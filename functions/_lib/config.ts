@@ -7,7 +7,7 @@ export { LANGUAGES, LANGUAGE_CODES, getLanguage, isLanguageCode, isUiLanguage } 
 
 import { CLASSIC_PROVIDERS } from '../../shared/types';
 
-export const APP_VERSION = '0.4.0';
+export const APP_VERSION = '0.5.0';
 
 export const LIMITS = {
   /** Максимальная длина текста для перевода и разбора. */
@@ -160,6 +160,56 @@ export const ADMIN = {
   maxDailyLimit: 10_000,
   /** Посетители считаются по хешу «IP + день»; старые отметки чистятся. */
   visitorRetentionDays: 120,
+} as const;
+
+/**
+ * Настоящие словари (версия 0.5.0, папка functions/_lib/dict/).
+ * Все адреса — по документации самих сервисов; при смене правьте только этот блок.
+ */
+export const DICT = {
+  /** Wiktionary REST (значения, род, формы). */
+  wiktionaryApi: 'https://en.wiktionary.org/api/rest_v1/page/definition',
+  /** Немецкий Wiktionary: страница в HTML (род, падежи, глагольные формы, IPA). */
+  wiktionaryHtml: 'https://de.wiktionary.org/api/rest_v1/page/html',
+  /** Статья для ссылки «Wiktionary» в подписи источника. */
+  wiktionaryPage: 'https://de.wiktionary.org/wiki',
+  /** OpenThesaurus: немецкие синонимы (только язык de). */
+  openThesaurusApi: 'https://www.openthesaurus.de/synonyme/search',
+  openThesaurusPage: 'https://www.openthesaurus.de',
+  /** Tatoeba API v1: настоящие примеры с переводом. */
+  tatoebaApi: 'https://api.tatoeba.org/v1/sentences',
+  tatoebaPage: 'https://tatoeba.org/de/sentences/show',
+  /** PONS API: словарная статья DE↔RU/EN. Ключ необязательный (PONS_API_KEY). */
+  ponsApi: 'https://api.pons.com/v1/dictionary',
+  ponsPage: 'https://de.pons.com',
+  /** Немецкий словарь DWDS — для толкования слова (страница HTML, без ключа). */
+  dwdsPage: 'https://www.dwds.de',
+  /** Каждый источник ждём не дольше 6 секунд. */
+  timeoutMs: 6_000,
+  /** Ответ карточки кэшируется в D1 на 30 дней. */
+  cacheTtlSeconds: 60 * 60 * 24 * 30,
+  /** Запросы к OpenThesaurus не чаще 60 в минуту: ответ держим в D1 30 дней. */
+  maxSenses: 8,
+  maxSynonyms: 12,
+  maxExamples: 4,
+  maxDefinitions: 6,
+  maxForms: 10,
+  /** Подпись в User-Agent (требование OpenThesaurus: контакт в каждом запросе). */
+  userAgent: 'YAi-Translator/0.5 (+https://yai-translator.pages.dev/about)',
+} as const;
+
+/** Полезные ресурсы и настройки этапа 4. */
+export const RESOURCES = {
+  /** Сколько ссылок показывать в одном списке. */
+  maxItems: 300,
+  maxTitleLength: 120,
+  maxUrlLength: 500,
+  maxDescriptionLength: 400,
+  /** Ответ с ресурсами кэшируется в D1 на 10 минут: в админке изменения видны быстро. */
+  cacheTtlSeconds: 600,
+  cacheKey: 'resources|list',
+  /** Переключатель «Показывать в приложениях из магазинов» тоже живёт в settings. */
+  showInAppsSetting: 'resources_show_in_apps',
 } as const;
 
 /** Адрес DeepL для конкретного ключа: path — 'translate' или 'usage'. */

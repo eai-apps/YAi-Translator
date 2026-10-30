@@ -14,6 +14,36 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.5.0',
+    date: '2026-10-30',
+    items: {
+      ru: [
+        'Карточка слова собирается из настоящих словарей — Wiktionary, OpenThesaurus, Tatoeba, PONS и DWDS — и работает даже без ИИ.',
+        'К примерам A1–B2 добавилась вкладка «Из жизни»: живые предложения с переводом от сообщества Tatoeba.',
+        'Синонимы дополняются из OpenThesaurus, значение по-немецки — из DWDS.',
+        'Внизу карточки указано, откуда взяты данные, со ссылками на источники.',
+        'Новая страница «Ресурсы»: проверенные бесплатные сайты для словарей, грамматики, аудирования, экзаменов и жизни в Германии.',
+        'В админке — вкладка «Ресурсы»: добавить, изменить, скрыть и упорядочить ссылки.',
+      ],
+      de: [
+        'Die Wortkarte wird aus echten Wörterbüchern zusammengestellt — Wiktionary, OpenThesaurus, Tatoeba, PONS und DWDS — und funktioniert auch ohne KI.',
+        'Zu den Beispielen A1–B2 gibt es den Reiter „Aus dem Leben“: echte Sätze mit Übersetzungen aus der Tatoeba-Gemeinschaft.',
+        'Synonyme ergänzt OpenThesaurus, die Bedeutung auf Deutsch kommt vom DWDS.',
+        'Unten an der Karte stehen die Quellen mit Links.',
+        'Neue Seite „Ressourcen“: geprüfte kostenlose Seiten für Wörterbücher, Grammatik, Hören, Prüfungen und Alltag in Deutschland.',
+        'Im Adminbereich der Reiter „Ressourcen“: Links hinzufügen, bearbeiten, verbergen und ordnen.',
+      ],
+      en: [
+        'The word card is now built from real dictionaries — Wiktionary, OpenThesaurus, Tatoeba, PONS and DWDS — and works even without AI.',
+        'The A1–B2 examples got a “From real life” tab: genuine sentences with translations from the Tatoeba community.',
+        'Synonyms come from OpenThesaurus, the German meaning from DWDS.',
+        'The bottom of the card lists the sources with links.',
+        'New “Resources” page: checked free sites for dictionaries, grammar, listening, exams and life in Germany.',
+        'A “Resources” tab in the admin area: add, edit, hide and reorder links.',
+      ],
+    },
+  },
+  {
     version: '0.4.0',
     date: '2026-10-30',
     items: {

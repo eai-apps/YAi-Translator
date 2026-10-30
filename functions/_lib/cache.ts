@@ -20,7 +20,10 @@ export async function readCache<T>(env: Env, key: string): Promise<T | null> {
       .bind(key, Date.now())
       .first<CacheRow>();
     if (!row) return null;
-    return JSON.parse(row.payload) as T;
+    // Битый JSON или другой формат (например, после обновления) — считаем, что кэша нет.
+    const parsed: unknown = JSON.parse(row.payload);
+    if (!parsed || typeof parsed !== 'object') return null;
+    return parsed as T;
   } catch (error) {
     console.warn('Кэш недоступен для чтения:', describeError(error));
     return null;

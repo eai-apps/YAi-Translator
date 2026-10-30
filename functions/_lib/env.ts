@@ -28,6 +28,8 @@ export interface Env {
   KEY_ENCRYPTION_SECRET?: string;
   /** Логины админов через запятую. Без этого секрета админки нет ни у кого. */
   ADMIN_LOGINS?: string;
+  /** PONS API (этап 4): необязательный, 1000 запросов в месяц бесплатно. */
+  PONS_API_KEY?: string;
 }
 
 /** Минимальный тип binding'а Workers AI, чтобы не зависеть от версии workers-types. */

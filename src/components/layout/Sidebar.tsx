@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { APP_VERSION } from '../../config';
 import { useAccount } from '../../hooks/useAccount';
 import { cn } from '../../lib/cn';
-import { IconInfo, IconSparkles } from './icons';
+import { IconCompass, IconInfo, IconSparkles } from './icons';
 import { useNavItems } from './navItems';
 import { Logo } from './Logo';
 import { ThemeSwitch } from './ThemeSwitch';
@@ -48,8 +48,20 @@ export function Sidebar() {
           <span className="text-xs text-muted">{t('profile.interfaceLanguage')}</span>
           <LanguageSwitch compact />
         </div>
-        {/* Внизу меню — ссылки «О приложении» и (только админу) «Админка». */}
+        {/* Внизу меню — «Ресурсы», «О приложении» и (только админу) «Админка». */}
         <div className="space-y-1">
+          <NavLink
+            to="/resources"
+            className={({ isActive }) =>
+              cn(
+                'flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-colors',
+                isActive ? 'bg-accentSoft text-accent' : 'text-muted hover:bg-soft hover:text-ink',
+              )
+            }
+          >
+            <IconCompass className="h-[18px] w-[18px]" />
+            <span>{t('nav.resources')}</span>
+          </NavLink>
           <NavLink
             to="/about"
             className={({ isActive }) =>

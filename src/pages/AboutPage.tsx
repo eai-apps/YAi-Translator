@@ -10,6 +10,7 @@ import { SectionTitle } from '../components/ui/SectionTitle';
 import { IconArrowLeft } from '../components/layout/icons';
 import { Logo } from '../components/layout/Logo';
 import { ChangelogList, ServicesStatus } from '../components/about/ServicesStatus';
+import { DictionarySources } from '../components/about/DictionarySources';
 
 export default function AboutPage() {
   const { t } = useTranslation();
@@ -52,7 +53,11 @@ export default function AboutPage() {
           <ServicesStatus />
         </Card>
 
-        <Card className="p-4 sm:p-5 lg:col-span-2">
+        <Card className="p-4 sm:p-5">
+          <DictionarySources />
+        </Card>
+
+        <Card className="p-4 sm:p-5">
           <ChangelogList uiLang={uiLanguage} />
         </Card>
       </div>

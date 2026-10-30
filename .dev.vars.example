@@ -15,3 +15,10 @@ MYMEMORY_EMAIL=
 # Сгенерировать: node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
 # Без него сайт работает, но ключи в аккаунте не сохраняются — только на устройстве.
 KEY_ENCRYPTION_SECRET=
+
+# Логины админов через запятую (без этого секрета админки нет ни у кого).
+ADMIN_LOGINS=
+
+# PONS API (этап 4): необязательный ключ словарных статей DE↔RU и DE↔EN.
+# 1000 запросов в месяц бесплатно, как получить — в README.md, раздел «Ключ PONS».
+PONS_API_KEY=

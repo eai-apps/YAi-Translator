@@ -3,14 +3,18 @@
  * Меняя тип, проверьте обе стороны.
  */
 import type { LanguageCode, UiLanguage } from './languages';
+import type { DictSourceRef } from './dict';
 
 // Типы админки живут отдельно и доступны отсюда же: shared/types или shared/admin — без разницы.
 export * from './admin';
+// Словарные данные и полезные ресурсы (этап 4).
+export * from './dict';
 
 export type { LanguageCode, UiLanguage };
 
 /** Тип задачи — входит в ключ кэша и определяет промпт. */
-export type TaskKind = 'translate' | 'word' | 'explain' | 'check';
+/** 'dict' и 'resources' — данные без ИИ (этап 4), тоже живут в таблице кэша D1. */
+export type TaskKind = 'translate' | 'word' | 'explain' | 'check' | 'dict' | 'resources';
 
 /** Провайдер ИИ, который реально ответил. */
 /** ИИ: gemini, groq, workersai. Обычные переводчики: deepl, lara, microsoft, google, mymemory, m2m100. */
@@ -166,6 +170,11 @@ export interface WordCard {
    * почему слова пишутся/стоят вместе, какой союз или предлог требуется.
    */
   grammarNotes: string[];
+  /**
+   * Источники, по которым дополнена карточка (этап 4: OpenThesaurus, Tatoeba, PONS).
+   * Пусто — карточка только от ИИ.
+   */
+  dictSources?: DictSourceRef[];
 }
 
 export interface WordResponse {
@@ -391,6 +400,7 @@ export type ApiErrorCode =
   | 'NO_PROVIDERS'
   | 'BAD_JSON'
   | 'NOT_FOUND'
+  | 'WORD_NOT_FOUND'
   | 'INTERNAL'
   | 'INVALID_CREDENTIALS'
   | 'LOGIN_TAKEN'

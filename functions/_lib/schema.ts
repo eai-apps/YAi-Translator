@@ -4,6 +4,9 @@
  */
 import type { Env } from './env';
 
+/** Сообщения о том, что объект уже существует, — это не ошибка. */
+const ALREADY_EXISTS = /duplicate column name|already exists/i;
+
 const STATEMENTS = [
   `CREATE TABLE IF NOT EXISTS cache (
     key TEXT PRIMARY KEY,
@@ -122,13 +125,28 @@ const STATEMENTS = [
     value TEXT NOT NULL,
     updated_at INTEGER NOT NULL
   )`,
+
+  // --- Этап 4: полезные ресурсы по языкам (начальный набор — migrations/0004_resources.sql) ---
+  `CREATE TABLE IF NOT EXISTS resources (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    lang TEXT NOT NULL,
+    category TEXT NOT NULL,
+    title TEXT NOT NULL,
+    url TEXT NOT NULL,
+    description_ru TEXT NOT NULL DEFAULT '',
+    description_de TEXT NOT NULL DEFAULT '',
+    description_en TEXT NOT NULL DEFAULT '',
+    sort INTEGER NOT NULL DEFAULT 0,
+    hidden INTEGER NOT NULL DEFAULT 0
+  )`,
+  'CREATE INDEX IF NOT EXISTS idx_resources_lang ON resources (lang, category, sort)',
 ];
 
 let ready: Promise<void> | null = null;
 
 /**
  * Выполняет batch по одному: в batch D1 одна ошибка портит весь набор,
- * а ALTER TABLE с уже существующей колонкой ошибается предсказуемо — пропускаем её.
+ * а ALTER TABLE с уже существующей колонкой / CREATE INDEX на базу этапа 3 ошибаются предсказуемо — пропускаем их.
  */
 async function runStatements(db: D1Database): Promise<void> {
   for (const sql of STATEMENTS) {
@@ -136,7 +154,7 @@ async function runStatements(db: D1Database): Promise<void> {
       await db.prepare(sql).run();
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      if (/duplicate column name/i.test(message)) continue;
+      if (ALREADY_EXISTS.test(message)) continue;
       throw error;
     }
   }

@@ -7,6 +7,7 @@ import { SiteServicesCard } from '../components/profile/SiteServicesCard';
 import { SettingsCard } from '../components/profile/SettingsCard';
 import { InstallCard } from '../components/profile/InstallCard';
 import { AboutCard } from '../components/profile/AboutCard';
+import { ResourcesCard } from '../components/profile/ResourcesCard';
 
 export default function ProfilePage() {
   const { t } = useTranslation();
@@ -19,6 +20,7 @@ export default function ProfilePage() {
         <KeysCard />
         <SiteServicesCard />
         <SettingsCard />
+        <ResourcesCard />
         <InstallCard />
         <AboutCard />
       </div>

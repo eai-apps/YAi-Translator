@@ -5,7 +5,7 @@
 export const API_BASE = (import.meta.env.VITE_API_BASE ?? '').replace(/\/+$/, '');
 
 /** Версия показывается в профиле; совпадает с package.json. */
-export const APP_VERSION = '0.4.0';
+export const APP_VERSION = '0.5.0';
 
 export const STORAGE_KEYS = {
   theme: 'yai.theme',
@@ -29,6 +29,8 @@ export const STORAGE_KEYS = {
   seenVersion: 'yai.seenVersion',
   /** Закрытый посетителем баннер-объявление (по тексту). */
   bannerClosed: 'yai.bannerClosed',
+  /** Язык на странице «Ресурсы», выбранный посетителем (иначе — язык перевода). */
+  resourcesLang: 'yai.resourcesLang',
 } as const;
 
 /** До какой длины текста блок «Как переводят другие» загружается сам. */

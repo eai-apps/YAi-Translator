@@ -1,6 +1,6 @@
 /** Карточка слова: артикль с цветом, значения, склонение, спряжение, примеры. */
 import { useTranslation } from 'react-i18next';
-import type { WordCard as WordCardData } from '../../../shared/types';
+import type { DictExample, LanguageCode, WordCard as WordCardData } from '../../../shared/types';
 import type { SpeechController } from '../../hooks/useSpeech';
 import { ARTICLE_COLORS } from '../../config';
 import { cn } from '../../lib/cn';
@@ -12,14 +12,19 @@ import { ExamplesList } from './ExamplesList';
 import { MeaningList } from './MeaningList';
 import { NounSection } from './NounSection';
 import { PhraseList } from './PhraseList';
+import { SourcesLine } from './SourcesLine';
 import { VerbSection } from './VerbSection';
 
 interface WordCardProps {
   card: WordCardData;
   speech: SpeechController;
+  /** Примеры «Из жизни» (Tatoeba) — вкладка в блоке примеров. */
+  dictExamples?: DictExample[];
+  /** Язык исходного слова — для примеров из словарей. */
+  dictLang?: LanguageCode | null;
 }
 
-export function WordCard({ card, speech }: WordCardProps) {
+export function WordCard({ card, speech, dictExamples = [], dictLang = null }: WordCardProps) {
   const { t } = useTranslation();
   const hasTranslation = card.meanings.length > 0;
 
@@ -69,7 +74,13 @@ export function WordCard({ card, speech }: WordCardProps) {
         </section>
       ) : null}
 
-      <ExamplesList examples={card.examples} language={card.language} speech={speech} />
+      <ExamplesList
+        examples={card.examples}
+        language={card.language}
+        speech={speech}
+        dictExamples={dictExamples}
+        dictLang={dictLang}
+      />
 
       {card.synonyms.length > 0 || card.antonyms.length > 0 ? (
         <div className="mt-6 grid gap-4 sm:grid-cols-2">
@@ -89,6 +100,9 @@ export function WordCard({ card, speech }: WordCardProps) {
       ) : null}
 
       <PhraseList phrases={card.phrases} />
+
+      {/* Откуда дополнены синонимы и примеры (этап 4). */}
+      <SourcesLine sources={card.dictSources ?? []} />
     </article>
   );
 }

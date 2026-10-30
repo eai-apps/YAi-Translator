@@ -1,3 +1,228 @@
+# Версия 0.5.0 — этап 4: словари «как Leo» и полезные ресурсы
+
+Дата: 30.10.2026 · Версия: **0.5.0** · Автор этапа: DeepSeek
+
+Сделано по `tasks/STAGE4.md`. Логотип, адрес DeepL (`deeplUrl()` в `functions/_lib/config.ts`),
+логика аккаунтов (`functions/_lib/auth/*`) и цепочка обычных переводчиков не менялись — только дополнены.
+
+---
+
+## Этап 4 — что сделано
+
+### 1. Источники словаря (`functions/_lib/dict/` — один файл = один источник)
+
+| Файл | Источник | Что даёт | Ключ |
+|---|---|---|---|
+| `wiktionary.ts` | `en.wiktionary.org/api/rest_v1/page/definition/{слово}` | значения, часть речи по 12 языкам; примеры для английских слов | — |
+| `wiktionaryDe.ts` | `de.wiktionary.org/api/rest_v1/page/html/{слово}` | род (der/die/das), множественное число, падежи, формы глагола, транскрипция [IPA] | — |
+| `openthesaurus.ts` | `www.openthesaurus.de/synonyme/search?q=…&format=application/json` | немецкие синонимы и близкие слова | — |
+| `tatoeba.ts` | `api.tatoeba.org/v1/sentences` | настоящие предложения с переводом | — |
+| `pons.ts` | `api.pons.com/v1/dictionary` | двуязычная статья DE↔RU / DE↔EN | `PONS_API_KEY` (необязательный) |
+| `dwds.ts` | `dwds.de/wb/{слово}` | толкование по-немецки | — |
+
+- Все адреса, таймауты (6 с на источник), лимиты и подпись `User-Agent` (`YAi-Translator/0.5 (+https://yai-translator.pages.dev/about)`)
+  лежат в `functions/_lib/config.ts` → `DICT`.
+- `dictFetch()` (в `dict/http.ts`) добавляет `User-Agent` в каждый запрос — этого требует OpenThesaurus.
+- Как ответил запрос, проверялось вживую 30.10.2026 (подробности в разделе «Проверки»).
+
+### 2. Сборка карточки
+
+- `POST /api/dict {word, sourceLang, targetLang}` → `DictEntry` (`shared/dict.ts`):
+  `{sources, senses, gender, plural, partOfSpeech, transcription, forms, synonyms, examples, definitions}`.
+- Источники опрашиваются параллельно (`functions/_lib/dict/index.ts`), каждый с таймаутом 6 с.
+  Результат кэшируется в D1 на 30 дней (`DICT.cacheTtlSeconds`) — это же закрывает требование
+  OpenThesaurus «не больше 60 запросов в минуту». Источник без данных молча пропускается.
+- `functions/api/word.ts`: карточка ИИ **дополняется** словарями — синонимы OpenThesaurus,
+  переводы PONS (только если ИИ не дал значений), часть речи/род/транскрипция, если их не было,
+  и список источников в `card.dictSources`. Данные ИИ не затираются.
+- Фронтенд: для 1–3 слов `/api/dict` грузится **вместе** с `/api/word` (`src/hooks/useDictLookup.ts`).
+  - ИИ ответил — карточка как раньше, к примерам A1–B2 добавлена вкладка **«Из жизни»** (Tatoeba),
+    внизу строка «Источники: …» со ссылками и лицензиями.
+  - ИИ недоступен (лимит) — показывается карточка только из словарей с пометкой
+    «Без ИИ — данные словарей» (`src/components/word/DictCard.tsx`).
+  - В словаре (`DictionaryPage`) карточка из словарей — запасной вариант при ошибке ИИ.
+
+### 3. Полезные ресурсы
+
+- `GET /api/resources` — только видимые ссылки, ответ кэшируется в D1 на 10 минут.
+- Страница `/resources` (`src/pages/ResourcesPage.tsx`, ленивая): выбор языка, группы «Словари»,
+  «Грамматика», «Аудирование и подкасты», «Экзамены», «Жизнь в стране»; ссылка в боковом меню и карточка в профиле.
+- Таблица `resources(id, lang, category, title, url, description_ru, description_de, description_en, sort, hidden)`
+  — в `functions/_lib/schema.ts` и `migrations/0004_resources.sql`. Миграция заливает **57 проверенных ссылок**:
+  немецкий — 19 (4 словаря, 3 грамматики, 4 аудирования, 4 экзамена, 4 жизни), русский — 4,
+  английский — 6, остальные языки — по 3.
+- Админка → вкладка **«Ресурсы»**: `GET/POST /api/admin/resources` (`add`, `update`, `hide`, `show`, `move`, `delete`,
+  `showInApps`), каждое действие пишется в журнал; переключатель «Показывать ресурсы в приложениях из магазинов»
+  хранится в `settings` под ключом `resources_show_in_apps`.
+- На странице «О приложении» — блок «Источники словаря» с лицензиями
+  (Wiktionary CC BY-SA, Tatoeba CC BY 2.0 FR, OpenThesaurus CC BY-SA/LGPL, PONS, DWDS);
+  ссылка на www.openthesaurus.de — обычная, без `nofollow`, как требует сервис.
+
+---
+
+## Файлы этапа 4
+
+### Созданные
+
+| Файл | Назначение |
+|---|---|
+| `shared/dict.ts` | Типы словарной карточки и ресурсов |
+| `migrations/0004_resources.sql` | Таблица `resources` и 57 проверенных ссылок |
+| `functions/_lib/dict/http.ts` | Запрос с `User-Agent` и таймаутом, разбор HTML, коды языков, части речи |
+| `functions/_lib/dict/wiktionary.ts` | en.wiktionary REST: значения и часть речи для 12 языков |
+| `functions/_lib/dict/wiktionaryDe.ts` | de.wiktionary: род, падежи, формы глагола, IPA |
+| `functions/_lib/dict/openthesaurus.ts` | Немецкие синонимы |
+| `functions/_lib/dict/tatoeba.ts` | Примеры с переводом (CC BY 2.0 FR) |
+| `functions/_lib/dict/pons.ts` | PONS API (ключ необязательный) |
+| `functions/_lib/dict/dwds.ts` | Толкование по-немецки |
+| `functions/_lib/dict/index.ts` | Параллельный опрос, сборка карточки, ключ кэша |
+| `functions/_lib/resources/store.ts` | Чтение, проверка и порядок ссылок, переключатель «в приложениях» |
+| `functions/_lib/resources/admin.ts` | Действия админки с ресурсами и сброс кэша |
+| `functions/api/dict.ts` | `POST /api/dict` |
+| `functions/api/dict-sources.ts` | `GET /api/dict-sources` — справочник источников |
+| `functions/api/resources.ts` | `GET /api/resources` |
+| `functions/api/admin/resources.ts` | `GET/POST /api/admin/resources` |
+| `src/api/request.ts` | Общий механизм запросов (заголовки, ошибки, cookie) |
+| `src/api/methods/core.ts`, `account.ts`, `admin.ts` | Методы API по группам |
+| `src/hooks/useDictLookup.ts` | Карточка из словарей параллельно с ИИ |
+| `src/hooks/useLanguageSwitching.ts` | Языки, «⇄», язык карточки (вынесено из `useTranslator`) |
+| `src/hooks/useExplainAndCheck.ts` | Панели «Разобрать» и «Проверить» (вынесено из `TranslatePage`) |
+| `src/hooks/useDictionarySearch.ts` | Поиск в словаре (вынесено из `DictionaryPage`) |
+| `src/hooks/useResources.ts` | Загрузка `/api/resources` с повтором |
+| `src/hooks/useAdminResources.ts` | Логика вкладки «Ресурсы» |
+| `src/components/word/DictCard.tsx` | Карточка только из словарей |
+| `src/components/word/DictPanel.tsx` | Обёртка карточки словарей для словаря |
+| `src/components/word/DictExamples.tsx` | Примеры «Из жизни» с подписями источников |
+| `src/components/word/SourcesLine.tsx` | Строка «Источники: …» |
+| `src/components/dictionary/DictionarySearchPanel.tsx` | Вкладка «Слово» в словаре |
+| `src/components/resources/ResourceGroup.tsx` | Группа ссылок и описание на языке интерфейса |
+| `src/components/about/DictionarySources.tsx` | Источники и лицензии на «О приложении» |
+| `src/components/admin/AdminResourcesTab.tsx` | Вкладка «Ресурсы» админки |
+| `src/components/admin/ResourceForm.tsx` | Форма добавления и изменения ссылки |
+| `src/components/profile/ResourcesCard.tsx` | Карточка «Полезные ресурсы» в профиле |
+| `src/pages/ResourcesPage.tsx` | Страница `/resources` (ленивая) |
+
+### Изменённые
+
+| Файл | Что изменилось |
+|---|---|
+| `shared/types.ts` | Подключены `shared/dict.ts`; `dictSources` в карточке; `WORD_NOT_FOUND`; кэш `dict`/`resources` |
+| `functions/_lib/config.ts` | Версия 0.5.0; блоки `DICT` (все адреса и лимиты) и `RESOURCES`; `deeplUrl()` не тронут |
+| `functions/_lib/env.ts`, `.dev.vars.example` | `PONS_API_KEY`, `ADMIN_LOGINS` в примере |
+| `functions/_lib/http.ts` | Текст ошибки `WORD_NOT_FOUND` на ru/de/en |
+| `functions/_lib/cache.ts` | Битый JSON в кэше = нет кэша |
+| `functions/_lib/schema.ts` | Таблица `resources`; «already exists» больше не роняет создание схемы |
+| `functions/api/word.ts` | Карточка ИИ дополняется словарями, `dictSources` |
+| `src/api/client.ts` | Теперь собирает методы из `api/methods/*`, механизм в `api/request.ts` |
+| `src/hooks/useTranslator.ts` | Словари параллельно с ИИ, языки — в `useLanguageSwitching` |
+| `src/pages/TranslatePage.tsx` | `WordPanel` получает карточку словарей, разбор/проверка — в `useExplainAndCheck` |
+| `src/pages/DictionaryPage.tsx` | Поиск — в `useDictionarySearch`, карточка словарей как запасной вариант |
+| `src/pages/AdminPage.tsx` | Вкладка «Ресурсы» и журнал на ней |
+| `src/pages/AboutPage.tsx` | Блок «Источники словаря» |
+| `src/components/word/WordCard.tsx`, `ExamplesList.tsx` | Вкладка «Из жизни», строка источников |
+| `src/components/word/WordPanel.tsx` | Карточка ИИ → карточка словарей → понятная ошибка |
+| `src/components/layout/Sidebar.tsx`, `icons.tsx` | Ссылка «Ресурсы», иконки компаса и стрелок |
+| `src/pages/ProfilePage.tsx` | Карточка «Полезные ресурсы» |
+| `src/App.tsx` | Маршрут `/resources` |
+| `src/config.ts` | Версия 0.5.0, ключ `yai.resourcesLang` |
+| `src/lib/errors.ts` | `WORD_NOT_FOUND` → понятный текст |
+| `src/locales/ru.json`, `de.json`, `en.json` | Разделы `dict`, `resources`, `admin.resources`, `about.*` — **по 443 ключа, наборы совпадают** |
+| `src/data/changelog.ts` | Запись 0.5.0 на трёх языках |
+| `package.json`, `README.md`, `CHANGELOG.md` | Версия, инструкция по PONS и миграции, история версий |
+
+---
+
+## Проверки
+
+### Сборка
+
+`npm run build` (TypeScript strict для фронта и Functions + Vite) — **проходит, 0 ошибок**;
+`npm run typecheck` — без ошибок. Сборка: 193 модуля, отдельные куски `AdminPage` 28,90 КБ,
+`ResourcesPage` 2,61 КБ, `AboutPage` 2,50 КБ, `ResourceGroup` 0,93 КБ; основной бандл 421,41 КБ
+(131,10 КБ gzip). Ключи локализации: **443 / 443 / 443**, наборы во всех трёх файлах одинаковые.
+
+### Проверка вживую (локальный `wrangler pages dev`, с интернетом)
+
+Все слова из задания: **Haus, aufstehen, sich freuen, стол (ru→de), house (en→de), casa (es→de)** —
+`/api/dict` отвечает 200 и отдаёт:
+
+- **Haus**: `das`, мн. ч. `Häuser`, падежи (Nominativ/Genitiv/Dativ/Akkusativ × Singular/Plural), `[haʊ̯s]`,
+  12 синонимов OpenThesaurus (Heim, Behausung, Bude …), 4 примера Tatoeba, толкования DWDS;
+  источники — Wiktionary, OpenThesaurus, Tatoeba.
+- **aufstehen**: формы `stehe auf / stehst auf / steht auf`, Präteritum `stand auf`, Partizip II `aufgestanden`,
+  Hilfsverb `sein`, примеры и толкование DWDS.
+- **sich freuen** (de.wiktionary такой страницы не имеет — 404, источник пропущен): синонимы OpenThesaurus
+  («sich freuen (über)», entzückt sein …), 2 примера Tatoeba, толкование DWDS — карточка всё равно собирается.
+- **стол**: примеры Tatoeba с переводом на немецкий («Стол пыльный. → Da ist Staub auf dem Tisch.»).
+- **house**, **casa**: значения Wiktionary и примеры Tatoeba с переводом на немецкий.
+
+Остальное по API — **70 проверок, все прошли**:
+
+- `/api/dict`: 200 для шести слов выше; у каждого источника ссылка `https://…`; у каждого примера
+  подпись `tatoeba`/`wiktionary` и ссылка; `auto + ru → словарь немецкий`; одинаковые языки → 400;
+  пустое слово → 400; слово длиннее 60 символов → 400; неизвестное слово → 404 `WORD_NOT_FOUND`;
+  повторный запрос → `cached: true`.
+- `/api/word` без ключей ИИ → 429 `LIMIT_REACHED` (лимит), то есть проверен сценарий «Без ИИ».
+- `/api/resources`: 200, 57 ссылок, 12 языков, все адреса `https`, описания на ru/de/en,
+  у немецкого все 5 групп, скрытые ссылки не отдаются.
+- Админка: без входа — 401; добавление, изменение, перестановка вверх, скрытие (скрытая ссылка
+  не видна посетителям), показ, переключатель «в приложениях», удаление, запись в журнал,
+  `javascript:`-адрес → 400, неизвестное действие → 400 (24 проверки).
+
+### Ссылки ресурсов
+
+56 из 57 ссылок ответили 200 в обычном запросе. Не открылись при автоматической проверке:
+
+- `https://www.goethe.de/de/spr/kup/prf.html` — 403: Goethe-Institut блокирует автоматические запросы,
+  в браузере сайт открывается (официальный сайт, ссылку оставили).
+- `https://www.almaany.com/`, `https://suspilne.media/` — 403 на автоматический запрос (защита от ботов).
+- `https://smotrim.ru/` — на этой машине не резолвится домен; в браузере сайт открывается.
+- Во время проверки заменены: `rae.es` (403 для роботов) → **SpanishDict**; `trt.net.tr/turkce` (404) →
+  `trt.net.tr`; добавлена Викитека (арабский) для группы «Жизнь в стране».
+
+### Браузер
+
+Проверять интерфейс в браузере по просьбе владельца не стал — это сделает Claude.
+Возможные места для проверки глазами: карточка «Haus» без ключей ИИ (должна появиться с пометкой
+«Без ИИ — данные словарей»), вкладка «Из жизни» при работающем ИИ, страница «Ресурсы», вкладка «Ресурсы» в админке.
+
+---
+
+## Что не сделано и ограничения
+
+- **PONS не проверен на настоящем ключе**: ключа нет. Ветка «нет ключа» работает (источник пропускается),
+  структура разбора написана по описанию API, но живого ответа я не видел. Если формат не совпадёт,
+  источник молча пропускается и карточка строится без него — но разбор стоит проверить после получения ключа.
+  Способ авторизации — заголовок `X-Secret` по документации PONS.
+- **DWDS даёт толкование по-немецки, а не перевод**: у DWDS нет документированного API, поэтому
+  разбирается только блок «Bedeutungsübersicht» статьи. Если DWDS изменит разметку, толкования пропадут,
+  остальное в карточке останется.
+- **`sich freuen`**: de.wiktionary не имеет страницы для словосочетаний (404), поэтому для таких слов
+  нет рода/форм — остаются синонимы, примеры и толкование. Поиск по форме «sich freuen» → Wiktionary REST
+  тоже не находит статью.
+- **Значения Wiktionary на английском**: так устроен en.wiktionary. Для русскоязычного пользователя
+  перевод даёт ИИ, а без ИИ показываются английские толкования и примеры Tatoeba с переводом.
+- **Порядок ссылок в админке**: «выше/ниже» меняет `sort` с соседом в группе; после удаления ссылок
+  промежутки в `sort` не пересчитываются (на порядок это не влияет).
+- **Миграцию `0004_resources.sql` нужно выполнить на сайте один раз** (повторный запуск создаст дубли).
+  Без неё страница «Ресурсы» пустая, но сайт работает.
+- **Для локальной проверки** `.dev.vars` создавался временно и удалён; `wrangler.toml` восстановлен
+  в исходном виде (`database_id` и блок `[ai]` на месте); папка `tmp` с временными скриптами удалена.
+
+---
+
+## Переменные окружения и настройки Cloudflare (добавлено на этапе 4)
+
+| Переменная | Назначение |
+|---|---|
+| `PONS_API_KEY` | PONS API, необязательный; можно добавить и в админке («Ключи сайта») |
+
+Новая таблица: `resources` (создаётся автоматически). Миграция с начальным набором ссылок:
+`npx wrangler d1 execute yai-translator-db --remote --file=./migrations/0004_resources.sql`
+(или на вкладке D1 в панели Cloudflare). Ключи Wiktionary, OpenThesaurus, Tatoeba и DWDS не нужны.
+
+---
+
 # Версия 0.4.0 — этап 3: все переводчики, языки, сравнение, админка, «О приложении»
 
 Дата: 30.10.2026 · Версия: **0.4.0** · Автор этапа: DeepSeek
@@ -694,3 +919,10 @@ Cloudflare: **Settings → Variables and secrets → Add → Secret**. Лока�
 - **DeepL: адрес по типу ключа** (`deeplUrl()` в `config.ts`). Бесплатный ключ `…:fx` → `api-free.deepl.com`,
   ключи тарифов Developer/Growth/Pro → `api.deepl.com`. Раньше ключ Developer получал 403 и помечался «неверным».
   Используется в переводе, в проверке сервисов и при добавлении ключа в админке.
+
+### Проверка Claude (этап 4)
+- Сборка проходит, исправления Claude (deeplUrl, MyMemory, тумблеры переводчиков) на месте.
+- Начальный набор ресурсов теперь заливается сам при первом открытии `/resources` (`functions/_lib/resources/seed.ts`,
+  флаг `resources_seeded` в settings). Миграцию 0004 запускать вручную не нужно.
+- Клиент: тайм-аут запроса 30 с (`src/api/request.ts`) — спиннер «Переводим…» больше не может висеть бесконечно.
+- Перевод: если язык текста совпал с целью (Guten Tag → Немецкий), цель сама меняется на русский (de → ru, иначе → de).

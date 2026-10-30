@@ -4,7 +4,7 @@
  * 2. Для 1–3 слов параллельно грузится полная карточка слова (ИИ, но с вечным кэшем на сервере).
  * 3. Кнопка «Спросить у AI» — перевод ИИ с альтернативами, только по нажатию.
  */
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type {
   ClassicProviderId,
@@ -19,6 +19,8 @@ import { toTranslatorError } from '../lib/errors';
 import type { TranslatorError } from '../lib/errors';
 import { useHistory } from './useHistory';
 import type { HistoryItem } from './useHistory';
+import { useDictLookup } from './useDictLookup';
+import { useCardLanguage, useLanguageSwitching } from './useLanguageSwitching';
 import { useLocalStorage } from './useLocalStorage';
 
 export type { TranslatorError };
@@ -33,6 +35,9 @@ export interface WordState {
 }
 
 const EMPTY_WORD: WordState = { loading: false, data: null, error: null };
+
+/** Карточка слова из словарей (этап 4) живёт в отдельном хуке useDictLookup.ts. */
+export type { DictState } from './useDictLookup';
 
 /** 1–3 слова без знаков конца предложения: «Tisch», «aufstehen», «sich freuen auf». */
 const WORD_QUERY = /^[\p{L}\p{M}'’-]+(?:\s+[\p{L}\p{M}'’-]+){0,2}$/u;
@@ -63,6 +68,8 @@ export function useTranslator(onLimitReached: () => void) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<TranslatorError | null>(null);
   const [word, setWord] = useState<WordState>(EMPTY_WORD);
+  // Словари грузятся параллельно с ИИ (этап 4).
+  const { dict, loadDict, resetDict } = useDictLookup();
   const [aiLoading, setAiLoading] = useState(false);
   const [historyId, setHistoryId] = useState<string | null>(null);
 
@@ -71,10 +78,7 @@ export function useTranslator(onLimitReached: () => void) {
   const limitRef = useRef(onLimitReached);
   limitRef.current = onLimitReached;
 
-  const detectedLang = useMemo<LanguageCode | null>(() => {
-    if (result?.detectedLang) return result.detectedLang;
-    return word.data?.card.language ?? null;
-  }, [result, word.data]);
+  const detectedLang = useCardLanguage(result, word);
 
   /** Карточка слова — отдельно, чтобы перевод не ждал ИИ. */
   const loadWord = useCallback(
@@ -92,10 +96,24 @@ export function useTranslator(onLimitReached: () => void) {
     [t],
   );
 
+  /**
+   * Словари — отдельно и параллельно с ИИ: карточка не ждёт, пока ИИ ответит или упрётся в лимит.
+   * Номер основного запроса проверяет, что ответ про старое слово не перезапишет новое.
+   */
+  const loadDictFor = useCallback(
+    (value: string, target: LanguageCode, requestId: number, signal: AbortSignal) => {
+      void loadDict(value, target, signal).then(() => {
+        if (requestId !== requestRef.current) resetDict();
+      });
+    },
+    [loadDict, resetDict],
+  );
+
   const run = useCallback(
     async (value: string, source: SourceLanguage, target: LanguageCode, choice: ProviderChoice) => {
       const trimmed = value.trim();
       setWord(EMPTY_WORD);
+      resetDict();
       if (!trimmed) {
         setResult(null);
         setError(null);
@@ -118,7 +136,11 @@ export function useTranslator(onLimitReached: () => void) {
       setLoading(true);
       setError(null);
 
-      if (isWordQuery(trimmed)) void loadWord(trimmed, source, target, requestId, controller.signal);
+      // Словари и карточка ИИ грузятся вместе, не дожидаясь друг друга.
+      if (isWordQuery(trimmed)) {
+        void loadWord(trimmed, source, target, requestId, controller.signal);
+        loadDictFor(trimmed, target, requestId, controller.signal);
+      }
 
       try {
         const response = await api.translate(
@@ -153,7 +175,7 @@ export function useTranslator(onLimitReached: () => void) {
         if (requestId === requestRef.current) setLoading(false);
       }
     },
-    [addItem, loadWord, t],
+    [addItem, loadDictFor, loadWord, t],
   );
 
   // Перевод с задержкой 600 мс; смена текста, языков или переводчика отменяет старый запрос.
@@ -162,6 +184,7 @@ export function useTranslator(onLimitReached: () => void) {
       setResult(null);
       setError(null);
       setWord(EMPTY_WORD);
+      resetDict();
       setLoading(false);
       return;
     }
@@ -175,7 +198,13 @@ export function useTranslator(onLimitReached: () => void) {
       window.clearTimeout(timer);
       abortRef.current?.abort();
     };
-  }, [text, sourceLang, targetLang, providerChoice, run]);
+  }, [resetDict, run, text, sourceLang, targetLang, providerChoice]);
+
+  // «Guten Tag» при цели «Немецкий»: язык текста совпал с целью — сами переключаем цель (de → ru, иначе → de).
+  useEffect(() => {
+    if (sourceLang !== 'auto' || !result?.detectedLang || result.detectedLang !== targetLang) return;
+    setTargetLangState(targetLang === 'de' ? 'ru' : 'de');
+  }, [result, sourceLang, targetLang, setTargetLangState]);
 
   /** «Спросить у AI»: перевод ИИ с альтернативами, заменяет обычный перевод. */
   const askAi = useCallback(async () => {
@@ -204,34 +233,15 @@ export function useTranslator(onLimitReached: () => void) {
     void loadWord(trimmed, sourceLang, targetLang, requestRef.current, controller.signal);
   }, [text, sourceLang, targetLang, loadWord]);
 
-  const changeSourceLang = useCallback(
-    (next: SourceLanguage) => {
-      setSourceLangState(next);
-      if (next !== 'auto' && next === targetLang) {
-        let fallback: LanguageCode = sourceLang === 'auto' ? 'de' : sourceLang;
-        if (fallback === next) fallback = next === 'de' ? 'ru' : 'de';
-        setTargetLangState(fallback);
-      }
-    },
-    [sourceLang, targetLang, setSourceLangState, setTargetLangState],
-  );
-
-  const changeTargetLang = useCallback(
-    (next: LanguageCode) => {
-      setTargetLangState(next);
-      if (next === sourceLang) setSourceLangState('auto');
-    },
-    [sourceLang, setSourceLangState, setTargetLangState],
-  );
-
-  const swapLanguages = useCallback(() => {
-    const nextTarget: LanguageCode = sourceLang === 'auto' ? detectedLang ?? targetLang : sourceLang;
-    const safeTarget = nextTarget === targetLang ? (targetLang === 'de' ? 'ru' : 'de') : nextTarget;
-    setSourceLangState(targetLang);
-    setTargetLangState(safeTarget);
-    // Если перевод уже есть, меняем местами и текст — как в Яндекс.Переводчике.
-    if (result?.translatedText) setText(result.translatedText);
-  }, [detectedLang, result, sourceLang, targetLang, setSourceLangState, setTargetLangState]);
+  const { changeSourceLang, changeTargetLang, swapLanguages } = useLanguageSwitching({
+    sourceLang,
+    setSourceLangState,
+    targetLang,
+    setTargetLangState,
+    detectedLang,
+    result,
+    setText,
+  });
 
   const retry = useCallback(() => {
     void run(text, sourceLang, targetLang, providerChoice);
@@ -244,8 +254,9 @@ export function useTranslator(onLimitReached: () => void) {
     setResult(null);
     setError(null);
     setWord(EMPTY_WORD);
+    resetDict();
     setLoading(false);
-  }, []);
+  }, [resetDict]);
 
   const applyIncoming = useCallback(
     (value: string, source: SourceLanguage, target: LanguageCode) => {
@@ -265,6 +276,7 @@ export function useTranslator(onLimitReached: () => void) {
     loading,
     error,
     word,
+    dict,
     aiLoading,
     providerChoice,
     setProviderChoice,

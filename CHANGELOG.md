@@ -1,5 +1,63 @@
 # История версий
 
+## 0.5.0 — 30.10.2026
+
+Этап 4: карточка слова собирается из настоящих словарей (Wiktionary, OpenThesaurus, Tatoeba,
+PONS, DWDS) и работает без ИИ. Новая страница «Ресурсы» и вкладка «Ресурсы» в админке.
+Логотип, адрес DeepL (`deeplUrl()`) и логика аккаунтов не менялись.
+
+### Добавлено
+
+- **Новый эндпоинт `POST /api/dict`** (`{word, sourceLang, targetLang}` → `DictEntry`):
+  значения, часть речи, род, множественное число, формы слова, транскрипция, синонимы,
+  примеры с переводом и толкование по-немецки. Источники опрашиваются параллельно
+  (таймаут 6 с), ответ кэшируется в D1 на 30 дней.
+- **Источники словаря — по файлу на сервис** (`functions/_lib/dict/`): `wiktionary.ts` (en.wiktionary REST +
+  немецкие формы из `wiktionaryDe.ts`), `openthesaurus.ts` (немецкие синонимы), `tatoeba.ts`
+  (живые примеры с переводом), `pons.ts` (двуязычная статья, нужен необязательный `PONS_API_KEY`),
+  `dwds.ts` (толкование по-немецки).
+- **Карточка из словарей без ИИ.** Для 1–3 слов `/api/dict` грузится вместе с `/api/word`:
+  если ИИ ответил — карточка как раньше, но синонимы дополнены OpenThesaurus, а к примерам A1–B2
+  добавлена вкладка **«Из жизни»** (Tatoeba) и строка «Источники: …» со ссылками.
+  Если ИИ недоступен (лимит) — показывается карточка только из словарей с пометкой
+  «Без ИИ — данные словарей».
+- **`/api/resources`** и страница **«Ресурсы»** (`/resources`, ссылка в боковом меню и в профиле):
+  проверенные бесплатные сайты для 12 языков по группам «Словари», «Грамматика»,
+  «Аудирование и подкасты», «Экзамены», «Жизнь в стране».
+- **Админка → «Ресурсы»**: добавить, изменить, скрыть, показать, поменять порядок и удалить ссылку,
+  переключатель «Показывать ресурсы в приложениях из магазинов».
+- **Новая таблица `resources`** (`migrations/0004_resources.sql`): 57 проверенных ссылок
+  (немецкий — 19). Таблицы по-прежнему создаются автоматически, миграция заливает только набор ссылок.
+- На странице «О приложении» — блок «Источники словаря» с лицензиями
+  (Wiktionary CC BY-SA, Tatoeba CC BY 2.0 FR, OpenThesaurus, PONS, DWDS).
+- `GET /api/dict-sources` — справочник источников для будущих экранов.
+
+### Изменено
+
+- Версия **0.5.0** (`package.json`, `src/config.ts`, `functions/_lib/config.ts`, профиль, «О приложении»).
+- `shared/types.ts`: подмодуль `shared/dict.ts` (типы словаря и ресурсов), `dictSources` в карточке,
+  коды ошибок `WORD_NOT_FOUND`, виды кэша `dict` и `resources`.
+- `functions/api/word.ts`: карточка ИИ дополняется словарями (синонимы, примеры, переводы, толкования).
+- `functions/_lib/schema.ts`: таблица `resources`; ошибки «уже существует» больше не ломают создание схемы.
+- `functions/_lib/cache.ts`: битый JSON в кэше считается отсутствием кэша.
+- `functions/_lib/http.ts` и `shared/types.ts`: понятное сообщение `WORD_NOT_FOUND` на ru/de/en.
+- `functions/_lib/env.ts` и `.dev.vars.example`: `PONS_API_KEY`.
+- Фронтенд разбит на короткие файлы: `src/api/request.ts` + `src/api/methods/*`,
+  хуки `useDictLookup.ts`, `useLanguageSwitching.ts`, `useExplainAndCheck.ts`, `useDictionarySearch.ts`,
+  `useResources.ts`, `useAdminResources.ts`; компоненты `word/DictCard.tsx`, `word/DictPanel.tsx`,
+  `word/DictExamples.tsx`, `word/SourcesLine.tsx`, `resources/ResourceGroup.tsx`,
+  `about/DictionarySources.tsx`, `admin/ResourceForm.tsx`, `admin/AdminResourcesTab.tsx`,
+  `profile/ResourcesCard.tsx`, страница `pages/ResourcesPage.tsx`.
+- `src/locales/ru.json`, `de.json`, `en.json`: разделы `dict`, `resources`, `about.*` и `admin.resources` —
+  по 443 ключа, наборы совпадают во всех трёх файлах.
+
+### Исправлено
+
+- Разбор форм de.wiktionary: у нового ответа API значения шаблона лежат в виде `{"wt":"…"}` —
+  раньше род и падежи не находились, теперь `das Haus → Häuser` и формы глагола определяются.
+- Разбор толкований DWDS: блок «Bedeutungsübersicht» находится по заголовку и списку,
+  вложенные подпункты в определения не попадают.
+
 ## 0.4.0 — 30.10.2026
 
 Этап 3: 12 языков, «Как переводят другие», Lara Translate, резервные ключи, админка,

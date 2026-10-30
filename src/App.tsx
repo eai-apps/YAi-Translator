@@ -12,6 +12,8 @@ import ProfilePage from './pages/ProfilePage';
 // Админка грузится отдельным куском: обычным посетителям её код не нужен.
 const AdminPage = lazy(() => import('./pages/AdminPage'));
 const AboutPage = lazy(() => import('./pages/AboutPage'));
+// Ресурсы и админка — тоже отдельными кусками.
+const ResourcesPage = lazy(() => import('./pages/ResourcesPage'));
 
 function PageFallback() {
   // Пустая обёртка со спиннером: блок не прыгает при загрузке куска.
@@ -34,6 +36,7 @@ export default function App() {
             <Route path="/conversation" element={<ConversationPage />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/about" element={<AboutPage />} />
+            <Route path="/resources" element={<ResourcesPage />} />
             <Route path="/admin" element={<AdminPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>

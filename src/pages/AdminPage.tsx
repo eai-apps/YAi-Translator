@@ -18,9 +18,10 @@ import { AdminOverviewTab } from '../components/admin/AdminOverviewTab';
 import { AdminKeysTab } from '../components/admin/AdminKeysTab';
 import { AdminSettingsTab } from '../components/admin/AdminSettingsTab';
 import { AdminUsersTab } from '../components/admin/AdminUsersTab';
+import { AdminResourcesTab } from '../components/admin/AdminResourcesTab';
 import { AdminLog } from '../components/admin/AdminLog';
 
-type Tab = 'overview' | 'keys' | 'settings' | 'users';
+type Tab = 'overview' | 'keys' | 'resources' | 'settings' | 'users';
 
 export default function AdminPage() {
   const { t } = useTranslation();
@@ -99,6 +100,7 @@ export default function AdminPage() {
         options={[
           { value: 'overview', label: t('admin.tabOverview') },
           { value: 'keys', label: t('admin.tabKeys') },
+          { value: 'resources', label: t('admin.tabResources') },
           { value: 'settings', label: t('admin.tabSettings') },
           { value: 'users', label: t('admin.tabUsers') },
         ]}
@@ -125,6 +127,8 @@ export default function AdminPage() {
 
         {tab === 'keys' ? <AdminKeysTab onError={setError} /> : null}
 
+        {tab === 'resources' ? <AdminResourcesTab onError={setError} /> : null}
+
         {tab === 'settings' ? (
           <AdminSettingsTab
             onError={setError}
@@ -139,7 +143,11 @@ export default function AdminPage() {
         {tab === 'users' ? <AdminUsersTab onError={setError} /> : null}
       </div>
 
-      {tab === 'settings' || tab === 'users' ? <div className="mt-3"><AdminLog refreshKey={logKey + (tab === 'users' ? 1 : 0)} /></div> : null}
+      {tab === 'settings' || tab === 'users' || tab === 'resources' ? (
+        <div className="mt-3">
+          <AdminLog refreshKey={logKey + (tab === 'users' ? 1 : 0)} />
+        </div>
+      ) : null}
     </>
   );
 }

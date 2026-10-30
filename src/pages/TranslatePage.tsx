@@ -1,20 +1,12 @@
 /** Экран «Перевод»: связывает ввод, API, разбор, проверку, «Как переводят другие» и окно ключей. */
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import type {
-  CheckResponse,
-  ExplainResponse,
-  LanguageCode,
-  ProviderId,
-  SourceLanguage,
-  TranslateResponse,
-} from '../../shared/types';
+import type { LanguageCode, ProviderId, SourceLanguage, TranslateResponse } from '../../shared/types';
 import { isLanguageCode } from '../../shared/languages';
-import { api } from '../api/client';
-import { isAiProvider, toTranslatorError } from '../lib/errors';
-import type { TranslatorError } from '../lib/errors';
+import { isAiProvider } from '../lib/errors';
 import { MAX_TEXT_LENGTH, STORAGE_KEYS } from '../config';
+import { useExplainAndCheck } from '../hooks/useExplainAndCheck';
 import { useHistory } from '../hooks/useHistory';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { useOthers } from '../hooks/useOthers';
@@ -31,17 +23,6 @@ import { CheckPanel } from '../components/translate/CheckPanel';
 import { WordPanel } from '../components/word/WordPanel';
 import { LimitDialog } from '../components/limit/LimitDialog';
 
-interface PanelState<T> {
-  open: boolean;
-  loading: boolean;
-  data: T | null;
-  error: TranslatorError | null;
-}
-
-function closedPanel<T>(): PanelState<T> {
-  return { open: false, loading: false, data: null, error: null };
-}
-
 export default function TranslatePage() {
   const { t } = useTranslation();
   const { uiLanguage } = useSettings();
@@ -52,16 +33,20 @@ export default function TranslatePage() {
   const [showOthers] = useLocalStorage<boolean>(STORAGE_KEYS.showOthers, true);
 
   const [limitOpen, setLimitOpen] = useState(false);
-  const [explain, setExplain] = useState<PanelState<ExplainResponse>>(closedPanel);
-  const [check, setCheck] = useState<PanelState<CheckResponse>>(closedPanel);
   /** Вариант другого переводчика, выбранный кнопкой «Использовать этот вариант». */
   const [chosen, setChosen] = useState<{ provider: ProviderId; text: string } | null>(null);
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const explainAbort = useRef<AbortController | null>(null);
-  const checkAbort = useRef<AbortController | null>(null);
-
   const { text, sourceLang, targetLang, applyIncoming, result } = translator;
+
+  // «Разобрать» и «Проверить мой немецкий» — отдельный хук (useExplainAndCheck.ts).
+  const { explain, check, runExplain, runCheck, closeExplain, closeCheck } = useExplainAndCheck({
+    text,
+    sourceLang,
+    targetLang,
+    uiLanguage,
+    onLimitReached: () => setLimitOpen(true),
+  });
 
   // Выбранный вариант действует только для этого текста и языков.
   useEffect(() => {
@@ -95,69 +80,7 @@ export default function TranslatePage() {
     setSearchParams(next, { replace: true });
   }, [searchParams, setSearchParams, applyIncoming]);
 
-  // Новый текст — старые разбор и проверка больше не относятся к делу.
-  useEffect(() => {
-    explainAbort.current?.abort();
-    checkAbort.current?.abort();
-    setExplain(closedPanel());
-    setCheck(closedPanel());
-  }, [text, sourceLang, targetLang]);
-
-  useEffect(() => {
-    return () => {
-      explainAbort.current?.abort();
-      checkAbort.current?.abort();
-    };
-  }, []);
-
-  const runExplain = useCallback(() => {
-    const value = text.trim();
-    if (!value) return;
-    explainAbort.current?.abort();
-    const controller = new AbortController();
-    explainAbort.current = controller;
-    setExplain({ open: true, loading: true, data: null, error: null });
-
-    void (async () => {
-      try {
-        const data = await api.explain(
-          { text: value, sourceLang, targetLang, uiLang: uiLanguage },
-          controller.signal,
-        );
-        if (controller.signal.aborted) return;
-        setExplain({ open: true, loading: false, data, error: null });
-      } catch (caught) {
-        if (controller.signal.aborted) return;
-        const error = toTranslatorError(caught, t('errors.unknown'));
-        setExplain({ open: true, loading: false, data: null, error });
-        if (error.code === 'LIMIT_REACHED') setLimitOpen(true);
-      }
-    })();
-  }, [text, sourceLang, targetLang, uiLanguage, t]);
-
-  const runCheck = useCallback(() => {
-    const value = text.trim();
-    if (!value) return;
-    checkAbort.current?.abort();
-    const controller = new AbortController();
-    checkAbort.current = controller;
-    setCheck({ open: true, loading: true, data: null, error: null });
-
-    void (async () => {
-      try {
-        const data = await api.check({ text: value, uiLang: uiLanguage }, controller.signal);
-        if (controller.signal.aborted) return;
-        setCheck({ open: true, loading: false, data, error: null });
-      } catch (caught) {
-        if (controller.signal.aborted) return;
-        const error = toTranslatorError(caught, t('errors.unknown'));
-        setCheck({ open: true, loading: false, data: null, error });
-        if (error.code === 'LIMIT_REACHED') setLimitOpen(true);
-      }
-    })();
-  }, [text, uiLanguage, t]);
-
-  /** «Использовать этот вариант»: чужой текст становится основным переводом. */
+  // «Использовать этот вариант»: чужой текст становится основным переводом. */
   const useVariant = (provider: ProviderId, variantText: string) => {
     setChosen({ provider, text: variantText });
   };
@@ -165,6 +88,12 @@ export default function TranslatePage() {
   const currentFavorite = translator.historyId
     ? items.find((item) => item.id === translator.historyId)?.favorite ?? false
     : false;
+
+  // Язык исходного слова для карточки из словарей: выбранный или определённый автоматически.
+  const wordLanguage: LanguageCode | null =
+    sourceLang !== 'auto'
+      ? sourceLang
+      : translator.dict.data?.entry.sourceLang ?? translator.word.data?.card.language ?? null;
 
   // Показанный перевод: выбранный вариант или ответ сервера.
   const shown: TranslateResponse | null = result
@@ -241,6 +170,8 @@ export default function TranslatePage() {
 
       <WordPanel
         word={translator.word}
+        dict={translator.dict}
+        sourceLang={wordLanguage}
         speech={speech}
         onRetry={translator.retryWord}
         onOpenLimit={() => setLimitOpen(true)}
@@ -251,10 +182,7 @@ export default function TranslatePage() {
           data={explain.data}
           loading={explain.loading}
           error={explain.error}
-          onClose={() => {
-            explainAbort.current?.abort();
-            setExplain(closedPanel());
-          }}
+          onClose={closeExplain}
           onRetry={runExplain}
         />
       ) : null}
@@ -265,10 +193,7 @@ export default function TranslatePage() {
           loading={check.loading}
           error={check.error}
           speech={speech}
-          onClose={() => {
-            checkAbort.current?.abort();
-            setCheck(closedPanel());
-          }}
+          onClose={closeCheck}
           onRetry={runCheck}
         />
       ) : null}

@@ -61,6 +61,11 @@ const ERROR_MESSAGES: Record<ApiErrorCode, Record<UiLanguage, string>> = {
     de: 'Diese Adresse wurde nicht gefunden.',
     en: 'This address was not found.',
   },
+  WORD_NOT_FOUND: {
+    ru: 'Словари не знают такого слова. Проверьте написание или попробуйте синоним.',
+    de: 'Die Wörterbücher kennen dieses Wort nicht. Prüfen Sie die Schreibweise oder probieren Sie ein anderes Wort.',
+    en: 'The dictionaries do not know this word. Check the spelling or try a synonym.',
+  },
   INTERNAL: {
     ru: 'Что-то пошло не так на сервере. Попробуйте ещё раз.',
     de: 'Auf dem Server ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut.',
