@@ -20,9 +20,11 @@ interface Options {
   provider: ProviderId | null;
   /** Настройка «Показывать другие переводчики автоматически». */
   autoEnabled: boolean;
+  /** Язык, который определил основной переводчик (точнее, чем угадывание по словам). */
+  detectedLang?: LanguageCode | null;
 }
 
-export function useOthers({ text, sourceLang, targetLang, provider, autoEnabled }: Options) {
+export function useOthers({ text, sourceLang, targetLang, provider, autoEnabled, detectedLang }: Options) {
   const [data, setData] = useState<CompareResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [failed, setFailed] = useState(false);
@@ -49,7 +51,7 @@ export function useOthers({ text, sourceLang, targetLang, provider, autoEnabled 
 
         // MyMemory не ответил серверу (общий лимит Cloudflare) — пробуем из браузера пользователя.
         const silentMyMemory = response.items.find((item) => item.provider === 'mymemory' && !item.text);
-        const source = sourceLang === 'auto' ? guessLanguage(value) : sourceLang;
+        const source = sourceLang === 'auto' ? detectedLang ?? guessLanguage(value) : sourceLang;
         if (silentMyMemory && source) {
           const translated = await translateWithMyMemoryInBrowser(value, source, targetLang, controller.signal);
           if (translated && !controller.signal.aborted) {
@@ -68,7 +70,7 @@ export function useOthers({ text, sourceLang, targetLang, provider, autoEnabled 
         if (!controller.signal.aborted) setLoading(false);
       }
     },
-    [text, sourceLang, targetLang],
+    [text, sourceLang, targetLang, detectedLang],
   );
 
   // Новый текст, языки или другой движок — начинаем заново.

@@ -74,6 +74,7 @@ export default function TranslatePage() {
     targetLang,
     provider: result?.provider ?? null,
     autoEnabled: showOthers,
+    detectedLang: translator.detectedLang,
   });
 
   // Текст и языки из истории («Открыть» в словаре).

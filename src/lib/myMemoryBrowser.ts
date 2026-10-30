@@ -16,6 +16,10 @@ interface MyMemoryResponse {
   quotaFinished?: boolean;
 }
 
+function normalize(value: string): string {
+  return value.toLowerCase().replace(/[\s.,!?;:'"«»„“”-]+/g, ' ').trim();
+}
+
 export async function translateWithMyMemoryInBrowser(
   text: string,
   sourceLang: LanguageCode,
@@ -36,6 +40,8 @@ export async function translateWithMyMemoryInBrowser(
     const translated = data.responseData?.translatedText?.trim();
     if (data.quotaFinished || String(data.responseStatus) !== '200' || !translated) return null;
     if (/MYMEMORY WARNING|QUERY LENGTH LIMIT/i.test(translated)) return null;
+    // MyMemory иногда возвращает исходный текст без перевода — это не вариант перевода.
+    if (normalize(translated) === normalize(value)) return null;
     return translated;
   } catch {
     // Нет сети, блокировка браузером (CORS) или отмена — просто нет варианта MyMemory.

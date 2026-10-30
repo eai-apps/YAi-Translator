@@ -122,6 +122,10 @@ export const myMemoryTranslator: ClassicTranslator = {
         clear();
       }
     }
-    return { text: parts.join(' '), detectedLang: null };
+    const joined = parts.join(' ');
+    // MyMemory иногда возвращает исходный текст без перевода — это не перевод, пусть ответят другие.
+    const normalize = (value: string) => value.toLowerCase().replace(/[\s.,!?;:'"«»„“”-]+/g, ' ').trim();
+    if (normalize(joined) === normalize(text)) return null;
+    return { text: joined, detectedLang: null };
   },
 };
