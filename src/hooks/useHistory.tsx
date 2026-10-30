@@ -1,9 +1,16 @@
-/** История переводов и избранное. Хранится только в браузере (localStorage). */
+/**
+ * История переводов и избранное.
+ * Без входа — только в браузере (localStorage). Вошёл в аккаунт — дополнительно
+ * синхронизируется с сервером, поэтому одинаково на всех устройствах.
+ */
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 import type { LanguageCode, SourceLanguage } from '../../shared/types';
 import { HISTORY_LIMIT, HISTORY_STORAGE_LIMIT, STORAGE_KEYS } from '../config';
 import { readStorage, writeStorage } from '../lib/storage';
+import type { Tombstones } from '../lib/syncTombstones';
+import { useAccount } from './useAccount';
+import { useHistorySync } from './useHistorySync';
 
 export interface HistoryItem {
   id: string;
@@ -43,17 +50,38 @@ function createId(): string {
   return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
 
+function isHistoryItem(value: HistoryItem): boolean {
+  return typeof value?.text === 'string' && typeof value?.translation === 'string';
+}
+
 export function HistoryProvider({ children }: { children: ReactNode }) {
+  const { status } = useAccount();
+  const signedIn = status === 'signedIn';
   const [items, setItems] = useState<HistoryItem[]>(() =>
-    readStorage<HistoryItem[]>(STORAGE_KEYS.history, []).filter(
-      (item) => typeof item?.text === 'string' && typeof item?.translation === 'string',
-    ),
+    readStorage<HistoryItem[]>(STORAGE_KEYS.history, []).filter(isHistoryItem),
   );
 
   // Любое изменение сразу сохраняем: история должна пережить перезагрузку.
   useEffect(() => {
     writeStorage(STORAGE_KEYS.history, items);
   }, [items]);
+
+  /** Сливаем записи с сервера и удаления; побеждает более новая запись. */
+  const onMerge = useCallback(
+    ({ items: remote, tombstones }: { items: HistoryItem[] | null; tombstones: Tombstones }) => {
+      setItems((previous) => {
+        const merged = remote ?? previous;
+        const kept = merged.filter((item) => !tombstones[item.id]);
+        return trimItems(kept);
+      });
+    },
+    [],
+  );
+
+  // Ошибку сети не показываем: следующая минута повторит обмен сама.
+  const onError = useCallback(() => undefined, []);
+
+  useHistorySync({ signedIn, items, onMerge, onError });
 
   const addItem = useCallback<HistoryContextValue['addItem']>((item) => {
     const id = createId();

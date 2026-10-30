@@ -1,7 +1,10 @@
 /** Единая точка всех запросов к бэкенду. Компоненты не вызывают fetch напрямую. */
 import type {
+  AccountInfo,
   ApiErrorBody,
   ApiErrorCode,
+  AuthResponse,
+  ChangePasswordRequest,
   CheckRequest,
   CheckResponse,
   CompareRequest,
@@ -9,8 +12,15 @@ import type {
   ExplainRequest,
   ExplainResponse,
   HealthResponse,
+  KeyProvider,
   KeyTestRequest,
   KeyTestResponse,
+  LoginRequest,
+  RegisterRequest,
+  SaveKeyRequest,
+  SaveKeyResponse,
+  SyncPushRequest,
+  SyncResponse,
   TranslateRequest,
   TranslateResponse,
   WordRequest,
@@ -18,6 +28,7 @@ import type {
 } from '../../shared/types';
 import { API_BASE } from '../config';
 import { getUserKeys } from '../lib/userKeys';
+import { getSessionToken } from '../lib/sessionToken';
 
 /** Сетевая ошибка добавляется к кодам сервера. */
 export type ClientErrorCode = ApiErrorCode | 'NETWORK';
@@ -43,25 +54,42 @@ export function setApiUiLanguage(language: string): void {
   uiLanguage = language;
 }
 
-async function request<T>(
-  path: string,
-  init: { method: 'GET' } | { method: 'POST'; body: unknown },
-  signal?: AbortSignal,
-): Promise<T> {
-  const keys = getUserKeys();
+type Method = 'GET' | 'POST' | 'PUT' | 'DELETE';
+
+interface RequestInit_ {
+  method: Method;
+  body?: unknown;
+  /** false — не отправлять токен и X-User-ключи (например, при входе). */
+  withAuth?: boolean;
+}
+
+async function request<T>(path: string, init: RequestInit_, signal?: AbortSignal): Promise<T> {
+  const withAuth = init.withAuth ?? true;
   const headers: Record<string, string> = {
     'X-UI-Language': uiLanguage,
     Accept: 'application/json',
   };
-  if (keys.gemini) headers['X-User-Gemini-Key'] = keys.gemini;
-  if (keys.groq) headers['X-User-Groq-Key'] = keys.groq;
+
+  if (withAuth) {
+    // Ключи с устройства важнее ключей аккаунта — сервер сам решает этот порядок.
+    const keys = getUserKeys();
+    if (keys.gemini) headers['X-User-Gemini-Key'] = keys.gemini;
+    if (keys.groq) headers['X-User-Groq-Key'] = keys.groq;
+    // На сайте сессия в cookie; токен нужен приложениям, где cookie недоступна.
+    const token = getSessionToken();
+    if (token) headers.Authorization = `Bearer ${token}`;
+  }
+
+  if (init.body !== undefined) headers['Content-Type'] = 'application/json';
 
   let response: Response;
   try {
     response = await fetch(`${API_BASE}${path}`, {
       method: init.method,
-      headers: init.method === 'POST' ? { ...headers, 'Content-Type': 'application/json' } : headers,
-      body: init.method === 'POST' ? JSON.stringify(init.body) : undefined,
+      headers,
+      body: init.body === undefined ? undefined : JSON.stringify(init.body),
+      // Cookie сессии отправляется и на другой домен (Capacitor); сервер разрешает это в CORS.
+      credentials: withAuth ? 'include' : 'same-origin',
       signal,
     });
   } catch (error) {
@@ -109,7 +137,70 @@ export const api = {
     return request<HealthResponse>('/api/health', { method: 'GET' }, signal);
   },
 
+  /** Настоящая проверка всех настроенных сервисов сайта (кэшируется на сервере 10 минут). */
+  healthCheck(signal?: AbortSignal): Promise<HealthResponse> {
+    return request<HealthResponse>('/api/health?check=1', { method: 'GET' }, signal);
+  },
+
   testKey(payload: KeyTestRequest, signal?: AbortSignal): Promise<KeyTestResponse> {
     return request<KeyTestResponse>('/api/key-test', { method: 'POST', body: payload }, signal);
+  },
+
+  /* ------------------------------- Аккаунт ------------------------------- */
+
+  register(payload: RegisterRequest): Promise<AuthResponse> {
+    return request<AuthResponse>('/api/auth/register', {
+      method: 'POST',
+      body: payload,
+      withAuth: true,
+    });
+  },
+
+  login(payload: LoginRequest): Promise<AuthResponse> {
+    return request<AuthResponse>('/api/auth/login', {
+      method: 'POST',
+      body: payload,
+      withAuth: false,
+    });
+  },
+
+  logout(): Promise<{ ok: boolean }> {
+    return request<{ ok: boolean }>('/api/auth/logout', { method: 'POST' });
+  },
+
+  logoutAll(): Promise<{ ok: boolean }> {
+    return request<{ ok: boolean }>('/api/auth/logout-all', { method: 'POST' });
+  },
+
+  me(signal?: AbortSignal): Promise<AccountInfo> {
+    return request<AccountInfo>('/api/auth/me', { method: 'GET' }, signal);
+  },
+
+  changePassword(payload: ChangePasswordRequest): Promise<AccountInfo> {
+    return request<AccountInfo>('/api/auth/password', { method: 'POST', body: payload });
+  },
+
+  /* -------------------------------- Ключи -------------------------------- */
+
+  saveAccountKey(provider: KeyProvider, payload: SaveKeyRequest): Promise<SaveKeyResponse> {
+    return request<SaveKeyResponse>(`/api/keys/${provider}`, { method: 'PUT', body: payload });
+  },
+
+  deleteAccountKey(provider: KeyProvider): Promise<{ ok: boolean }> {
+    return request<{ ok: boolean }>(`/api/keys/${provider}`, { method: 'DELETE' });
+  },
+
+  testAccountKey(provider: KeyProvider): Promise<KeyTestResponse> {
+    return request<KeyTestResponse>(`/api/keys/${provider}/test`, { method: 'POST', body: {} });
+  },
+
+  /* ---------------------------- Синхронизация ---------------------------- */
+
+  syncPull(since: number, signal?: AbortSignal): Promise<SyncResponse> {
+    return request<SyncResponse>(`/api/sync?since=${Math.max(0, Math.floor(since))}`, { method: 'GET' }, signal);
+  },
+
+  syncPush(payload: SyncPushRequest): Promise<SyncResponse> {
+    return request<SyncResponse>('/api/sync', { method: 'PUT', body: payload });
   },
 };

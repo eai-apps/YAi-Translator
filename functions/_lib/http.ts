@@ -4,8 +4,9 @@ import { isUiLanguage } from '../../shared/languages';
 
 export const CORS_HEADERS: Record<string, string> = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, X-UI-Language, X-User-Gemini-Key, X-User-Groq-Key',
+  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+  'Access-Control-Allow-Headers':
+    'Content-Type, Authorization, X-UI-Language, X-User-Gemini-Key, X-User-Groq-Key',
   'Access-Control-Max-Age': '86400',
 };
 
@@ -64,6 +65,51 @@ const ERROR_MESSAGES: Record<ApiErrorCode, Record<UiLanguage, string>> = {
     ru: 'Что-то пошло не так на сервере. Попробуйте ещё раз.',
     de: 'Auf dem Server ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut.',
     en: 'Something went wrong on the server. Please try again.',
+  },
+  INVALID_CREDENTIALS: {
+    ru: 'Неверный логин или пароль. Проверьте и попробуйте снова.',
+    de: 'Login oder Passwort ist falsch. Bitte prüfen und erneut versuchen.',
+    en: 'Wrong login or password. Please check and try again.',
+  },
+  TOO_MANY_ATTEMPTS: {
+    ru: 'Слишком много попыток входа. Подождите 15 минут и попробуйте снова.',
+    de: 'Zu viele Anmeldeversuche. Warten Sie 15 Minuten und versuchen Sie es erneut.',
+    en: 'Too many sign-in attempts. Wait 15 minutes and try again.',
+  },
+  UNAUTHORIZED: {
+    ru: 'Сначала войдите в аккаунт.',
+    de: 'Bitte melden Sie sich zuerst an.',
+    en: 'Please sign in first.',
+  },
+  SESSION_EXPIRED: {
+    ru: 'Вход истёк. Войдите снова — ваши избранное и ключи на месте.',
+    de: 'Die Anmeldung ist abgelaufen. Melden Sie sich erneut an — Favoriten und Schlüssel bleiben erhalten.',
+    en: 'Your session has expired. Sign in again — your favorites and keys are safe.',
+  },
+  LOGIN_TAKEN: {
+    ru: 'Такой логин уже занят. Выберите другой или войдите с этим.',
+    de: 'Dieser Login ist schon vergeben. Wählen Sie einen anderen oder melden Sie sich an.',
+    en: 'This login is already taken. Choose another one or sign in with it.',
+  },
+  LOGIN_INVALID: {
+    ru: 'Логин: 3–32 символа, латинские буквы, цифры, точка, дефис и подчёркивание.',
+    de: 'Login: 3–32 Zeichen, lateinische Buchstaben, Ziffern, Punkt, Bindestrich und Unterstrich.',
+    en: 'Login: 3–32 characters, Latin letters, digits, dot, hyphen and underscore.',
+  },
+  PASSWORD_TOO_SHORT: {
+    ru: 'Пароль должен быть не короче 8 символов.',
+    de: 'Das Passwort muss mindestens 8 Zeichen lang sein.',
+    en: 'The password must be at least 8 characters long.',
+  },
+  KEYS_STORAGE_DISABLED: {
+    ru: 'Хранение ключей в аккаунте сейчас выключено. Ключ можно сохранить на этом устройстве.',
+    de: 'Das Speichern von Schlüsseln im Konto ist ausgeschaltet. Der Schlüssel kann auf diesem Gerät gespeichert werden.',
+    en: 'Storing keys in the account is turned off right now. The key can be saved on this device.',
+  },
+  KEY_NO_ACCESS: {
+    ru: 'Этот ключ не даёт доступа. Проверьте, что скопировали его целиком и он активен.',
+    de: 'Dieser Schlüssel gibt keinen Zugriff. Prüfen Sie, ob Sie ihn vollständig kopiert haben und er aktiv ist.',
+    en: 'This key does not grant access. Make sure you copied all of it and that it is active.',
   },
 };
 
@@ -125,8 +171,11 @@ export function getUiLanguage(request: Request): UiLanguage {
   return 'ru';
 }
 
-/** Ключи пользователя из заголовков. Сервер их нигде не сохраняет. */
-export function getUserKeys(request: Request): { gemini?: string; groq?: string } {
+/**
+ * Ключи только из заголовков X-User-*. Ничего не сохраняют.
+ * Если у запроса есть сессия, дополнительно берутся ключи из аккаунта — см. auth/keys.ts.
+ */
+export function getHeaderKeys(request: Request): { gemini?: string; groq?: string } {
   const gemini = request.headers.get('x-user-gemini-key')?.trim();
   const groq = request.headers.get('x-user-groq-key')?.trim();
   return {

@@ -1,3 +1,20 @@
+/**
+ * Чтение буфера обмена (кнопка «Вставить» в мастере ключа).
+ * На iPhone Safari и без разрешения браузер может отказать — тогда вернём пустую строку,
+ * и поле просто получит фокус для ручной вставки.
+ */
+export async function pasteFromClipboard(): Promise<string> {
+  try {
+    if (navigator.clipboard?.readText) {
+      const text = await navigator.clipboard.readText();
+      return typeof text === 'string' ? text.trim() : '';
+    }
+  } catch {
+    // Нет разрешения на чтение — вернём пустую строку.
+  }
+  return '';
+}
+
 /** Копирование с запасным вариантом для браузеров без Clipboard API. */
 export async function copyText(text: string): Promise<boolean> {
   try {

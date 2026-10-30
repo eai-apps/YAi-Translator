@@ -16,6 +16,8 @@ interface SettingsContextValue {
   keys: UserKeys;
   saveKey: (provider: keyof UserKeys, key: string) => void;
   removeKey: (provider: keyof UserKeys) => void;
+  /** Убирает ключи с устройства (после переноса в аккаунт). */
+  removeKeys: (providers: (keyof UserKeys)[]) => void;
 }
 
 const SettingsContext = createContext<SettingsContextValue | null>(null);
@@ -59,9 +61,18 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
+  const removeKeys = useCallback((providers: (keyof UserKeys)[]) => {
+    setKeys((previous) => {
+      const next = { ...previous };
+      for (const provider of providers) next[provider] = '';
+      writeStorage(STORAGE_KEYS.keys, next);
+      return next;
+    });
+  }, []);
+
   const value = useMemo(
-    () => ({ uiLanguage, setUiLanguage, keys, saveKey, removeKey }),
-    [uiLanguage, setUiLanguage, keys, saveKey, removeKey],
+    () => ({ uiLanguage, setUiLanguage, keys, saveKey, removeKey, removeKeys }),
+    [uiLanguage, setUiLanguage, keys, saveKey, removeKey, removeKeys],
   );
 
   return <SettingsContext.Provider value={value}>{children}</SettingsContext.Provider>;

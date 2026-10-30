@@ -5,7 +5,7 @@
 export const API_BASE = (import.meta.env.VITE_API_BASE ?? '').replace(/\/+$/, '');
 
 /** Версия показывается в профиле; совпадает с package.json. */
-export const APP_VERSION = '0.2.0';
+export const APP_VERSION = '0.3.0';
 
 export const STORAGE_KEYS = {
   theme: 'yai.theme',
@@ -15,7 +15,21 @@ export const STORAGE_KEYS = {
   targetLang: 'yai.targetLang',
   history: 'yai.history',
   provider: 'yai.provider',
+  /** Токен входа для приложений (на сайте сессия живёт в cookie HttpOnly). */
+  session: 'yai.session',
+  /** Логин последнего входа — только чтобы подставить его в форму. */
+  lastLogin: 'yai.lastLogin',
+  /** Удалённые записи истории и избранного, которые ещё не отправлены на сервер. */
+  syncTombstones: 'yai.syncTombstones',
+  /** До какого момента забрали изменения с сервера (передаётся в ?since=). */
+  syncSince: 'yai.syncSince',
 } as const;
+
+/** Как часто вошедший пользователь обменивается изменениями с сервером. */
+export const SYNC_INTERVAL_MS = 60_000;
+
+/** Докуда хранить список удалённых записей (длиннее не нужно: сервер их уже знает). */
+export const SYNC_TOMBSTONE_LIMIT = 500;
 
 /** Задержка перевода после окончания ввода. */
 export const TRANSLATE_DEBOUNCE_MS = 600;

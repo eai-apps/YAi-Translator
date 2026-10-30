@@ -11,7 +11,8 @@ import type { ClassicProviderId, LanguageCode, SourceLanguage, TranslateResponse
 import type { Env } from '../_lib/env';
 import { buildCacheKey, requireLanguage, requireSourceLanguage, requireText } from '../_lib/request';
 import { readCache, writeCache } from '../_lib/cache';
-import { ApiError, errorResponse, getClientIp, getUiLanguage, getUserKeys, jsonResponse, readJsonBody } from '../_lib/http';
+import { ApiError, errorResponse, getClientIp, getHeaderKeys, getUiLanguage, jsonResponse, readJsonBody } from '../_lib/http';
+import { resolveUserKeys } from '../_lib/auth/keys';
 import { createLimitGuard } from '../_lib/usage';
 import { buildTranslatePrompt } from '../_lib/prompts';
 import { runJsonTask } from '../_lib/router';
@@ -74,13 +75,15 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     }
 
     const env = context.env;
+    // Ключи: заголовки X-User-* важнее, затем расшифрованные ключи аккаунта.
+    const userKeys = await resolveUserKeys(env, context.request, getHeaderKeys(context.request));
     const job: Job = {
       env,
       text,
       sourceLang,
       targetLang,
       uiLang,
-      userKeys: getUserKeys(context.request),
+      userKeys,
       signal: context.request.signal,
       limitGuard: createLimitGuard(env, getClientIp(context.request)),
     };

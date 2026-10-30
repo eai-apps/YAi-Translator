@@ -4,7 +4,8 @@ import type { Env } from '../_lib/env';
 import { LIMITS } from '../_lib/config';
 import { buildCacheKey, requireLanguage, requireSourceLanguage, requireText } from '../_lib/request';
 import { readCache, writeCache } from '../_lib/cache';
-import { ApiError, errorResponse, getClientIp, getUiLanguage, getUserKeys, jsonResponse, readJsonBody } from '../_lib/http';
+import { ApiError, errorResponse, getClientIp, getHeaderKeys, getUiLanguage, jsonResponse, readJsonBody } from '../_lib/http';
+import { resolveUserKeys } from '../_lib/auth/keys';
 import { createLimitGuard } from '../_lib/usage';
 import { buildWordPrompt } from '../_lib/prompts';
 import { runJsonTask } from '../_lib/router';
@@ -23,7 +24,8 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     }
 
     const env = context.env;
-    const userKeys = getUserKeys(context.request);
+    // Ключи: заголовки X-User-* важнее, затем ключи из аккаунта (если вошёл).
+    const userKeys = await resolveUserKeys(env, context.request, getHeaderKeys(context.request));
 
     const cacheKey = await buildCacheKey({ kind: 'word', text: word, sourceLang, targetLang, uiLang });
     const cached = await readCache<WordResponse>(env, cacheKey);

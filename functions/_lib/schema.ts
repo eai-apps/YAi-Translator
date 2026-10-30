@@ -21,6 +21,49 @@ const STATEMENTS = [
     PRIMARY KEY (ip_hash, day)
   )`,
   'CREATE INDEX IF NOT EXISTS idx_usage_day ON usage (day)',
+
+  // --- Этап 2: аккаунт, сессии, ключи пользователя и синхронизация избранного ---
+  `CREATE TABLE IF NOT EXISTS users (
+    id TEXT PRIMARY KEY,
+    login TEXT NOT NULL UNIQUE,
+    password_hash TEXT NOT NULL,
+    password_salt TEXT NOT NULL,
+    created_at INTEGER NOT NULL,
+    last_login_at INTEGER
+  )`,
+  `CREATE TABLE IF NOT EXISTS sessions (
+    token_hash TEXT PRIMARY KEY,
+    user_id TEXT NOT NULL,
+    device TEXT,
+    created_at INTEGER NOT NULL,
+    last_seen_at INTEGER NOT NULL,
+    expires_at INTEGER NOT NULL
+  )`,
+  'CREATE INDEX IF NOT EXISTS idx_sessions_user_id ON sessions (user_id)',
+  `CREATE TABLE IF NOT EXISTS user_keys (
+    user_id TEXT NOT NULL,
+    provider TEXT NOT NULL,
+    ciphertext TEXT NOT NULL,
+    iv TEXT NOT NULL,
+    last4 TEXT NOT NULL,
+    updated_at INTEGER NOT NULL,
+    PRIMARY KEY (user_id, provider)
+  )`,
+  `CREATE TABLE IF NOT EXISTS user_items (
+    user_id TEXT NOT NULL,
+    item_id TEXT NOT NULL,
+    payload TEXT NOT NULL,
+    updated_at INTEGER NOT NULL,
+    deleted INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY (user_id, item_id)
+  )`,
+  'CREATE INDEX IF NOT EXISTS idx_user_items_user_day ON user_items (user_id, updated_at)',
+  `CREATE TABLE IF NOT EXISTS login_attempts (
+    ip_hash TEXT NOT NULL,
+    window_start INTEGER NOT NULL,
+    attempts INTEGER NOT NULL,
+    PRIMARY KEY (ip_hash, window_start)
+  )`,
 ];
 
 let ready: Promise<void> | null = null;

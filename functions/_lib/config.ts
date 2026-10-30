@@ -7,7 +7,7 @@ export { LANGUAGES, LANGUAGE_CODES, getLanguage, isLanguageCode, isUiLanguage } 
 
 import { CLASSIC_PROVIDERS } from '../../shared/types';
 
-export const APP_VERSION = '0.2.0';
+export const APP_VERSION = '0.3.0';
 
 export const LIMITS = {
   /** Максимальная длина текста для перевода и разбора. */
@@ -28,6 +28,44 @@ export const LIMITS = {
 
 /** Версия промптов: меняется вместе с prompts.ts и автоматически сбрасывает кэш. */
 export const PROMPT_VERSION = '2';
+
+/** Аккаунт, сессии и синхронизация избранного (этап 2). */
+export const AUTH = {
+  /** Логин: 3–32 символа, латиница, цифры, _ . - (регистр не важен). */
+  loginPattern: /^[a-z0-9_.-]{3,32}$/,
+  minPasswordLength: 8,
+  maxPasswordLength: 128,
+  /** PBKDF2-SHA256. Cloudflare Workers разрешает не больше 100 000 итераций. */
+  pbkdf2Iterations: 100_000,
+  saltBytes: 16,
+  hashBytes: 32,
+  /** Случайный токен сессии 32 байта; в базе — только SHA-256 от него. */
+  tokenBytes: 32,
+  sessionDays: 90,
+  /** Cookie сессии для сайта. */
+  cookieName: 'yai_session',
+  /** Не больше 10 попыток входа или регистрации с одного IP за 15 минут. */
+  maxAttemptsPerWindow: 10,
+  attemptWindowMs: 15 * 60 * 1000,
+  /** Сколько последних устройств показывать в профиле. */
+  maxSessionsListed: 10,
+  /** Сколько записей можно передать в одном запросе синхронизации. */
+  maxSyncItemsPerRequest: 200,
+  /** Максимум записей избранного и истории на один аккаунт (удалённые чистятся первыми). */
+  maxSyncItemsPerUser: 3000,
+  /** Размер одной записи избранного/истории в байтах. */
+  maxSyncPayloadBytes: 8_000,
+} as const;
+
+/** Проверка общих ключей сайта через /api/health?check=1. */
+export const HEALTH_CHECK = {
+  timeoutMs: 8_000,
+  /** Результат проверки кэшируется, чтобы кнопкой нельзя было жечь лимиты сервисов. */
+  cacheTtlSeconds: 600,
+  maxCachedPayloadBytes: 20_000,
+  /** Короткий текст для проверки перевода. */
+  sampleText: 'Hallo',
+} as const;
 
 export const GEMINI = {
   baseUrl: 'https://generativelanguage.googleapis.com/v1beta/models',

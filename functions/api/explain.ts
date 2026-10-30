@@ -3,7 +3,8 @@ import type { ExplainResponse } from '../../shared/types';
 import type { Env } from '../_lib/env';
 import { buildCacheKey, requireLanguage, requireSourceLanguage, requireText, requireUiLanguage } from '../_lib/request';
 import { readCache, writeCache } from '../_lib/cache';
-import { errorResponse, getClientIp, getUiLanguage, getUserKeys, jsonResponse, readJsonBody } from '../_lib/http';
+import { errorResponse, getClientIp, getHeaderKeys, getUiLanguage, jsonResponse, readJsonBody } from '../_lib/http';
+import { resolveUserKeys } from '../_lib/auth/keys';
 import { createLimitGuard } from '../_lib/usage';
 import { buildExplainPrompt } from '../_lib/prompts';
 import { runJsonTask } from '../_lib/router';
@@ -19,7 +20,8 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     const explainUiLang = requireUiLanguage(body.uiLang ?? uiLang);
 
     const env = context.env;
-    const userKeys = getUserKeys(context.request);
+    // Ключи: заголовки X-User-* важнее, затем ключи из аккаунта (если вошёл).
+    const userKeys = await resolveUserKeys(env, context.request, getHeaderKeys(context.request));
 
     const cacheKey = await buildCacheKey({
       kind: 'explain',

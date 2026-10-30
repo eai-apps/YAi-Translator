@@ -3,7 +3,8 @@ import type { CheckResponse } from '../../shared/types';
 import type { Env } from '../_lib/env';
 import { buildCacheKey, requireText, requireUiLanguage } from '../_lib/request';
 import { readCache, writeCache } from '../_lib/cache';
-import { errorResponse, getClientIp, getUiLanguage, getUserKeys, jsonResponse, readJsonBody } from '../_lib/http';
+import { errorResponse, getClientIp, getHeaderKeys, getUiLanguage, jsonResponse, readJsonBody } from '../_lib/http';
+import { resolveUserKeys } from '../_lib/auth/keys';
 import { createLimitGuard } from '../_lib/usage';
 import { buildCheckPrompt } from '../_lib/prompts';
 import { runJsonTask } from '../_lib/router';
@@ -17,7 +18,8 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     const checkUiLang = requireUiLanguage(body.uiLang ?? uiLang);
 
     const env = context.env;
-    const userKeys = getUserKeys(context.request);
+    // Ключи: заголовки X-User-* важнее, затем ключи из аккаунта (если вошёл).
+    const userKeys = await resolveUserKeys(env, context.request, getHeaderKeys(context.request));
 
     const cacheKey = await buildCacheKey({ kind: 'check', text, sourceLang: 'auto', uiLang: checkUiLang });
     const cached = await readCache<CheckResponse>(env, cacheKey);

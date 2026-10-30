@@ -10,3 +10,8 @@ MICROSOFT_TRANSLATOR_KEY=
 MICROSOFT_TRANSLATOR_REGION=
 GOOGLE_TRANSLATE_KEY=
 MYMEMORY_EMAIL=
+
+# Секрет для шифрования ключей ИИ пользователей в аккаунте (AES-GCM), 32 случайных байта в base64.
+# Сгенерировать: node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
+# Без него сайт работает, но ключи в аккаунте не сохраняются — только на устройстве.
+KEY_ENCRYPTION_SECRET=

@@ -14,6 +14,11 @@ export interface Env {
   GOOGLE_TRANSLATE_KEY?: string;
   /** Почта для MyMemory: поднимает бесплатный лимит с 5 000 до 50 000 символов в день. */
   MYMEMORY_EMAIL?: string;
+  /**
+   * Секрет для шифрования ключей ИИ пользователей (AES-GCM), 32 случайных байта в base64.
+   * Если не задан, ключи в аккаунте не сохраняются — только на устройстве.
+   */
+  KEY_ENCRYPTION_SECRET?: string;
 }
 
 /** Минимальный тип binding'а Workers AI, чтобы не зависеть от версии workers-types. */
