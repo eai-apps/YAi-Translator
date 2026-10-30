@@ -5,7 +5,7 @@
  */
 import type { ProviderId, ServiceCheck, UiLanguage } from '../../../shared/types';
 import type { Env } from '../env';
-import { HEALTH_CHECK } from '../config';
+import { APP_VERSION, HEALTH_CHECK } from '../config';
 import { allKeys } from '../keypool';
 import { isKeyUsable, loadKeyStates } from '../keystate';
 import { ensureSchema } from '../schema';
@@ -32,7 +32,8 @@ async function firstUsableKey(env: Env, provider: 'gemini' | 'groq'): Promise<st
 
 /** Ключ кэша: результат зависит от языка интерфейса (тексты причин). */
 function cacheKey(uiLang: UiLanguage): string {
-  return `${CACHE_KIND}:${uiLang}`;
+  // Версия в ключе: после обновления проверок старый кэш не используется.
+  return `${CACHE_KIND}:${APP_VERSION}:2:${uiLang}`;
 }
 
 async function readCached(env: Env, uiLang: UiLanguage): Promise<ServiceChecks | null> {

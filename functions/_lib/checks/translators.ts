@@ -122,8 +122,11 @@ export async function checkGoogle(env: Env, uiLang: UiLanguage): Promise<Service
   });
 }
 
-export function checkMyMemory(env: Env, uiLang: UiLanguage): Promise<ServiceCheck> {
-  return probe('MyMemory', uiLang, async (signal) => {
+export async function checkMyMemory(env: Env, uiLang: UiLanguage): Promise<ServiceCheck> {
+  // Своя проверка (не probe): в сообщении — точная причина отказа MyMemory.
+  const started = Date.now();
+  const { signal, clear } = withTimeoutSignal(undefined, HEALTH_CHECK.timeoutMs);
+  try {
     const url = new URL(CLASSIC.myMemoryUrl);
     url.searchParams.set('q', HEALTH_CHECK.sampleText);
     url.searchParams.set('langpair', 'de|ru');
@@ -132,18 +135,28 @@ export function checkMyMemory(env: Env, uiLang: UiLanguage): Promise<ServiceChec
       signal,
       headers: { 'User-Agent': CLASSIC.userAgent, Accept: 'application/json' },
     });
-    const data = (await response.json().catch(() => ({}))) as {
-      responseStatus?: number | string;
-      quotaFinished?: boolean;
-      responseDetails?: string;
-    };
-    if (!response.ok || String(data.responseStatus) !== '200') {
-      console.warn(`MyMemory (проверка): HTTP ${response.status}, details=${data.responseDetails ?? ''}`);
+    const raw = await response.text();
+    let data: { responseStatus?: number | string; quotaFinished?: boolean; responseDetails?: string } = {};
+    try {
+      data = JSON.parse(raw) as typeof data;
+    } catch {
+      // не JSON — покажем начало ответа
     }
-    if (!response.ok) return false;
-    // Исчерпанный дневной лимит MyMemory — не поломка, но и не рабочий доступ.
-    return !data.quotaFinished && String(data.responseStatus) === '200';
-  });
+    const latencyMs = Date.now() - started;
+    if (response.ok && !data.quotaFinished && String(data.responseStatus) === '200') {
+      return { ok: true, latencyMs, message: null };
+    }
+    const reason = data.responseDetails || raw.replace(/\s+/g, ' ').slice(0, 160);
+    return {
+      ok: false,
+      latencyMs,
+      message: `MyMemory: HTTP ${response.status}, status ${String(data.responseStatus ?? '-')}, quota ${String(data.quotaFinished ?? '-')}. ${reason}`,
+    };
+  } catch (error) {
+    return messages.unreachable('MyMemory', Date.now() - started, uiLang);
+  } finally {
+    clear();
+  }
 }
 
 export function checkM2M100(env: Env, uiLang: UiLanguage): Promise<ServiceCheck> {
