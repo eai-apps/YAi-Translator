@@ -1,0 +1,80 @@
+/** Карточка слова: артикль с цветом, значения, склонение, спряжение, примеры. */
+import { useTranslation } from 'react-i18next';
+import type { WordCard as WordCardData } from '../../../shared/types';
+import type { SpeechController } from '../../hooks/useSpeech';
+import { ARTICLE_COLORS } from '../../config';
+import { cn } from '../../lib/cn';
+import { partOfSpeechKey } from '../../lib/labels';
+import { Badge } from '../ui/Badge';
+import { SectionTitle } from '../ui/SectionTitle';
+import { ChipList } from './ChipList';
+import { ExamplesList } from './ExamplesList';
+import { MeaningList } from './MeaningList';
+import { NounSection } from './NounSection';
+import { PhraseList } from './PhraseList';
+import { VerbSection } from './VerbSection';
+
+interface WordCardProps {
+  card: WordCardData;
+  speech: SpeechController;
+}
+
+export function WordCard({ card, speech }: WordCardProps) {
+  const { t } = useTranslation();
+  const hasTranslation = card.meanings.length > 0;
+
+  return (
+    <article className="animate-fade-in">
+      <header className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
+        {card.article ? (
+          <span
+            className={cn('text-base font-bold uppercase tracking-wide', ARTICLE_COLORS[card.article])}
+          >
+            {card.article}
+          </span>
+        ) : null}
+        <h2 className="text-2xl font-semibold leading-tight tracking-tight sm:text-3xl">
+          {card.lemma}
+        </h2>
+        <Badge>{t(partOfSpeechKey(card.partOfSpeech))}</Badge>
+        {card.transcription ? (
+          <span className="text-sm text-muted">{card.transcription}</span>
+        ) : null}
+      </header>
+
+      {hasTranslation ? <MeaningList meanings={card.meanings} /> : null}
+
+      <NounSection article={card.article} plural={card.plural} declension={card.declension} />
+
+      {card.conjugation ? <VerbSection conjugation={card.conjugation} /> : null}
+
+      {card.governance.length > 0 ? (
+        <section className="mt-5">
+          <SectionTitle>{t('word.governance')}</SectionTitle>
+          <ChipList items={card.governance} />
+        </section>
+      ) : null}
+
+      <ExamplesList examples={card.examples} language={card.language} speech={speech} />
+
+      {card.synonyms.length > 0 || card.antonyms.length > 0 ? (
+        <div className="mt-6 grid gap-4 sm:grid-cols-2">
+          {card.synonyms.length > 0 ? (
+            <section>
+              <SectionTitle>{t('word.synonyms')}</SectionTitle>
+              <ChipList items={card.synonyms} />
+            </section>
+          ) : null}
+          {card.antonyms.length > 0 ? (
+            <section>
+              <SectionTitle>{t('word.antonyms')}</SectionTitle>
+              <ChipList items={card.antonyms} tone="danger" />
+            </section>
+          ) : null}
+        </div>
+      ) : null}
+
+      <PhraseList phrases={card.phrases} />
+    </article>
+  );
+}
