@@ -5,6 +5,7 @@
  */
 import type { ProviderId, SiteKeyProvider } from '../../../shared/types';
 import { CLASSIC } from '../config';
+import { isProviderEnabled } from '../settings';
 import type { Env } from '../env';
 import { hasAnyKey } from '../keypool';
 import { deeplTranslator } from './deepl';
@@ -36,6 +37,8 @@ function pooled(id: ProviderId): SiteKeyProvider | null {
 export async function isClassicConfigured(env: Env, id: ProviderId): Promise<boolean> {
   const translator = TRANSLATORS[id];
   if (!translator) return false;
+  // Выключен тумблером в админке — считаем, что сервиса нет.
+  if (!(await isProviderEnabled(env, id))) return false;
   const pool = pooled(id);
   if (pool) return hasAnyKey(env, pool);
   return translator.isConfigured(env);

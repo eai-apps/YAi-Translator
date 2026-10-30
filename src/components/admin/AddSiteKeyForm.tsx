@@ -12,7 +12,7 @@ export function AddSiteKeyForm({ keys }: { keys: ReturnType<typeof useAdminKeys>
   const { t } = useTranslation();
 
   return (
-    <Card className="p-4">
+    <Card className="p-4" id="add-site-key">
       <SectionTitle>{t('admin.keys.addTitle')}</SectionTitle>
       <div className="mt-2 space-y-2">
         <label className="block text-xs text-muted">

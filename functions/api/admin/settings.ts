@@ -12,7 +12,9 @@ import {
   clampDailyLimit,
   normalizeBanner,
   readBanner,
+  readDisabledProviders,
   readSetting,
+  writeDisabledProviders,
   SETTINGS_KEYS,
   writeSetting,
 } from '../../_lib/settings';
@@ -34,6 +36,7 @@ async function currentSettings(env: Env): Promise<AdminSettings> {
     dailyLimit: typeof stored === 'number' ? clampDailyLimit(stored) : null,
     defaultDailyLimit: LIMITS.freeRequestsPerDay,
     banner,
+    disabledProviders: [...(await readDisabledProviders(env))],
   };
 }
 
@@ -65,6 +68,12 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
       }
       await saveDailyLimit(env, value);
       await logAdminAction(env, admin, 'settings.limit', String(clampDailyLimit(value)));
+    }
+
+    // Тумблеры переводчиков: список выключенных.
+    if (body.disabledProviders !== undefined) {
+      const list = await writeDisabledProviders(env, body.disabledProviders);
+      await logAdminAction(env, admin, 'settings.providers', list.join(',') || 'all-on');
     }
 
     // Баннер-объявление на ru/de/en.

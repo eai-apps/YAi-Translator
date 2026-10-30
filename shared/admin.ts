@@ -64,6 +64,8 @@ export interface AdminSettings {
   dailyLimit: number | null;
   defaultDailyLimit: number;
   banner: { enabled: boolean; ru: string; de: string; en: string };
+  /** Переводчики и ИИ, выключенные тумблером (по умолчанию — MyMemory). */
+  disabledProviders: string[];
 }
 
 export interface AdminUserItem {

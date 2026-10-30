@@ -11,6 +11,7 @@
 import type { ProviderId } from '../../shared/types';
 import type { Env } from './env';
 import { ApiError } from './http';
+import { readDisabledProviders } from './settings';
 import { markExhausted, markInvalid, markUsed, usableKeys } from './keystate';
 import type { AiProvider, ProviderPrompt } from './providers/types';
 import { geminiProvider } from './providers/gemini';
@@ -81,8 +82,10 @@ async function buildAttempts(env: Env, userKeys: UserKeys): Promise<Attempt[]> {
 }
 
 export async function runJsonTask<T>(options: RunJsonOptions<T>): Promise<{ data: T; provider: ProviderId }> {
+  const disabled = await readDisabledProviders(options.env);
   const attempts = (await buildAttempts(options.env, options.userKeys)).filter(
-    (attempt) => !options.only || options.only.includes(attempt.id),
+    // Выключенный в админке ИИ не используется даже с ключом пользователя.
+    (attempt) => (!options.only || options.only.includes(attempt.id)) && !disabled.has(attempt.id),
   );
 
   for (const attempt of attempts) {

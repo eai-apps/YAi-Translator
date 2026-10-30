@@ -441,7 +441,10 @@
       "addFailed": "Schlüssel nicht gespeichert: Der Dienst hat ihn abgelehnt oder er ist unvollständig.",
       "removed": "Schlüssel gelöscht.",
       "noKeys": "Noch keine Schlüssel.",
-      "confirmRemove": "Diesen Schlüssel löschen?"
+      "confirmRemove": "Diesen Schlüssel löschen?",
+      "addMore": "+ Schlüssel hinzufügen",
+      "cloudflareOnly": "Löschen — in Cloudflare",
+      "cloudflareHint": "Dieser Schlüssel ist in Cloudflare hinterlegt (Settings → Variables and secrets) und kann nur dort gelöscht oder ersetzt werden. Neue Schlüssel fügen Sie am besten hier hinzu."
     },
     "settings": {
       "title": "Einstellungen der Seite",
@@ -481,6 +484,12 @@
       "empty": "Noch keine Benutzer.",
       "self": "das bist du",
       "noLog": "Noch keine Einträge."
+    },
+    "switches": {
+      "title": "Übersetzer: ein / aus",
+      "hint": "Ein ausgeschalteter Dienst wird nirgends auf der Website genutzt. MyMemory ist standardmäßig aus: Seine Datenbank füllen beliebige Nutzer, manchmal kommt Unsinn zurück.",
+      "ai": "KI",
+      "translator": "Übersetzer"
     }
   }
 }

@@ -14,7 +14,7 @@ import { APP_VERSION, LIMITS } from '../_lib/config';
 import type { Env } from '../_lib/env';
 import { errorResponse, getClientIp, getUiLanguage, jsonResponse } from '../_lib/http';
 import { hasAnyKey } from '../_lib/keypool';
-import { readDailyLimit } from '../_lib/settings';
+import { readDailyLimit, readDisabledProviders } from '../_lib/settings';
 import { registerVisitor } from '../_lib/stats';
 import { sha256Hex } from '../_lib/utils';
 
@@ -34,13 +34,14 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
       hasAnyKey(env, 'gemini'),
       hasAnyKey(env, 'groq'),
     ]);
+    const disabled = await readDisabledProviders(env);
     const providers: Record<ProviderId, boolean> = {
-      gemini: geminiKeys,
-      groq: groqKeys,
+      gemini: geminiKeys && !disabled.has('gemini'),
+      groq: groqKeys && !disabled.has('groq'),
       deepl: Boolean(classic.deepl),
       lara: Boolean(classic.lara),
-      workersai: Boolean(env.AI),
-      mymemory: true,
+      workersai: Boolean(env.AI) && !disabled.has('workersai'),
+      mymemory: Boolean(classic.mymemory),
       m2m100: Boolean(env.AI),
       microsoft: Boolean(classic.microsoft),
       google: Boolean(classic.google),

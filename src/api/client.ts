@@ -252,6 +252,7 @@ export const api = {
   adminSaveSettings(payload: {
     dailyLimit?: number | null;
     banner?: AdminSettings['banner'];
+    disabledProviders?: string[];
   }): Promise<AdminSettings> {
     return request<AdminSettings>('/api/admin/settings', { method: 'PUT', body: payload });
   },

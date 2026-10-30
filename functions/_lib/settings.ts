@@ -2,7 +2,7 @@
  * Настройки сайта из админки (таблица settings, ключ → JSON-значение).
  * Сейчас их две: дневной лимит бесплатных запросов ИИ и баннер-объявление на ru/de/en.
  */
-import type { UiLanguage } from '../../shared/types';
+import type { ProviderId, UiLanguage } from '../../shared/types';
 import { ADMIN, LIMITS } from './config';
 import type { Env } from './env';
 import { ensureSchema } from './schema';
@@ -11,7 +11,43 @@ import { describeError } from './utils';
 export const SETTINGS_KEYS = {
   dailyLimit: 'daily_limit',
   banner: 'banner',
+  disabledProviders: 'disabled_providers',
 } as const;
+
+/**
+ * Переводчики, выключенные тумблером в админке. MyMemory выключен по умолчанию:
+ * его база частично наполняется кем угодно, и иногда в ответ приходит мусор.
+ */
+export const DEFAULT_DISABLED_PROVIDERS: ProviderId[] = ['mymemory'];
+
+const ALL_PROVIDERS: ProviderId[] = [
+  'gemini', 'groq', 'workersai', 'deepl', 'lara', 'microsoft', 'google', 'mymemory', 'm2m100',
+];
+
+let disabledMemo: { at: number; value: Set<ProviderId> } | null = null;
+
+/** Выключенные переводчики (чтение из D1 не чаще раза в 30 секунд на сервер). */
+export async function readDisabledProviders(env: Env): Promise<Set<ProviderId>> {
+  if (disabledMemo && Date.now() - disabledMemo.at < 30_000) return disabledMemo.value;
+  const stored = await readSetting<string[]>(env, SETTINGS_KEYS.disabledProviders);
+  const list = Array.isArray(stored) ? stored : DEFAULT_DISABLED_PROVIDERS;
+  const value = new Set(list.filter((id): id is ProviderId => (ALL_PROVIDERS as string[]).includes(id)));
+  disabledMemo = { at: Date.now(), value };
+  return value;
+}
+
+export async function isProviderEnabled(env: Env, id: ProviderId): Promise<boolean> {
+  return !(await readDisabledProviders(env)).has(id);
+}
+
+export async function writeDisabledProviders(env: Env, list: unknown): Promise<ProviderId[]> {
+  const clean = Array.isArray(list)
+    ? [...new Set(list.filter((id): id is ProviderId => (ALL_PROVIDERS as string[]).includes(id as string)))]
+    : [];
+  await writeSetting(env, SETTINGS_KEYS.disabledProviders, clean);
+  disabledMemo = null;
+  return clean;
+}
 
 /** Баннер: включён + текст на трёх языках интерфейса. */
 export interface BannerSettings {

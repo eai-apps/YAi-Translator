@@ -12,6 +12,7 @@ import { Button } from '../ui/Button';
 import { Card } from '../ui/Card';
 import { SectionTitle } from '../ui/SectionTitle';
 import { AddSiteKeyForm } from './AddSiteKeyForm';
+import { ProviderSwitches } from './ProviderSwitches';
 
 const HEALTH_CLASSES: Record<KeyHealth, string> = {
   ok: 'bg-success/15 text-success',
@@ -54,20 +55,35 @@ export function AdminKeysTab({ onError }: { onError: (message: string | null) =>
         {keys.notice ? <p className="mt-2 text-sm text-ink">{keys.notice}</p> : null}
       </Card>
 
+      <ProviderSwitches onError={onError} />
+
       {SITE_KEY_PROVIDERS.map((current) => {
         const items = (keys.data?.keys ?? []).filter((item) => item.provider === current);
         return (
           <Card key={current} className="p-4">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <SectionTitle>{providerLabel(current)}</SectionTitle>
-              <Button
-                size="sm"
-                loading={keys.busy === `test-${current}`}
-                disabled={items.length === 0}
-                onClick={() => void keys.testProvider(current)}
-              >
-                {t('admin.keys.test')}
-              </Button>
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  onClick={() => {
+                    // Выбираем этот сервис в форме добавления и прокручиваем к ней.
+                    keys.setProvider(current);
+                    document.getElementById('add-site-key')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                  }}
+                >
+                  {t('admin.keys.addMore')}
+                </Button>
+                <Button
+                  size="sm"
+                  loading={keys.busy === `test-${current}`}
+                  disabled={items.length === 0}
+                  onClick={() => void keys.testProvider(current)}
+                >
+                  {t('admin.keys.test')}
+                </Button>
+              </div>
             </div>
 
             {items.length === 0 ? (
@@ -108,7 +124,11 @@ export function AdminKeysTab({ onError }: { onError: (message: string | null) =>
                       >
                         {t('admin.keys.remove')}
                       </Button>
-                    ) : null}
+                    ) : (
+                      <span className="ml-auto text-[11px] text-muted" title={t('admin.keys.cloudflareHint')}>
+                        {t('admin.keys.cloudflareOnly')}
+                      </span>
+                    )}
                   </li>
                 ))}
               </ul>

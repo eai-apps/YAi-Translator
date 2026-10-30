@@ -441,7 +441,10 @@
       "addFailed": "The key was not saved: the service rejected it or it is incomplete.",
       "removed": "The key was deleted.",
       "noKeys": "No keys yet.",
-      "confirmRemove": "Delete this key?"
+      "confirmRemove": "Delete this key?",
+      "addMore": "+ Add key",
+      "cloudflareOnly": "Delete in Cloudflare",
+      "cloudflareHint": "This key is set in Cloudflare (Settings → Variables and secrets) and can only be deleted or replaced there. New keys are easier to add here."
     },
     "settings": {
       "title": "Site settings",
@@ -481,6 +484,12 @@
       "empty": "No users yet.",
       "self": "this is you",
       "noLog": "No entries yet."
+    },
+    "switches": {
+      "title": "Translators: on / off",
+      "hint": "A switched-off service is not used anywhere on the site. MyMemory is off by default: anyone can write to its database, and sometimes it returns rubbish.",
+      "ai": "AI",
+      "translator": "Translator"
     }
   }
 }
