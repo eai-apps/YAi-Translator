@@ -4,6 +4,8 @@
  * Один запрос — не больше 500 байт, поэтому длинный текст режем по предложениям.
  */
 import { CLASSIC } from '../config';
+import { readCache, writeCache } from '../cache';
+import type { Env } from '../env';
 import { withTimeoutSignal } from '../utils';
 import type { ClassicTranslator } from './types';
 
@@ -12,6 +14,29 @@ interface MyMemoryResponse {
   responseStatus?: number | string;
   quotaFinished?: boolean;
   responseDetails?: string;
+}
+
+/**
+ * MyMemory считает лимит по IP. У Cloudflare один IP на тысячи чужих сайтов, поэтому общий лимит
+ * быстро кончается (ответ 429 «NEXT AVAILABLE IN 11 HOURS 28 MINUTES»). Тогда сервер «отдыхает»
+ * от MyMemory до указанного времени, а фронтенд переводит через MyMemory прямо из браузера
+ * пользователя (src/lib/myMemoryBrowser.ts) — у каждого человека свой лимит.
+ */
+const REST_KEY = 'mymemory:resting';
+
+async function isResting(env: Env): Promise<boolean> {
+  return (await readCache<boolean>(env, REST_KEY)) === true;
+}
+
+/** Из «NEXT AVAILABLE IN 11 HOURS 28 MINUTES 00 SECONDS» — секунды до сброса (по умолчанию 1 час). */
+export function restSecondsFrom(details: string): number {
+  const match = /IN\s+(\d+)\s+HOURS?\s+(\d+)\s+MINUTES?/i.exec(details);
+  if (!match) return 3600;
+  return Math.max(60, Number(match[1]) * 3600 + Number(match[2]) * 60);
+}
+
+async function startResting(env: Env, details: string): Promise<void> {
+  await writeCache(env, REST_KEY, 'translate', true, restSecondsFrom(details));
 }
 
 /** Делит текст на куски до maxBytes, стараясь резать по концу предложения. */
@@ -55,6 +80,7 @@ export const myMemoryTranslator: ClassicTranslator = {
 
   async translate({ env, text, sourceLang, targetLang, signal }) {
     if (sourceLang === 'auto') return null; // язык подставляет вызывающий код
+    if (await isResting(env)) return null; // общий лимит Cloudflare исчерпан — не ждём зря
     const chunks = splitIntoChunks(text, CLASSIC.myMemoryMaxBytes);
     if (chunks.length > CLASSIC.myMemoryMaxChunks) return null;
 
@@ -75,6 +101,9 @@ export const myMemoryTranslator: ClassicTranslator = {
         const translated = data.responseData?.translatedText?.trim();
         if (!response.ok || data.quotaFinished || String(data.responseStatus) !== '200' || !translated) {
           // Причину пишем в журнал Cloudflare, чтобы было видно, почему MyMemory отказал.
+          if (response.status === 429 || data.quotaFinished || String(data.responseStatus) === '429') {
+            await startResting(env, `${data.responseDetails ?? ''} ${translated ?? ''}`);
+          }
           console.warn(
             `MyMemory отказал: HTTP ${response.status}, status ${String(data.responseStatus)}, ` +
               `quotaFinished=${String(data.quotaFinished)}, details=${data.responseDetails ?? ''}`,
@@ -82,7 +111,10 @@ export const myMemoryTranslator: ClassicTranslator = {
           return null;
         }
         // При исчерпании лимита MyMemory иногда отвечает текстом-предупреждением.
-        if (/MYMEMORY WARNING|QUERY LENGTH LIMIT/i.test(translated)) return null;
+        if (/MYMEMORY WARNING|QUERY LENGTH LIMIT/i.test(translated)) {
+          if (/FREE TRANSLATIONS/i.test(translated)) await startResting(env, translated);
+          return null;
+        }
         parts.push(translated);
       } catch {
         return null;

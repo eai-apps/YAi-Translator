@@ -8,6 +8,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { CompareResponse, LanguageCode, ProviderId, SourceLanguage } from '../../shared/types';
 import { api } from '../api/client';
+import { translateWithMyMemoryInBrowser } from '../lib/myMemoryBrowser';
+import { guessLanguage } from '../../shared/detect';
 import { shouldAutoLoad } from '../components/translate/OthersPanel';
 
 interface Options {
@@ -44,6 +46,21 @@ export function useOthers({ text, sourceLang, targetLang, provider, autoEnabled 
         );
         if (controller.signal.aborted) return;
         setData(response);
+
+        // MyMemory не ответил серверу (общий лимит Cloudflare) — пробуем из браузера пользователя.
+        const silentMyMemory = response.items.find((item) => item.provider === 'mymemory' && !item.text);
+        const source = sourceLang === 'auto' ? guessLanguage(value) : sourceLang;
+        if (silentMyMemory && source) {
+          const translated = await translateWithMyMemoryInBrowser(value, source, targetLang, controller.signal);
+          if (translated && !controller.signal.aborted) {
+            setData({
+              ...response,
+              items: response.items.map((item) =>
+                item.provider === 'mymemory' ? { ...item, text: translated } : item,
+              ),
+            });
+          }
+        }
       } catch {
         if (controller.signal.aborted) return;
         setFailed(true);
