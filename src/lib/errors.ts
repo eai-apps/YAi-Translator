@@ -44,6 +44,14 @@ export function providerLabel(provider: string): string {
       return 'DeepL';
     case 'workersai':
       return 'Cloudflare AI';
+    case 'microsoft':
+      return 'Microsoft Translator';
+    case 'google':
+      return 'Google Translate';
+    case 'mymemory':
+      return 'MyMemory';
+    case 'm2m100':
+      return 'M2M100 (Cloudflare)';
     default:
       return provider;
   }

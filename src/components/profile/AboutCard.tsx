@@ -9,7 +9,16 @@ import { providerLabel } from '../../lib/errors';
 import { Card } from '../ui/Card';
 import { SectionTitle } from '../ui/SectionTitle';
 
-const PROVIDERS: ProviderId[] = ['gemini', 'groq', 'deepl', 'workersai'];
+const PROVIDERS: ProviderId[] = [
+  'gemini',
+  'groq',
+  'workersai',
+  'deepl',
+  'microsoft',
+  'google',
+  'mymemory',
+  'm2m100',
+];
 
 export function AboutCard() {
   const { t } = useTranslation();

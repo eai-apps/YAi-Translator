@@ -229,3 +229,22 @@ npx wrangler pages dev dist --port 8788
 5. **`wrangler.toml`**: блок D1 с нулевым ID закомментирован, иначе первый деплой на Cloudflare падает.
    Включим после создания базы.
 6. **PWA**: запросы `/api/*` исключены из офлайн-подмены страницы (`navigateFallbackDenylist`).
+
+---
+
+## Обычные переводчики без ИИ (30.10.2026, Claude)
+
+Добавлена папка `functions/_lib/classic/`: один файл на сервис.
+
+| Сервис | Ключ | Бесплатно |
+|---|---|---|
+| DeepL | `DEEPL_API_KEY` | 500 000 символов/мес |
+| Microsoft Translator | `MICROSOFT_TRANSLATOR_KEY` + `MICROSOFT_TRANSLATOR_REGION` | 2 млн символов/мес (Azure просит карту) |
+| Google Translate | `GOOGLE_TRANSLATE_KEY` | 500 000 символов/мес (Google Cloud просит карту) |
+| MyMemory | не нужен (`MYMEMORY_EMAIL` поднимает лимит) | 5 000 → 50 000 символов/день |
+| M2M100 (открытая модель Meta в Cloudflare) | не нужен | в пределах лимита Workers AI |
+
+Порядок в `/api/translate`: кэш → Gemini/Groq (с альтернативами) → DeepL → Microsoft → Google → MyMemory →
+Workers AI → M2M100. Обычные переводчики не тратят дневной лимит ИИ.
+Для одного слова, если ИИ исчерпан, фронтенд показывает простой перевод (`mode: 'classic'`) вместо окна лимита.
+Языки для сервисов без автоопределения угадываются в `classic/detect.ts`.

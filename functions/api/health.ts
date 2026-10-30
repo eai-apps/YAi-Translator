@@ -15,6 +15,10 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
       groq: Boolean(env.GROQ_API_KEY),
       deepl: Boolean(env.DEEPL_API_KEY),
       workersai: Boolean(env.AI),
+      mymemory: true,
+      m2m100: Boolean(env.AI),
+      microsoft: Boolean(env.MICROSOFT_TRANSLATOR_KEY),
+      google: Boolean(env.GOOGLE_TRANSLATE_KEY),
     },
     limits: {
       maxTextLength: LIMITS.maxTextLength,

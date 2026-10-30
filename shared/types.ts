@@ -10,7 +10,16 @@ export type { LanguageCode, UiLanguage };
 export type TaskKind = 'translate' | 'word' | 'explain' | 'check';
 
 /** Провайдер ИИ, который реально ответил. */
-export type ProviderId = 'gemini' | 'groq' | 'deepl' | 'workersai';
+/** ИИ: gemini, groq, workersai. Обычные переводчики: deepl, microsoft, google, mymemory, m2m100. */
+export type ProviderId =
+  | 'gemini'
+  | 'groq'
+  | 'deepl'
+  | 'workersai'
+  | 'microsoft'
+  | 'google'
+  | 'mymemory'
+  | 'm2m100';
 
 export type SourceLanguage = LanguageCode | 'auto';
 
@@ -39,6 +48,8 @@ export interface TranslateRequest {
   text: string;
   sourceLang: SourceLanguage;
   targetLang: LanguageCode;
+  /** 'classic' — только обычные переводчики без ИИ (быстрее, не тратит лимит ИИ). */
+  mode?: 'auto' | 'classic';
 }
 
 export interface AlternativeTranslation {

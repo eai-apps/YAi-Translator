@@ -52,3 +52,20 @@ export const WORKERS_AI = {
   timeoutMs: 25_000,
   maxOutputTokens: 4096,
 } as const;
+
+/**
+ * Обычные переводчики без ИИ — запасной путь, когда лимиты ИИ закончились.
+ * Порядок = приоритет. Сервис без ключа просто пропускается.
+ */
+export const CLASSIC = {
+  order: ['deepl', 'microsoft', 'google', 'mymemory', 'm2m100'] as const,
+  timeoutMs: 12_000,
+  microsoftUrl: 'https://api.cognitive.microsofttranslator.com/translate',
+  googleUrl: 'https://translation.googleapis.com/language/translate/v2',
+  myMemoryUrl: 'https://api.mymemory.translated.net/get',
+  /** MyMemory принимает до 500 байт за запрос; берём с запасом. */
+  myMemoryMaxBytes: 450,
+  /** Больше кусков не отправляем, чтобы не съесть дневной лимит MyMemory одним текстом. */
+  myMemoryMaxChunks: 8,
+  m2m100Model: '@cf/meta/m2m100-1.2b',
+} as const;

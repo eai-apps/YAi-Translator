@@ -7,6 +7,13 @@ export interface Env {
   GEMINI_API_KEY?: string;
   GROQ_API_KEY?: string;
   DEEPL_API_KEY?: string;
+  /** Microsoft Translator (Azure F0): ключ и регион ресурса, например westeurope. */
+  MICROSOFT_TRANSLATOR_KEY?: string;
+  MICROSOFT_TRANSLATOR_REGION?: string;
+  /** Google Cloud Translation API (Basic v2). */
+  GOOGLE_TRANSLATE_KEY?: string;
+  /** Почта для MyMemory: поднимает бесплатный лимит с 5 000 до 50 000 символов в день. */
+  MYMEMORY_EMAIL?: string;
 }
 
 /** Минимальный тип binding'а Workers AI, чтобы не зависеть от версии workers-types. */

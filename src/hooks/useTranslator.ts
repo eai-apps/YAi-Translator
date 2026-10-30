@@ -92,11 +92,23 @@ export function useTranslator(onLimitReached: () => void) {
       setError(null);
 
       try {
+        // Карточка слова требует ИИ. Если лимит ИИ закончился — переводим слово
+        // обычным переводчиком, чтобы человек всё равно получил ответ.
+        let wordResponse: WordResponse | null = null;
         if (isSingleWord(trimmed)) {
-          const response = await api.word(
-            { word: trimmed, sourceLang: source, targetLang: target },
-            controller.signal,
-          );
+          try {
+            wordResponse = await api.word(
+              { word: trimmed, sourceLang: source, targetLang: target },
+              controller.signal,
+            );
+          } catch (wordError) {
+            const code = toTranslatorError(wordError, '').code;
+            if (controller.signal.aborted || code !== 'LIMIT_REACHED') throw wordError;
+          }
+        }
+
+        if (wordResponse) {
+          const response = wordResponse;
           if (requestId !== requestRef.current) return;
           setResult({ kind: 'word', response });
           setHistoryId(
@@ -111,7 +123,12 @@ export function useTranslator(onLimitReached: () => void) {
           );
         } else {
           const response = await api.translate(
-            { text: trimmed, sourceLang: source, targetLang: target },
+            {
+              text: trimmed,
+              sourceLang: source,
+              targetLang: target,
+              mode: isSingleWord(trimmed) ? 'classic' : 'auto',
+            },
             controller.signal,
           );
           if (requestId !== requestRef.current) return;
