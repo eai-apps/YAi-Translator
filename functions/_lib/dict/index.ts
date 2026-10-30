@@ -97,6 +97,6 @@ export async function buildDictEntry(
  */
 export function dictCacheKey(word: string, sourceLang: LanguageCode, targetLang: LanguageCode): string {
   // PURGE_VERSION меняется при исправлении разбора источников — старый кэш тогда не мешает.
-  const purge = 'v2';
+  const purge = 'v3';
   return `dict|${purge}|${sourceLang}|${targetLang}|${word.trim().toLowerCase().replace(/\s+/g, ' ')}`;
 }

@@ -48,7 +48,8 @@ export async function lookupSynonyms(
   const own = data.synsets.filter((synset) =>
     (synset.terms ?? []).some((term) => termName(term).toLowerCase() === normalized),
   );
-  const ordered = [...own, ...data.synsets.filter((synset) => !own.includes(synset))];
+  // Только главное значение: у «Baum» второй набор — про графы в информатике, он путает.
+  const ordered = own.length > 0 ? own.slice(0, 1) : data.synsets.slice(0, 1);
 
   const result: string[] = [];
   const seen = new Set<string>([normalized]);
@@ -57,7 +58,7 @@ export async function lookupSynonyms(
     for (const term of synset.terms ?? []) {
       const name = termName(term);
       const lower = name.toLowerCase();
-      if (!name || seen.has(lower) || isWordForms(name) || name.length > 40) continue;
+      if (!name || seen.has(lower) || isWordForms(name) || name.length > 40 || name.includes(',')) continue;
       seen.add(lower);
       result.push(name);
       if (result.length >= DICT.maxSynonyms) break;
