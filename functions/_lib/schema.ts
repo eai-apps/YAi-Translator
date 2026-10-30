@@ -142,7 +142,12 @@ const STATEMENTS = [
   'CREATE INDEX IF NOT EXISTS idx_resources_lang ON resources (lang, category, sort)',
 ];
 
-let ready: Promise<void> | null = null;
+/**
+ * Только флаг «готово», а не общий Promise: в Cloudflare Workers обещание, начатое одним запросом,
+ * зависает навсегда, если тот запрос отменили (человек продолжил печатать). Все следующие запросы
+ * этого экземпляра ждали бы его вечно — так и «висел» перевод. Повторный прогон безопасен: IF NOT EXISTS.
+ */
+let schemaReady = false;
 
 /**
  * Выполняет batch по одному: в batch D1 одна ошибка портит весь набор,
@@ -160,12 +165,8 @@ async function runStatements(db: D1Database): Promise<void> {
   }
 }
 
-export function ensureSchema(env: Env): Promise<void> {
-  if (!env.DB) return Promise.resolve();
-  const db = env.DB;
-  ready ??= runStatements(db).catch((error: unknown) => {
-    ready = null; // попробуем снова при следующем запросе
-    throw error;
-  });
-  return ready;
+export async function ensureSchema(env: Env): Promise<void> {
+  if (!env.DB || schemaReady) return;
+  await runStatements(env.DB);
+  schemaReady = true;
 }
