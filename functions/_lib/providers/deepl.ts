@@ -34,7 +34,8 @@ export async function translateWithDeepL(
 
   const { signal: timeoutSignal, clear } = withTimeoutSignal(signal, DEEPL.timeoutMs);
   try {
-    const response = await fetch(DEEPL.url, {
+    const url = env.DEEPL_API_KEY.trim().endsWith(':fx') ? DEEPL.freeUrl : DEEPL.paidUrl;
+    const response = await fetch(url, {
       method: 'POST',
       // С ноября 2025 DeepL принимает ключ только в заголовке Authorization.
       headers: {

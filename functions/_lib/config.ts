@@ -87,7 +87,9 @@ export const GROQ = {
 } as const;
 
 export const DEEPL = {
-  url: 'https://api-free.deepl.com/v2/translate',
+  /** Бесплатные ключи (оканчиваются на «:fx») работают через api-free, остальные тарифы — через api. */
+  freeUrl: 'https://api-free.deepl.com/v2/translate',
+  paidUrl: 'https://api.deepl.com/v2/translate',
   timeoutMs: 15_000,
 } as const;
 

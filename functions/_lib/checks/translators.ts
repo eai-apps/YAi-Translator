@@ -31,7 +31,9 @@ async function probe(
 export function checkDeepL(env: Env, uiLang: UiLanguage): Promise<ServiceCheck> {
   if (!env.DEEPL_API_KEY) return Promise.resolve(messages.notConfigured(uiLang));
   return probe('DeepL', uiLang, async (signal) => {
-    const response = await fetch('https://api-free.deepl.com/v2/usage', {
+    // Бесплатный ключ (…:fx) — api-free, остальные тарифы DeepL — api.
+    const host = env.DEEPL_API_KEY!.trim().endsWith(':fx') ? 'api-free.deepl.com' : 'api.deepl.com';
+    const response = await fetch(`https://${host}/v2/usage`, {
       headers: { Authorization: `DeepL-Auth-Key ${env.DEEPL_API_KEY}` },
       signal,
     });
