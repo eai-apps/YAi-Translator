@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "vite",
     "dev:api": "wrangler pages dev dist --port 8788",
-    "icons": "node scripts/generate-icons.mjs",
+    "icons": "node scripts/render-icons.mjs",
     "typecheck": "tsc -p tsconfig.app.json --noEmit && tsc -p tsconfig.functions.json --noEmit",
     "build": "npm run typecheck && vite build",
     "preview": "npm run build && wrangler pages dev dist --port 8788",

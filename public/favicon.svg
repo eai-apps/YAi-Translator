@@ -1,10 +1,20 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
   <defs>
-    <linearGradient id="g" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#5b8cff" />
-      <stop offset="1" stop-color="#2f56d8" />
+    <linearGradient id="bg" x1="0" y1="0" x2="512" y2="512" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#4f7bff"/>
+      <stop offset="1" stop-color="#6d3df5"/>
+    </linearGradient>
+    <linearGradient id="spark" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffe08a"/>
+      <stop offset="1" stop-color="#ffb84d"/>
     </linearGradient>
   </defs>
-  <rect width="48" height="48" rx="13" fill="url(#g)" />
-  <path d="M13 13h5l6 9 6-9h5l-8.5 12.5V36h-5V25.5L13 13z" fill="#ffffff" />
+  <rect width="512" height="512" rx="116" fill="url(#bg)"/>
+  <!-- Y: главная буква -->
+  <path d="M100 124 L190 262 L280 124 M190 262 V404" fill="none" stroke="#ffffff" stroke-width="66" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- A: заглавная -->
+  <path d="M308 404 L352 262 L396 404 M324 356 H380" fill="none" stroke="#dbe3ff" stroke-width="30" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- i: маленькая, точка — искра ИИ -->
+  <path d="M440 318 V404" fill="none" stroke="#dbe3ff" stroke-width="30" stroke-linecap="round"/>
+  <path d="M440 234 C443 256 448 261 470 264 C448 267 443 272 440 294 C437 272 432 267 410 264 C432 261 437 256 440 234 Z" fill="url(#spark)"/>
 </svg>
