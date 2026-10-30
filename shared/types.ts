@@ -48,8 +48,32 @@ export interface TranslateRequest {
   text: string;
   sourceLang: SourceLanguage;
   targetLang: LanguageCode;
-  /** 'classic' — только обычные переводчики без ИИ (быстрее, не тратит лимит ИИ). */
-  mode?: 'auto' | 'classic';
+  /**
+   * 'classic' (по умолчанию) — обычные переводчики без ИИ; ИИ подключается, только если все они молчат.
+   * 'ai' — кнопка «Спросить у AI»: перевод ИИ с альтернативами.
+   */
+  mode?: 'classic' | 'ai';
+  /** Конкретный обычный переводчик, выбранный пользователем (иначе — по очереди). */
+  provider?: ProviderId;
+}
+
+/** Переводчики, которые пользователь может выбрать вручную. */
+export const CLASSIC_PROVIDERS = ['deepl', 'microsoft', 'google', 'mymemory', 'm2m100'] as const;
+export type ClassicProviderId = (typeof CLASSIC_PROVIDERS)[number];
+
+export interface CompareRequest {
+  text: string;
+  sourceLang: SourceLanguage;
+  targetLang: LanguageCode;
+}
+
+export interface CompareItem {
+  provider: ProviderId;
+  text: string | null;
+}
+
+export interface CompareResponse {
+  items: CompareItem[];
 }
 
 export interface AlternativeTranslation {
@@ -131,6 +155,11 @@ export interface WordCard {
   synonyms: string[];
   antonyms: string[];
   phrases: Phrase[];
+  /**
+   * Грамматические пояснения на языке интерфейса: возвратный ли глагол, отделяемая ли приставка,
+   * почему слова пишутся/стоят вместе, какой союз или предлог требуется.
+   */
+  grammarNotes: string[];
 }
 
 export interface WordResponse {

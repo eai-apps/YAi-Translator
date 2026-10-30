@@ -5,7 +5,9 @@
 
 export { LANGUAGES, LANGUAGE_CODES, getLanguage, isLanguageCode, isUiLanguage } from '../../shared/languages';
 
-export const APP_VERSION = '0.1.0';
+import { CLASSIC_PROVIDERS } from '../../shared/types';
+
+export const APP_VERSION = '0.2.0';
 
 export const LIMITS = {
   /** Максимальная длина текста для перевода и разбора. */
@@ -16,12 +18,16 @@ export const LIMITS = {
   freeRequestsPerDay: 40,
   /** Срок жизни кэша ответов (30 дней). */
   cacheTtlSeconds: 60 * 60 * 24 * 30,
+  /** Карточки слов почти не меняются — храним год: каждое слово стоит ИИ один запрос на всех. */
+  wordCacheTtlSeconds: 60 * 60 * 24 * 365,
+  /** Карточка строится для 1–3 слов («aufstehen», «sich freuen auf»). */
+  maxWordsForCard: 3,
   /** Сколько последних ответов держать в кэше (чистка при переполнении не нужна, есть TTL). */
   maxCachedPayloadBytes: 120_000,
 } as const;
 
 /** Версия промптов: меняется вместе с prompts.ts и автоматически сбрасывает кэш. */
-export const PROMPT_VERSION = '1';
+export const PROMPT_VERSION = '2';
 
 export const GEMINI = {
   baseUrl: 'https://generativelanguage.googleapis.com/v1beta/models',
@@ -58,7 +64,7 @@ export const WORKERS_AI = {
  * Порядок = приоритет. Сервис без ключа просто пропускается.
  */
 export const CLASSIC = {
-  order: ['deepl', 'microsoft', 'google', 'mymemory', 'm2m100'] as const,
+  order: CLASSIC_PROVIDERS,
   timeoutMs: 12_000,
   microsoftUrl: 'https://api.cognitive.microsofttranslator.com/translate',
   googleUrl: 'https://translation.googleapis.com/language/translate/v2',

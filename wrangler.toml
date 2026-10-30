@@ -4,12 +4,11 @@ compatibility_date = "2026-10-30"
 pages_build_output_dir = "dist"
 
 # База данных D1: кэш переводов и счётчик дневных запросов.
-# Пока блок закомментирован: сайт работает и без базы (без кэша и без дневного лимита).
-# Когда база будет создана в Cloudflare, Claude вставит её database_id и уберёт решётки.
-# [[d1_databases]]
-# binding = "DB"
-# database_name = "yai-translator-db"
-# database_id = "ВСТАВИТЬ_ID_БАЗЫ"
+# Таблицы создаются автоматически при первом запросе (functions/_lib/schema.ts).
+[[d1_databases]]
+binding = "DB"
+database_name = "yai-translator-db"
+database_id = "d6240c11-423a-4c33-b1a3-ea829b98e45c"
 
 # Последний запасной провайдер — бесплатные Cloudflare Workers AI.
 # ВАЖНО: AI доступен только на сайте Cloudflare, поэтому `npm run dev:api`

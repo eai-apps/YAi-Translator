@@ -21,6 +21,11 @@ const TRANSLATORS: Record<string, ClassicTranslator> = {
   m2m100: m2m100Translator,
 };
 
+/** Настроен ли конкретный переводчик (есть ключ или binding). */
+export function isClassicConfigured(env: Env, id: ProviderId): boolean {
+  return TRANSLATORS[id]?.isConfigured(env) ?? false;
+}
+
 /** Какие обычные переводчики сейчас настроены (для /api/health). */
 export function configuredClassic(env: Env): Partial<Record<ProviderId, boolean>> {
   const result: Partial<Record<ProviderId, boolean>> = {};

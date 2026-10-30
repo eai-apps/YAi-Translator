@@ -33,6 +33,11 @@ export function errorMessageKey(code: ClientErrorCode): string {
   }
 }
 
+/** Ответил ли ИИ (а не обычный переводчик). */
+export function isAiProvider(provider: string): boolean {
+  return provider === 'gemini' || provider === 'groq' || provider === 'workersai';
+}
+
 /** Названия провайдеров для бейджа «Перевод: …». */
 export function providerLabel(provider: string): string {
   switch (provider) {

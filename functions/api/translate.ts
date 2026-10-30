@@ -1,10 +1,13 @@
 /**
  * POST /api/translate — перевод фразы или текста.
- * Порядок: кэш → ИИ (ключ пользователя, Gemini, Groq) с альтернативами →
- * обычные переводчики (DeepL, Microsoft, Google, MyMemory) → Workers AI → M2M100.
- * Обычные переводчики не тратят дневной лимит ИИ.
+ *
+ * mode = 'classic' (по умолчанию): кэш → обычные переводчики без ИИ
+ *   (DeepL → Microsoft → Google → MyMemory → M2M100). ИИ — только если все они молчат.
+ * mode = 'ai' (кнопка «Спросить у AI»): кэш → ключ пользователя → Gemini → Groq → Workers AI,
+ *   с альтернативами в разных стилях. На общих ключах действует дневной лимит.
  */
-import type { TranslateResponse } from '../../shared/types';
+import { CLASSIC_PROVIDERS } from '../../shared/types';
+import type { ClassicProviderId, LanguageCode, SourceLanguage, TranslateResponse } from '../../shared/types';
 import type { Env } from '../_lib/env';
 import { buildCacheKey, requireLanguage, requireSourceLanguage, requireText } from '../_lib/request';
 import { readCache, writeCache } from '../_lib/cache';
@@ -12,8 +15,49 @@ import { ApiError, errorResponse, getClientIp, getUiLanguage, getUserKeys, jsonR
 import { createLimitGuard } from '../_lib/usage';
 import { buildTranslatePrompt } from '../_lib/prompts';
 import { runJsonTask } from '../_lib/router';
+import type { UserKeys } from '../_lib/router';
 import { translateClassic } from '../_lib/classic';
 import { validateTranslate } from '../_lib/validate';
+
+interface Job {
+  env: Env;
+  text: string;
+  sourceLang: SourceLanguage;
+  targetLang: LanguageCode;
+  uiLang: ReturnType<typeof getUiLanguage>;
+  userKeys: UserKeys;
+  signal: AbortSignal;
+  limitGuard: () => Promise<void>;
+}
+
+/** Обычные переводчики: выбранный пользователем или все по очереди. */
+async function runClassic(job: Job, only: ClassicProviderId | null): Promise<TranslateResponse | null> {
+  const classic = await translateClassic(
+    { env: job.env, text: job.text, sourceLang: job.sourceLang, targetLang: job.targetLang, signal: job.signal },
+    only ? [only] : CLASSIC_PROVIDERS,
+  );
+  if (!classic) return null;
+  return {
+    translatedText: classic.text,
+    alternatives: [],
+    detectedLang: classic.detectedLang,
+    provider: classic.provider,
+    cached: false,
+  };
+}
+
+/** ИИ с альтернативами. Ошибку LIMIT_REACHED пробрасываем — фронтенд покажет окно ключа. */
+async function runAi(job: Job): Promise<TranslateResponse> {
+  const { data, provider } = await runJsonTask({
+    env: job.env,
+    prompt: buildTranslatePrompt(job),
+    userKeys: job.userKeys,
+    signal: job.signal,
+    beforeShared: job.limitGuard,
+    validate: validateTranslate,
+  });
+  return { ...data, provider, cached: false };
+}
 
 export const onRequestPost: PagesFunction<Env> = async (context) => {
   const uiLang = getUiLanguage(context.request);
@@ -22,20 +66,29 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     const text = requireText(body.text);
     const sourceLang = requireSourceLanguage(body.sourceLang);
     const targetLang = requireLanguage(body.targetLang);
-    const classicOnly = body.mode === 'classic';
+    const mode = body.mode === 'ai' ? 'ai' : 'classic';
+    const chosen = CLASSIC_PROVIDERS.find((id) => id === body.provider) ?? null;
 
     if (sourceLang !== 'auto' && sourceLang === targetLang) {
       throw new ApiError('VALIDATION', 400);
     }
 
     const env = context.env;
-    const signal = context.request.signal;
-    const userKeys = getUserKeys(context.request);
+    const job: Job = {
+      env,
+      text,
+      sourceLang,
+      targetLang,
+      uiLang,
+      userKeys: getUserKeys(context.request),
+      signal: context.request.signal,
+      limitGuard: createLimitGuard(env, getClientIp(context.request)),
+    };
 
-    // 1. Кэш: одинаковый запрос не тратит лимиты. Обычный режим кэшируется отдельно.
+    // Кэш отдельно для каждого режима и выбранного переводчика.
     const cacheKey = await buildCacheKey({
       kind: 'translate',
-      text: classicOnly ? `classic|${text}` : text,
+      text: `${mode}|${chosen ?? 'any'}|${text}`,
       sourceLang,
       targetLang,
       uiLang,
@@ -43,79 +96,15 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     const cached = await readCache<TranslateResponse>(env, cacheKey);
     if (cached) return jsonResponse({ ...cached, cached: true });
 
-    // Дневной лимит считается, только когда дело доходит до общих ключей ИИ.
-    const limitGuard = createLimitGuard(env, getClientIp(context.request));
-    const prompt = buildTranslatePrompt({ text, sourceLang, targetLang, uiLang });
-    let result: TranslateResponse | null = null;
-
-    // 2. ИИ с альтернативами: ключ пользователя, затем общие Gemini и Groq.
-    if (!classicOnly) {
-      try {
-        const { data, provider } = await runJsonTask({
-          env,
-          prompt,
-          userKeys,
-          signal,
-          beforeShared: limitGuard,
-          validate: validateTranslate,
-          only: ['gemini', 'groq'],
-        });
-        result = { ...data, provider, cached: false };
-      } catch {
-        // Лимит ИИ или сбой — ниже работают обычные переводчики.
-      }
+    let result: TranslateResponse | null;
+    if (mode === 'ai') {
+      result = await runAi(job);
+    } else {
+      result = await runClassic(job, chosen);
+      // Выбранный переводчик не ответил — пробуем остальные, затем ИИ как последний шанс.
+      if (!result && chosen) result = await runClassic(job, null);
+      if (!result) result = await runAi(job);
     }
-
-    // 3. Обычные переводчики без ИИ — только основной перевод, без альтернатив.
-    if (!result) {
-      const classic = await translateClassic(
-        { env, text, sourceLang, targetLang, signal },
-        ['deepl', 'microsoft', 'google', 'mymemory'],
-      );
-      if (classic) {
-        result = {
-          translatedText: classic.text,
-          alternatives: [],
-          detectedLang: classic.detectedLang,
-          provider: classic.provider,
-          cached: false,
-        };
-      }
-    }
-
-    // 4. Workers AI (чат-модель с альтернативами), если лимит ИИ ещё не исчерпан.
-    if (!result && !classicOnly) {
-      try {
-        const { data, provider } = await runJsonTask({
-          env,
-          prompt,
-          userKeys: {},
-          signal,
-          beforeShared: limitGuard,
-          validate: validateTranslate,
-          only: ['workersai'],
-        });
-        result = { ...data, provider, cached: false };
-      } catch {
-        // Ниже — последний вариант.
-      }
-    }
-
-    // 5. M2M100 — открытая модель перевода внутри Cloudflare, последний запасной вариант.
-    if (!result) {
-      const classic = await translateClassic({ env, text, sourceLang, targetLang, signal }, ['m2m100']);
-      if (classic) {
-        result = {
-          translatedText: classic.text,
-          alternatives: [],
-          detectedLang: classic.detectedLang,
-          provider: classic.provider,
-          cached: false,
-        };
-      }
-    }
-
-    if (!result) throw new ApiError('LIMIT_REACHED', 429);
 
     await writeCache(env, cacheKey, 'translate', result);
     return jsonResponse(result);

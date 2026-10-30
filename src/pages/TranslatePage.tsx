@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import type { CheckResponse, ExplainResponse, LanguageCode, SourceLanguage } from '../../shared/types';
+import type { CheckResponse, CompareResponse, ExplainResponse, LanguageCode, SourceLanguage } from '../../shared/types';
 import { isLanguageCode } from '../../shared/languages';
 import { api } from '../api/client';
 import { toTranslatorError } from '../lib/errors';
@@ -18,6 +18,8 @@ import { SourcePanel } from '../components/translate/SourcePanel';
 import { ResultPanel } from '../components/translate/ResultPanel';
 import { ExplanationPanel } from '../components/translate/ExplanationPanel';
 import { CheckPanel } from '../components/translate/CheckPanel';
+import { ComparePanel } from '../components/translate/ComparePanel';
+import { WordPanel } from '../components/word/WordPanel';
 import { LimitDialog } from '../components/limit/LimitDialog';
 
 interface PanelState<T> {
@@ -41,6 +43,8 @@ export default function TranslatePage() {
   const [limitOpen, setLimitOpen] = useState(false);
   const [explain, setExplain] = useState<PanelState<ExplainResponse>>(closedPanel);
   const [check, setCheck] = useState<PanelState<CheckResponse>>(closedPanel);
+  const [compare, setCompare] = useState<PanelState<CompareResponse>>(closedPanel);
+  const compareAbort = useRef<AbortController | null>(null);
   const [searchParams, setSearchParams] = useSearchParams();
 
   const explainAbort = useRef<AbortController | null>(null);
@@ -70,14 +74,17 @@ export default function TranslatePage() {
   useEffect(() => {
     explainAbort.current?.abort();
     checkAbort.current?.abort();
+    compareAbort.current?.abort();
     setExplain(closedPanel());
     setCheck(closedPanel());
+    setCompare(closedPanel());
   }, [text, sourceLang, targetLang]);
 
   useEffect(() => {
     return () => {
       explainAbort.current?.abort();
       checkAbort.current?.abort();
+      compareAbort.current?.abort();
     };
   }, []);
 
@@ -128,6 +135,26 @@ export default function TranslatePage() {
     })();
   }, [text, uiLanguage, t]);
 
+  const runCompare = useCallback(() => {
+    const value = text.trim();
+    if (!value) return;
+    compareAbort.current?.abort();
+    const controller = new AbortController();
+    compareAbort.current = controller;
+    setCompare({ open: true, loading: true, data: null, error: null });
+
+    void (async () => {
+      try {
+        const data = await api.compare({ text: value, sourceLang, targetLang }, controller.signal);
+        if (controller.signal.aborted) return;
+        setCompare({ open: true, loading: false, data, error: null });
+      } catch (caught) {
+        if (controller.signal.aborted) return;
+        setCompare({ open: true, loading: false, data: null, error: toTranslatorError(caught, t('errors.unknown')) });
+      }
+    })();
+  }, [text, sourceLang, targetLang, t]);
+
   const currentFavorite = translator.historyId
     ? items.find((item) => item.id === translator.historyId)?.favorite ?? false
     : false;
@@ -162,15 +189,42 @@ export default function TranslatePage() {
           isFavorite={currentFavorite}
           canUseTools={translator.text.trim().length > 0}
           speech={speech}
+          providerChoice={translator.providerChoice}
+          aiLoading={translator.aiLoading}
+          onProviderChange={translator.setProviderChoice}
+          onAskAi={() => void translator.askAi()}
           onRetry={translator.retry}
           onOpenLimit={() => setLimitOpen(true)}
           onExplain={runExplain}
           onCheck={runCheck}
+          onCompare={runCompare}
           onToggleFavorite={() => {
             if (translator.historyId) toggleFavorite(translator.historyId);
           }}
         />
       </div>
+
+      <WordPanel
+        word={translator.word}
+        speech={speech}
+        onRetry={translator.retryWord}
+        onOpenLimit={() => setLimitOpen(true)}
+      />
+
+      {compare.open ? (
+        <ComparePanel
+          data={compare.data}
+          loading={compare.loading}
+          error={compare.error}
+          targetLang={targetLang}
+          speech={speech}
+          onClose={() => {
+            compareAbort.current?.abort();
+            setCompare(closedPanel());
+          }}
+          onRetry={runCompare}
+        />
+      ) : null}
 
       {explain.open ? (
         <ExplanationPanel

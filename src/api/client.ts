@@ -4,6 +4,8 @@ import type {
   ApiErrorCode,
   CheckRequest,
   CheckResponse,
+  CompareRequest,
+  CompareResponse,
   ExplainRequest,
   ExplainResponse,
   HealthResponse,
@@ -97,6 +99,10 @@ export const api = {
 
   check(payload: CheckRequest, signal?: AbortSignal): Promise<CheckResponse> {
     return request<CheckResponse>('/api/check', { method: 'POST', body: payload }, signal);
+  },
+
+  compare(payload: CompareRequest, signal?: AbortSignal): Promise<CompareResponse> {
+    return request<CompareResponse>('/api/compare', { method: 'POST', body: payload }, signal);
   },
 
   health(signal?: AbortSignal): Promise<HealthResponse> {

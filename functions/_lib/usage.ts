@@ -3,6 +3,7 @@ import { LIMITS } from './config';
 import type { Env } from './env';
 import { ApiError } from './http';
 import { describeError, sha256Hex } from './utils';
+import { ensureSchema } from './schema';
 
 /** Проверяет лимит и сразу увеличивает счётчик на единицу. */
 export async function enforceDailyLimit(env: Env, clientIp: string): Promise<void> {
@@ -12,6 +13,7 @@ export async function enforceDailyLimit(env: Env, clientIp: string): Promise<voi
   const day = new Date().toISOString().slice(0, 10);
 
   try {
+    await ensureSchema(env);
     const row = await env.DB.prepare('SELECT requests FROM usage WHERE ip_hash = ? AND day = ?')
       .bind(ipHash, day)
       .first<{ requests: number }>();

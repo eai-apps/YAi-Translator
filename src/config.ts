@@ -5,7 +5,7 @@
 export const API_BASE = (import.meta.env.VITE_API_BASE ?? '').replace(/\/+$/, '');
 
 /** Версия показывается в профиле; совпадает с package.json. */
-export const APP_VERSION = '0.1.0';
+export const APP_VERSION = '0.2.0';
 
 export const STORAGE_KEYS = {
   theme: 'yai.theme',
@@ -14,6 +14,7 @@ export const STORAGE_KEYS = {
   sourceLang: 'yai.sourceLang',
   targetLang: 'yai.targetLang',
   history: 'yai.history',
+  provider: 'yai.provider',
 } as const;
 
 /** Задержка перевода после окончания ввода. */

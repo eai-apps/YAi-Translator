@@ -62,13 +62,13 @@ export function validateWordCard(raw: unknown): WordCore | null {
         }
       : null;
 
-  const examples = asArray(source.examples, 8)
+  const examples = asArray(source.examples, 9)
     .map((item): WordExample | null => {
       if (!isRecord(item)) return null;
       const text = asText(item.text, 400);
       if (!text) return null;
       return {
-        level: asEnum(item.level, LEVELS, 'A1'),
+        level: asEnum(item.level, LEVELS, 'A2'),
         text,
         translation: asText(item.translation, 400),
       };
@@ -101,5 +101,8 @@ export function validateWordCard(raw: unknown): WordCore | null {
     synonyms: asStringList(source.synonyms, 8),
     antonyms: asStringList(source.antonyms, 8),
     phrases,
+    grammarNotes: asArray(source.grammarNotes, 6)
+      .map((item) => asText(item, 400))
+      .filter((item) => item.length > 0),
   };
 }

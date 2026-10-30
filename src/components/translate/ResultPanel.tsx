@@ -1,11 +1,10 @@
-/** Правая колонка: перевод, карточка слова, ошибки и действия. */
+/** Правая колонка: перевод, выбор переводчика, ошибки и действия («Спросить у AI», «Разобрать»…). */
 import { useTranslation } from 'react-i18next';
-import type { LanguageCode, SourceLanguage } from '../../../shared/types';
+import type { LanguageCode, SourceLanguage, TranslateResponse } from '../../../shared/types';
 import { getLanguage } from '../../../shared/languages';
-import type { TranslationResult, TranslatorError } from '../../hooks/useTranslator';
-import { summarizeCard } from '../../hooks/useTranslator';
+import type { ProviderChoice, TranslatorError } from '../../hooks/useTranslator';
 import type { SpeechController } from '../../hooks/useSpeech';
-import { errorMessageKey, providerLabel } from '../../lib/errors';
+import { errorMessageKey, isAiProvider, providerLabel } from '../../lib/errors';
 import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
 import { Card } from '../ui/Card';
@@ -13,12 +12,12 @@ import { CopyButton } from '../ui/CopyButton';
 import { IconButton } from '../ui/IconButton';
 import { Spinner } from '../ui/Spinner';
 import { SpeakButton } from '../ui/SpeakButton';
-import { IconAlert, IconCheck, IconSparkles, IconStar, IconTranslate } from '../layout/icons';
-import { WordCard } from '../word/WordCard';
+import { IconAlert, IconCheck, IconSearch, IconSparkles, IconStar, IconTranslate } from '../layout/icons';
 import { AlternativesList } from './AlternativesList';
+import { ProviderSelect } from './ProviderSelect';
 
 interface ResultPanelProps {
-  result: TranslationResult | null;
+  result: TranslateResponse | null;
   loading: boolean;
   error: TranslatorError | null;
   sourceLang: SourceLanguage;
@@ -27,29 +26,20 @@ interface ResultPanelProps {
   isFavorite: boolean;
   canUseTools: boolean;
   speech: SpeechController;
+  providerChoice: ProviderChoice;
+  aiLoading: boolean;
+  onProviderChange: (next: ProviderChoice) => void;
+  onAskAi: () => void;
   onRetry: () => void;
   onOpenLimit: () => void;
   onExplain: () => void;
   onCheck: () => void;
+  onCompare: () => void;
   onToggleFavorite: () => void;
 }
 
-export function ResultPanel({
-  result,
-  loading,
-  error,
-  sourceLang,
-  targetLang,
-  detectedLang,
-  isFavorite,
-  canUseTools,
-  speech,
-  onRetry,
-  onOpenLimit,
-  onExplain,
-  onCheck,
-  onToggleFavorite,
-}: ResultPanelProps) {
+export function ResultPanel(props: ResultPanelProps) {
+  const { result, loading, error, sourceLang, targetLang, detectedLang, speech } = props;
   const { t } = useTranslation();
 
   const sourceName =
@@ -59,12 +49,8 @@ export function ResultPanel({
         : t('languages.auto')
       : getLanguage(sourceLang)?.nativeName ?? sourceLang;
   const targetName = getLanguage(targetLang)?.nativeName ?? targetLang;
-
-  const copyValue = result
-    ? result.kind === 'text'
-      ? result.response.translatedText
-      : summarizeCard(result.response.card)
-    : '';
+  const copyValue = result?.translatedText ?? '';
+  const answeredByAi = result ? isAiProvider(result.provider) : false;
 
   return (
     <Card className="flex min-h-[320px] flex-col p-4 sm:p-5">
@@ -78,9 +64,11 @@ export function ResultPanel({
               {t('translate.detected', { language: getLanguage(detectedLang)?.nativeName ?? detectedLang })}
             </Badge>
           ) : null}
-          {result?.kind === 'word' ? <Badge>{t('translate.singleWordHint')}</Badge> : null}
         </div>
-        {loading ? <Spinner className="text-muted" /> : null}
+        <div className="flex items-center gap-2">
+          {loading ? <Spinner className="text-muted" /> : null}
+          <ProviderSelect value={props.providerChoice} onChange={props.onProviderChange} />
+        </div>
       </div>
 
       <div className="mt-2 flex-1" aria-live="polite">
@@ -92,12 +80,12 @@ export function ResultPanel({
             </div>
             <div className="flex flex-wrap gap-2">
               {error.code !== 'VALIDATION' ? (
-                <Button size="sm" onClick={onRetry}>
+                <Button size="sm" onClick={props.onRetry}>
                   {t('common.retry')}
                 </Button>
               ) : null}
               {error.code === 'LIMIT_REACHED' ? (
-                <Button size="sm" variant="primary" onClick={onOpenLimit}>
+                <Button size="sm" variant="primary" onClick={props.onOpenLimit}>
                   {t('limit.title')}
                 </Button>
               ) : null}
@@ -118,18 +106,12 @@ export function ResultPanel({
               <p className="max-w-xs text-sm leading-relaxed text-muted">{t('translate.emptyText')}</p>
             </div>
           )
-        ) : result.kind === 'word' ? (
-          <WordCard card={result.response.card} speech={speech} />
         ) : (
           <>
             <p className="whitespace-pre-wrap break-words text-lg leading-relaxed sm:text-xl">
-              {result.response.translatedText}
+              {result.translatedText}
             </p>
-            <AlternativesList
-              alternatives={result.response.alternatives}
-              targetLang={targetLang}
-              speech={speech}
-            />
+            <AlternativesList alternatives={result.alternatives} targetLang={targetLang} speech={speech} />
           </>
         )}
       </div>
@@ -138,45 +120,37 @@ export function ResultPanel({
         <div className="mt-4 border-t border-line pt-3">
           <div className="flex flex-wrap items-center gap-2">
             <CopyButton text={copyValue} label={t('translate.copyResult')} />
-            <SpeakButton
-              text={copyValue}
-              language={targetLang}
-              id="result"
-              speech={speech}
-              label={t('translate.speakResult')}
-            />
+            <SpeakButton text={copyValue} language={targetLang} id="result" speech={speech} label={t('translate.speakResult')} />
             <IconButton
-              label={isFavorite ? t('translate.favoriteRemove') : t('translate.favoriteAdd')}
-              icon={<IconStar className="h-[18px] w-[18px]" filled={isFavorite} />}
-              active={isFavorite}
-              onClick={onToggleFavorite}
+              label={props.isFavorite ? t('translate.favoriteRemove') : t('translate.favoriteAdd')}
+              icon={<IconStar className="h-[18px] w-[18px]" filled={props.isFavorite} />}
+              active={props.isFavorite}
+              onClick={props.onToggleFavorite}
             />
-            {result.kind === 'text' ? (
-              <>
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  icon={<IconSparkles className="h-4 w-4" />}
-                  onClick={onExplain}
-                  disabled={!canUseTools}
-                >
-                  {t('translate.explain')}
-                </Button>
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  icon={<IconCheck className="h-4 w-4" />}
-                  onClick={onCheck}
-                  disabled={!canUseTools}
-                >
-                  {t('translate.check')}
-                </Button>
-              </>
+            {!answeredByAi ? (
+              <Button
+                size="sm"
+                variant="primary"
+                icon={<IconSparkles className="h-4 w-4" />}
+                loading={props.aiLoading}
+                onClick={props.onAskAi}
+              >
+                {t('translate.askAi')}
+              </Button>
             ) : null}
+            <Button size="sm" variant="secondary" icon={<IconSparkles className="h-4 w-4" />} onClick={props.onExplain} disabled={!props.canUseTools}>
+              {t('translate.explain')}
+            </Button>
+            <Button size="sm" variant="secondary" icon={<IconSearch className="h-4 w-4" />} onClick={props.onCompare} disabled={!props.canUseTools}>
+              {t('translate.compare')}
+            </Button>
+            <Button size="sm" variant="secondary" icon={<IconCheck className="h-4 w-4" />} onClick={props.onCheck} disabled={!props.canUseTools}>
+              {t('translate.check')}
+            </Button>
           </div>
           <p className="mt-2 text-[11px] text-muted">
-            {t('translate.provider', { provider: providerLabel(result.response.provider) })}
-            {result.response.cached ? ` · ${t('translate.fromCache')}` : ''}
+            {t('translate.provider', { provider: providerLabel(result.provider) })}
+            {result.cached ? ` · ${t('translate.fromCache')}` : ''}
           </p>
         </div>
       ) : null}

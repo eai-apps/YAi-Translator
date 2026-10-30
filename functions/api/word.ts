@@ -43,7 +43,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     });
 
     const result: WordResponse = { card: data, provider, cached: false };
-    await writeCache(env, cacheKey, 'word', result);
+    await writeCache(env, cacheKey, 'word', result, LIMITS.wordCacheTtlSeconds);
     return jsonResponse(result);
   } catch (error) {
     return errorResponse(error, uiLang);

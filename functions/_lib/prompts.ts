@@ -73,7 +73,9 @@ export function buildWordPrompt(input: {
 }): ProviderPrompt {
   const { word, sourceLang, targetLang, uiLang } = input;
   const system = `You are YAi Dictionary, a German language dictionary and tutor for learners.
-Analyse the word; ${sourceDescription(sourceLang, uiLang)}; translate its meanings into ${languageName(targetLang, uiLang)}.
+Analyse the word or short word combination (1-3 words); ${sourceDescription(sourceLang, uiLang)}; translate its meanings into ${languageName(targetLang, uiLang)}.
+Work like a full dictionary entry (Yandex Translator, Leo, Duden): the learner must not need any other dictionary.
+The learner studies German. If the input is NOT German but the target language is German (for example Russian "стол" → German), build the grammar part of the entry for the main German equivalent: "lemma", "article", "plural", "declension", "conjugation", "governance", "examples", "synonyms", "antonyms", "phrases" and "grammarNotes" describe the German word, "language" is "de"; "meanings" still list the German translations of the input for each sense; example translations go into the input language.
 
 Rules:
 - "lemma": dictionary form (for German nouns: the noun without article, capitalised).
@@ -86,14 +88,15 @@ Rules:
 - "declension": for German nouns and adjectives only, exactly 4 rows in this order: nominative, accusative, dative, genitive, with "singular" and "plural" forms including article where natural; otherwise null.
 - "conjugation": German verbs only. "praesens" and "praeteritum" each contain 6 forms in order: ich, du, er/sie/es, wir, ihr, sie/Sie. "perfekt" is the full perfect form, e.g. "hat gemacht". "auxiliary" is "haben" or "sein". Otherwise null.
 - "governance": for German verbs/adjectives/nouns: prepositions and cases they require, e.g. "warten auf + Akkusativ". Empty array if none.
-- "examples": exactly 4 sentences, one per level "A1","A2","B1","B2", in the analysed language, with a translation into the target language.
+- "examples": exactly 6 sentences in the German (or analysed) language with a translation into the target language: 2 at level "A2" (short, everyday), 2 at "B1" (subordinate clause or Perfekt), 2 at "B2" (richer vocabulary, passive or Konjunktiv where natural). Each sentence must use the analysed word.
+- "grammarNotes": 2-6 short explanations in ${UI_NAMES[uiLang]} (interface language) of what a learner must know: whether the verb is reflexive (sich freuen) and with which case of "sich"; separable or inseparable prefix and how it splits in a sentence (aufstehen → ich stehe auf); strong/irregular forms; if the input is 2-3 words — why they go together (fixed collocation, verb + preposition, separable verb, noun + verb phrase like "Angst haben") and how the combination changes in a sentence; for nouns — gender rule hints and the n-declension if relevant; for conjunctions/prepositions — word order or case they trigger.
 - "synonyms" and "antonyms": in the analysed language, up to 6 each.
 - "phrases": up to 4 common collocations or idioms with the word, each with a translation into the target language.
-- If the input is not a single word, analyse its key word and note this in the first meaning's "note".
+- If the input is 2-3 words, analyse the whole combination as one entry: "lemma" is the combination in dictionary form, "partOfSpeech" is "phrase" unless it is a reflexive/separable verb (then "verb" with full conjugation of the combination, e.g. "ich freue mich").
 
 ${JSON_RULES}
 JSON schema:
-{"lemma":"string","language":"de|ru|uk|en","partOfSpeech":"noun|verb|adjective|adverb|pronoun|preposition|conjunction|numeral|interjection|phrase|other","article":"der|die|das|null","plural":"string|null","transcription":"string|null","meanings":[{"sense":"string","translations":["string"],"note":"string|null"}],"declension":[{"grammaticalCase":"nominative|accusative|dative|genitive","singular":"string","plural":"string"}]|null,"conjugation":{"praesens":[{"pronoun":"string","form":"string"}],"praeteritum":[{"pronoun":"string","form":"string"}],"perfekt":"string","auxiliary":"haben|sein"}|null,"governance":["string"],"examples":[{"level":"A1|A2|B1|B2","text":"string","translation":"string"}],"synonyms":["string"],"antonyms":["string"],"phrases":[{"text":"string","translation":"string"}]}`;
+{"lemma":"string","language":"de|ru|uk|en","partOfSpeech":"noun|verb|adjective|adverb|pronoun|preposition|conjunction|numeral|interjection|phrase|other","article":"der|die|das|null","plural":"string|null","transcription":"string|null","meanings":[{"sense":"string","translations":["string"],"note":"string|null"}],"declension":[{"grammaticalCase":"nominative|accusative|dative|genitive","singular":"string","plural":"string"}]|null,"conjugation":{"praesens":[{"pronoun":"string","form":"string"}],"praeteritum":[{"pronoun":"string","form":"string"}],"perfekt":"string","auxiliary":"haben|sein"}|null,"governance":["string"],"examples":[{"level":"A1|A2|B1|B2","text":"string","translation":"string"}],"synonyms":["string"],"antonyms":["string"],"phrases":[{"text":"string","translation":"string"}],"grammarNotes":["string"]}`;
 
   return { task: 'word', system, user: asData('Word to analyse', word) };
 }

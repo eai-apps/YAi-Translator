@@ -48,6 +48,20 @@ export function WordCard({ card, speech }: WordCardProps) {
 
       {card.conjugation ? <VerbSection conjugation={card.conjugation} /> : null}
 
+      {card.grammarNotes.length > 0 ? (
+        <section className="mt-5">
+          <SectionTitle>{t('word.grammarNotes')}</SectionTitle>
+          <ul className="mt-2 space-y-1.5">
+            {card.grammarNotes.map((note, index) => (
+              <li key={index} className="flex gap-2 text-sm leading-relaxed">
+                <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-accent" aria-hidden="true" />
+                <span>{note}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
       {card.governance.length > 0 ? (
         <section className="mt-5">
           <SectionTitle>{t('word.governance')}</SectionTitle>

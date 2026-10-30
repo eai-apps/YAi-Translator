@@ -32,7 +32,7 @@
   },
   "translate": {
     "title": "Übersetzen",
-    "subtitle": "Text eingeben — die Übersetzung erscheint automatisch. Bei einem Wort öffnet sich die Wortkarte mit Grammatik.",
+    "subtitle": "Text eingeben — die Übersetzung erscheint automatisch. Für 1–3 Wörter erscheint unten ein vollständiger Wörterbucheintrag.",
     "placeholder": "Text in einer beliebigen Sprache eingeben…",
     "emptyTitle": "Los geht's",
     "emptyText": "Gib links ein Wort oder einen Satz ein. Die Übersetzung erscheint gleich hier.",
@@ -60,7 +60,11 @@
     "styleColloquial": "umgangssprachlich",
     "styleFormal": "formell",
     "singleWordHint": "Wortkarte",
-    "loadingTitle": "Wird übersetzt…"
+    "loadingTitle": "Wird übersetzt…",
+    "askAi": "KI fragen",
+    "compare": "Übersetzer vergleichen",
+    "engine": "Übersetzer",
+    "engineAuto": "Auto"
   },
   "word": {
     "article": "Artikel",
@@ -95,7 +99,11 @@
     "posInterjection": "Interjektion",
     "posPhrase": "Wendung",
     "posOther": "Sonstiges",
-    "noData": "Keine Daten"
+    "noData": "Keine Daten",
+    "grammarNotes": "Wichtig zu wissen",
+    "loading": "Wörterbucheintrag wird erstellt…",
+    "needAi": "Für den vollständigen Eintrag wird KI benötigt, die kostenlosen Versuche für heute sind aufgebraucht. Die Übersetzung oben ist bereits fertig.",
+    "examplesLevel": "Niveau der Beispiele"
   },
   "explain": {
     "title": "Analyse",
@@ -221,5 +229,10 @@
     "rate": "Zu viele Anfragen. Warte ein paar Sekunden.",
     "unknown": "Etwas ist schiefgelaufen. Versuche es erneut.",
     "sameLanguage": "Ausgangs- und Zielsprache sind gleich."
+  },
+  "compare": {
+    "title": "Übersetzer im Vergleich",
+    "subtitle": "Derselbe Text in jedem verbundenen Dienst",
+    "noAnswer": "Der Dienst hat gerade nicht geantwortet"
   }
 }

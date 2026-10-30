@@ -32,7 +32,7 @@
   },
   "translate": {
     "title": "Translate",
-    "subtitle": "Type the text — the translation appears automatically. A single word opens a word card with grammar.",
+    "subtitle": "Type text — the translation appears automatically. For 1–3 words a full dictionary entry appears below.",
     "placeholder": "Enter text in any language…",
     "emptyTitle": "Start translating",
     "emptyText": "Type a word or a phrase on the left. The translation will appear here in a moment.",
@@ -60,7 +60,11 @@
     "styleColloquial": "colloquial",
     "styleFormal": "formal",
     "singleWordHint": "Word card",
-    "loadingTitle": "Translating…"
+    "loadingTitle": "Translating…",
+    "askAi": "Ask AI",
+    "compare": "Compare translators",
+    "engine": "Translator",
+    "engineAuto": "Auto"
   },
   "word": {
     "article": "Article",
@@ -95,7 +99,11 @@
     "posInterjection": "Interjection",
     "posPhrase": "Phrase",
     "posOther": "Other",
-    "noData": "No data"
+    "noData": "No data",
+    "grammarNotes": "Good to know",
+    "loading": "Preparing the full word entry…",
+    "needAi": "The full word entry needs AI, and today's free requests are used up. The translation above is ready.",
+    "examplesLevel": "Example level"
   },
   "explain": {
     "title": "Analysis",
@@ -221,5 +229,10 @@
     "rate": "Too many requests. Wait a few seconds.",
     "unknown": "Something went wrong. Please try again.",
     "sameLanguage": "The source and target languages are the same."
+  },
+  "compare": {
+    "title": "Translator comparison",
+    "subtitle": "The same text in every connected service",
+    "noAnswer": "The service did not answer right now"
   }
 }
