@@ -1,9 +1,9 @@
 {
   "name": "yai-translator",
   "private": true,
-  "version": "0.3.0",
+  "version": "0.4.0",
   "type": "module",
-  "description": "YAi Translator — онлайн-переводчик, словарь и учебник немецкого",
+  "description": "YAi Translator вЂ” РѕРЅР»Р°Р№РЅ-РїРµСЂРµРІРѕРґС‡РёРє, СЃР»РѕРІР°СЂСЊ Рё СѓС‡РµР±РЅРёРє РЅРµРјРµС†РєРѕРіРѕ",
   "scripts": {
     "dev": "vite",
     "dev:api": "wrangler pages dev dist --port 8788",
@@ -34,3 +34,4 @@
     "wrangler": "^4.156.0"
   }
 }
+

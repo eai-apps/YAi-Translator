@@ -1,9 +1,12 @@
-/** Дневной лимит бесплатных запросов с одного IP. В D1 хранится только хеш IP. */
-import { LIMITS } from './config';
+/**
+ * Дневной лимит бесплатных запросов с одного IP. В D1 хранится только хеш IP.
+ * Значение лимита задаётся в админке (таблица settings), иначе LIMITS.freeRequestsPerDay.
+ */
 import type { Env } from './env';
 import { ApiError } from './http';
 import { describeError, sha256Hex } from './utils';
 import { ensureSchema } from './schema';
+import { readDailyLimit } from './settings';
 
 /** Проверяет лимит и сразу увеличивает счётчик на единицу. */
 export async function enforceDailyLimit(env: Env, clientIp: string): Promise<void> {
@@ -11,6 +14,7 @@ export async function enforceDailyLimit(env: Env, clientIp: string): Promise<voi
 
   const ipHash = await sha256Hex(`yai:${clientIp}`);
   const day = new Date().toISOString().slice(0, 10);
+  const limit = await readDailyLimit(env);
 
   try {
     await ensureSchema(env);
@@ -18,7 +22,7 @@ export async function enforceDailyLimit(env: Env, clientIp: string): Promise<voi
       .bind(ipHash, day)
       .first<{ requests: number }>();
 
-    if (row && row.requests >= LIMITS.freeRequestsPerDay) {
+    if (row && row.requests >= limit) {
       throw new ApiError('LIMIT_REACHED', 429);
     }
 

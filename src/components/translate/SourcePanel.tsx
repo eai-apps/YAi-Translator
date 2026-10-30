@@ -2,6 +2,7 @@
 import { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { LanguageCode, SourceLanguage } from '../../../shared/types';
+import { textDirection } from '../../../shared/languages';
 import type { SpeechController } from '../../hooks/useSpeech';
 import { cn } from '../../lib/cn';
 import { Card } from '../ui/Card';
@@ -83,6 +84,8 @@ export function SourcePanel({ text, onChange, sourceLang, maxLength, speech }: S
           placeholder={t('translate.placeholder')}
           rows={6}
           spellCheck
+          /* Арабский текст пишется справа налево; для остальных языков — обычное направление. */
+          dir={sourceLang === 'auto' ? 'auto' : textDirection(sourceLang)}
           className="min-h-[150px] w-full flex-1 resize-none bg-transparent px-1 py-3 text-base leading-relaxed text-ink outline-none placeholder:text-muted sm:min-h-[210px] sm:text-lg"
         />
       </label>

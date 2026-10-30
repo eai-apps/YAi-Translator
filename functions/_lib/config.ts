@@ -7,7 +7,7 @@ export { LANGUAGES, LANGUAGE_CODES, getLanguage, isLanguageCode, isUiLanguage } 
 
 import { CLASSIC_PROVIDERS } from '../../shared/types';
 
-export const APP_VERSION = '0.3.0';
+export const APP_VERSION = '0.4.0';
 
 export const LIMITS = {
   /** Максимальная длина текста для перевода и разбора. */
@@ -87,9 +87,21 @@ export const GROQ = {
 } as const;
 
 export const DEEPL = {
-  /** Бесплатные ключи (оканчиваются на «:fx») работают через api-free, остальные тарифы — через api. */
-  freeUrl: 'https://api-free.deepl.com/v2/translate',
-  paidUrl: 'https://api.deepl.com/v2/translate',
+  /**
+   * У бесплатного ключа (оканчивается на «:fx») свой адрес api-free, у остальных тарифов
+   * (Developer, Growth, Pro) — api. Используй только deeplUrl() ниже.
+   */
+  freeBase: 'https://api-free.deepl.com/v2',
+  paidBase: 'https://api.deepl.com/v2',
+  timeoutMs: 15_000,
+} as const;
+
+export const LARA = {
+  /**
+   * Lara Translate API (раздел «Translate Text» в developers.laratranslate.com).
+   * Авторизация: POST {baseUrl}/v2/auth с подписью Lara:<HMAC>, затем POST {baseUrl}/v2/translate.
+   */
+  baseUrl: 'https://api.laratranslate.com',
   timeoutMs: 15_000,
 } as const;
 
@@ -115,3 +127,41 @@ export const CLASSIC = {
   myMemoryMaxChunks: 8,
   m2m100Model: '@cf/meta/m2m100-1.2b',
 } as const;
+
+/**
+ * Резервные общие ключи (версия 0.4.0).
+ * Ключи берутся из переменных Cloudflare (GEMINI_API_KEY, GEMINI_API_KEY_2 … _5 — так же для
+ * Groq, DeepL, Microsoft, Google и Lara) и из таблицы site_keys (добавлены в админке).
+ * Исчерпанный ключ (429) «отдыхает» до 00:00 UTC, неверный (401/403) помечается и больше не используется.
+ */
+export const KEY_POOL = {
+  /** Сколько ключей одного сервиса брать из переменных окружения: KEY, _2, _3 … */
+  maxEnvKeys: 5,
+  /**
+   * Количество ключей в админке не ограничено: можно добавить сколько угодно
+   * на каждый сервис (Gemini, Groq, DeepL, Microsoft, Google, Lara).
+   */
+} as const;
+
+/** Админка (версия 0.4.0): доступ по списку логинов в секрете ADMIN_LOGINS. */
+export const ADMIN = {
+  /** Сколько последних пользователей показывать в списке. */
+  maxUsersListed: 500,
+  /** Сколько действий админов хранить в журнале. */
+  maxLogEntries: 500,
+  /** Сколько дней показывать на графике. */
+  chartDays: 30,
+  /** Максимальная длина строки баннера. */
+  maxBannerLength: 280,
+  /** Границы дневного лимита, который можно задать в админке. */
+  minDailyLimit: 1,
+  maxDailyLimit: 10_000,
+  /** Посетители считаются по хешу «IP + день»; старые отметки чистятся. */
+  visitorRetentionDays: 120,
+} as const;
+
+/** Адрес DeepL для конкретного ключа: path — 'translate' или 'usage'. */
+export function deeplUrl(key: string, path: 'translate' | 'usage'): string {
+  const base = key.trim().endsWith(':fx') ? DEEPL.freeBase : DEEPL.paidBase;
+  return `${base}/${path}`;
+}

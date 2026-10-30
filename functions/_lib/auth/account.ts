@@ -4,6 +4,7 @@ import type { Env } from '../env';
 import { ApiError } from '../http';
 import { isKeysStorageEnabled } from './crypto';
 import { readKeyInfos } from './keys';
+import { isAdminLogin } from '../admin/access';
 import { listSessions } from './session';
 import { findUserById } from './users';
 
@@ -31,5 +32,6 @@ export async function buildAccountInfo(
     })),
     keys,
     keysStorageEnabled: isKeysStorageEnabled(env),
+    isAdmin: isAdminLogin(env, user.login),
   };
 }

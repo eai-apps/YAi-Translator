@@ -1,45 +1,50 @@
-/** Строка результата проверки ключа: ✅ «работает, ответ за N мс» или ❌ с причиной. */
+/** Значок состояния сервиса: ✅ работает или ❌ с причиной. */
 import { useTranslation } from 'react-i18next';
-import type { WizardCheck } from '../../hooks/useKeyWizard';
-import { Spinner } from '../ui/Spinner';
-import { IconCheck, IconAlert } from '../layout/icons';
+import type { ServiceCheck } from '../../../shared/types';
+import { IconAlert, IconCheck } from '../layout/icons';
 
 interface KeyStatusProps {
-  check: WizardCheck;
+  /** 'idle' — ещё не проверяли, 'testing' — проверяем, 'ok' / 'fail' — результат. */
+  check: 'idle' | 'testing' | 'ok' | 'fail';
   latencyMs: number | null;
+  /** Причина отказа от сервера (уже на языке интерфейса). */
   message: string | null;
-  savedNotice: 'account' | 'device' | null;
+  /** Короткое сообщение о сохранении. */
+  savedNotice?: string | null;
 }
 
 export function KeyStatus({ check, latencyMs, message, savedNotice }: KeyStatusProps) {
   const { t } = useTranslation();
 
-  return (
-    <div className="mt-1.5 min-h-[20px] text-xs leading-relaxed" aria-live="polite">
-      {check === 'testing' ? (
-        <span className="inline-flex items-center gap-1.5 text-muted">
-          <Spinner className="h-3.5 w-3.5" />
-          {t('keys.checking')}
-        </span>
-      ) : null}
+  if (check === 'idle' && !savedNotice) return null;
 
+  return (
+    <div className="mt-2 space-y-1 text-xs" role="status">
+      {check === 'testing' ? <p className="text-muted">{t('keys.checking')}</p> : null}
       {check === 'ok' ? (
-        <span className="inline-flex items-start gap-1.5 text-success">
-          <IconCheck className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+        <p className="flex items-center gap-1.5 text-success">
+          <IconCheck className="h-3.5 w-3.5" />
           <span>
             {latencyMs !== null ? t('keys.checkOk', { ms: latencyMs }) : t('keys.checkOkNoTime')}
-            {savedNotice === 'account' ? ` · ${t('keys.savedInAccount')}` : ''}
-            {savedNotice === 'device' ? ` · ${t('keys.savedOnDevice')}` : ''}
           </span>
-        </span>
+        </p>
       ) : null}
-
       {check === 'fail' ? (
-        <span className="inline-flex items-start gap-1.5 text-danger">
+        <p className="flex items-start gap-1.5 text-danger">
           <IconAlert className="mt-0.5 h-3.5 w-3.5 shrink-0" />
           <span>{message ?? t('keys.checkFailed')}</span>
-        </span>
+        </p>
       ) : null}
+      {savedNotice ? <p className="text-muted">{savedNotice}</p> : null}
     </div>
   );
+}
+
+/** Превращает ответ проверки сервиса в значения для KeyStatus. */
+export function checkToStatus(check: ServiceCheck): Pick<KeyStatusProps, 'check' | 'latencyMs' | 'message'> {
+  return {
+    check: check.ok ? 'ok' : 'fail',
+    latencyMs: check.latencyMs,
+    message: check.message,
+  };
 }

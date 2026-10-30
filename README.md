@@ -3,11 +3,31 @@
 Переводчик, словарь и учебник немецкого языка в стиле Яндекс.Переводчика, Leo и Duolingo.
 Сайт работает как обычное приложение (PWA): его можно установить на iPhone и Android.
 
-**Языки:** немецкий ↔ русский, а также украинский и английский. Интерфейс — русский, немецкий или английский.
+**12 языков:** немецкий ↔ русский, а также украинский, английский, французский, испанский, итальянский,
+португальский, польский, нидерландский, турецкий и арабский (арабский пишется справа налево).
+Интерфейс — русский, немецкий или английский.
+
+**Версия 0.4.0 — этап 3.**
 
 ---
 
-## Что уже работает (этап 2)
+## Что нового в 0.4.0
+
+- **12 языков.** Список языков расширяется одной строкой в `shared/languages.ts`.
+  Для арабского поля ввода, перевод, альтернативы и примеры получают направление справа налево.
+- **Как переводят другие.** Под основным переводом — сворачиваемый блок с вариантами других сервисов.
+  Для текста до 300 символов он загружается сам, для длинного — по кнопке «Показать».
+  У каждого варианта есть «копировать», «озвучить» и **«Использовать этот вариант»** (он становится основным).
+  Сервис, давший основной перевод, в списке не повторяется. Отключается в профиле:
+  «Показывать другие переводчики автоматически».
+- **Резервные ключи.** У каждого сервиса может быть несколько ключей. Если один закончился
+  (ответ 429), он «отдыхает» до 00:00 UTC и берётся следующий; неверный (401/403) больше не используется.
+- **Новый переводчик Lara Translate** (бесплатный тариф, без карты).
+- **Админка `/admin`:** статистика и график за 30 дней, ключи сайта (добавить/проверить/удалить),
+  дневной лимит ИИ и баннер-объявление, пользователи (заблокировать/удалить), журнал действий.
+- **Страница «О приложении»** (`/about`) с историей версий и окно «Что нового» после обновления.
+
+## Что работает с этапа 2
 
 - **Аккаунт без Google и Apple.** Логин и пароль, аккаунт заводится за 10 секунд. Один логин работает
   на любом числе телефонов и компьютеров, им можно поделиться с семьёй: ключи ИИ, избранное и история
@@ -86,6 +106,7 @@ npm run preview   # сборка + локальный сервер на http://l
 npx wrangler d1 create yai-translator-db
 npx wrangler d1 execute yai-translator-db --local --file=./migrations/0001_init.sql
 npx wrangler d1 execute yai-translator-db --local --file=./migrations/0002_accounts.sql
+npx wrangler d1 execute yai-translator-db --local --file=./migrations/0003_admin.sql
 ```
 
 Команда `d1 create` покажет `database_id` — вставьте его в `wrangler.toml` вместо
@@ -94,11 +115,11 @@ npx wrangler d1 execute yai-translator-db --local --file=./migrations/0002_accou
 ### Ключи и секреты сервисов
 
 1. Скопируйте `.dev.vars.example` в `.dev.vars`.
-2. Впишите бесплатные ключи:
+2. Впишите бесплатные ключи (подробные шаги — в разделе «Как получить ключи» ниже):
    - **Gemini** — https://aistudio.google.com/apikey (кнопка «Create API key»);
    - **Groq** — https://console.groq.com/keys;
-   - **DeepL** (необязательно, только обычный перевод) — https://www.deepl.com/pro-api
-     (тариф «API Free»).
+   - **DeepL** — https://www.deepl.com/pro-api (тариф «API Free»);
+   - при желании **Microsoft**, **Google** и **Lara** — по инструкции ниже.
 3. Сгенерируйте секрет для шифрования ключей пользователей в аккаунте:
 
    ```bash
@@ -113,6 +134,71 @@ npx wrangler d1 execute yai-translator-db --local --file=./migrations/0002_accou
 Без `KEY_ENCRYPTION_SECRET` сайт тоже работает, но ключи в аккаунте не сохраняются
 (сервер отвечает `KEYS_STORAGE_DISABLED`): ключ в этом случае хранится только на устройстве.
 Без любых ключей сайт запускается, но переводы будут отвечать окном «Подключите свой бесплатный ключ».
+
+### Как стать админом
+
+1. Зарегистрируйся на сайте обычным логином (например, `evgen`).
+2. В `.dev.vars` (локально) или в **Cloudflare → Settings → Variables and secrets → Add Secret** добавь:
+
+   ```
+   ADMIN_LOGINS=evgen
+   ```
+
+   Несколько админов — через запятую: `ADMIN_LOGINS=evgen,anna.berger`. Регистр не важен.
+3. Перезапусти сервер (`npm run dev:api`). В профиле появится кнопка **«Админка»**, адрес — `/admin`.
+
+Пароль админа — обычный пароль этого аккаунта. **Без `ADMIN_LOGINS` админки нет ни у кого**, даже у первого
+зарегистрированного пользователя. Все запросы `/api/admin/*` проверяют сессию и этот список: обычный
+пользователь получает `403`.
+
+### Как получить ключи
+
+Картинки не нужны: везде достаточно бесплатного тарифа и кнопки «Создать ключ».
+
+**Gemini (ИИ, для карточек слов, разбора и перевода ИИ)**
+1. Открой https://aistudio.google.com/apikey и войди любым аккаунтом Google.
+2. «Create API key» → выбери проект (можно создать новый) → скопируй ключ вида `AIza…`.
+3. Вставь в `GEMINI_API_KEY`. Второй ключ — `GEMINI_API_KEY_2`, третий — `_3` (до `_5`).
+
+**Groq (ИИ, запасной)**
+1. https://console.groq.com/keys → «Create API Key» → скопируй ключ вида `gsk_…`.
+2. `GROQ_API_KEY`. Ещё ключи — `GROQ_API_KEY_2` … `_5`.
+
+**DeepL (обычный переводчик)**
+1. https://www.deepl.com/pro-api → «Sign up for API Free» (банковская карта не нужна).
+2. В личном кабинете → **API Keys** → скопируй ключ (он заканчивается на `:fx` — это бесплатный тариф).
+3. `DEEPL_API_KEY`. Ещё ключи — `DEEPL_API_KEY_2` … `_5`.
+
+**Microsoft Translator (обычный переводчик, 2 млн символов в месяц)**
+1. Открой https://portal.azure.com → «Create a resource» → найди **Translator** → Create.
+2. Pricing tier — **F0** (бесплатный, карта не списывает деньги; Azure может попросить её привязать).
+3. После создания открой ресурс → **Keys and Endpoint**: скопируй **KEY 1** и **Region** (например, `westeurope`).
+4. В Cloudflare: `MICROSOFT_TRANSLATOR_KEY=…` и `MICROSOFT_TRANSLATOR_REGION=westeurope`.
+   Ещё ключи — `MICROSOFT_TRANSLATOR_KEY_2` ….
+
+**Google Translate (обычный переводчик, 500 000 символов в месяц)**
+1. Открой https://console.cloud.google.com → создай проект → «APIs & Services» → «Enable APIs» →
+   **Cloud Translation API** → Enable. Для бесплатного объёма Google требует привязать банковскую карту.
+2. «APIs & Services» → «Credentials» → «Create credentials» → **API key** → скопируй ключ `AIza…`.
+3. `GOOGLE_TRANSLATE_KEY`. Ещё ключи — `GOOGLE_TRANSLATE_KEY_2` ….
+
+**Lara Translate (обычный переводчик, бесплатный тариф без карты)**
+1. Зарегистрируйся на https://laratranslate.com и оформи любой тариф, включая **Free**.
+2. В личном кабинете открой раздел **API** и создай пару ключей: **Access Key ID** и **Access Key Secret**.
+3. В Cloudflare: `LARA_ACCESS_KEY_ID=…` и `LARA_ACCESS_KEY_SECRET=…`. Ещё пара — `LARA_ACCESS_KEY_ID_2` /
+   `LARA_ACCESS_KEY_SECRET_2`.
+
+**MyMemory** работает без ключа. Если указать `MYMEMORY_EMAIL`, бесплатный дневной лимит вырастет
+с 5 000 до 50 000 символов.
+
+### Несколько ключей одного сервиса
+
+- Из переменных Cloudflare: `GEMINI_API_KEY`, `GEMINI_API_KEY_2` … `_5` (так же для Groq, DeepL, Microsoft, Google, Lara).
+- Или через админку: вкладка **«Ключи сайта»** → выбрать сервис → вставить ключ → «Проверить и добавить».
+  Количество **не ограничено**. Ключ перед сохранением проверяется настоящим запросом, хранится
+  в зашифрованном виде, и его можно удалить.
+- Исчерпанный ключ (ответ 429) отдыхает до 00:00 UTC, неверный (401/403) помечается и не используется.
+  Состояние видно в админке.
 
 ---
 
@@ -138,6 +224,7 @@ npx wrangler d1 execute yai-translator-db --local --file=./migrations/0002_accou
    ```bash
    npx wrangler d1 execute yai-translator-db --remote --file=./migrations/0001_init.sql
    npx wrangler d1 execute yai-translator-db --remote --file=./migrations/0002_accounts.sql
+   npx wrangler d1 execute yai-translator-db --remote --file=./migrations/0003_admin.sql
    ```
 
 6. В проекте Pages откройте **Settings → Functions → Bindings** и проверьте:
@@ -146,8 +233,9 @@ npx wrangler d1 execute yai-translator-db --local --file=./migrations/0002_accou
    Эти же привязки уже описаны в `wrangler.toml`; если Cloudflare подхватил их
    автоматически, ничего добавлять не нужно.
 7. В **Settings → Variables and Secrets** добавьте секреты:
-   `GEMINI_API_KEY`, `GROQ_API_KEY`, при желании `DEEPL_API_KEY`.
-   Для каждого нажмите **Encrypt**.
+   `GEMINI_API_KEY`, `GROQ_API_KEY`, при желании `DEEPL_API_KEY`, `MICROSOFT_TRANSLATOR_KEY` +
+   `MICROSOFT_TRANSLATOR_REGION`, `GOOGLE_TRANSLATE_KEY`, `LARA_ACCESS_KEY_ID` + `LARA_ACCESS_KEY_SECRET`
+   и `ADMIN_LOGINS` (логины админов). Для каждого нажмите **Encrypt**.
 8. Добавьте секрет **`KEY_ENCRYPTION_SECRET`** — без него ключи ИИ нельзя хранить в аккаунте:
    1. сгенерируйте значение на компьютере:
       ```bash
@@ -178,6 +266,7 @@ npx wrangler pages secret put GEMINI_API_KEY --project-name yai-translator
 npx wrangler pages secret put GROQ_API_KEY --project-name yai-translator
 npx wrangler pages secret put DEEPL_API_KEY --project-name yai-translator
 npx wrangler pages secret put KEY_ENCRYPTION_SECRET --project-name yai-translator
+npx wrangler pages secret put ADMIN_LOGINS --project-name yai-translator
 ```
 
 Не забудьте про миграции D1 из пункта 5 — без них не работают кэш, дневной лимит
@@ -208,19 +297,28 @@ npx wrangler pages secret put KEY_ENCRYPTION_SECRET --project-name yai-translato
 
 ```
 functions/            бэкенд Cloudflare Pages Functions
-  api/                эндпоинты: translate, word, explain, check, health, key-test,
-                      auth/*, keys/*, sync
+  api/                эндпоинты: translate, word, explain, check, compare, health, key-test,
+                      site-settings, auth/*, keys/*, sync, admin/*
   _lib/               провайдеры ИИ, цепочка, кэш, лимиты, промпты, проверка JSON
     auth/             пароли, сессии, шифрование ключей, защита от подбора
+    admin/            доступ админа (ADMIN_LOGINS), ключи сайта, статистика
     checks/           настоящая проверка сервисов сайта
-migrations/           SQL-схема D1 (cache, usage, users, sessions, user_keys, user_items, login_attempts)
-shared/               общие типы и список языков для фронта и бэка
+    classic/          обычные переводчики: DeepL, Lara, Microsoft, Google, MyMemory, M2M100
+    keypool.ts        список ключей сервиса (переменные Cloudflare + админка)
+    keystate.ts       «отдыхает до 00:00 UTC» / «неверный»
+    settings.ts       дневной лимит и баннер из админки
+    stats.ts          дневная статистика и уникальные посетители
+migrations/           SQL-схема D1 (cache, usage, users, sessions, user_keys, user_items,
+                      login_attempts, site_keys, key_state, stats_daily, visitors, admin_log, settings)
+shared/               общие типы, список 12 языков и определение языка для фронта и бэка
 src/                  React-приложение
   api/client.ts       все запросы к серверу — только здесь
-  components/         кнопки, карточки, панели, карточка слова, мастер ключа
-  hooks/              тема, настройки, аккаунт, история и синхронизация, озвучка, перевод
+  components/         кнопки, карточки, панели, карточка слова, мастер ключа, блок «Как переводят другие»,
+                      компоненты админки
+  data/changelog.ts   история версий (для «О приложении» и окна «Что нового»)
+  hooks/              тема, настройки, аккаунт, история и синхронизация, озвучка, перевод, админка
   locales/            ru.json, de.json, en.json
-  pages/              Перевод, Словарь, Учёба, Разговор, Профиль
+  pages/              Перевод, Словарь, Учёба, Разговор, Профиль, О приложении, Админка (ленивая)
 scripts/              генератор иконок PWA
 ```
 
@@ -229,9 +327,9 @@ scripts/              генератор иконок PWA
 1. Кэш в D1 — одинаковый запрос не тратит лимиты.
 2. Ключ пользователя: вошедший в аккаунт — из аккаунта (расшифровывается на сервере),
    иначе — из заголовков `X-User-Gemini-Key` / `X-User-Groq-Key`. Заголовки важнее аккаунта.
-3. Общий ключ Gemini сайта.
-4. Общий ключ Groq сайта.
-5. Обычные переводчики без ИИ: DeepL → Microsoft → Google → MyMemory → M2M100.
+3. Общие ключи Gemini сайта — по очереди, в обход отдыхающих и неверных.
+4. Общие ключи Groq сайта — так же.
+5. Обычные переводчики без ИИ: DeepL → Lara → Microsoft → Google → MyMemory → M2M100.
 6. Cloudflare Workers AI — последний запасной вариант.
 
 Команда «Спросить у AI» идёт сразу по цепочке ИИ (шаги 1–4 и 6, с альтернативами
@@ -253,10 +351,12 @@ scripts/              генератор иконок PWA
 ### Где менять настройки
 
 - Модели ИИ, лимиты, таймауты, порядок провайдеров — `functions/_lib/config.ts`
-  (там же правила аккаунта и проверки сервисов: блоки `AUTH` и `HEALTH_CHECK`).
+  (там же правила аккаунта, ключей, админки и проверки сервисов: блоки `AUTH`, `KEY_POOL`, `ADMIN`, `HEALTH_CHECK`).
 - Промпты — `functions/_lib/prompts.ts`.
-- Список языков — `shared/languages.ts` (одна строка добавляет новый язык).
-- Тексты интерфейса — `src/locales/*.json`.
+- Список языков — `shared/languages.ts` (одна строка добавляет новый язык);
+  угадывание языка — `shared/detect.ts`.
+- Тексты интерфейса — `src/locales/*.json` (во всех трёх файлах одинаковый набор ключей).
+- История версий — `src/data/changelog.ts` (новые версии сверху).
 - Задержка перевода, ключи localStorage, цвета артиклей — `src/config.ts`.
 
 ---
@@ -284,8 +384,16 @@ scripts/              генератор иконок PWA
 или закончился дневной лимит. Введите свой ключ в окне или в «Профиле».
 
 **`no such table: cache` в логах.** Не выполнена миграция. Локально:
-`npx wrangler d1 execute yai-translator-db --local --file=./migrations/0001_init.sql`
-и затем `./migrations/0002_accounts.sql`. На сайте: те же команды с `--remote`.
+`npx wrangler d1 execute yai-translator-db --local --file=./migrations/0001_init.sql`,
+затем `0002_accounts.sql` и `0003_admin.sql`. На сайте: те же команды с `--remote`.
+Обычно миграции не нужны: таблицы создаются сами при первом запросе.
+
+**В профиле нет кнопки «Админка».** Не задан секрет `ADMIN_LOGINS` или логин в нём не совпадает
+с логином аккаунта. После изменения секрета перезапусти сервер (или дождись нового деплоя).
+
+**Ключ в админке не добавляется.** Он не прошёл проверку настоящим запросом (неверный, неполный
+или у сервиса исчерпан бесплатный тариф). Причина видна в списке ключей — «Последняя ошибка».
+Для Lara нужна строка формата `идентификатор:секрет`.
 
 **Не удаётся сохранить ключ в аккаунт.** Не задан секрет `KEY_ENCRYPTION_SECRET`
 (см. раздел «Публикация на Cloudflare Pages»). Пока его нет, ключ можно сохранить на устройстве.
@@ -310,5 +418,8 @@ Chrome и Safari) и требует разрешения на микрофон. 
 - Ключ, сохранённый на устройстве, сервер читает из заголовка запроса и никуда не записывает.
 - В D1 попадают кэш переводов, хеш IP для дневного счётчика, хеш IP для защиты от подбора,
   аккаунт (логин и хеш пароля), сессии (только хеши токенов) и синхронизированные записи.
+- Статистика для админки хранится только цифрами: счётчики по дням и хеш «IP + дата»
+  для уникальных посетителей. Сам IP не хранится. Ключи из админки шифруются,
+  в таблице состояний лежат только первые 12 символов SHA-256 ключа и код ошибки.
 - Тексты переводов отправляются выбранному сервису ИИ (Google, Groq, DeepL или
   Cloudflare) — без этого перевод невозможен.

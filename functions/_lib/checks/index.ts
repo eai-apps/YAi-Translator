@@ -6,14 +6,29 @@
 import type { ProviderId, ServiceCheck, UiLanguage } from '../../../shared/types';
 import type { Env } from '../env';
 import { HEALTH_CHECK } from '../config';
+import { allKeys } from '../keypool';
+import { isKeyUsable, loadKeyStates } from '../keystate';
 import { ensureSchema } from '../schema';
 import { describeError } from '../utils';
 import { checkGemini, checkGroq, checkWorkersAi } from './ai';
-import { checkDeepL, checkGoogle, checkM2M100, checkMicrosoft, checkMyMemory } from './translators';
+import {
+  checkDeepL,
+  checkGoogle,
+  checkLara,
+  checkM2M100,
+  checkMicrosoft,
+  checkMyMemory,
+} from './translators';
 
 export type ServiceChecks = Partial<Record<ProviderId, ServiceCheck>>;
 
 const CACHE_KIND = 'health';
+
+/** Первый рабочий ключ сервиса (отдыхающие и неверные пропускаются). */
+async function firstUsableKey(env: Env, provider: 'gemini' | 'groq'): Promise<string | null> {
+  const [keys, states] = await Promise.all([allKeys(env, provider), loadKeyStates(env, provider)]);
+  return keys.find((key) => isKeyUsable(states[key.id]))?.key ?? null;
+}
 
 /** Ключ кэша: результат зависит от языка интерфейса (тексты причин). */
 function cacheKey(uiLang: UiLanguage): string {
@@ -66,27 +81,40 @@ export async function runServiceChecks(
   if (cached) return { checks: cached, cached: true };
 
   // Все проверки стартуют одновременно: каждая сама укладывается в 8 секунд.
+  // Gemini и Groq проверяются первым рабочим ключом из пула (может быть и из админки).
   const [
     gemini,
     groq,
     workersai,
     deepl,
+    lara,
     microsoft,
     google,
     mymemory,
     m2m100,
   ] = await Promise.all([
-    checkGemini(env, uiLang),
-    checkGroq(env, uiLang),
+    checkGemini(env, uiLang, await firstUsableKey(env, 'gemini')),
+    checkGroq(env, uiLang, await firstUsableKey(env, 'groq')),
     checkWorkersAi(env, uiLang),
     checkDeepL(env, uiLang),
+    checkLara(env, uiLang),
     checkMicrosoft(env, uiLang),
     checkGoogle(env, uiLang),
     checkMyMemory(env, uiLang),
     checkM2M100(env, uiLang),
   ]);
 
-  const checks: ServiceChecks = { gemini, groq, workersai, deepl, microsoft, google, mymemory, m2m100 };
+  const checks: ServiceChecks = {
+    gemini,
+    groq,
+    workersai,
+    deepl,
+    lara,
+    microsoft,
+    google,
+    mymemory,
+    m2m100,
+  };
   await writeCached(env, uiLang, checks);
   return { checks, cached: false };
 }

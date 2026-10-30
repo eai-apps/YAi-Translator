@@ -28,6 +28,10 @@ export function errorMessageKey(code: ClientErrorCode): string {
       return 'errors.network';
     case 'NOT_FOUND':
       return 'errors.server';
+    case 'FORBIDDEN':
+      return 'errors.forbidden';
+    case 'ACCOUNT_BLOCKED':
+      return 'errors.blocked';
     default:
       return 'errors.unknown';
   }
@@ -47,6 +51,8 @@ export function providerLabel(provider: string): string {
       return 'Groq';
     case 'deepl':
       return 'DeepL';
+    case 'lara':
+      return 'Lara Translate';
     case 'workersai':
       return 'Cloudflare AI';
     case 'microsoft':

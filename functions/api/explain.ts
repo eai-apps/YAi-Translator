@@ -8,6 +8,7 @@ import { resolveUserKeys } from '../_lib/auth/keys';
 import { createLimitGuard } from '../_lib/usage';
 import { buildExplainPrompt } from '../_lib/prompts';
 import { runJsonTask } from '../_lib/router';
+import { bump } from '../_lib/stats';
 import { validateExplain } from '../_lib/validate';
 
 export const onRequestPost: PagesFunction<Env> = async (context) => {
@@ -31,7 +32,10 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       uiLang: explainUiLang,
     });
     const cached = await readCache<ExplainResponse>(env, cacheKey);
-    if (cached) return jsonResponse({ ...cached, cached: true });
+    if (cached) {
+      void bump(env, ['explain', 'ai_requests', 'total', 'cache_hits']);
+      return jsonResponse({ ...cached, cached: true });
+    }
 
     // Дневной лимит считается, только когда дело доходит до общих ключей сайта.
     const limitGuard = createLimitGuard(env, getClientIp(context.request));
@@ -48,6 +52,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
     const result: ExplainResponse = { ...data, provider, cached: false };
     await writeCache(env, cacheKey, 'explain', result);
+    void bump(env, ['explain', 'ai_requests', 'total']);
     return jsonResponse(result);
   } catch (error) {
     return errorResponse(error, uiLang);

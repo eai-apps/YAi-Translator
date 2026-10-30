@@ -4,17 +4,21 @@
  */
 import type { LanguageCode, UiLanguage } from './languages';
 
+// Типы админки живут отдельно и доступны отсюда же: shared/types или shared/admin — без разницы.
+export * from './admin';
+
 export type { LanguageCode, UiLanguage };
 
 /** Тип задачи — входит в ключ кэша и определяет промпт. */
 export type TaskKind = 'translate' | 'word' | 'explain' | 'check';
 
 /** Провайдер ИИ, который реально ответил. */
-/** ИИ: gemini, groq, workersai. Обычные переводчики: deepl, microsoft, google, mymemory, m2m100. */
+/** ИИ: gemini, groq, workersai. Обычные переводчики: deepl, lara, microsoft, google, mymemory, m2m100. */
 export type ProviderId =
   | 'gemini'
   | 'groq'
   | 'deepl'
+  | 'lara'
   | 'workersai'
   | 'microsoft'
   | 'google'
@@ -57,14 +61,16 @@ export interface TranslateRequest {
   provider?: ProviderId;
 }
 
-/** Переводчики, которые пользователь может выбрать вручную. */
-export const CLASSIC_PROVIDERS = ['deepl', 'microsoft', 'google', 'mymemory', 'm2m100'] as const;
+/** Переводчики, которые пользователь может выбрать вручную. Порядок = приоритет в цепочке. */
+export const CLASSIC_PROVIDERS = ['deepl', 'lara', 'microsoft', 'google', 'mymemory', 'm2m100'] as const;
 export type ClassicProviderId = (typeof CLASSIC_PROVIDERS)[number];
 
 export interface CompareRequest {
   text: string;
   sourceLang: SourceLanguage;
   targetLang: LanguageCode;
+  /** Сервис, который дал основной перевод: в списке он не повторяется. */
+  exclude?: ProviderId;
 }
 
 export interface CompareItem {
@@ -315,6 +321,8 @@ export interface AccountInfo {
   sessions: AccountSession[];
   keys: Record<KeyProvider, StoredKeyInfo | null>;
   keysStorageEnabled: boolean;
+  /** true — логин указан в секрете ADMIN_LOGINS; только тогда видна ссылка «Админка». */
+  isAdmin: boolean;
 }
 
 /** Ответ входа и регистрации. */
@@ -392,7 +400,9 @@ export type ApiErrorCode =
   | 'LOGIN_INVALID'
   | 'PASSWORD_TOO_SHORT'
   | 'KEYS_STORAGE_DISABLED'
-  | 'KEY_NO_ACCESS';
+  | 'KEY_NO_ACCESS'
+  | 'FORBIDDEN'
+  | 'ACCOUNT_BLOCKED';
 
 export interface ApiErrorBody {
   error: {

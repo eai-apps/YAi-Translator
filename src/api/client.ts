@@ -1,6 +1,12 @@
 /** Единая точка всех запросов к бэкенду. Компоненты не вызывают fetch напрямую. */
 import type {
   AccountInfo,
+  AdminAddKeyRequest,
+  AdminLogResponse,
+  AdminOverview,
+  AdminSettings,
+  AdminSiteKeysResponse,
+  AdminUsersResponse,
   ApiErrorBody,
   ApiErrorCode,
   AuthResponse,
@@ -19,6 +25,10 @@ import type {
   RegisterRequest,
   SaveKeyRequest,
   SaveKeyResponse,
+  SiteKeyInfo,
+  SiteKeyProvider,
+  SiteKeyTestResponse,
+  SiteSettingsResponse,
   SyncPushRequest,
   SyncResponse,
   TranslateRequest,
@@ -202,5 +212,62 @@ export const api = {
 
   syncPush(payload: SyncPushRequest): Promise<SyncResponse> {
     return request<SyncResponse>('/api/sync', { method: 'PUT', body: payload });
+  },
+
+  /* -------------------------- Настройки сайта --------------------------- */
+
+  /** Баннер-объявление и дневной лимит — для всех посетителей. */
+  siteSettings(signal?: AbortSignal): Promise<SiteSettingsResponse> {
+    return request<SiteSettingsResponse>('/api/site-settings', { method: 'GET' }, signal);
+  },
+
+  /* -------------------------------- Админка ------------------------------- */
+
+  adminOverview(signal?: AbortSignal): Promise<AdminOverview> {
+    return request<AdminOverview>('/api/admin/overview', { method: 'GET' }, signal);
+  },
+
+  adminKeys(signal?: AbortSignal): Promise<AdminSiteKeysResponse> {
+    return request<AdminSiteKeysResponse>('/api/admin/keys', { method: 'GET' }, signal);
+  },
+
+  adminAddKey(payload: AdminAddKeyRequest): Promise<{ key: SiteKeyInfo }> {
+    return request('/api/admin/keys', { method: 'POST', body: payload });
+  },
+
+  adminTestKey(provider: SiteKeyProvider): Promise<SiteKeyTestResponse> {
+    return request<SiteKeyTestResponse>(`/api/admin/keys/${provider}/test`, { method: 'POST', body: {} });
+  },
+
+  adminRemoveKey(provider: SiteKeyProvider, id: string): Promise<{ ok: boolean }> {
+    return request<{ ok: boolean }>(`/api/admin/keys/${provider}?id=${encodeURIComponent(id)}`, {
+      method: 'DELETE',
+    });
+  },
+
+  adminSettings(signal?: AbortSignal): Promise<AdminSettings> {
+    return request<AdminSettings>('/api/admin/settings', { method: 'GET' }, signal);
+  },
+
+  adminSaveSettings(payload: {
+    dailyLimit?: number | null;
+    banner?: AdminSettings['banner'];
+  }): Promise<AdminSettings> {
+    return request<AdminSettings>('/api/admin/settings', { method: 'PUT', body: payload });
+  },
+
+  adminUsers(signal?: AbortSignal): Promise<AdminUsersResponse> {
+    return request<AdminUsersResponse>('/api/admin/users', { method: 'GET' }, signal);
+  },
+
+  adminUserAction(payload: {
+    login: string;
+    action: 'block' | 'unblock' | 'delete';
+  }): Promise<{ ok: boolean }> {
+    return request<{ ok: boolean }>('/api/admin/users', { method: 'POST', body: payload });
+  },
+
+  adminLog(signal?: AbortSignal): Promise<AdminLogResponse> {
+    return request<AdminLogResponse>('/api/admin/log', { method: 'GET' }, signal);
   },
 };

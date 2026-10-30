@@ -18,7 +18,26 @@ import { buildTranslatePrompt } from '../_lib/prompts';
 import { runJsonTask } from '../_lib/router';
 import type { UserKeys } from '../_lib/router';
 import { translateClassic } from '../_lib/classic';
+import { bump } from '../_lib/stats';
 import { validateTranslate } from '../_lib/validate';
+
+/** Языковая пара для статистики: «auto» заменяется языком, определённым при переводе. */
+async function recordTranslation(env: Env, response: TranslateResponse, sourceLang: SourceLanguage, targetLang: LanguageCode) {
+  const from = sourceLang === 'auto' ? (response.detectedLang ?? 'auto') : sourceLang;
+  // total — все переводы за день, cache_hits — сколько из них отдал кэш.
+  const metrics = [
+    'total',
+    `translations:${response.provider}`,
+    `pair:${from}-${targetLang}`,
+  ];
+  if (response.cached) metrics.push('cache_hits');
+  if (isAi(response)) metrics.push('ai_requests');
+  await bump(env, metrics);
+}
+
+function isAi(response: TranslateResponse): boolean {
+  return response.provider === 'gemini' || response.provider === 'groq' || response.provider === 'workersai';
+}
 
 interface Job {
   env: Env;
@@ -97,7 +116,10 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       uiLang,
     });
     const cached = await readCache<TranslateResponse>(env, cacheKey);
-    if (cached) return jsonResponse({ ...cached, cached: true });
+    if (cached) {
+      void recordTranslation(env, cached, sourceLang, targetLang);
+      return jsonResponse({ ...cached, cached: true });
+    }
 
     let result: TranslateResponse | null;
     if (mode === 'ai') {
@@ -110,6 +132,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     }
 
     await writeCache(env, cacheKey, 'translate', result);
+    void recordTranslation(env, result, sourceLang, targetLang);
     return jsonResponse(result);
   } catch (error) {
     return errorResponse(error, uiLang);

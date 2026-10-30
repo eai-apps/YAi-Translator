@@ -1,4 +1,8 @@
-/** Переменные окружения Cloudflare Pages. Секреты задаются только в панели Cloudflare или в .dev.vars. */
+/**
+ * Переменные окружения Cloudflare Pages. Секреты задаются только в панели Cloudflare или в .dev.vars.
+ * Резервные ключи (GEMINI_API_KEY_2 … _5 и такие же для других сервисов) читаются
+ * через Numbers по имени, поэтому здесь они не перечислены.
+ */
 export interface Env {
   /** D1: кэш ответов и счётчик дневных запросов. Может отсутствовать локально. */
   DB?: D1Database;
@@ -12,6 +16,9 @@ export interface Env {
   MICROSOFT_TRANSLATOR_REGION?: string;
   /** Google Cloud Translation API (Basic v2). */
   GOOGLE_TRANSLATE_KEY?: string;
+  /** Lara Translate: идентификатор и секрет ключа. */
+  LARA_ACCESS_KEY_ID?: string;
+  LARA_ACCESS_KEY_SECRET?: string;
   /** Почта для MyMemory: поднимает бесплатный лимит с 5 000 до 50 000 символов в день. */
   MYMEMORY_EMAIL?: string;
   /**
@@ -19,6 +26,8 @@ export interface Env {
    * Если не задан, ключи в аккаунте не сохраняются — только на устройстве.
    */
   KEY_ENCRYPTION_SECRET?: string;
+  /** Логины админов через запятую. Без этого секрета админки нет ни у кого. */
+  ADMIN_LOGINS?: string;
 }
 
 /** Минимальный тип binding'а Workers AI, чтобы не зависеть от версии workers-types. */

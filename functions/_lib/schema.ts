@@ -29,8 +29,11 @@ const STATEMENTS = [
     password_hash TEXT NOT NULL,
     password_salt TEXT NOT NULL,
     created_at INTEGER NOT NULL,
-    last_login_at INTEGER
+    last_login_at INTEGER,
+    blocked INTEGER NOT NULL DEFAULT 0
   )`,
+  // Добавлено на этапе 3: у базы этапа 2 нет колонки blocked.
+  'ALTER TABLE users ADD COLUMN blocked INTEGER NOT NULL DEFAULT 0',
   `CREATE TABLE IF NOT EXISTS sessions (
     token_hash TEXT PRIMARY KEY,
     user_id TEXT NOT NULL,
@@ -64,19 +67,87 @@ const STATEMENTS = [
     attempts INTEGER NOT NULL,
     PRIMARY KEY (ip_hash, window_start)
   )`,
+
+  // --- Этап 3: резервные ключи, статистика, посетители, админка, настройки ---
+  // Ключи сайта, добавленные в админке (шифруются AES-GCM, в строке только шифротекст).
+  `CREATE TABLE IF NOT EXISTS site_keys (
+    id TEXT PRIMARY KEY,
+    provider TEXT NOT NULL,
+    ciphertext TEXT NOT NULL,
+    iv TEXT NOT NULL,
+    last4 TEXT NOT NULL,
+    region TEXT,
+    created_at INTEGER NOT NULL,
+    created_by TEXT
+  )`,
+  'CREATE INDEX IF NOT EXISTS idx_site_keys_provider ON site_keys (provider)',
+  // Состояние каждого ключа (и своего, и из Cloudflare): отдыхает до … / неверный.
+  `CREATE TABLE IF NOT EXISTS key_state (
+    provider TEXT NOT NULL,
+    key_id TEXT NOT NULL,
+    exhausted_until INTEGER,
+    invalid INTEGER NOT NULL DEFAULT 0,
+    last_error TEXT,
+    last_used_at INTEGER,
+    PRIMARY KEY (provider, key_id)
+  )`,
+  // Дневные счётчики: metric = translations:deepl, visitors, cache_hits …
+  `CREATE TABLE IF NOT EXISTS stats_daily (
+    day TEXT NOT NULL,
+    metric TEXT NOT NULL,
+    value INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY (day, metric)
+  )`,
+  // Посетители: хеш «IP + день», сам IP не хранится.
+  `CREATE TABLE IF NOT EXISTS visitors (
+    day TEXT NOT NULL,
+    visitor_hash TEXT NOT NULL,
+    created_at INTEGER NOT NULL,
+    PRIMARY KEY (day, visitor_hash)
+  )`,
+  'CREATE INDEX IF NOT EXISTS idx_visitors_day ON visitors (day)',
+  // Журнал действий админов.
+  `CREATE TABLE IF NOT EXISTS admin_log (
+    id TEXT PRIMARY KEY,
+    at INTEGER NOT NULL,
+    user_id TEXT NOT NULL,
+    login TEXT NOT NULL,
+    action TEXT NOT NULL,
+    details TEXT
+  )`,
+  'CREATE INDEX IF NOT EXISTS idx_admin_log_at ON admin_log (at)',
+  // Настройки сайта: ключ → JSON-значение.
+  `CREATE TABLE IF NOT EXISTS settings (
+    key TEXT PRIMARY KEY,
+    value TEXT NOT NULL,
+    updated_at INTEGER NOT NULL
+  )`,
 ];
 
 let ready: Promise<void> | null = null;
 
+/**
+ * Выполняет batch по одному: в batch D1 одна ошибка портит весь набор,
+ * а ALTER TABLE с уже существующей колонкой ошибается предсказуемо — пропускаем её.
+ */
+async function runStatements(db: D1Database): Promise<void> {
+  for (const sql of STATEMENTS) {
+    try {
+      await db.prepare(sql).run();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      if (/duplicate column name/i.test(message)) continue;
+      throw error;
+    }
+  }
+}
+
 export function ensureSchema(env: Env): Promise<void> {
   if (!env.DB) return Promise.resolve();
   const db = env.DB;
-  ready ??= db
-    .batch(STATEMENTS.map((sql) => db.prepare(sql)))
-    .then(() => undefined)
-    .catch((error: unknown) => {
-      ready = null; // попробуем снова при следующем запросе
-      throw error;
-    });
+  ready ??= runStatements(db).catch((error: unknown) => {
+    ready = null; // попробуем снова при следующем запросе
+    throw error;
+  });
   return ready;
 }

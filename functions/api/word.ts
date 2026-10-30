@@ -9,6 +9,7 @@ import { resolveUserKeys } from '../_lib/auth/keys';
 import { createLimitGuard } from '../_lib/usage';
 import { buildWordPrompt } from '../_lib/prompts';
 import { runJsonTask } from '../_lib/router';
+import { bump } from '../_lib/stats';
 import { validateWordCard } from '../_lib/validate';
 
 export const onRequestPost: PagesFunction<Env> = async (context) => {
@@ -29,7 +30,10 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
     const cacheKey = await buildCacheKey({ kind: 'word', text: word, sourceLang, targetLang, uiLang });
     const cached = await readCache<WordResponse>(env, cacheKey);
-    if (cached) return jsonResponse({ ...cached, cached: true });
+    if (cached) {
+      void bump(env, ['word', 'total', 'cache_hits']);
+      return jsonResponse({ ...cached, cached: true });
+    }
 
     // Дневной лимит считается, только когда дело доходит до общих ключей сайта.
     const limitGuard = createLimitGuard(env, getClientIp(context.request));
@@ -46,6 +50,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
     const result: WordResponse = { card: data, provider, cached: false };
     await writeCache(env, cacheKey, 'word', result, LIMITS.wordCacheTtlSeconds);
+    void bump(env, ['word', 'total', 'ai_requests']);
     return jsonResponse(result);
   } catch (error) {
     return errorResponse(error, uiLang);

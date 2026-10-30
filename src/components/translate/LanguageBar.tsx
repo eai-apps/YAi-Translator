@@ -1,7 +1,8 @@
-/** Выбор языков и кнопка обмена. */
+/** Выбор языков и кнопка обмена. Сверху закреплённые de, ru, uk, en, ниже остальные. */
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { LanguageCode, SourceLanguage } from '../../../shared/types';
-import { LANGUAGES } from '../../../shared/languages';
+import { groupedLanguages } from '../../../shared/languages';
 import { IconSwap } from '../layout/icons';
 
 interface LanguageBarProps {
@@ -33,6 +34,11 @@ export function LanguageBar({
   onSwap,
 }: LanguageBarProps) {
   const { t } = useTranslation();
+  // Список строится один раз: закреплённые сверху, остальные ниже.
+  const groups = useMemo(() => groupedLanguages(), []);
+
+  const selectClass =
+    'h-11 w-full cursor-pointer appearance-none rounded-xl bg-transparent pl-3 pr-9 text-sm font-medium text-ink focus:bg-soft';
 
   return (
     <div className="flex flex-col gap-2 rounded-2xl border border-line bg-card p-2 shadow-card sm:flex-row sm:items-center">
@@ -41,14 +47,23 @@ export function LanguageBar({
         <select
           value={sourceLang}
           onChange={(event) => onSourceChange(event.target.value as SourceLanguage)}
-          className="h-11 w-full cursor-pointer appearance-none rounded-xl bg-transparent pl-3 pr-9 text-sm font-medium text-ink focus:bg-soft"
+          className={selectClass}
         >
           <option value="auto">{t('languages.auto')}</option>
-          {LANGUAGES.map((language) => (
-            <option key={language.code} value={language.code}>
-              {language.nativeName}
-            </option>
-          ))}
+          <optgroup label={t('languages.pinned')}>
+            {groups.pinned.map((language) => (
+              <option key={language.code} value={language.code}>
+                {language.nativeName} — {t(`languages.${language.code}`)}
+              </option>
+            ))}
+          </optgroup>
+          <optgroup label={t('languages.other')}>
+            {groups.other.map((language) => (
+              <option key={language.code} value={language.code}>
+                {language.nativeName} — {t(`languages.${language.code}`)}
+              </option>
+            ))}
+          </optgroup>
         </select>
         <Chevron />
       </label>
@@ -68,13 +83,22 @@ export function LanguageBar({
         <select
           value={targetLang}
           onChange={(event) => onTargetChange(event.target.value as LanguageCode)}
-          className="h-11 w-full cursor-pointer appearance-none rounded-xl bg-transparent pl-3 pr-9 text-sm font-medium text-ink focus:bg-soft"
+          className={selectClass}
         >
-          {LANGUAGES.map((language) => (
-            <option key={language.code} value={language.code}>
-              {language.nativeName}
-            </option>
-          ))}
+          <optgroup label={t('languages.pinned')}>
+            {groups.pinned.map((language) => (
+              <option key={language.code} value={language.code}>
+                {language.nativeName} — {t(`languages.${language.code}`)}
+              </option>
+            ))}
+          </optgroup>
+          <optgroup label={t('languages.other')}>
+            {groups.other.map((language) => (
+              <option key={language.code} value={language.code}>
+                {language.nativeName} — {t(`languages.${language.code}`)}
+              </option>
+            ))}
+          </optgroup>
         </select>
         <Chevron />
       </label>

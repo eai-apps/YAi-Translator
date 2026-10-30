@@ -2,6 +2,7 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { CefrLevel, LanguageCode, WordExample } from '../../../shared/types';
+import { textDirection } from '../../../shared/languages';
 import type { SpeechController } from '../../hooks/useSpeech';
 import { CEFR_LEVELS } from '../../lib/labels';
 import { Segmented } from '../ui/Segmented';
@@ -45,9 +46,13 @@ export function ExamplesList({ examples, language, speech }: ExamplesListProps) 
           <li key={`${example.level}-${index}`} className="rounded-xl border border-line px-3 py-2.5">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
-                <p className="text-sm font-medium leading-relaxed">{example.text}</p>
+                <p dir={textDirection(language)} className="text-sm font-medium leading-relaxed">
+                  {example.text}
+                </p>
                 {example.translation ? (
-                  <p className="mt-0.5 text-sm leading-relaxed text-muted">{example.translation}</p>
+                  <p dir="auto" className="mt-0.5 text-sm leading-relaxed text-muted">
+                    {example.translation}
+                  </p>
                 ) : null}
               </div>
               <SpeakButton

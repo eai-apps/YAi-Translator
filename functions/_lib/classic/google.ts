@@ -1,10 +1,12 @@
 /**
  * Google Cloud Translation (Basic v2, 500 000 символов в месяц бесплатно).
- * Включается, только если в Cloudflare задан GOOGLE_TRANSLATE_KEY.
+ * Включается, если задан GOOGLE_TRANSLATE_KEY (или _2 … _5, или ключ из админки).
  * Важно: Google требует привязать карту к проекту Google Cloud даже для бесплатного объёма.
  */
 import { isLanguageCode } from '../../../shared/languages';
 import { CLASSIC } from '../config';
+import { usableKeys } from '../keystate';
+import { markExhausted, markInvalid, markUsed } from '../keystate';
 import { withTimeoutSignal } from '../utils';
 import type { ClassicTranslator } from './types';
 
@@ -28,34 +30,43 @@ export const googleTranslator: ClassicTranslator = {
   isConfigured: (env) => Boolean(env.GOOGLE_TRANSLATE_KEY),
 
   async translate({ env, text, sourceLang, targetLang, signal }) {
-    if (!env.GOOGLE_TRANSLATE_KEY) return null;
-    const { signal: timeoutSignal, clear } = withTimeoutSignal(signal, CLASSIC.timeoutMs);
-    try {
-      const response = await fetch(CLASSIC.googleUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-goog-api-key': env.GOOGLE_TRANSLATE_KEY },
-        body: JSON.stringify({
-          q: text,
-          target: targetLang,
-          format: 'text',
-          ...(sourceLang !== 'auto' ? { source: sourceLang } : {}),
-        }),
-        signal: timeoutSignal,
-      });
-      if (!response.ok) {
-        console.warn(`Google Translate ${response.status}`);
-        return null;
+    const keys = await usableKeys(env, 'google');
+    const body = JSON.stringify({
+      q: text,
+      target: targetLang,
+      format: 'text',
+      ...(sourceLang !== 'auto' ? { source: sourceLang } : {}),
+    });
+
+    for (const key of keys) {
+      const { signal: timeoutSignal, clear } = withTimeoutSignal(signal, CLASSIC.timeoutMs);
+      try {
+        const response = await fetch(CLASSIC.googleUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key.key },
+          body,
+          signal: timeoutSignal,
+        });
+        if (!response.ok) {
+          const note = `Google Translate ${response.status}`;
+          console.warn(note);
+          if (response.status === 403) await markInvalid(env, 'google', key.id, note);
+          else if (response.status === 429) await markExhausted(env, 'google', key.id, note);
+          continue;
+        }
+        const data = (await response.json().catch(() => ({}))) as GoogleResponse;
+        const item = data.data?.translations?.[0];
+        const translated = item?.translatedText ? decodeEntities(item.translatedText).trim() : '';
+        if (!translated) continue;
+        void markUsed(env, 'google', key.id);
+        const detected = item?.detectedSourceLanguage ?? null;
+        return { text: translated, detectedLang: isLanguageCode(detected) ? detected : null };
+      } catch {
+        // Сеть или таймаут — пробуем следующий ключ.
+      } finally {
+        clear();
       }
-      const data = (await response.json().catch(() => ({}))) as GoogleResponse;
-      const item = data.data?.translations?.[0];
-      const translated = item?.translatedText ? decodeEntities(item.translatedText).trim() : '';
-      if (!translated) return null;
-      const detected = item?.detectedSourceLanguage ?? null;
-      return { text: translated, detectedLang: isLanguageCode(detected) ? detected : null };
-    } catch {
-      return null;
-    } finally {
-      clear();
     }
+    return null;
   },
 };

@@ -111,6 +111,16 @@ const ERROR_MESSAGES: Record<ApiErrorCode, Record<UiLanguage, string>> = {
     de: 'Dieser Schlüssel gibt keinen Zugriff. Prüfen Sie, ob Sie ihn vollständig kopiert haben und er aktiv ist.',
     en: 'This key does not grant access. Make sure you copied all of it and that it is active.',
   },
+  FORBIDDEN: {
+    ru: 'Недостаточно прав: эта страница доступна только администратору.',
+    de: 'Keine Berechtigung: Diese Seite ist nur für Administratoren.',
+    en: 'Not enough rights: this page is only for administrators.',
+  },
+  ACCOUNT_BLOCKED: {
+    ru: 'Этот аккаунт заблокирован администратором.',
+    de: 'Dieses Konto wurde vom Administrator gesperrt.',
+    en: 'This account has been blocked by the administrator.',
+  },
 };
 
 export function messageForError(code: ApiErrorCode, uiLang: UiLanguage): string {

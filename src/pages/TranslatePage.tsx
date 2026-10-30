@@ -1,14 +1,23 @@
-/** Экран «Перевод»: связывает ввод, API, разбор, проверку и окно ключей. */
+/** Экран «Перевод»: связывает ввод, API, разбор, проверку, «Как переводят другие» и окно ключей. */
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import type { CheckResponse, CompareResponse, ExplainResponse, LanguageCode, SourceLanguage } from '../../shared/types';
+import type {
+  CheckResponse,
+  ExplainResponse,
+  LanguageCode,
+  ProviderId,
+  SourceLanguage,
+  TranslateResponse,
+} from '../../shared/types';
 import { isLanguageCode } from '../../shared/languages';
 import { api } from '../api/client';
 import { toTranslatorError } from '../lib/errors';
 import type { TranslatorError } from '../lib/errors';
-import { MAX_TEXT_LENGTH } from '../config';
+import { MAX_TEXT_LENGTH, STORAGE_KEYS } from '../config';
 import { useHistory } from '../hooks/useHistory';
+import { useLocalStorage } from '../hooks/useLocalStorage';
+import { useOthers } from '../hooks/useOthers';
 import { useSettings } from '../hooks/useSettings';
 import { useSpeech } from '../hooks/useSpeech';
 import { useTranslator } from '../hooks/useTranslator';
@@ -16,9 +25,9 @@ import { PageHeader } from '../components/ui/PageHeader';
 import { LanguageBar } from '../components/translate/LanguageBar';
 import { SourcePanel } from '../components/translate/SourcePanel';
 import { ResultPanel } from '../components/translate/ResultPanel';
+import { OthersPanel } from '../components/translate/OthersPanel';
 import { ExplanationPanel } from '../components/translate/ExplanationPanel';
 import { CheckPanel } from '../components/translate/CheckPanel';
-import { ComparePanel } from '../components/translate/ComparePanel';
 import { WordPanel } from '../components/word/WordPanel';
 import { LimitDialog } from '../components/limit/LimitDialog';
 
@@ -39,18 +48,33 @@ export default function TranslatePage() {
   const { items, toggleFavorite } = useHistory();
   const speech = useSpeech();
   const translator = useTranslator(() => setLimitOpen(true));
+  // Настройка профиля: показывать ли других переводчиков автоматически.
+  const [showOthers] = useLocalStorage<boolean>(STORAGE_KEYS.showOthers, true);
 
   const [limitOpen, setLimitOpen] = useState(false);
   const [explain, setExplain] = useState<PanelState<ExplainResponse>>(closedPanel);
   const [check, setCheck] = useState<PanelState<CheckResponse>>(closedPanel);
-  const [compare, setCompare] = useState<PanelState<CompareResponse>>(closedPanel);
-  const compareAbort = useRef<AbortController | null>(null);
+  /** Вариант другого переводчика, выбранный кнопкой «Использовать этот вариант». */
+  const [chosen, setChosen] = useState<{ provider: ProviderId; text: string } | null>(null);
   const [searchParams, setSearchParams] = useSearchParams();
 
   const explainAbort = useRef<AbortController | null>(null);
   const checkAbort = useRef<AbortController | null>(null);
 
-  const { text, sourceLang, targetLang, applyIncoming } = translator;
+  const { text, sourceLang, targetLang, applyIncoming, result } = translator;
+
+  // Выбранный вариант действует только для этого текста и языков.
+  useEffect(() => {
+    setChosen(null);
+  }, [text, sourceLang, targetLang, translator.providerChoice]);
+
+  const others = useOthers({
+    text,
+    sourceLang,
+    targetLang,
+    provider: result?.provider ?? null,
+    autoEnabled: showOthers,
+  });
 
   // Текст и языки из истории («Открыть» в словаре).
   useEffect(() => {
@@ -74,17 +98,14 @@ export default function TranslatePage() {
   useEffect(() => {
     explainAbort.current?.abort();
     checkAbort.current?.abort();
-    compareAbort.current?.abort();
     setExplain(closedPanel());
     setCheck(closedPanel());
-    setCompare(closedPanel());
   }, [text, sourceLang, targetLang]);
 
   useEffect(() => {
     return () => {
       explainAbort.current?.abort();
       checkAbort.current?.abort();
-      compareAbort.current?.abort();
     };
   }, []);
 
@@ -135,29 +156,21 @@ export default function TranslatePage() {
     })();
   }, [text, uiLanguage, t]);
 
-  const runCompare = useCallback(() => {
-    const value = text.trim();
-    if (!value) return;
-    compareAbort.current?.abort();
-    const controller = new AbortController();
-    compareAbort.current = controller;
-    setCompare({ open: true, loading: true, data: null, error: null });
-
-    void (async () => {
-      try {
-        const data = await api.compare({ text: value, sourceLang, targetLang }, controller.signal);
-        if (controller.signal.aborted) return;
-        setCompare({ open: true, loading: false, data, error: null });
-      } catch (caught) {
-        if (controller.signal.aborted) return;
-        setCompare({ open: true, loading: false, data: null, error: toTranslatorError(caught, t('errors.unknown')) });
-      }
-    })();
-  }, [text, sourceLang, targetLang, t]);
+  /** «Использовать этот вариант»: чужой текст становится основным переводом. */
+  const useVariant = (provider: ProviderId, variantText: string) => {
+    setChosen({ provider, text: variantText });
+  };
 
   const currentFavorite = translator.historyId
     ? items.find((item) => item.id === translator.historyId)?.favorite ?? false
     : false;
+
+  // Показанный перевод: выбранный вариант или ответ сервера.
+  const shown: TranslateResponse | null = result
+    ? chosen
+      ? { ...result, translatedText: chosen.text, provider: chosen.provider, alternatives: [] }
+      : result
+    : null;
 
   return (
     <>
@@ -180,7 +193,7 @@ export default function TranslatePage() {
           speech={speech}
         />
         <ResultPanel
-          result={translator.result}
+          result={shown}
           loading={translator.loading}
           error={translator.error}
           sourceLang={translator.sourceLang}
@@ -197,10 +210,27 @@ export default function TranslatePage() {
           onOpenLimit={() => setLimitOpen(true)}
           onExplain={runExplain}
           onCheck={runCheck}
-          onCompare={runCompare}
           onToggleFavorite={() => {
             if (translator.historyId) toggleFavorite(translator.historyId);
           }}
+          others={
+            showOthers && result && !translator.error ? (
+              <OthersPanel
+                data={others.data}
+                loading={others.loading}
+                failed={others.failed}
+                autoEnabled={showOthers}
+                exclude={result.provider}
+                targetLang={targetLang}
+                speech={speech}
+                expanded={others.expanded}
+                onExpand={others.expand}
+                onCollapse={others.collapse}
+                onUseVariant={useVariant}
+                usedProvider={chosen?.provider ?? null}
+              />
+            ) : null
+          }
         />
       </div>
 
@@ -210,21 +240,6 @@ export default function TranslatePage() {
         onRetry={translator.retryWord}
         onOpenLimit={() => setLimitOpen(true)}
       />
-
-      {compare.open ? (
-        <ComparePanel
-          data={compare.data}
-          loading={compare.loading}
-          error={compare.error}
-          targetLang={targetLang}
-          speech={speech}
-          onClose={() => {
-            compareAbort.current?.abort();
-            setCompare(closedPanel());
-          }}
-          onRetry={runCompare}
-        />
-      ) : null}
 
       {explain.open ? (
         <ExplanationPanel

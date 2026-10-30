@@ -8,11 +8,27 @@ import type { ProviderPrompt } from './providers/types';
 /** Короткая проверка ключа: модель должна ответить одним словом. */
 export const KEY_TEST_PROMPT = 'Reply with exactly one word: OK';
 
+/** Названия всех 12 языков сайта на трёх языках интерфейса. */
 const LANGUAGE_NAMES: Record<UiLanguage, Record<LanguageCode, string>> = {
-  ru: { de: 'немецкий', ru: 'русский', uk: 'украинский', en: 'английский' },
-  de: { de: 'Deutsch', ru: 'Russisch', uk: 'Ukrainisch', en: 'Englisch' },
-  en: { de: 'German', ru: 'Russian', uk: 'Ukrainian', en: 'English' },
+  ru: {
+    de: 'немецкий', ru: 'русский', uk: 'украинский', en: 'английский',
+    fr: 'французский', es: 'испанский', it: 'итальянский', pt: 'португальский',
+    pl: 'польский', nl: 'нидерландский', tr: 'турецкий', ar: 'арабский',
+  },
+  de: {
+    de: 'Deutsch', ru: 'Russisch', uk: 'Ukrainisch', en: 'Englisch',
+    fr: 'Französisch', es: 'Spanisch', it: 'Italienisch', pt: 'Portugiesisch',
+    pl: 'Polnisch', nl: 'Niederländisch', tr: 'Türkisch', ar: 'Arabisch',
+  },
+  en: {
+    de: 'German', ru: 'Russian', uk: 'Ukrainian', en: 'English',
+    fr: 'French', es: 'Spanish', it: 'Italian', pt: 'Portuguese',
+    pl: 'Polish', nl: 'Dutch', tr: 'Turkish', ar: 'Arabic',
+  },
 };
+
+/** ISO-коды для поля detectedLang в ответе ИИ. */
+const ISO_CODES = '"de", "ru", "uk", "en", "fr", "es", "it", "pt", "pl", "nl", "tr" or "ar"';
 
 const UI_NAMES: Record<UiLanguage, string> = {
   ru: 'Russian',
@@ -48,19 +64,19 @@ export function buildTranslatePrompt(input: {
   uiLang: UiLanguage;
 }): ProviderPrompt {
   const { text, sourceLang, targetLang, uiLang } = input;
-  const system = `You are YAi Translator, a precise translator between German, Russian, Ukrainian and English.
+  const system = `You are YAi Translator, a precise translator between German, Russian, Ukrainian, English, French, Spanish, Italian, Portuguese, Polish, Dutch, Turkish and Arabic.
 Task: translate the text; ${sourceDescription(sourceLang, uiLang)}; target language: ${languageName(targetLang, uiLang)}.
 
 Rules:
 - Keep the meaning, tone, names, numbers and line breaks of the original.
 - "translatedText" is the best natural translation.
 - "alternatives": 2-3 complete alternative translations of the whole text, each in a different register: exactly one "neutral", one "colloquial", one "formal". Only include an alternative if it is natural and noticeably different from "translatedText".
-- "detectedLang": ISO code of the detected source language ("de", "ru", "uk" or "en"). Use null when the source language was given explicitly.
+- "detectedLang": ISO code of the detected source language (${ISO_CODES}). Use null when the source language was given explicitly.
 - Never add explanations or notes.
 
 ${JSON_RULES}
 JSON schema:
-{"translatedText":"string","alternatives":[{"style":"neutral|colloquial|formal","text":"string"}],"detectedLang":"de|ru|uk|en|null"}`;
+{"translatedText":"string","alternatives":[{"style":"neutral|colloquial|formal","text":"string"}],"detectedLang":"de|ru|uk|en|fr|es|it|pt|pl|nl|tr|ar|null"}`;
 
   return { task: 'translate', system, user: asData('Text to translate', text) };
 }
@@ -79,7 +95,7 @@ The learner studies German. If the input is NOT German but the target language i
 
 Rules:
 - "lemma": dictionary form (for German nouns: the noun without article, capitalised).
-- "language": language of the analysed word ("de", "ru", "uk" or "en").
+- "language": language of the analysed word (${ISO_CODES}).
 - "partOfSpeech": one of "noun","verb","adjective","adverb","pronoun","preposition","conjunction","numeral","interjection","phrase","other".
 - "article": German nouns only — "der", "die" or "das"; otherwise null.
 - "plural": German nouns only, with article, e.g. "die Häuser"; otherwise null.
@@ -96,7 +112,7 @@ Rules:
 
 ${JSON_RULES}
 JSON schema:
-{"lemma":"string","language":"de|ru|uk|en","partOfSpeech":"noun|verb|adjective|adverb|pronoun|preposition|conjunction|numeral|interjection|phrase|other","article":"der|die|das|null","plural":"string|null","transcription":"string|null","meanings":[{"sense":"string","translations":["string"],"note":"string|null"}],"declension":[{"grammaticalCase":"nominative|accusative|dative|genitive","singular":"string","plural":"string"}]|null,"conjugation":{"praesens":[{"pronoun":"string","form":"string"}],"praeteritum":[{"pronoun":"string","form":"string"}],"perfekt":"string","auxiliary":"haben|sein"}|null,"governance":["string"],"examples":[{"level":"A1|A2|B1|B2","text":"string","translation":"string"}],"synonyms":["string"],"antonyms":["string"],"phrases":[{"text":"string","translation":"string"}],"grammarNotes":["string"]}`;
+{"lemma":"string","language":"de|ru|uk|en|fr|es|it|pt|pl|nl|tr|ar","partOfSpeech":"noun|verb|adjective|adverb|pronoun|preposition|conjunction|numeral|interjection|phrase|other","article":"der|die|das|null","plural":"string|null","transcription":"string|null","meanings":[{"sense":"string","translations":["string"],"note":"string|null"}],"declension":[{"grammaticalCase":"nominative|accusative|dative|genitive","singular":"string","plural":"string"}]|null,"conjugation":{"praesens":[{"pronoun":"string","form":"string"}],"praeteritum":[{"pronoun":"string","form":"string"}],"perfekt":"string","auxiliary":"haben|sein"}|null,"governance":["string"],"examples":[{"level":"A1|A2|B1|B2","text":"string","translation":"string"}],"synonyms":["string"],"antonyms":["string"],"phrases":[{"text":"string","translation":"string"}],"grammarNotes":["string"]}`;
 
   return { task: 'word', system, user: asData('Word to analyse', word) };
 }

@@ -1,11 +1,16 @@
 /**
- * Проверка обычных переводчиков без ИИ: DeepL, Microsoft, Google, MyMemory, M2M100.
+ * Проверка обычных переводчиков без ИИ: DeepL, Lara, Microsoft, Google, MyMemory, M2M100.
  * Проверяем сам ответ сервиса, а не текст перевода: у MyMemory для коротких слов
  * перевод бывает пустым, и это не поломка. Для DeepL хватает запроса расхода.
+ * DB, Lara, Microsoft и Google проверяются первым рабочим ключом из пула.
  */
 import type { ServiceCheck, UiLanguage } from '../../../shared/types';
-import { CLASSIC, HEALTH_CHECK } from '../config';
+import { CLASSIC, deeplUrl, HEALTH_CHECK, LARA } from '../config';
 import type { Env } from '../env';
+import { allKeys } from '../keypool';
+import { usableKeys } from '../keystate';
+import type { PooledKey } from '../keypool';
+import { laraContentMd5, laraSignature } from '../classic/lara';
 import { withTimeoutSignal } from '../utils';
 import { messages } from './messages';
 
@@ -28,21 +33,57 @@ async function probe(
   }
 }
 
-export function checkDeepL(env: Env, uiLang: UiLanguage): Promise<ServiceCheck> {
-  if (!env.DEEPL_API_KEY) return Promise.resolve(messages.notConfigured(uiLang));
+/**
+ * Первый рабочий ключ сервиса (отдыхающие и неверные пропускаются).
+ * Если ключи есть, но все отдыхают или неверные, — возвращаем первый из них:
+ * проверка честно покажет причину, а не «ключ не задан».
+ */
+async function firstKey(env: Env, provider: 'deepl' | 'lara' | 'microsoft' | 'google'): Promise<PooledKey | null> {
+  const usable = await usableKeys(env, provider);
+  if (usable.length > 0) return usable[0];
+  const all = await allKeys(env, provider);
+  return all[0] ?? null;
+}
+
+export async function checkDeepL(env: Env, uiLang: UiLanguage): Promise<ServiceCheck> {
+  const key = await firstKey(env, 'deepl');
+  if (!key) return messages.notConfigured(uiLang);
   return probe('DeepL', uiLang, async (signal) => {
-    // Бесплатный ключ (…:fx) — api-free, остальные тарифы DeepL — api.
-    const host = env.DEEPL_API_KEY!.trim().endsWith(':fx') ? 'api-free.deepl.com' : 'api.deepl.com';
-    const response = await fetch(`https://${host}/v2/usage`, {
-      headers: { Authorization: `DeepL-Auth-Key ${env.DEEPL_API_KEY}` },
+    const response = await fetch(deeplUrl(key.key, 'usage'), {
+      headers: { Authorization: `DeepL-Auth-Key ${key.key}` },
       signal,
     });
     return response.ok;
   });
 }
 
-export function checkMicrosoft(env: Env, uiLang: UiLanguage): Promise<ServiceCheck> {
-  if (!env.MICROSOFT_TRANSLATOR_KEY) return Promise.resolve(messages.notConfigured(uiLang));
+export async function checkLara(env: Env, uiLang: UiLanguage): Promise<ServiceCheck> {
+  const key = await firstKey(env, 'lara');
+  if (!key) return messages.notConfigured(uiLang);
+  return probe('Lara', uiLang, async (signal) => {
+    // Проверяем подпись ключа: тот же запрос авторизации, что и при переводе.
+    const date = new Date().toUTCString();
+    const body = JSON.stringify({ id: key.key });
+    const md5 = await laraContentMd5(body);
+    const signature = await laraSignature(key.secretPart ?? '', 'POST', '/v2/auth', md5, 'application/json', date);
+    const response = await fetch(`${LARA.baseUrl}/v2/auth`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Lara-Date': date,
+        'Content-MD5': md5,
+        Authorization: `Lara:${signature}`,
+      },
+      body,
+      signal,
+    });
+    return response.ok;
+  });
+}
+
+export async function checkMicrosoft(env: Env, uiLang: UiLanguage): Promise<ServiceCheck> {
+  const key = await firstKey(env, 'microsoft');
+  if (!key) return messages.notConfigured(uiLang);
   return probe('Microsoft Translator', uiLang, async (signal) => {
     const url = new URL(CLASSIC.microsoftUrl);
     url.searchParams.set('api-version', '3.0');
@@ -50,11 +91,10 @@ export function checkMicrosoft(env: Env, uiLang: UiLanguage): Promise<ServiceChe
     url.searchParams.set('from', 'de');
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
-      'Ocp-Apim-Subscription-Key': env.MICROSOFT_TRANSLATOR_KEY ?? '',
+      'Ocp-Apim-Subscription-Key': key.key,
     };
-    if (env.MICROSOFT_TRANSLATOR_REGION) {
-      headers['Ocp-Apim-Subscription-Region'] = env.MICROSOFT_TRANSLATOR_REGION;
-    }
+    const region = key.region ?? env.MICROSOFT_TRANSLATOR_REGION;
+    if (region) headers['Ocp-Apim-Subscription-Region'] = region;
     const response = await fetch(url.toString(), {
       method: 'POST',
       headers,
@@ -65,14 +105,15 @@ export function checkMicrosoft(env: Env, uiLang: UiLanguage): Promise<ServiceChe
   });
 }
 
-export function checkGoogle(env: Env, uiLang: UiLanguage): Promise<ServiceCheck> {
-  if (!env.GOOGLE_TRANSLATE_KEY) return Promise.resolve(messages.notConfigured(uiLang));
+export async function checkGoogle(env: Env, uiLang: UiLanguage): Promise<ServiceCheck> {
+  const key = await firstKey(env, 'google');
+  if (!key) return messages.notConfigured(uiLang);
   return probe('Google Translate', uiLang, async (signal) => {
     const response = await fetch(CLASSIC.googleUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-goog-api-key': env.GOOGLE_TRANSLATE_KEY ?? '',
+        'x-goog-api-key': key.key,
       },
       body: JSON.stringify({ q: HEALTH_CHECK.sampleText, target: 'ru', source: 'de', format: 'text' }),
       signal,

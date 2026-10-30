@@ -14,6 +14,8 @@ const MESSAGE_KEYS: Partial<Record<ClientErrorCode, string>> = {
   SESSION_EXPIRED: 'account.errors.sessionExpired',
   KEYS_STORAGE_DISABLED: 'account.errors.keysStorageDisabled',
   KEY_NO_ACCESS: 'account.errors.keyNoAccess',
+  ACCOUNT_BLOCKED: 'account.errors.blocked',
+  FORBIDDEN: 'errors.forbidden',
   NETWORK: 'errors.network',
   VALIDATION: 'errors.validation',
   TEXT_TOO_LONG: 'errors.tooLong',

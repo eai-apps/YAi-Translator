@@ -8,6 +8,7 @@ import { resolveUserKeys } from '../_lib/auth/keys';
 import { createLimitGuard } from '../_lib/usage';
 import { buildCheckPrompt } from '../_lib/prompts';
 import { runJsonTask } from '../_lib/router';
+import { bump } from '../_lib/stats';
 import { validateCheck } from '../_lib/validate';
 
 export const onRequestPost: PagesFunction<Env> = async (context) => {
@@ -23,7 +24,10 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
     const cacheKey = await buildCacheKey({ kind: 'check', text, sourceLang: 'auto', uiLang: checkUiLang });
     const cached = await readCache<CheckResponse>(env, cacheKey);
-    if (cached) return jsonResponse({ ...cached, cached: true });
+    if (cached) {
+      void bump(env, ['check', 'ai_requests', 'total', 'cache_hits']);
+      return jsonResponse({ ...cached, cached: true });
+    }
 
     // Дневной лимит считается, только когда дело доходит до общих ключей сайта.
     const limitGuard = createLimitGuard(env, getClientIp(context.request));
@@ -40,6 +44,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
     const result: CheckResponse = { ...data, provider, cached: false };
     await writeCache(env, cacheKey, 'check', result);
+    void bump(env, ['check', 'ai_requests', 'total']);
     return jsonResponse(result);
   } catch (error) {
     return errorResponse(error, uiLang);

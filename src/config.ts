@@ -5,7 +5,7 @@
 export const API_BASE = (import.meta.env.VITE_API_BASE ?? '').replace(/\/+$/, '');
 
 /** Версия показывается в профиле; совпадает с package.json. */
-export const APP_VERSION = '0.3.0';
+export const APP_VERSION = '0.4.0';
 
 export const STORAGE_KEYS = {
   theme: 'yai.theme',
@@ -23,7 +23,16 @@ export const STORAGE_KEYS = {
   syncTombstones: 'yai.syncTombstones',
   /** До какого момента забрали изменения с сервера (передаётся в ?since=). */
   syncSince: 'yai.syncSince',
+  /** Блок «Как переводят другие» показывается автоматически (по умолчанию да). */
+  showOthers: 'yai.showOthers',
+  /** Последняя версия, про которую пользователь видел окно «Что нового». */
+  seenVersion: 'yai.seenVersion',
+  /** Закрытый посетителем баннер-объявление (по тексту). */
+  bannerClosed: 'yai.bannerClosed',
 } as const;
+
+/** До какой длины текста блок «Как переводят другие» загружается сам. */
+export const OTHERS_AUTO_MAX_CHARS = 300;
 
 /** Как часто вошедший пользователь обменивается изменениями с сервером. */
 export const SYNC_INTERVAL_MS = 60_000;

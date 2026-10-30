@@ -7,15 +7,18 @@ import { withTimeoutSignal } from '../utils';
 
 const PROBE_PROMPT = 'Reply with the single word: ok';
 
-/** Gemini: те же адрес и модель, что и в переводе, но крошечный ответ. */
-export async function checkGemini(env: Env, uiLang: UiLanguage): Promise<ServiceCheck> {
-  if (!env.GEMINI_API_KEY) return messages.notConfigured(uiLang);
+/**
+ * Gemini: те же адрес и модель, что и в переводе, но крошечный ответ.
+ * key — первый рабочий ключ из пула (переменная Cloudflare или ключ из админки).
+ */
+export async function checkGemini(env: Env, uiLang: UiLanguage, key: string | null): Promise<ServiceCheck> {
+  if (!key) return messages.notConfigured(uiLang);
   const started = Date.now();
   const { signal, clear } = withTimeoutSignal(undefined, HEALTH_CHECK.timeoutMs);
   try {
     const response = await fetch(`${GEMINI.baseUrl}/${GEMINI.models[0]}:generateContent`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-goog-api-key': env.GEMINI_API_KEY },
+      headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
       signal,
       body: JSON.stringify({
         contents: [{ role: 'user', parts: [{ text: PROBE_PROMPT }] }],
@@ -34,14 +37,14 @@ export async function checkGemini(env: Env, uiLang: UiLanguage): Promise<Service
 }
 
 /** Groq: тот же адрес и модель, что в переводе. */
-export async function checkGroq(env: Env, uiLang: UiLanguage): Promise<ServiceCheck> {
-  if (!env.GROQ_API_KEY) return messages.notConfigured(uiLang);
+export async function checkGroq(env: Env, uiLang: UiLanguage, key: string | null): Promise<ServiceCheck> {
+  if (!key) return messages.notConfigured(uiLang);
   const started = Date.now();
   const { signal, clear } = withTimeoutSignal(undefined, HEALTH_CHECK.timeoutMs);
   try {
     const response = await fetch(GROQ.url, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${env.GROQ_API_KEY}` },
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` },
       signal,
       body: JSON.stringify({
         model: GROQ.models[0],

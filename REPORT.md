@@ -1,3 +1,280 @@
+# Версия 0.4.0 — этап 3: все переводчики, языки, сравнение, админка, «О приложении»
+
+Дата: 30.10.2026 · Версия: **0.4.0** · Автор этапа: DeepSeek
+
+Сделано строго по `tasks/STAGE3.md`. Логотип (`src/components/layout/Logo.tsx`, `public/logo.svg`, иконки)
+и логика аккаунтов (`functions/_lib/auth/*`) не переписывались: в `auth` только добавлены проверка
+блокировки (`require.ts`, `users.ts`) и флаг `isAdmin` в профиле (`account.ts`).
+
+---
+
+## Этап 3 — что сделано
+
+### 1. Новые языки (12 всего)
+
+- `shared/languages.ts`: добавлены fr, es, it, pt, pl, nl, tr, ar. В `LanguageOption` появилось поле `rtl`,
+  `deeplCode` португальского — `PT-PT`, `speechCode` — `pt-PT`, `ar-SA` и т.д. Добавлены
+  `PINNED_LANGUAGE_CODES`, `textDirection()` и `groupedLanguages()`.
+- `LanguageBar`: 12 языков двумя группами — сверху закреплённые de, ru, uk, en, ниже остальные.
+- Восточный текст справа налево: `dir="rtl"` у поля ввода (`SourcePanel`), основного перевода (`ResultPanel`),
+  альтернатив (`AlternativesList`), примеров (`ExamplesList`) и вариантов других сервисов (`OthersPanel`).
+- `functions/_lib/prompts.ts`: `LANGUAGE_NAMES` для всех 12 языков на трёх языках интерфейса,
+  схемы ответов ИИ расширены кодами новых языков.
+- Определение языка перенесено в `shared/detect.ts` (общий файл для сайта и Functions):
+  арабский — U+0600–U+06FF; ñ ¿ ¡ → es; ã õ ç → pt; ł ą ę ś ź ż ń → pl; ğ ş ı → tr;
+  турецкое `İ` только с точкой или ğ/ş (обычная `I` есть и в английском); стоп-слова 25–28 на язык
+  для de, en, fr, es, it, pt, nl, pl, tr. `functions/_lib/classic/detect.ts` теперь только
+  переэкспортирует этот модуль.
+- `src/locales/*.json`: раздел `languages` заполнен на всех трёх языках; карточка слова по-прежнему
+  описывает немецкое слово (это было в промпте и не менялось).
+
+### 2. Новые бесплатные переводчики
+
+- **Lara Translate** — `functions/_lib/classic/lara.ts`. Работает через REST так, как описано
+  в документации и в официальном SDK `@translated/lara`: `X-Lara-Date`, `Content-MD5` (первые 16 байт
+  SHA-256 от тела, base64), `Authorization: Lara:<HMAC-SHA256 от "POST\n/v2/auth\n<md5>\n<json>\n<date>">`,
+  затем `POST /v2/translate` с `Authorization: Bearer <token>`. Ключи: `LARA_ACCESS_KEY_ID` +
+  `LARA_ACCESS_KEY_SECRET` (и `_2` … для резерва).
+- `lara` добавлен в `ProviderId`, `CLASSIC_PROVIDERS` (после DeepL), `CLASSIC.order`, подписи
+  (`src/lib/errors.ts`) и в проверку `/api/health?check=1`.
+- **Apple Translate в браузере невозможен** — см. раздел «На будущее: Apple Translation в iOS-приложении».
+- Старая кнопка «Сравнить переводчики» и `ComparePanel.tsx` удалены.
+
+### 3. Несколько общих ключей
+
+- `functions/_lib/keypool.ts` — список ключей сервиса: переменные Cloudflare (`GEMINI_API_KEY`,
+  `_2` … `_5`, так же для Groq, DeepL, Microsoft, Google, Lara) и ключи из админки (`site_keys`,
+  расшифровка AES-GCM с контекстом `site:<provider>:<id>`).
+- `functions/_lib/keystate.ts` — таблица `key_state`: 429 → `exhausted_until` = 00:00 UTC,
+  401/403 → `invalid`; `key_id` = первые 12 символов SHA-256, сам ключ не хранится.
+- `router.ts` (Gemini/Groq) и обычные переводчики (`providers/deepl.ts`, `classic/microsoft.ts`,
+  `classic/google.ts`, `classic/lara.ts`) перебирают рабочие ключи по очереди. Ключ пользователя,
+  как и раньше, идёт первым.
+  **Ограничения на количество ключей нет:** в админке можно добавить сколько угодно ключей на каждый
+  сервис (Gemini, Groq, DeepL, Microsoft, Google, Lara) — проверка счётчика удалена.
+
+### 4. «Как переводят другие»
+
+- `src/components/translate/OthersPanel.tsx` + `src/hooks/useOthers.ts`. До 300 символов блок грузится
+  сам после основного перевода (если настройка включена), для длинного текста — кнопка «Показать».
+- У варианта: название сервиса, текст, «копировать», «озвучить», «Использовать этот вариант»
+  (становится основным переводом; отмечено «Использован этот вариант»).
+- `/api/compare` переписан: кэш **каждого сервиса отдельно** (ключ `compare|<сервис>|<текст>`),
+  параметр `exclude` убирает сервис основного перевода.
+- Настройка в профиле «Показывать другие переводчики автоматически» (по умолчанию включена,
+  `localStorage` `yai.showOthers`).
+
+### 5. Админка
+
+- Доступ: логин из секрета `ADMIN_LOGINS` (через запятую), пароль — обычный пароль аккаунта.
+  `GET /api/auth/me` отдаёт `isAdmin`; ссылка «Админка» — в профиле и внизу бокового меню.
+- `/admin` — `React.lazy` (`src/pages/AdminPage.tsx`), API — `functions/api/admin/*`,
+  `functions/api/admin/_middleware.ts` проверяет `requireAdmin` на всех адресах, иначе 401/403.
+  Каждое действие пишется в `admin_log`.
+- Вкладки: «Обзор» (пользователи, посетители по хешу IP + дата, переводы за сегодня по сервисам,
+  кэш, запросы ИИ, популярные пары, SVG-график за 30 дней), «Ключи сайта», «Настройки» (дневной лимит,
+  баннер на ru/de/en), «Пользователи» (блокировка, удаление), плюс журнал действий.
+- Таблицы: `site_keys`, `key_state`, `stats_daily`, `visitors`, `admin_log`, `settings`,
+  колонка `users.blocked` — в `functions/_lib/schema.ts` и `migrations/0003_admin.sql`.
+  `schema.ts` теперь выполняет `ALTER TABLE … ADD COLUMN blocked` и пропускает «duplicate column name».
+- Счётчики увеличиваются в translate/word/explain/check/compare; посетитель отмечается в `/api/health`.
+
+### 6. «О приложении» и «Что нового»
+
+- `/about` (`React.lazy`): логотип, описание, версия, подключённые сервисы, история версий.
+- `src/data/changelog.ts` (0.4.0) + `src/data/changelogOlder.ts` (0.3.0, 0.2.0, 0.1.0) с текстами
+  на ru/de/en, новые версии сверху.
+- Окно «Что нового в версии X» — один раз после обновления (последняя версия в `localStorage`).
+- Ссылки: карточка в профиле → «Подробнее и история версий», внизу бокового меню — «О приложении».
+
+---
+
+## Файлы этапа 3
+
+### Созданные
+
+| Файл | Назначение |
+|---|---|
+| `shared/detect.ts` | Определение языка для 12 языков без ИИ |
+| `shared/admin.ts` | Типы админки (ключи сайта, статистика, настройки, пользователи, журнал) |
+| `migrations/0003_admin.sql` | Новые таблицы и колонка `users.blocked` |
+| `functions/_lib/keypool.ts` | Список ключей сервиса: переменные Cloudflare + админка |
+| `functions/_lib/keystate.ts` | Состояние ключей: отдыхает / неверный, рабочие ключи по очереди |
+| `functions/_lib/settings.ts` | Дневной лимит и баннер из админки, публичные настройки |
+| `functions/_lib/stats.ts` | Дневная статистика и уникальные посетители |
+| `functions/_lib/classic/lara.ts` | Lara Translate (подпись запроса, перевод, тест ключа) |
+| `functions/_lib/admin/access.ts` | Кто админ: список логинов из `ADMIN_LOGINS` |
+| `functions/_lib/admin/require.ts` | `requireAdmin` и запись в журнал |
+| `functions/_lib/admin/overview.ts` | Данные вкладки «Обзор» и график 30 дней |
+| `functions/_lib/admin/sitekeys.ts` | Список, проверка, добавление, удаление ключей сайта |
+| `functions/api/admin/_middleware.ts` | Проверка прав на всех `/api/admin/*` |
+| `functions/api/admin/overview.ts` | GET — статистика |
+| `functions/api/admin/keys.ts` | GET — список ключей, POST — добавить (с проверкой) |
+| `functions/api/admin/keys/[provider].ts` | DELETE — удалить ключ из админки |
+| `functions/api/admin/keys/[provider]/test.ts` | POST — проверить ключ сервиса |
+| `functions/api/admin/settings.ts` | GET/PUT — лимит и баннер |
+| `functions/api/admin/users.ts` | GET — список, POST — block/unblock/delete |
+| `functions/api/admin/log.ts` | GET — журнал действий |
+| `functions/api/site-settings.ts` | Публичные баннер и лимит для всех посетителей |
+| `src/components/translate/OthersPanel.tsx` | Блок «Как переводят другие» |
+| `src/hooks/useOthers.ts` | Загрузка вариантов, «Показать», повтор, выбор варианта |
+| `src/pages/AboutPage.tsx` | Страница «О приложении» (ленивая) |
+| `src/pages/AdminPage.tsx` | Админка (ленивая) |
+| `src/components/about/ServicesStatus.tsx` | Сервисы с проверкой и список истории версий |
+| `src/components/admin/AdminChart.tsx` | График за 30 дней на SVG |
+| `src/components/admin/AdminOverviewTab.tsx` | Вкладка «Обзор» |
+| `src/components/admin/AdminKeysTab.tsx` | Вкладка «Ключи сайта» |
+| `src/components/admin/AddSiteKeyForm.tsx` | Форма добавления ключа |
+| `src/components/admin/AdminSettingsTab.tsx` | Вкладка «Настройки» |
+| `src/components/admin/AdminUsersTab.tsx` | Вкладка «Пользователи» |
+| `src/components/admin/AdminLog.tsx` | Журнал действий |
+| `src/hooks/useAdminKeys.ts` | Логика вкладки «Ключи сайта» |
+| `src/components/layout/AnnouncementBanner.tsx` | Баннер-объявление с крестиком |
+| `src/components/layout/WhatsNewDialog.tsx` | Окно «Что нового» один раз после обновления |
+| `src/data/changelog.ts` | История версий (0.4.0 + старые) |
+| `src/data/changelogOlder.ts` | Версии 0.3.0, 0.2.0, 0.1.0 |
+
+### Изменённые
+
+| Файл | Что изменилось |
+|---|---|
+| `shared/languages.ts` | 12 языков, `rtl`, закреплённые языки, `textDirection`, `groupedLanguages` |
+| `shared/types.ts` | `lara` в провайдерах, `isAdmin`, коды `FORBIDDEN`/`ACCOUNT_BLOCKED`, `exclude` в сравнении; типы админки вынесены в `shared/admin.ts` и экспортируются дальше |
+| `functions/_lib/config.ts` | Версия 0.4.0, `LARA`, `KEY_POOL` (без ограничения ключей), `ADMIN` |
+| `functions/_lib/env.ts` | `LARA_ACCESS_KEY_ID`, `LARA_ACCESS_KEY_SECRET`, `ADMIN_LOGINS` |
+| `functions/_lib/schema.ts` | Новые таблицы; поштучное выполнение с пропуском существующей колонки |
+| `functions/_lib/http.ts` | Тексты `FORBIDDEN` и `ACCOUNT_BLOCKED` |
+| `functions/_lib/router.ts` | Общие ключи Gemini/Groq через пул; состояние ключа по коду ответа |
+| `functions/_lib/classic/index.ts` | `lara` в цепочке; настройка проверяется через пул |
+| `functions/_lib/classic/detect.ts` | Переэкспорт `shared/detect.ts` |
+| `functions/_lib/classic/microsoft.ts`, `google.ts` | Перебор ключей пула, отметки 429/401/403 |
+| `functions/_lib/providers/deepl.ts` | Пул ключей DeepL (в т.ч. PT-PT как цель, PT как источник) |
+| `functions/_lib/prompts.ts` | 12 языков на трёх языках интерфейса |
+| `functions/_lib/usage.ts` | Дневной лимит берётся из настроек админки |
+| `functions/_lib/checks/*` | Проверка Lara; Gemini/Groq/обычные — первым рабочим ключом |
+| `functions/_lib/auth/account.ts` | `isAdmin` в профиле |
+| `functions/_lib/auth/require.ts` | Отказ заблокированному аккаунту, удаление его сессий |
+| `functions/_lib/auth/users.ts` | Поле `blocked`, `setUserBlocked`, `deleteUser`, счётчики для статистики |
+| `functions/api/health.ts` | Провайдеры из пула, отметка посетителя, лимит из настроек |
+| `functions/api/compare.ts` | Кэш по каждому сервису, `exclude`, счётчик |
+| `functions/api/translate.ts`, `word.ts`, `explain.ts`, `check.ts` | Счётчики статистики |
+| `src/config.ts` | Версия, ключи localStorage, `OTHERS_AUTO_MAX_CHARS` |
+| `src/api/client.ts` | Методы админки и настроек сайта; GET без тела |
+| `src/lib/storage.ts` | Добавлен `removeStorage` |
+| `src/lib/errors.ts` | Подпись Lara, тексты `FORBIDDEN` / `ACCOUNT_BLOCKED` |
+| `src/lib/accountError.ts` | Новые коды ошибок |
+| `src/App.tsx` | Маршруты `/about` и `/admin` через `React.lazy` |
+| `src/components/translate/LanguageBar.tsx` | 12 языков, группы |
+| `src/components/translate/SourcePanel.tsx` | Направление текста |
+| `src/components/translate/ResultPanel.tsx` | RTL перевода, слот для других переводчиков, кнопка сравнения убрана |
+| `src/components/translate/AlternativesList.tsx` | Направление текста |
+| `src/components/word/ExamplesList.tsx` | Направление текста |
+| `src/pages/TranslatePage.tsx` | Блок «Как переводят другие», выбор варианта |
+| `src/components/profile/SettingsCard.tsx` | Переключатель «Показывать другие переводчики автоматически» |
+| `src/components/profile/SiteServicesCard.tsx` | Использует общий `ServicesStatus` |
+| `src/components/profile/AboutCard.tsx` | Ссылки на «О приложении» и «Админку» |
+| `src/components/layout/Sidebar.tsx` | Ссылки «О приложении» и «Админка» внизу меню |
+| `src/components/layout/AppShell.tsx` | Баннер и окно «Что нового» |
+| `src/components/layout/icons.tsx` | Иконка «О приложении» |
+| `src/components/keys/KeyStatus.tsx` | Показ причины проверки |
+| `src/locales/ru.json`, `de.json`, `en.json` | Разделы `others`, `about`, `admin`, настройка профиля, 12 языков — **431 ключ в каждом, наборы совпадают** |
+| `package.json`, `src/config.ts`, `functions/_lib/config.ts` | Версия 0.4.0 |
+| `README.md`, `CHANGELOG.md`, `src/data/changelog.ts` | Инструкции, история версий |
+
+---
+
+## Проверки
+
+Команды: `npm run build` (TypeScript strict + Vite) — **проходит, 0 ошибок**;
+`npm run typecheck` — без ошибок. Сборка: 172 модуля, админка и «О приложении» — отдельные куски
+(`AdminPage` 19,39 КБ, `AboutPage` 1,39 КБ), основной бандл 399,57 КБ (124,95 КБ gzip).
+
+Локальный сервер: `npx wrangler pages dev dist --port 8791` с `.dev.vars`
+(`KEY_ENCRYPTION_SECRET`, `ADMIN_LOGINS=admin.test`) и двумя фальшивыми ключами
+`MICROSOFT_TRANSLATOR_KEY` / `GOOGLE_TRANSLATE_KEY` для проверки пула.
+
+**API — 69 проверок, все прошли** (скрипты проверки удалены после прогона):
+
+- `/api/health`: версия 0.4.0, в списке есть `lara`, Microsoft и Google видны через пул ключей.
+- Регистрация двух аккаунтов; `me`: `isAdmin=false` у обычного, `isAdmin=true` у логина из `ADMIN_LOGINS`.
+- `/api/admin/*` без входа → 401, обычным пользователем → 403 (`overview`, `keys`, `users`, `settings`).
+  GET-запросы без тела работают (нашлась и исправлена ошибка: клиент отправлял тело в GET).
+- «Обзор»: пользователи по периодам, посетитель за день, график 30 точек.
+- «Ключи сайта»: ключ Cloudflare виден как `••••1234`; неверный ключ Gemini не сохраняется (`KEY_NO_ACCESS` 422);
+  Lara без секрета → 400; маски и источники верные.
+- Фейковый ключ Microsoft получил 401 → в `key_state` записан `invalid=1` (`Microsoft Translator 401`),
+  в админке «Неверный», `/api/health?check=1` больше его не использует, «Проверить» показывает настоящую
+  причину отказа (а не «ключ не задан»). **Отдыхающие и неверные ключи пропускаются** — подтверждено.
+- «Настройки»: лимит 7 сохраняется и виден в `/api/health` и `/api/site-settings`; баннер доходит
+  до публичного адреса; лимит −5 → 400; «по умолчанию» возвращает 40.
+- «Пользователи»: список, блокировка (сессии закрываются, вход → `ACCOUNT_BLOCKED`), разблокировка,
+  себя заблокировать нельзя (403), удаление, журнал действий заполняется.
+- Автоопределение языка: перевод `Dzień dobry…` → `detectedLang: pl`, `El tiempo…` → `es`,
+  `Olá…` → `pt`, `Merhaba…` → `tr`, `مرحبا…` → `ar` (перевод через MyMemory настоящий).
+- Определение языка отдельным тестом: **12 из 12** языков; короткие слова (`Haus`, `Straße`, `¿Qué?`,
+  `Łódź`, `İstanbul`) не ломают его.
+- `/api/compare`: только подключённые сервисы, `exclude` убирает основной, кэш на каждый сервис отдельно.
+
+**Браузер (chromium, локальный сервер):** страница «О приложении» показывает логотип, сервисы
+(в том числе Lara) и историю 0.4.0 → 0.1.0; окно «Что нового в версии 0.4.0» открывается один раз;
+перевод с 12 языками и группами; профиль под админом с кнопкой «Админка»; вкладка «Ключи сайта»
+(ключ Cloudflare с маской, «Неверный», «Последняя ошибка»), «Настройки» (лимит, баннер, сохранение,
+журнал). Тёмная тема и русский интерфейс — как раньше.
+
+---
+
+## Что не сделано и ограничения
+
+- **Живой перевод через Lara не прогонялся** — нет пары ключей. Схема подписи взята из официального
+  SDK (`src/net/lara/client.ts`: HMAC-SHA256, `Content-MD5` от первых 16 байт SHA-256, заголовок
+  `Authorization: Lara:…`), поэтому она соответствует документации; ветка отказа (401/429/сеть)
+  обрабатывается как у остальных сервисов.
+- **Настоящие ключи Gemini / Groq / DeepL / Microsoft / Google тоже не проверялись** — их нет.
+  Проверены «ключ неверный», «ключ отдыхает» и «ключ не задан»; ответы настоящих сервисов стоит
+  один раз прогнать после добавления ключей.
+- **Добавление рабочего ключа через админку end-to-end не прогонено** по той же причине:
+  проверена вся ветка отказа (422, фиктивные ключи получают 401) и то, что успешное сохранение требует
+  проверки. Ограничения по количеству ключей нет ни в API, ни в интерфейсе.
+- **Workers AI и M2M100** проверены только в ветке «не настроено»: локально нет привязки `AI`
+  без `wrangler login`.
+- **Окно «Что нового»** показывается один раз на устройство (версия в `localStorage`) — так и задумано.
+- **Статистика посетителей** считается по отметке в `/api/health`: если браузер не запрашивал `/api/health`,
+  посетитель за день не учтён.
+- Для локальной проверки блок `[ai]` в `wrangler.toml` временно отключался (нужен `wrangler login`).
+  **После проверки `wrangler.toml` восстановлен из копии, копия удалена**; `.dev.vars` и папка `tmp`
+  с временными скриптами тоже удалены.
+
+---
+
+## На будущее: Apple Translation в iOS-приложении
+
+На сайте Apple Translate недоступен: у Apple **нет веб-API** для перевода. Есть только встроенный
+перевод в приложениях: фреймворк **Translation** (SwiftUI `translationTask`, `TranslationSession`)
+в iOS 18 и новее, он работает на устройстве и требует установленного языкового пакета.
+Когда проект на этапе 4 соберётся на Capacitor, перевод через Apple можно добавить **отдельным
+нативным плагином** (Swift-модуль с `TranslationSession`), который канал Capacitor вызывает из JS.
+Тогда в `CLASSIC_PROVIDERS` появится ещё один сервис `apple`, доступный только в iOS-приложении,
+а на сайте его просто не будет. Пока ничего не подключаю: сайту Apple предложить нечего.
+
+---
+
+## Переменные окружения и настройки Cloudflare (добавлено на этапе 3)
+
+| Переменная | Назначение |
+|---|---|
+| `ADMIN_LOGINS` | Логины админов через запятую. Без него админки нет ни у кого |
+| `LARA_ACCESS_KEY_ID`, `LARA_ACCESS_KEY_SECRET` | Lara Translate |
+| `MICROSOFT_TRANSLATOR_KEY`, `MICROSOFT_TRANSLATOR_REGION` | Microsoft Translator |
+| `GOOGLE_TRANSLATE_KEY` | Google Translate |
+| `GEMINI_API_KEY_2 … _5`, `GROQ_API_KEY_2 … _5`, `DEEPL_API_KEY_2 … _5`, `MICROSOFT_TRANSLATOR_KEY_2 …`, `GOOGLE_TRANSLATE_KEY_2 …`, `LARA_ACCESS_KEY_ID_2` / `_SECRET_2` | Резервные ключи |
+
+Ключи можно не заводить в переменных, а добавлять в админке (вкладка «Ключи сайта», количество
+не ограничено): они хранятся в `site_keys` зашифрованными и требуют `KEY_ENCRYPTION_SECRET`.
+Миграция: `npx wrangler d1 execute yai-translator-db --remote --file=./migrations/0003_admin.sql`
+(таблицы и так создаются автоматически).
+
+---
+
 # Отчёт по этапу 1
 
 Дата: 30.10.2026 · Версия: **0.1.0**
@@ -407,3 +684,13 @@ Cloudflare: **Settings → Variables and secrets → Add → Secret**. Лока�
 3. **Лимит записей синхронизации** — `AUTH.maxSyncItemsPerUser` (3000); удалённые записи чистятся первыми.
 
 Миграцию `0002_accounts.sql` вручную запускать не нужно: таблицы создаёт `schema.ts`.
+
+### Проверка Claude этапа 3 (30.10.2026)
+
+Сборка и типы проходят. Проверено на `wrangler pages dev`: админ по `ADMIN_LOGINS` видит `/api/admin/*`,
+обычный пользователь получает 403, без входа — 401; статистика пользователей и посетителей считается; ключи сайта
+без ограничения количества. Исправлено:
+
+- **DeepL: адрес по типу ключа** (`deeplUrl()` в `config.ts`). Бесплатный ключ `…:fx` → `api-free.deepl.com`,
+  ключи тарифов Developer/Growth/Pro → `api.deepl.com`. Раньше ключ Developer получал 403 и помечался «неверным».
+  Используется в переводе, в проверке сервисов и при добавлении ключа в админке.

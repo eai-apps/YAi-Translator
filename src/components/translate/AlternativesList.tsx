@@ -1,6 +1,7 @@
 /** Альтернативные переводы: нейтральный, разговорный, официальный. */
 import { useTranslation } from 'react-i18next';
 import type { AlternativeTranslation, LanguageCode } from '../../../shared/types';
+import { textDirection } from '../../../shared/languages';
 import type { SpeechController } from '../../hooks/useSpeech';
 import { translationStyleKey } from '../../lib/labels';
 import { Badge } from '../ui/Badge';
@@ -26,7 +27,10 @@ export function AlternativesList({ alternatives, targetLang, speech }: Alternati
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
                 <Badge tone="accent">{t(translationStyleKey(alternative.style))}</Badge>
-                <p className="mt-1.5 whitespace-pre-wrap break-words text-[15px] leading-relaxed">
+                <p
+                  dir={textDirection(targetLang)}
+                  className="mt-1.5 whitespace-pre-wrap break-words text-[15px] leading-relaxed"
+                >
                   {alternative.text}
                 </p>
               </div>

@@ -1,13 +1,16 @@
 /**
- * Цепочка обычных переводчиков (без ИИ). Порядок задан в config.ts → CLASSIC.order.
+ * Цепочка обычных переводчиков (без ИИ). Порядок задан в shared/types.ts → CLASSIC_PROVIDERS
+ * и повторён в config.ts → CLASSIC.order.
  * Если сервис не умеет определять язык, подставляем язык, угаданный по тексту.
  */
-import type { ProviderId } from '../../../shared/types';
+import type { ProviderId, SiteKeyProvider } from '../../../shared/types';
 import { CLASSIC } from '../config';
 import type { Env } from '../env';
+import { hasAnyKey } from '../keypool';
 import { deeplTranslator } from './deepl';
 import { guessLanguage } from './detect';
 import { googleTranslator } from './google';
+import { laraTranslator } from './lara';
 import { m2m100Translator } from './m2m100';
 import { microsoftTranslator } from './microsoft';
 import { myMemoryTranslator } from './mymemory';
@@ -15,21 +18,37 @@ import type { ClassicInput, ClassicResult, ClassicTranslator } from './types';
 
 const TRANSLATORS: Record<string, ClassicTranslator> = {
   deepl: deeplTranslator,
+  lara: laraTranslator,
   microsoft: microsoftTranslator,
   google: googleTranslator,
   mymemory: myMemoryTranslator,
   m2m100: m2m100Translator,
 };
 
+/** Сервисы, у которых ключи могут лежать в пуле (переменные Cloudflare и админка). */
+const POOLED: SiteKeyProvider[] = ['deepl', 'lara', 'microsoft', 'google'];
+
+function pooled(id: ProviderId): SiteKeyProvider | null {
+  return (POOLED as string[]).includes(id) ? (id as SiteKeyProvider) : null;
+}
+
 /** Настроен ли конкретный переводчик (есть ключ или binding). */
-export function isClassicConfigured(env: Env, id: ProviderId): boolean {
-  return TRANSLATORS[id]?.isConfigured(env) ?? false;
+export async function isClassicConfigured(env: Env, id: ProviderId): Promise<boolean> {
+  const translator = TRANSLATORS[id];
+  if (!translator) return false;
+  const pool = pooled(id);
+  if (pool) return hasAnyKey(env, pool);
+  return translator.isConfigured(env);
 }
 
 /** Какие обычные переводчики сейчас настроены (для /api/health). */
-export function configuredClassic(env: Env): Partial<Record<ProviderId, boolean>> {
+export async function configuredClassic(env: Env): Promise<Partial<Record<ProviderId, boolean>>> {
   const result: Partial<Record<ProviderId, boolean>> = {};
-  for (const id of CLASSIC.order) result[id] = TRANSLATORS[id]?.isConfigured(env) ?? false;
+  await Promise.all(
+    CLASSIC.order.map(async (id) => {
+      result[id] = await isClassicConfigured(env, id);
+    }),
+  );
   return result;
 }
 
@@ -42,7 +61,7 @@ export async function translateClassic(
 
   for (const id of ids) {
     const translator = TRANSLATORS[id];
-    if (!translator || !translator.isConfigured(input.env)) continue;
+    if (!translator || !(await isClassicConfigured(input.env, id))) continue;
 
     let sourceLang = input.sourceLang;
     if (sourceLang === 'auto' && !translator.supportsAutoDetect) {
