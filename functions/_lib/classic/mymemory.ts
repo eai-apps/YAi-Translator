@@ -11,6 +11,7 @@ interface MyMemoryResponse {
   responseData?: { translatedText?: string };
   responseStatus?: number | string;
   quotaFinished?: boolean;
+  responseDetails?: string;
 }
 
 /** Делит текст на куски до maxBytes, стараясь резать по концу предложения. */
@@ -66,10 +67,18 @@ export const myMemoryTranslator: ClassicTranslator = {
 
       const { signal: timeoutSignal, clear } = withTimeoutSignal(signal, CLASSIC.timeoutMs);
       try {
-        const response = await fetch(url.toString(), { signal: timeoutSignal });
+        const response = await fetch(url.toString(), {
+          signal: timeoutSignal,
+          headers: { 'User-Agent': CLASSIC.userAgent, Accept: 'application/json' },
+        });
         const data = (await response.json().catch(() => ({}))) as MyMemoryResponse;
         const translated = data.responseData?.translatedText?.trim();
         if (!response.ok || data.quotaFinished || String(data.responseStatus) !== '200' || !translated) {
+          // Причину пишем в журнал Cloudflare, чтобы было видно, почему MyMemory отказал.
+          console.warn(
+            `MyMemory отказал: HTTP ${response.status}, status ${String(data.responseStatus)}, ` +
+              `quotaFinished=${String(data.quotaFinished)}, details=${data.responseDetails ?? ''}`,
+          );
           return null;
         }
         // При исчерпании лимита MyMemory иногда отвечает текстом-предупреждением.

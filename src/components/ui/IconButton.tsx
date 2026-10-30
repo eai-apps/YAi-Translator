@@ -24,6 +24,8 @@ export function IconButton({ label, icon, active = false, className, type = 'but
         className,
       )}
       {...rest}
-    />
+    >
+      {icon}
+    </button>
   );
 }

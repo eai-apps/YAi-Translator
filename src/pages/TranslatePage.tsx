@@ -12,7 +12,7 @@ import type {
 } from '../../shared/types';
 import { isLanguageCode } from '../../shared/languages';
 import { api } from '../api/client';
-import { toTranslatorError } from '../lib/errors';
+import { isAiProvider, toTranslatorError } from '../lib/errors';
 import type { TranslatorError } from '../lib/errors';
 import { MAX_TEXT_LENGTH, STORAGE_KEYS } from '../config';
 import { useHistory } from '../hooks/useHistory';
@@ -228,6 +228,10 @@ export default function TranslatePage() {
                 onCollapse={others.collapse}
                 onUseVariant={useVariant}
                 usedProvider={chosen?.provider ?? null}
+                sourceText={text}
+                sourceLang={sourceLang}
+                mainIsAi={isAiProvider(result.provider)}
+                onLimitReached={() => setLimitOpen(true)}
               />
             ) : null
           }

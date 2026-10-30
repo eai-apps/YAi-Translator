@@ -121,6 +121,8 @@ export const CLASSIC = {
   microsoftUrl: 'https://api.cognitive.microsofttranslator.com/translate',
   googleUrl: 'https://translation.googleapis.com/language/translate/v2',
   myMemoryUrl: 'https://api.mymemory.translated.net/get',
+  /** Подпись запросов: без User-Agent часть сервисов отклоняет запросы из Cloudflare Workers. */
+  userAgent: 'YAi-Translator/0.4 (+https://yai-translator.pages.dev/about)',
   /** MyMemory принимает до 500 байт за запрос; берём с запасом. */
   myMemoryMaxBytes: 450,
   /** Больше кусков не отправляем, чтобы не съесть дневной лимит MyMemory одним текстом. */

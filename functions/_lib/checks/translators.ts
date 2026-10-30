@@ -128,12 +128,19 @@ export function checkMyMemory(env: Env, uiLang: UiLanguage): Promise<ServiceChec
     url.searchParams.set('q', HEALTH_CHECK.sampleText);
     url.searchParams.set('langpair', 'de|ru');
     if (env.MYMEMORY_EMAIL) url.searchParams.set('de', env.MYMEMORY_EMAIL);
-    const response = await fetch(url.toString(), { signal });
-    if (!response.ok) return false;
+    const response = await fetch(url.toString(), {
+      signal,
+      headers: { 'User-Agent': CLASSIC.userAgent, Accept: 'application/json' },
+    });
     const data = (await response.json().catch(() => ({}))) as {
       responseStatus?: number | string;
       quotaFinished?: boolean;
+      responseDetails?: string;
     };
+    if (!response.ok || String(data.responseStatus) !== '200') {
+      console.warn(`MyMemory (проверка): HTTP ${response.status}, details=${data.responseDetails ?? ''}`);
+    }
+    if (!response.ok) return false;
     // Исчерпанный дневной лимит MyMemory — не поломка, но и не рабочий доступ.
     return !data.quotaFinished && String(data.responseStatus) === '200';
   });

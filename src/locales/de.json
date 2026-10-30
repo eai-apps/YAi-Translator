@@ -94,7 +94,12 @@
     "used": "Diese Variante ist aktiv",
     "noAnswer": "Der Dienst hat gerade nicht geantwortet",
     "empty": "Es sind noch keine anderen Übersetzer verbunden.",
-    "error": "Die Varianten konnten nicht geladen werden. Versuche es erneut."
+    "error": "Die Varianten konnten nicht geladen werden. Versuche es erneut.",
+    "silent": "Gerade keine Antwort: {{list}}",
+    "aiHint": "KI-Übersetzung auf Knopfdruck, um das Limit zu schonen.",
+    "aiShow": "KI-Übersetzung zeigen",
+    "aiLabel": "KI · {{provider}}",
+    "aiFailed": "Die KI hat gerade nicht geantwortet. Bitte erneut versuchen."
   },
   "word": {
     "article": "Artikel",

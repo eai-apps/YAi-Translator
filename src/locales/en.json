@@ -94,7 +94,12 @@
     "used": "This variant is in use",
     "noAnswer": "The service did not answer right now",
     "empty": "No other translators are connected yet.",
-    "error": "The variants could not be loaded. Try again."
+    "error": "The variants could not be loaded. Try again.",
+    "silent": "No answer right now: {{list}}",
+    "aiHint": "AI translation on request, to save the free limit.",
+    "aiShow": "Show AI translation",
+    "aiLabel": "AI · {{provider}}",
+    "aiFailed": "The AI did not answer right now. Please try again."
   },
   "word": {
     "article": "Article",
