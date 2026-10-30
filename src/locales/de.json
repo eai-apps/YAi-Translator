@@ -30,7 +30,8 @@
     "conversation": "Gespräch",
     "profile": "Profil",
     "about": "Über die App",
-    "admin": "Admin"
+    "admin": "Admin",
+    "resources": "Nützliche Links"
   },
   "languages": {
     "auto": "Sprache erkennen",
@@ -375,7 +376,9 @@
     "whatsNew": "Was ist neu",
     "servicesTitle": "Verbundene Dienste",
     "whatsNewDialogTitle": "Was ist neu in Version {{version}}",
-    "openHistory": "Alle Versionen"
+    "openHistory": "Alle Versionen",
+    "sourcesTitle": "Wörterbücher und Quellen",
+    "sourcesText": "Die Wortkarte nutzt offene Wörterbücher. Danke an ihre Autorinnen und Autoren:"
   },
   "admin": {
     "title": "Admin",
@@ -490,6 +493,63 @@
       "hint": "Ein ausgeschalteter Dienst wird nirgends auf der Website genutzt. MyMemory ist standardmäßig aus: Seine Datenbank füllen beliebige Nutzer, manchmal kommt Unsinn zurück.",
       "ai": "KI",
       "translator": "Übersetzer"
+    },
+    "tabResources": "Links",
+    "resources": {
+      "title": "Nützliche Links",
+      "intro": "Links für die Seite „Nützliche Links“. Hinzufügen, bearbeiten, ausblenden und sortieren.",
+      "showInApps": "Links in den Store-Apps anzeigen",
+      "showInAppsHint": "Für spätere Versionen in App Store und Google Play. Auf der Website sind die Links immer sichtbar.",
+      "lang": "Sprache",
+      "category": "Gruppe",
+      "titleField": "Titel",
+      "urlField": "Adresse (https://…)",
+      "descriptionRu": "Beschreibung auf Russisch",
+      "descriptionDe": "Beschreibung auf Deutsch",
+      "descriptionEn": "Beschreibung auf Englisch",
+      "add": "Link hinzufügen",
+      "edit": "Bearbeiten",
+      "editing": "Bearbeiten: {{title}}",
+      "save": "Speichern",
+      "cancelEdit": "Abbrechen",
+      "invalid": "Bitte Titel und eine Adresse mit https:// angeben",
+      "up": "Nach oben",
+      "down": "Nach unten",
+      "hide": "Ausblenden",
+      "show": "Einblenden",
+      "remove": "Löschen",
+      "confirmRemove": "Link „{{title}}“ löschen?",
+      "hiddenNote": "ausgeblendet",
+      "empty": "In dieser Gruppe gibt es noch keine Links."
     }
+  },
+  "dict": {
+    "badge": "Wörterbücher",
+    "withoutAi": "Ohne KI — Daten aus Wörterbüchern",
+    "loading": "Suche in Wörterbüchern…",
+    "definitions": "Bedeutungen",
+    "forms": "Formen",
+    "germanMeaning": "Deutsche Bedeutung",
+    "fromLife": "Aus dem Leben",
+    "fromTatoeba": "Tatoeba",
+    "fromWiktionary": "Wiktionary",
+    "sourcesLine": "Quellen:"
+  },
+  "resources": {
+    "title": "Nützliche Links",
+    "subtitle": "Geprüfte kostenlose Websites zum Sprachenlernen.",
+    "intro": "Wir verlinken nur — die Seiten öffnen sich in einem neuen Tab.",
+    "langLabel": "Sprache",
+    "loading": "Links werden geladen…",
+    "error": "Links konnten nicht geladen werden.",
+    "retry": "Erneut versuchen",
+    "empty": "Für diese Sprache gibt es noch keine Links.",
+    "profileHint": "Wörterbücher, Grammatik, Podcasts, Prüfungen und Leben in Deutschland — kostenlose Websites.",
+    "profileLink": "Links öffnen",
+    "dictionaries": "Wörterbücher",
+    "grammar": "Grammatik",
+    "listening": "Hören und Podcasts",
+    "exams": "Prüfungen",
+    "life": "Leben in Deutschland"
   }
 }

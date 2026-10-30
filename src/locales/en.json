@@ -30,7 +30,8 @@
     "conversation": "Conversation",
     "profile": "Profile",
     "about": "About",
-    "admin": "Admin"
+    "admin": "Admin",
+    "resources": "Useful resources"
   },
   "languages": {
     "auto": "Detect language",
@@ -375,7 +376,9 @@
     "whatsNew": "What's new",
     "servicesTitle": "Connected services",
     "whatsNewDialogTitle": "What's new in version {{version}}",
-    "openHistory": "Full version history"
+    "openHistory": "Full version history",
+    "sourcesTitle": "Dictionaries and sources",
+    "sourcesText": "The word card uses open dictionaries. Thanks to their authors:"
   },
   "admin": {
     "title": "Admin",
@@ -490,6 +493,63 @@
       "hint": "A switched-off service is not used anywhere on the site. MyMemory is off by default: anyone can write to its database, and sometimes it returns rubbish.",
       "ai": "AI",
       "translator": "Translator"
+    },
+    "tabResources": "Resources",
+    "resources": {
+      "title": "Useful resources",
+      "intro": "Links for the “Useful resources” page. Add, edit, hide and reorder them.",
+      "showInApps": "Show resources in store apps",
+      "showInAppsHint": "For future App Store and Google Play versions. On the website resources are always visible.",
+      "lang": "Language",
+      "category": "Group",
+      "titleField": "Title",
+      "urlField": "Address (https://…)",
+      "descriptionRu": "Description in Russian",
+      "descriptionDe": "Description in German",
+      "descriptionEn": "Description in English",
+      "add": "Add link",
+      "edit": "Edit",
+      "editing": "Editing: {{title}}",
+      "save": "Save",
+      "cancelEdit": "Cancel",
+      "invalid": "Fill in a title and an address starting with https://",
+      "up": "Move up",
+      "down": "Move down",
+      "hide": "Hide",
+      "show": "Show",
+      "remove": "Delete",
+      "confirmRemove": "Delete the link “{{title}}”?",
+      "hiddenNote": "hidden",
+      "empty": "No links in this group yet."
     }
+  },
+  "dict": {
+    "badge": "Dictionaries",
+    "withoutAi": "Without AI — dictionary data",
+    "loading": "Searching dictionaries…",
+    "definitions": "Meanings",
+    "forms": "Forms",
+    "germanMeaning": "German definition",
+    "fromLife": "Real life",
+    "fromTatoeba": "Tatoeba",
+    "fromWiktionary": "Wiktionary",
+    "sourcesLine": "Sources:"
+  },
+  "resources": {
+    "title": "Useful resources",
+    "subtitle": "Checked free websites for learning languages.",
+    "intro": "We only link — sites open in a new tab.",
+    "langLabel": "Language",
+    "loading": "Loading links…",
+    "error": "Could not load links.",
+    "retry": "Try again",
+    "empty": "No links for this language yet.",
+    "profileHint": "Dictionaries, grammar, podcasts, exams and life in Germany — free websites.",
+    "profileLink": "Open resources",
+    "dictionaries": "Dictionaries",
+    "grammar": "Grammar",
+    "listening": "Listening and podcasts",
+    "exams": "Exams",
+    "life": "Life in Germany"
   }
 }
