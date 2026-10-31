@@ -77,11 +77,11 @@ function toMatch(value: unknown, text: string, translation: string): WordExample
   };
 }
 
-/** Переводы связанных слов: только строки, до 40 пунктов, ключ и значение не длиннее 80 знаков. */
+/** Переводы связанных слов и немецких переводов значений: только строки, до 60 пунктов, ключ и значение не длиннее 80 знаков. */
 function toGlossary(value: unknown): Record<string, string> {
   if (!isRecord(value)) return {};
   const glossary: Record<string, string> = {};
-  for (const [key, translation] of Object.entries(value).slice(0, 40)) {
+  for (const [key, translation] of Object.entries(value).slice(0, 60)) {
     const word = asText(key, 80);
     const meaning = asText(translation, 80);
     if (word && meaning) glossary[word] = meaning;
@@ -91,7 +91,7 @@ function toGlossary(value: unknown): Record<string, string> {
 
 /** Пункты грамматики: заголовок, объяснение и 2–4 примера с уровнем A1–B2. */
 function toGrammarPoints(value: unknown): GrammarPoint[] {
-  return asArray(value, 5)
+  return asArray(value, 6)
     .map((item): GrammarPoint | null => {
       if (!isRecord(item)) return null;
       const title = asText(item.title, 160);

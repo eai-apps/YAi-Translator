@@ -13,9 +13,11 @@ interface MeaningListProps {
   translationLang: LanguageCode;
   /** Клик по переводу: слово и язык переводов. Без обработчика чипсы неактивны. */
   onPickTranslation?: (translation: string, lang: LanguageCode) => void;
+  /** Короткие переводы немецких слов (ru→de: «die Arbeit — работа»). */
+  glossary?: Record<string, string>;
 }
 
-export function MeaningList({ meanings, translationLang, onPickTranslation }: MeaningListProps) {
+export function MeaningList({ meanings, translationLang, onPickTranslation, glossary }: MeaningListProps) {
   const { t } = useTranslation();
   if (meanings.length === 0) return null;
 
@@ -32,6 +34,7 @@ export function MeaningList({ meanings, translationLang, onPickTranslation }: Me
                 <Chips
                   items={meaning.translations}
                   tone="accent"
+                  glossary={glossary}
                   onPick={(value) => onPickTranslation(value, translationLang)}
                 />
               ) : (

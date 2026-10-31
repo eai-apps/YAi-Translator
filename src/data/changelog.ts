@@ -14,6 +14,30 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.8.3',
+    date: '2026-10-31',
+    items: {
+      ru: [
+        'Новый заголовок экрана «Перевод»: фирменный шрифт и короткое описание, что умеет переводчик.',
+        'При переводе на немецкий словарь в карточке показывает немецкие слова с артиклем и русским переводом под каждым: «die Tätigkeit — деятельность».',
+        'Грамматика слова подробнее: 4–6 пунктов, в каждом 3–4 примера A1–B2.',
+        'Номер версии в меню показывается один раз — внизу.',
+      ],
+      de: [
+        'Neue Überschrift auf „Übersetzen“: eigene Schrift und ein kurzer Satz, was der Übersetzer kann.',
+        'Beim Übersetzen ins Deutsche zeigt das Wörterbuch deutsche Wörter mit Artikel und kurzer Übersetzung.',
+        'Ausführlichere Grammatik: 4–6 Punkte mit je 3–4 Beispielen A1–B2.',
+        'Die Versionsnummer steht im Menü nur noch einmal — unten.',
+      ],
+      en: [
+        'New heading on "Translate": a display font and a short line about what the translator does.',
+        'When translating into German, the dictionary lists German words with article and a short translation under each.',
+        'More detailed grammar: 4–6 points with 3–4 A1–B2 examples each.',
+        'The version number is shown once in the menu — at the bottom.',
+      ],
+    },
+  },
+  {
     version: '0.8.2',
     date: '2026-10-31',
     items: {

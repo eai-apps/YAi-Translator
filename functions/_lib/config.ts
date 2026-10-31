@@ -7,7 +7,7 @@ export { LANGUAGES, LANGUAGE_CODES, getLanguage, isLanguageCode, isUiLanguage } 
 
 import { CLASSIC_PROVIDERS } from '../../shared/types';
 
-export const APP_VERSION = '0.8.2';
+export const APP_VERSION = '0.8.3';
 
 export const LIMITS = {
   /** Максимальная длина текста для перевода и разбора. */
@@ -27,7 +27,7 @@ export const LIMITS = {
 } as const;
 
 /** Версия промптов: меняется вместе с prompts.ts и автоматически сбрасывает кэш. */
-export const PROMPT_VERSION = '7';
+export const PROMPT_VERSION = '8';
 
 /** Аккаунт, сессии и синхронизация избранного (этап 2). */
 export const AUTH = {
@@ -75,14 +75,14 @@ export const GEMINI = {
    */
   models: ['gemini-3.5-flash-lite', 'gemini-3.8-flash', 'gemini-2.5-flash'],
   /** Модели 3.x «думают» перед ответом, это тоже тратит токены — запас побольше. */
-  maxOutputTokens: 8192,
-  timeoutMs: 20_000,
+  maxOutputTokens: 12288,
+  timeoutMs: 22_000,
 } as const;
 
 export const GROQ = {
   url: 'https://api.groq.com/openai/v1/chat/completions',
   models: ['openai/gpt-oss-120b', 'llama-3.3-70b-versatile'],
-  maxOutputTokens: 4096,
+  maxOutputTokens: 6144,
   timeoutMs: 20_000,
 } as const;
 

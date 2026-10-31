@@ -20,7 +20,7 @@ import { useSpeech } from '../hooks/useSpeech';
 import { useTranslateSettings } from '../hooks/useTranslateSettings';
 import { useTranslationActions } from '../hooks/useTranslationActions';
 import { useTranslator } from '../hooks/useTranslator';
-import { PageHeader } from '../components/ui/PageHeader';
+import { TranslateHeader } from '../components/translate/TranslateHeader';
 import { SourcePanel } from '../components/translate/SourcePanel';
 import { ResultPanel } from '../components/translate/ResultPanel';
 import { OthersPanel } from '../components/translate/OthersPanel';
@@ -174,8 +174,7 @@ export default function TranslatePage() {
 
   return (
     <>
-      {/* Без пояснения под заголовком: так поле ввода и перевод стоят выше (подсказка есть в пустом блоке перевода). */}
-      <PageHeader title={t('translate.title')} />
+      <TranslateHeader />
 
       {/* Две колонки идут сверху вниз независимо: под полем ввода нет пустой дыры (этап 8Б). */}
       <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:gap-4">

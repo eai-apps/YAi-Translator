@@ -24,6 +24,7 @@ export default {
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'sans-serif'],
+        display: ['Unbounded', 'Inter', 'system-ui', 'sans-serif'],
       },
       borderRadius: {
         xl: '14px',

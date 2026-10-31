@@ -99,7 +99,9 @@
     "suggestIcon": "▸",
     "share": "Share",
     "shareCopy": "Copy translation",
-    "moreVariants": "More options:"
+    "moreVariants": "More options:",
+    "tagline": "A modern translator that explains everything",
+    "taglineSub": "Forms, grammar and A1–B2 examples for every word · several AI models and services at once"
   },
   "others": {
     "title": "How others translate it",

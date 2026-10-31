@@ -113,7 +113,7 @@ export function WordCard({
           <div className="space-y-6">
             <div>
               <SectionTitle>{t('word.tabDictionary')}</SectionTitle>
-              <MeaningList meanings={card.meanings} translationLang={lang} onPickTranslation={onPickTranslation} />
+              <MeaningList meanings={card.meanings} translationLang={lang} onPickTranslation={onPickTranslation} glossary={card.glossary} />
             </div>
             {card.examples.length > 0 || dictExamples.length > 0 ? (
               <ExamplesList
@@ -137,6 +137,7 @@ export function WordCard({
               meanings={card.meanings}
               translationLang={lang}
               onPickTranslation={onPickTranslation}
+              glossary={card.glossary}
             />
             <SourcesLine sources={card.dictSources ?? []} />
           </div>

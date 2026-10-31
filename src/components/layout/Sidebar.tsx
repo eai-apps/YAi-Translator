@@ -74,10 +74,6 @@ export function Sidebar() {
           >
             <IconInfo className="h-4 w-4 shrink-0" />
             <span className="truncate">{t('nav.about')}</span>
-            {/* Номер версии рядом с «О приложении» — сразу видно, обновился ли сайт. */}
-            <span className="ml-auto shrink-0 rounded-full bg-soft px-1.5 py-0.5 text-[10px] font-semibold text-muted">
-              v{APP_VERSION}
-            </span>
           </Link>
           {account?.isAdmin ? (
             <Link
