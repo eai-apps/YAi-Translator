@@ -1,9 +1,12 @@
 /**
- * Хук для обработки горизонтальных свайпов (влево/вправо) на элементе.
- * Порог срабатывания: ~60px по горизонтали, и горизонталь > вертикали в 1.5 раза.
- * Не срабатывает на полях ввода, кнопках, словах-кнопках и лентах чипсов.
+ * Хук для горизонтального свайпа с интерактивным следованием за пальцем (этап 12):
+ * - Во время движения пальца возвращает dragOffset (в пикселях) и isDragging.
+ * - Карточка едет прямо за пальцем.
+ * - Если жест вертикальный (скролл страницы), свайп отменяется.
+ * - По завершении жеста с достаточным смещением срабатывает onSwipeLeft / onSwipeRight.
  */
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { hapticImpact } from '../lib/haptics';
 
 interface UseSwipeOptions {
   onSwipeLeft?: () => void;
@@ -11,8 +14,6 @@ interface UseSwipeOptions {
   threshold?: number;
 }
 
-// Не игнорируем кнопки и слова-кнопки: весь текст перевода состоит из них (pick.tsx), и свайп по нему
-// не работал. Нажатие без сдвига пальца свайпом не считается, поэтому кнопки по-прежнему нажимаются.
 const IGNORE_SELECTOR = 'textarea, input, select, [data-swipe-ignore], [data-chips]';
 
 export function useSwipe<T extends HTMLElement>(
@@ -22,44 +23,85 @@ export function useSwipe<T extends HTMLElement>(
   const optionsRef = useRef(options);
   optionsRef.current = options;
 
+  const [dragOffset, setDragOffset] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+
   useEffect(() => {
     const el = elementRef.current;
     if (!el) return;
 
     let startX = 0;
     let startY = 0;
-    let validTouch = false;
+    let isHorizontal: boolean | null = null;
+    let active = false;
 
     const onTouchStart = (e: TouchEvent) => {
       if (e.touches.length !== 1) {
-        validTouch = false;
+        active = false;
         return;
       }
       const target = e.target as HTMLElement | null;
       if (target && target.closest(IGNORE_SELECTOR)) {
-        validTouch = false;
+        active = false;
         return;
       }
-      validTouch = true;
+      active = true;
+      isHorizontal = null;
       startX = e.touches[0].clientX;
       startY = e.touches[0].clientY;
+      setIsDragging(false);
+      setDragOffset(0);
     };
 
-    const onTouchEnd = (e: TouchEvent) => {
-      if (!validTouch || e.changedTouches.length === 0) return;
-      validTouch = false;
+    const onTouchMove = (e: TouchEvent) => {
+      if (!active || e.touches.length === 0) return;
 
-      const endX = e.changedTouches[0].clientX;
-      const endY = e.changedTouches[0].clientY;
-      const dx = endX - startX;
-      const dy = endY - startY;
+      const currentX = e.touches[0].clientX;
+      const currentY = e.touches[0].clientY;
+      const dx = currentX - startX;
+      const dy = currentY - startY;
+
+      // Если направление ещё не определено
+      if (isHorizontal === null) {
+        if (Math.abs(dx) > 8 || Math.abs(dy) > 8) {
+          if (Math.abs(dx) >= Math.abs(dy) * 1.2) {
+            isHorizontal = true;
+            setIsDragging(true);
+          } else {
+            // Вертикальный скролл — отменяем жест
+            isHorizontal = false;
+            active = false;
+            setIsDragging(false);
+            setDragOffset(0);
+            return;
+          }
+        } else {
+          return;
+        }
+      }
+
+      if (isHorizontal) {
+        // Ограничиваем максимальное смещение для естественного ощущения сопротивления
+        const damped = Math.sign(dx) * Math.min(Math.abs(dx), 180);
+        setDragOffset(damped);
+      }
+    };
+
+    const finishSwipe = (currentX: number, currentY: number) => {
+      if (!active) return;
+      active = false;
+
+      const dx = currentX - startX;
+      const dy = currentY - startY;
       const absDx = Math.abs(dx);
       const absDy = Math.abs(dy);
+      const threshold = optionsRef.current.threshold ?? 55;
 
-      const threshold = optionsRef.current.threshold ?? 60;
+      setIsDragging(false);
+      setDragOffset(0);
 
-      // Горизонтальный свайп: порог >= 60 px и горизонталь больше вертикали в 1.5 раза
-      if (absDx >= threshold && absDx > absDy * 1.5) {
+      if (isHorizontal && absDx >= threshold && absDx > absDy * 1.2) {
+        void hapticImpact();
         if (dx < 0) {
           optionsRef.current.onSwipeLeft?.();
         } else {
@@ -68,18 +110,34 @@ export function useSwipe<T extends HTMLElement>(
       }
     };
 
+    const onTouchEnd = (e: TouchEvent) => {
+      if (e.changedTouches.length > 0) {
+        finishSwipe(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
+      } else {
+        active = false;
+        setIsDragging(false);
+        setDragOffset(0);
+      }
+    };
+
     const onTouchCancel = () => {
-      validTouch = false;
+      active = false;
+      setIsDragging(false);
+      setDragOffset(0);
     };
 
     el.addEventListener('touchstart', onTouchStart, { passive: true });
+    el.addEventListener('touchmove', onTouchMove, { passive: true });
     el.addEventListener('touchend', onTouchEnd, { passive: true });
     el.addEventListener('touchcancel', onTouchCancel, { passive: true });
 
     return () => {
       el.removeEventListener('touchstart', onTouchStart);
+      el.removeEventListener('touchmove', onTouchMove);
       el.removeEventListener('touchend', onTouchEnd);
       el.removeEventListener('touchcancel', onTouchCancel);
     };
   }, [elementRef]);
+
+  return { dragOffset, isDragging };
 }

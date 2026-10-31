@@ -1,9 +1,10 @@
 /**
- * Карточка слова с вкладками (этап 8): заголовок с главными формами и вкладки-пилюли
- * «Словарь · Примеры · Формы · Связанные слова (+ Грамматика)». Выбранная вкладка запоминается
- * до следующего слова; вкладки прилипают к верху при прокрутке.
+ * Карточка слова с вкладками и горизонтальной лентой карточек (этап 12):
+ * - На мобильном: горизонтальная карусель карточек со scroll-snap (WordCarousel),
+ *   листается влево-вправо, виден край следующей.
+ * - На десктопе: классические вкладки-пилюли с полным или детальным просмотром.
  */
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { ReactNode } from 'react';
 import type { DictExample, LanguageCode, WordCard as WordCardData } from '../../../shared/types';
@@ -21,23 +22,20 @@ import { GrammarSection } from './GrammarSection';
 import { MeaningList } from './MeaningList';
 import { RelatedSection } from './RelatedSection';
 import { SourcesLine } from './SourcesLine';
+import { WordCarousel } from './WordCarousel';
 import { usePick } from './pick';
 import { WordCardHeader } from './WordCardHeader';
+import { hapticImpact } from '../../lib/haptics';
 
 type TabId = 'all' | 'dictionary' | 'examples' | 'forms' | 'related' | 'grammar';
 
 interface WordCardProps {
   card: WordCardData;
   speech: SpeechController;
-  /** Примеры «Из жизни» (Tatoeba) — во вкладке «Примеры». */
   dictExamples?: DictExample[];
-  /** Язык исходного слова — для примеров из словарей. */
   dictLang?: LanguageCode | null;
-  /** Язык переводов карточки (обычно — цель перевода). */
   translationLang?: LanguageCode;
-  /** Нажатие на перевод значения: перевести обратно (страница перевода). */
   onPickTranslation?: (translation: string, lang: LanguageCode) => void;
-  /** «⋯» в заголовке: меню «Разобрать», «Проверить». */
   headerMenu?: ReactNode;
 }
 
@@ -51,8 +49,8 @@ export function WordCard({
   headerMenu,
 }: WordCardProps) {
   const { t } = useTranslation();
-  // По умолчанию «Всё» — вся карточка одной лентой, как было раньше; остальные вкладки — быстрый переход.
   const [tab, setTab] = useState<TabId>('all');
+  const carouselRef = useRef<HTMLDivElement>(null);
   const pick = usePick();
   const studyInput = useMemo(() => cardFromWord(card), [card]);
 
@@ -70,22 +68,32 @@ export function WordCard({
   const available: CardTab<TabId>[] = [
     { id: 'all', label: t('word.tabAll') },
     { id: 'dictionary', label: t('word.tabDictionary') },
+    ...(hasForms ? [{ id: 'forms' as TabId, label: t('word.tabForms') }] : []),
     ...(card.examples.length > 0 || dictExamples.length > 0
       ? [{ id: 'examples' as TabId, label: t('word.tabExamples') }]
       : []),
-    ...(hasForms ? [{ id: 'forms' as TabId, label: t('word.tabForms') }] : []),
     ...(hasRelated ? [{ id: 'related' as TabId, label: t('word.tabRelated') }] : []),
     ...(hasGrammar ? [{ id: 'grammar' as TabId, label: t('word.tabGrammar') }] : []),
   ];
-  // Вкладка могла исчезнуть у нового слова — тогда первая доступная.
+
   const active = available.some((item) => item.id === tab) ? tab : available[0].id;
   const lang = translationLang ?? 'ru';
 
-  // Грамматика (этап 8Б): подробные пункты с примерами; старые карточки — короткими пояснениями.
+  const handleTabChange = (newTab: TabId) => {
+    void hapticImpact();
+    setTab(newTab);
+    if (newTab !== 'all' && carouselRef.current) {
+      const target = carouselRef.current.querySelector(`#card-${newTab}`);
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+      }
+    }
+  };
+
   const grammarBlock = <GrammarSection card={card} speech={speech} translationLang={lang} />;
 
   return (
-    <article className="animate-fade-in">
+    <article className="animate-fade-in select-text">
       <WordCardHeader
         card={card}
         menu={headerMenu}
@@ -105,10 +113,29 @@ export function WordCard({
       </div>
 
       <div className="mt-3">
-        <CardTabs tabs={available} value={active} onChange={setTab} />
+        <CardTabs tabs={available} value={active} onChange={handleTabChange} />
       </div>
 
-      <div className="mt-3">
+      {/* Мобильный: горизонтальная лента карточек со scroll-snap */}
+      <div className="lg:hidden mt-3">
+        <WordCarousel
+          ref={carouselRef}
+          card={card}
+          speech={speech}
+          dictExamples={dictExamples}
+          dictLang={dictLang}
+          translationLang={lang}
+          hasForms={hasForms}
+          hasRelated={hasRelated}
+          hasGrammar={hasGrammar}
+          grammarBlock={grammarBlock}
+          onPickTranslation={onPickTranslation}
+          onPickWord={pick ?? undefined}
+        />
+      </div>
+
+      {/* Десктоп: обычные вкладки и полный столбик (≥1024px) */}
+      <div className="hidden lg:block mt-3">
         {active === 'all' ? (
           <div className="space-y-6">
             <div>
@@ -162,9 +189,9 @@ export function WordCard({
         {active === 'grammar' ? grammarBlock : null}
       </div>
 
-      {/* Управление предлогами — короткая строка под вкладками, как в словаре. */}
+      {/* Управление предлогами — на десктопе */}
       {card.governance.length > 0 && active !== 'related' && active !== 'all' ? (
-        <div className="mt-4">
+        <div className="hidden lg:block mt-4">
           <SectionTitle>{t('word.governance')}</SectionTitle>
           <Chips className="mt-1.5" items={card.governance} onPick={(value) => pick?.(value)} />
         </div>

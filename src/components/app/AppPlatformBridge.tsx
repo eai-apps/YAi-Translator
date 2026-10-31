@@ -5,6 +5,7 @@ import { SplashScreen } from '@capacitor/splash-screen';
 import { StatusBar, Style } from '@capacitor/status-bar';
 import { storeBuild } from '../../config';
 import { APP_UPDATE_EVENT, checkAppUpdate } from '../../lib/appUpdate';
+import { checkAndDownloadLiveUpdate } from '../../lib/liveUpdate';
 import { useTheme } from '../../hooks/useTheme';
 import { AppUpdateModal, type AppUpdateInfo } from './AppUpdateModal';
 
@@ -28,25 +29,30 @@ export const AppPlatformBridge: React.FC = () => {
   const updateInfoRef = useRef(updateInfo);
   updateInfoRef.current = updateInfo;
 
-  // 1. Скрытие сплэш-экрана при загрузке приложения
+  // 1. Скрытие сплэш-экрана и проверка обновления веб-бандла при запуске
   useEffect(() => {
     if (!isAndroid) return;
     SplashScreen.hide().catch(() => undefined);
+    void checkAndDownloadLiveUpdate();
   }, [isAndroid]);
 
   // 2. Синхронизация стиля статус-бара с темой оформления
+  // overlaysWebView: true (capacitor.config.ts) → WebView под статус-баром (edge-to-edge).
+  // Здесь устанавливаем только цвет иконок (Style.Dark/Light), фон — прозрачный.
   useEffect(() => {
     if (!isAndroid) return;
     const isDark =
       theme === 'dark' ||
       (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
 
+    // Стиль иконок: светлые на тёмном фоне и наоборот.
     StatusBar.setStyle({
       style: isDark ? Style.Dark : Style.Light,
     }).catch(() => undefined);
 
+    // Фон прозрачный: цвет страницы просвечивает (edge-to-edge).
     StatusBar.setBackgroundColor({
-      color: isDark ? '#0e1117' : '#f6f7fb',
+      color: isDark ? '#00000000' : '#00000000',
     }).catch(() => undefined);
   }, [isAndroid, theme]);
 

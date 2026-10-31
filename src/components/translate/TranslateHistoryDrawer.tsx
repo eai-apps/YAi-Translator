@@ -64,6 +64,10 @@ export function TranslateHistoryDrawer({ open, onClose, onSelect }: TranslateHis
         aria-modal="true"
         aria-label={t('translate.historyTitle')}
         className="relative z-10 flex h-full w-full max-w-md flex-col border-l border-line bg-card shadow-2xl animate-fade-in"
+        style={{
+          paddingTop: 'env(safe-area-inset-top)',
+          paddingBottom: 'env(safe-area-inset-bottom)',
+        }}
       >
         {/* Шапка */}
         <div className="flex items-center justify-between border-b border-line px-4 py-3 sm:px-5">

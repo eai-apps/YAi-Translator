@@ -37,6 +37,7 @@ import { LimitDialog } from '../components/limit/LimitDialog';
 import { cardFromTranslation } from '../lib/studyCard';
 import { shareTranslationImage } from '../lib/renderShareImage';
 import { extractMoreVariants } from '../components/translate/variants';
+import { hideKeyboard } from '../lib/keyboard';
 
 export default function TranslatePage() {
   const { t } = useTranslation();
@@ -46,6 +47,15 @@ export default function TranslatePage() {
   const speech = useSpeech();
   const translator = useTranslator(() => setLimitOpen(true));
   const { streak, todayActive, markTodayActivity } = useStreak();
+
+  // Скрытие экранной клавиатуры при скролле страницы
+  useEffect(() => {
+    const onScroll = () => {
+      void hideKeyboard();
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
   const [limitOpen, setLimitOpen] = useState(false);
   const [historyDrawerOpen, setHistoryDrawerOpen] = useState(false);
@@ -212,8 +222,8 @@ export default function TranslatePage() {
             onAskAi={(model?: string) => void translator.askAi(model)}
           />
 
-          {translator.text.trim() === '' ? <WordOfDayCard compact /> : null}
-
+          {/* На телефоне пустая карточка «Начните переводить» не нужна — показываем её только на ПК. */}
+          <div className={translator.text.trim() ? '' : 'hidden lg:block'}>
           <ResultPanel
             moreVariants={moreVariants}
             onPickVariant={(value) => pickTranslation(value, targetLang)}
@@ -242,6 +252,7 @@ export default function TranslatePage() {
             slideDirection={historyBrowse.slideDirection}
             onShareImage={handleShareImage}
           />
+          </div>
 
           {quiz.shouldPrompt ? (
             <HistoryQuizPromptCard onStart={quiz.startQuiz} onDismiss={quiz.dismiss} />
@@ -281,6 +292,11 @@ export default function TranslatePage() {
           }
         />
       </PickContext.Provider>
+
+      {/* «Слово дня» — компактно в самом низу экрана перевода (пункт 2) */}
+      <div className="mt-4">
+        <WordOfDayCard compact />
+      </div>
 
       {explain.open ? (
         <ExplanationPanel

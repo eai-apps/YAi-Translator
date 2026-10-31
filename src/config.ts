@@ -4,13 +4,17 @@
  */
 import { Capacitor } from '@capacitor/core';
 
-export const API_BASE = (import.meta.env.VITE_API_BASE ?? '').replace(/\/+$/, '');
+// В приложении (Capacitor) страница открыта с https://localhost, поэтому API — всегда сайт. Это важно и для
+// обновления «по воздуху»: архив собирается из обычной сборки сайта, где VITE_API_BASE пустой.
+export const API_BASE = (
+  import.meta.env.VITE_API_BASE || (Capacitor.isNativePlatform() ? 'https://yai-translator.pages.dev' : '')
+).replace(/\/+$/, '');
 
 /** Версия показывается в профиле; совпадает с package.json. */
-export const APP_VERSION = '0.13.0';
+export const APP_VERSION = '0.14.0';
 
 /** Код версии приложения Android (увеличивается при каждом обновлении APK). */
-export const ANDROID_VERSION_CODE = 2;
+export const ANDROID_VERSION_CODE = 3;
 
 export const STORAGE_KEYS = {
   theme: 'yai.theme',

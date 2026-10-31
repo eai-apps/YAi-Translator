@@ -1,9 +1,9 @@
 {
-  "versionCode": 2,
-  "versionName": "0.12.1",
+  "versionCode": 3,
+  "versionName": "0.14.0",
   "apkUrl": "https://github.com/eai-apps/YAi-Translator/releases/latest/download/YAi-Translator.apk",
-  "notes_ru": "Свайп по истории переводов, кнопка «История», серия дней 🔥, озвучка в приложении, перевод текста из любого приложения и карточки для соцсетей.",
-  "notes_de": "Wischen durch den Übersetzungsverlauf, Verlauf-Button, Tagesserie 🔥, Sprachausgabe in der App, Textübersetzung aus jeder App und Bild-Export.",
-  "notes_en": "Swipe through translation history, history button, day streak 🔥, in-app speech synthesis, translate text from any app, and share as image.",
+  "notes_ru": "Полноценное Android-приложение без браузерной рамки, поддержка Android 15 edge-to-edge, шторка выбора языка, карусель карточки слова, нативные буфер и шаринг, обновление содержимого по воздуху.",
+  "notes_de": "Vollwertige Android-App ohne Browser-Rahmen, Android 15 Edge-to-Edge-Unterstützung, Sprachauswahl-Sheet, Wortkarten-Karussell, native Zwischenablage und Teilen, Over-the-Air-Inhaltsaktualisierung.",
+  "notes_en": "Native Android app without browser frame, Android 15 edge-to-edge support, language bottom sheet, word card carousel, native clipboard and share, over-the-air bundle updates.",
   "required": false
 }

@@ -1,17 +1,25 @@
 /**
- * Чипс быстрой вставки из буфера обмена для пустого поля ввода перевода.
+ * Кнопка быстрой вставки из буфера обмена (этап 12):
+ * - Располагается под полем ввода рядом с микрофоном, не перекрывая текст подсказки.
+ * - В приложении использует нативный буфер через @capacitor/clipboard.
  */
 import { useTranslation } from 'react-i18next';
+import { readClipboardText } from '../../lib/nativeClipboard';
+import { hapticImpact } from '../../lib/haptics';
 
-export function PasteChip({ onPaste }: { onPaste: (text: string) => void }) {
+interface PasteChipProps {
+  onPaste: (text: string) => void;
+  className?: string;
+}
+
+export function PasteChip({ onPaste, className }: PasteChipProps) {
   const { t } = useTranslation();
 
   const handlePaste = async () => {
-    try {
-      const clip = await navigator.clipboard.readText();
-      if (clip.trim()) onPaste(clip.trim());
-    } catch {
-      // Буфер обмена недоступен
+    void hapticImpact();
+    const clip = await readClipboardText();
+    if (clip.trim()) {
+      onPaste(clip.trim());
     }
   };
 
@@ -19,7 +27,10 @@ export function PasteChip({ onPaste }: { onPaste: (text: string) => void }) {
     <button
       type="button"
       onClick={() => void handlePaste()}
-      className="absolute right-1 top-2 flex items-center gap-1 rounded-lg border border-line bg-soft px-2 py-1 text-xs font-medium text-muted transition-colors hover:bg-soft hover:text-ink focus-visible:ring-2 focus-visible:ring-accent"
+      className={
+        className ??
+        'flex h-9 items-center gap-1.5 rounded-xl border border-line bg-card px-2.5 text-xs font-medium text-muted transition-colors hover:bg-soft hover:text-ink active:scale-95 focus-visible:ring-2 focus-visible:ring-accent'
+      }
       title={t('translate.pasteFromClipboard')}
     >
       <svg

@@ -14,6 +14,42 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.14.0',
+    date: '2026-11-01',
+    items: {
+      ru: [
+        'Полноценное мобильное приложение без браузерной рамки: экраны встроены внутри APK и работают мгновенно.',
+        'Поддержка Android 15 edge-to-edge: правильные отступы под системный статус-бар и панель навигации.',
+        'Новая шторка выбора языка снизу с быстрым поиском и недавними языками.',
+        'Симметричная строка языков 1fr auto 1fr с кнопкой ⇄ строго по центру.',
+        'Интерактивный свайп по карточке перевода: карточка следует за пальцем.',
+        'Горизонтальная лента карточки слова (Яндекс-стиль): листание между значениями, формами, примерами и связями.',
+        'Кнопка «Вставить» вынесена под поле ввода рядом с микрофоном; автоматическое скрытие клавиатуры.',
+        'Обновление содержимого приложения «по воздуху» без необходимости переустановки APK.',
+      ],
+      de: [
+        'Vollwertige App ohne Browser-Rahmen: Bildschirme sind direkt im APK integriert und starten sofort.',
+        'Android 15 Edge-to-Edge-Unterstützung mit sicheren Abständen für Statusleiste und Navigation.',
+        'Neues Sprachauswahl-Sheet von unten mit Schnellsuche und zuletzt verwendeten Sprachen.',
+        'Symmetrische Sprachzeile (1fr auto 1fr) mit ⇄-Taste genau in der Mitte.',
+        'Interaktives Wischen über die Übersetzungskarte: Karte folgt dem Finger.',
+        'Horizontales Karussell für Wortkarten: Wischen zwischen Bedeutungen, Formen, Beispielen und Bezügen.',
+        'Einfügen-Button unter dem Eingabefeld neben dem Mikrofon; automatische Tastatursteuerung.',
+        'Over-the-Air-Inhaltsaktualisierung ohne Neuinstallation der APK.',
+      ],
+      en: [
+        'Full standalone app without browser frame: screens are built into APK and launch instantly.',
+        'Android 15 edge-to-edge support with safe area insets for status and navigation bars.',
+        'New bottom sheet for language selection with fast search and recent languages.',
+        'Symmetrical language bar (1fr auto 1fr) with centered ⇄ button.',
+        'Interactive swipe on translation card: card follows the finger smoothly.',
+        'Horizontal word card carousel: swipe between meanings, forms, examples, and relations.',
+        'Paste button relocated beneath input next to microphone; automatic keyboard dismissal.',
+        'Over-the-air bundle updates without reinstalling APK.',
+      ],
+    },
+  },
+  {
     version: '0.13.0',
     date: '2026-11-01',
     items: {

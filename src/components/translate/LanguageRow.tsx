@@ -1,11 +1,17 @@
-/** Строка языков и умлауты внутри карточки перевода (этап 8). */
-import { useMemo } from 'react';
+/**
+ * Строка переключения языков «Язык ввода ⇄ Язык перевода» (этап 12):
+ * - Сетка grid 1fr auto 1fr: обе половины строго одинаковой ширины, кнопка ⇄ строго по центру.
+ * - Текст названий языков центрирован, обычный регистр (не капсом).
+ * - Нажатие на язык открывает красивую шторку LanguagePicker снизу с поиском и недавними.
+ * - Строка умлаутов аккуратно располагается снизу.
+ */
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { LanguageCode, SourceLanguage } from '../../../shared/types';
-import { groupedLanguages } from '../../../shared/languages';
 import { IconSwap } from '../layout/icons';
+import { LanguagePicker } from './LanguagePicker';
+import { hapticImpact } from '../../lib/haptics';
 
-/** Буквы немецкого алфавита, которых нет на обычной клавиатуре телефона. */
 export const UMLAUTS = ['ä', 'ö', 'ü', 'ß', 'Ä', 'Ö', 'Ü'];
 
 interface LanguageRowProps {
@@ -16,6 +22,8 @@ interface LanguageRowProps {
   onSwap: () => void;
   /** Вставить умлаут в позицию курсора. */
   onUmlaut?: (character: string) => void;
+  /** Недавно использованные языки (для шторки). */
+  recentLangs?: LanguageCode[];
 }
 
 export function LanguageRow({
@@ -25,79 +33,100 @@ export function LanguageRow({
   onTargetChange,
   onSwap,
   onUmlaut,
+  recentLangs,
 }: LanguageRowProps) {
   const { t } = useTranslation();
-  const groups = useMemo(() => groupedLanguages(), []);
-  const selectClass =
-    'h-8 max-w-[9.5rem] cursor-pointer appearance-none rounded-lg bg-transparent px-1.5 text-xs font-semibold uppercase tracking-wide text-muted transition-colors hover:bg-soft hover:text-ink focus:bg-soft sm:max-w-[12rem] sm:text-sm';
+  const [pickerOpen, setPickerOpen] = useState<'source' | 'target' | null>(null);
+
+  const sourceName = sourceLang === 'auto' ? t('languages.auto') : t(`languages.${sourceLang}`);
+  const targetName = t(`languages.${targetLang}`);
+
+  const handleSwap = () => {
+    void hapticImpact();
+    onSwap();
+  };
+
+  const handleOpenSource = () => {
+    void hapticImpact();
+    setPickerOpen('source');
+  };
+
+  const handleOpenTarget = () => {
+    void hapticImpact();
+    setPickerOpen('target');
+  };
 
   return (
-    <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1">
-      <div className="flex items-center gap-1">
-        <label className="min-w-0">
-          <span className="sr-only">{t('translate.sourceLanguage')}</span>
-          <select
-            value={sourceLang}
-            onChange={(event) => onSourceChange(event.target.value as SourceLanguage)}
-            className={selectClass}
-          >
-            <option value="auto">{t('languages.auto')}</option>
-            {(['pinned', 'other'] as const).map((group) => (
-              <optgroup key={group} label={t(`languages.${group}`)}>
-                {groups[group].map((language) => (
-                  <option key={language.code} value={language.code}>
-                    {t(`languages.${language.code}`)}
-                  </option>
-                ))}
-              </optgroup>
-            ))}
-          </select>
-        </label>
-
+    <div className="flex flex-col gap-1.5 w-full">
+      {/* ── Сетка 1fr auto 1fr: кнопка ⇄ ровно по центру ── */}
+      <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-1.5 sm:gap-2 w-full">
+        {/* Исходный язык */}
         <button
           type="button"
-          onClick={onSwap}
-          aria-label={t('translate.swap')}
-          title={t('translate.swap')}
-          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-muted transition-colors hover:bg-soft hover:text-accent"
+          onClick={handleOpenSource}
+          className="flex h-10 w-full items-center justify-center truncate rounded-xl bg-soft/70 px-3 text-center text-sm sm:text-base font-semibold text-ink transition-colors hover:bg-soft active:bg-soft focus-visible:ring-2 focus-visible:ring-accent"
+          aria-label={t('translate.sourceLanguage')}
         >
-          <IconSwap className="h-4 w-4" />
+          <span className="truncate">{sourceName}</span>
         </button>
 
-        <label className="min-w-0">
-          <span className="sr-only">{t('translate.targetLanguage')}</span>
-          <select
-            value={targetLang}
-            onChange={(event) => onTargetChange(event.target.value as LanguageCode)}
-            className={selectClass}
-          >
-            {(['pinned', 'other'] as const).map((group) => (
-              <optgroup key={group} label={t(`languages.${group}`)}>
-                {groups[group].map((language) => (
-                  <option key={language.code} value={language.code}>
-                    {t(`languages.${language.code}`)}
-                  </option>
-                ))}
-              </optgroup>
-            ))}
-          </select>
-        </label>
+        {/* Кнопка ⇄ по центру */}
+        <button
+          type="button"
+          onClick={handleSwap}
+          aria-label={t('translate.swap')}
+          title={t('translate.swap')}
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-muted transition-colors hover:bg-soft hover:text-accent active:scale-95 focus-visible:ring-2 focus-visible:ring-accent"
+        >
+          <IconSwap className="h-4 w-4 sm:h-5 sm:w-5" />
+        </button>
+
+        {/* Целевой язык */}
+        <button
+          type="button"
+          onClick={handleOpenTarget}
+          className="flex h-10 w-full items-center justify-center truncate rounded-xl bg-soft/70 px-3 text-center text-sm sm:text-base font-semibold text-ink transition-colors hover:bg-soft active:bg-soft focus-visible:ring-2 focus-visible:ring-accent"
+          aria-label={t('translate.targetLanguage')}
+        >
+          <span className="truncate">{targetName}</span>
+        </button>
       </div>
 
+      {/* Умлауты (если немецкий язык) */}
       {onUmlaut && (sourceLang === 'auto' || sourceLang === 'de') ? (
-        <div className="flex flex-wrap items-center gap-0.5">
+        <div className="flex flex-wrap items-center justify-center sm:justify-end gap-1 pt-0.5">
           {UMLAUTS.map((character) => (
             <button
               key={character}
               type="button"
-              onClick={() => onUmlaut(character)}
-              className="h-7 w-7 rounded-lg text-sm font-medium text-muted transition-colors hover:bg-accentSoft hover:text-accent"
+              onClick={() => {
+                void hapticImpact();
+                onUmlaut(character);
+              }}
+              className="flex h-7 w-7 items-center justify-center rounded-lg text-sm font-medium text-muted transition-colors hover:bg-accentSoft hover:text-accent active:bg-accentSoft"
             >
               {character}
             </button>
           ))}
         </div>
       ) : null}
+
+      {/* Шторка выбора языка */}
+      <LanguagePicker
+        open={pickerOpen === 'source'}
+        onClose={() => setPickerOpen(null)}
+        value={sourceLang}
+        onChange={(v) => onSourceChange(v as SourceLanguage)}
+        isSource
+        recent={recentLangs}
+      />
+      <LanguagePicker
+        open={pickerOpen === 'target'}
+        onClose={() => setPickerOpen(null)}
+        value={targetLang}
+        onChange={(v) => onTargetChange(v as LanguageCode)}
+        recent={recentLangs}
+      />
     </div>
   );
 }

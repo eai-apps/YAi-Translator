@@ -1,4 +1,13 @@
-/** Каркас приложения: меню слева на широком экране, вкладки снизу на телефоне. */
+/**
+ * Каркас приложения.
+ * На широком экране (≥1024px): боковое меню + контент.
+ * На телефоне/планшете: TopBar сверху + нижняя панель вкладок.
+ *
+ * Edge-to-edge (Android 15+ / iPhone notch):
+ *   TopBar получает padding-top = env(safe-area-inset-top) — контент не под статус-баром.
+ *   BottomNav получает padding-bottom = env(safe-area-inset-bottom) — не под жестами/кнопками.
+ *   Sidebar на ТВ/ПК тоже компенсирует safe-area-inset-top.
+ */
 import type { ReactNode } from 'react';
 import { Sidebar } from './Sidebar';
 import { TopBar } from './TopBar';

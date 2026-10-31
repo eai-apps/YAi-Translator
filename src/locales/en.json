@@ -21,7 +21,8 @@
     "yes": "Yes",
     "no": "No",
     "on": "On",
-    "off": "Off"
+    "off": "Off",
+    "noResults": "No results found"
   },
   "nav": {
     "translate": "Translate",
@@ -35,7 +36,8 @@
     "admin": "Admin",
     "resources": "Useful resources",
     "guestSignIn": "Guest · Sign in",
-    "apps": "Apps"
+    "apps": "Apps",
+    "more": "More"
   },
   "languages": {
     "auto": "Detect language",
@@ -63,6 +65,10 @@
     "chars": "{{used}} / {{max}}",
     "sourceLanguage": "Input language",
     "targetLanguage": "Translation language",
+    "chooseLanguage": "Choose language",
+    "searchLanguage": "Search language…",
+    "recentLanguages": "Recent",
+    "autoHint": "Detect automatically",
     "detected": "Detected: {{language}}",
     "swap": "Swap languages",
     "voice": "Voice input",
@@ -114,6 +120,7 @@
     "historyTitle": "Translation history",
     "historyPrev": "Previous translation",
     "historyNext": "Next translation",
+    "streak": "Streak",
     "streakTitle": "{{count}} day streak",
     "streakTodayComplete": "Great! Today is counted. Keep it up!",
     "streakHint": "Translate or review a word today to keep your streak!",

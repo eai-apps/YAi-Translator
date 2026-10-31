@@ -21,7 +21,8 @@
     "yes": "Ja",
     "no": "Nein",
     "on": "An",
-    "off": "Aus"
+    "off": "Aus",
+    "noResults": "Keine Ergebnisse"
   },
   "nav": {
     "translate": "Übersetzen",
@@ -35,7 +36,8 @@
     "admin": "Admin",
     "resources": "Nützliche Links",
     "guestSignIn": "Gast · Anmelden",
-    "apps": "Apps"
+    "apps": "Apps",
+    "more": "Mehr"
   },
   "languages": {
     "auto": "Sprache erkennen",
@@ -63,6 +65,10 @@
     "chars": "{{used}} / {{max}}",
     "sourceLanguage": "Sprache der Eingabe",
     "targetLanguage": "Zielsprache",
+    "chooseLanguage": "Sprache wählen",
+    "searchLanguage": "Sprache suchen…",
+    "recentLanguages": "Zuletzt verwendet",
+    "autoHint": "Automatisch erkennen",
     "detected": "Erkannt: {{language}}",
     "swap": "Sprachen tauschen",
     "voice": "Spracheingabe",
@@ -114,6 +120,7 @@
     "historyTitle": "Übersetzungsverlauf",
     "historyPrev": "Vorherige Übersetzung",
     "historyNext": "Nächste Übersetzung",
+    "streak": "Serie",
     "streakTitle": "Serie: {{count}} T.",
     "streakTodayComplete": "Super! Heute gezählt. Mach weiter so!",
     "streakHint": "Übersetze oder wiederhole heute ein Wort, um die Serie nicht zu verlieren!",

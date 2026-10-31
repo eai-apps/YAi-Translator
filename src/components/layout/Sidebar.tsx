@@ -39,7 +39,10 @@ export function Sidebar() {
   const { account } = useAccount();
 
   return (
-    <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-line bg-card px-3 py-5 lg:flex">
+    <aside
+      className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-line bg-card px-3 lg:flex"
+      style={{ paddingTop: 'calc(env(safe-area-inset-top) + 1.25rem)', paddingBottom: '1.25rem' }}
+    >
       <Link to="/" className="shrink-0 rounded-xl px-2 py-1" aria-label={t('nav.translate')}>
         <Logo size={38} withWordmark />
       </Link>

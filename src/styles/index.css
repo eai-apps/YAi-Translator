@@ -57,6 +57,10 @@
     margin: 0;
     min-height: 100dvh;
     font-feature-settings: 'cv11', 'ss01';
+    /* Нет «резинового» скролла в приложении и PWA. */
+    overscroll-behavior: none;
+    /* Нет серой вспышки при нажатии на Android WebView. */
+    -webkit-tap-highlight-color: transparent;
   }
 
   ::selection {
@@ -90,9 +94,37 @@
 }
 
 @layer utilities {
-  /* Отступ под нижнюю панель на iPhone с «челкой». */
+  /* ─── Safe area insets (edge-to-edge, Android 15+ / iPhone notch) ─── */
+
+  /* Верхний отступ: статус-бар + вырез камеры. */
+  .safe-top {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  /* Нижний отступ: навигационная панель Android / Home Indicator iOS. */
   .safe-bottom {
     padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  /* Боковые отступы: для альбомной ориентации с вырезом. */
+  .safe-left {
+    padding-left: env(safe-area-inset-left);
+  }
+  .safe-right {
+    padding-right: env(safe-area-inset-right);
+  }
+
+  /* Отступы сразу со всех сторон (для модальных шторок и т.п.). */
+  .safe-all {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+
+  /* Минимальная высота с учётом нижней панели. */
+  .min-h-safe {
+    min-height: calc(100dvh - env(safe-area-inset-bottom));
   }
 
   .no-scrollbar {
@@ -107,6 +139,22 @@
   .table-scroll {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
+  }
+
+  /* Запрет выделения текста в интерфейсе приложения (кроме полей ввода и текста перевода). */
+  .no-select {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  /* Убрать серую подсветку нажатия на Android WebView. */
+  .no-tap-highlight {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Запрет «резинового» скролла (overscroll bounce). */
+  .no-overscroll {
+    overscroll-behavior: none;
   }
 }
 

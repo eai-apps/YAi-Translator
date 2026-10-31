@@ -1,7 +1,9 @@
 /**
- * Поле ввода карточки перевода (этап 8, «как в Яндексе»): строка языков внутри карточки,
- * крупный текст с крестиком «очистить» справа, подсказки при наборе и нижняя панель действий:
- * 🔊 озвучить, пилюля режима, 🎤 микрофон.
+ * Поле ввода карточки перевода (этап 12):
+ * - Строка языков с равными долями 1fr auto 1fr и кнопкой ⇄ по центру.
+ * - Поле ввода без перекрывающих чипсов: кнопка «Вставить» вынесена вниз рядом с микрофоном.
+ * - enterKeyHint="done", скрытие экранной клавиатуры по Enter и действиям.
+ * - Неактивные кнопки (озвучка при пустом вводе) скрываются.
  */
 import { useEffect, useRef, useState } from 'react';
 import type { KeyboardEvent } from 'react';
@@ -12,6 +14,7 @@ import type { ProviderChoice } from '../../hooks/useTranslator';
 import type { SpeechController } from '../../hooks/useSpeech';
 import { useSuggestions } from '../../hooks/useSuggestions';
 import { useAudioVoice } from '../../hooks/useAudioVoice';
+import { hideKeyboard } from '../../lib/keyboard';
 import { cn } from '../../lib/cn';
 import { Card } from '../ui/Card';
 import { IconButton } from '../ui/IconButton';
@@ -45,17 +48,13 @@ export function SourcePanel(props: SourcePanelProps) {
   const { t } = useTranslation();
   const { text, onChange, sourceLang, speech } = props;
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  // -1 — подсказка не подсвечена (Enter в этом случае просто переводит текст).
   const [highlighted, setHighlighted] = useState(-1);
 
   const suggestions = useSuggestions(text, sourceLang, props.suggestionsEnabled);
-  // Подсказки — только пока человек печатает в поле; после выбора или ухода из поля прячутся.
   const [focused, setFocused] = useState(false);
   const [dismissed, setDismissed] = useState(false);
   const listOpen = focused && !dismissed && suggestions.length > 0;
 
-  // Новый текст — выбор подсказки снова с начала списка.
-  // Поле растёт вместе с текстом: короткое слово — низкое поле, длинный текст — выше (до 420 px).
   useEffect(() => {
     const element = textareaRef.current;
     if (!element) return;
@@ -66,7 +65,6 @@ export function SourcePanel(props: SourcePanelProps) {
   const acceptedRef = useRef<string | null>(null);
   useEffect(() => {
     setHighlighted(-1);
-    // Выбранную подсказку не показываем снова для того же слова.
     setDismissed(acceptedRef.current === text);
   }, [text]);
 
@@ -116,15 +114,19 @@ export function SourcePanel(props: SourcePanelProps) {
     if (listOpen && highlighted >= 0) {
       event.preventDefault();
       acceptSuggestion(suggestions[Math.min(highlighted, suggestions.length - 1)]);
+      void hideKeyboard();
       return;
     }
     if (props.enterToTranslate) {
-      event.preventDefault(); props.onSubmit();
+      event.preventDefault();
+      props.onSubmit();
+      void hideKeyboard();
     }
   };
 
   const speechLanguage: LanguageCode = sourceLang === 'auto' ? 'de' : sourceLang;
   const voiceError = speech.error === 'unsupported' ? t('translate.voiceUnsupported') : speech.error ? t('translate.voiceDenied') : null;
+  const hasText = text.trim().length > 0;
 
   return (
     <Card className="flex flex-col p-3 sm:p-4">
@@ -133,6 +135,7 @@ export function SourcePanel(props: SourcePanelProps) {
         onSourceChange={props.onSourceChange} onTargetChange={props.onTargetChange}
         onSwap={props.onSwap} onUmlaut={insertCharacter}
       />
+
       <div className="mt-1.5 border-t border-line pt-2">
         <div className="relative">
           <label className="flex flex-col">
@@ -148,13 +151,14 @@ export function SourcePanel(props: SourcePanelProps) {
               placeholder={t('translate.placeholder')}
               rows={2}
               spellCheck
-              /* Арабский текст пишется справа налево; для остальных языков — обычное направление. */
+              enterKeyHint="done"
               dir={sourceLang === 'auto' ? 'auto' : textDirection(sourceLang)}
               className="min-h-[64px] max-h-[420px] w-full resize-none overflow-y-auto bg-transparent py-2 pl-1 pr-10 text-lg leading-relaxed text-ink outline-none placeholder:text-muted sm:min-h-[80px] sm:text-xl"
             />
           </label>
-          {/* Крестик «очистить» — справа в поле, либо чипс «Вставить» для пустого поля. */}
-          {text ? (
+
+          {/* Крестик «очистить» справа в поле (только если есть текст) */}
+          {hasText ? (
             <button
               type="button"
               aria-label={t('translate.clearInput')}
@@ -163,13 +167,11 @@ export function SourcePanel(props: SourcePanelProps) {
                 onChange('');
                 textareaRef.current?.focus();
               }}
-              className="absolute right-1 top-1 flex h-8 w-8 items-center justify-center rounded-full text-muted transition-colors hover:bg-soft hover:text-ink"
+              className="absolute right-1 top-1 flex h-8 w-8 items-center justify-center rounded-full text-muted transition-colors hover:bg-soft hover:text-ink active:scale-95"
             >
               <IconClose className="h-[18px] w-[18px]" />
             </button>
-          ) : (
-            <PasteChip onPaste={onChange} />
-          )}
+          ) : null}
         </div>
 
         {listOpen ? (
@@ -204,43 +206,53 @@ export function SourcePanel(props: SourcePanelProps) {
       </div>
 
       <div className="mt-1 flex flex-wrap items-center gap-1.5 border-t border-line pt-2">
-        <IconButton
-          label={t('translate.speakSource')}
-          icon={<IconVolume className="h-[18px] w-[18px]" />}
-          onClick={() => speech.speak(text, speechLanguage, 'source')}
-          disabled={!text.trim()}
-          active={speech.speakingId === 'source'}
-        />
+        {/* Озвучка ввода: скрыта, если поле пустое (пункт 8) */}
+        {hasText ? (
+          <IconButton
+            label={t('translate.speakSource')}
+            icon={<IconVolume className="h-[18px] w-[18px]" />}
+            onClick={() => speech.speak(text, speechLanguage, 'source')}
+            active={speech.speakingId === 'source'}
+          />
+        ) : null}
+
         <ProviderPill
           value={props.providerChoice}
           onChange={props.onProviderChange}
           aiLoading={props.aiLoading}
           onAskAi={props.onAskAi}
-          hasText={text.trim().length > 0}
+          hasText={hasText}
         />
-        <button
-          type="button"
-          aria-label={voice.recording || speech.listening ? t('common.stop') : t('translate.voice')}
-          title={voice.recording || speech.listening ? t('common.stop') : t('translate.voice')}
-          onClick={handleVoice}
-          className={cn(
-            'ml-auto flex h-9 items-center justify-center gap-1.5 rounded-xl border border-line px-2.5 text-xs font-medium transition-colors',
-            (voice.recording || speech.listening)
-              ? 'border-danger bg-danger text-white'
-              : 'text-muted hover:bg-soft hover:text-ink',
-          )}
-        >
-          {voice.transcribing ? (
-            <Spinner className="h-4 w-4" />
-          ) : voice.recording ? (
-            <>
-              <span className="h-2 w-2 animate-pulse rounded-full bg-white" />
-              <span className="tabular-nums font-mono">{voice.seconds}s</span>
-            </>
-          ) : (
-            <IconMic className="h-[18px] w-[18px]" />
-          )}
-        </button>
+
+        <div className="ml-auto flex items-center gap-1.5">
+          {/* Кнопка «Вставить» рядом с микрофоном при пустом поле (пункт 7) */}
+          {!hasText ? <PasteChip onPaste={onChange} /> : null}
+
+          <button
+            type="button"
+            aria-label={voice.recording || speech.listening ? t('common.stop') : t('translate.voice')}
+            title={voice.recording || speech.listening ? t('common.stop') : t('translate.voice')}
+            onClick={handleVoice}
+            className={cn(
+              'flex h-9 items-center justify-center gap-1.5 rounded-xl border border-line px-2.5 text-xs font-medium transition-colors',
+              (voice.recording || speech.listening)
+                ? 'border-danger bg-danger text-white'
+                : 'text-muted hover:bg-soft hover:text-ink',
+            )}
+          >
+            {voice.transcribing ? (
+              <Spinner className="h-4 w-4" />
+            ) : voice.recording ? (
+              <>
+                <span className="h-2 w-2 animate-pulse rounded-full bg-white" />
+                <span className="tabular-nums font-mono">{voice.seconds}s</span>
+              </>
+            ) : (
+              <IconMic className="h-[18px] w-[18px]" />
+            )}
+          </button>
+        </div>
+
         <span className="w-full text-right text-[11px] tabular-nums text-muted">
           {props.enterToTranslate ? `${t('translate.enterHint')} · ` : ''}
           {t('translate.chars', { used: text.length, max: props.maxLength })}

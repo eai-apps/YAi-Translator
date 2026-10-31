@@ -42,7 +42,12 @@ export default function AboutPage() {
             </div>
           </div>
           <p className="mt-3 text-sm leading-relaxed text-muted">{t('about.description')}</p>
-          <div className="mt-4 rounded-xl bg-soft p-3">
+          <div className="mt-4 space-y-2 rounded-xl bg-soft p-3.5">
+            <p className="text-sm font-semibold text-ink">{t('translate.tagline')}</p>
+            <p className="text-xs leading-relaxed text-muted">{t('translate.taglineSub')}</p>
+            <p className="text-xs font-medium text-accent">★ {t('translate.taglineGuest')}</p>
+          </div>
+          <div className="mt-3 rounded-xl bg-soft p-3">
             <p className="text-sm font-semibold">{t('about.freelyTitle')}</p>
             <p className="mt-1 text-xs leading-relaxed text-muted">{t('about.freelyText')}</p>
           </div>

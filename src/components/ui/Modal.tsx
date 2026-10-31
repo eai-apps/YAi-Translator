@@ -49,6 +49,7 @@ export function Modal({ open, onClose, title, children, footer, className }: Mod
           'animate-fade-in sm:max-w-lg sm:rounded-2xl',
           className,
         )}
+        style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
       >
         <div className="flex items-start justify-between gap-3 border-b border-line px-5 py-4">
           <h2 className="text-lg font-semibold leading-snug">{title}</h2>

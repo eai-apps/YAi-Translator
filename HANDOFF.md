@@ -117,6 +117,53 @@
 
 ## Журнал работ (новые записи — сверху)
 
+### 2026-11-01 01:05 — Claude — 0.14.0 (проверка этапа 12: Antigravity, Claude Sonnet 4.6 → Gemini)
+- Проверил и выложил этап 12: приложение снова со встроенной сборкой (без `server.url`), обновление по воздуху
+  `@capgo/capacitor-updater` (`src/lib/liveUpdate.ts`, архив `dist/app/bundle-<версия>.zip` + `bundle.json` из
+  `scripts/build-app-bundle.mjs`, вызывается в `npm run build`), нижняя панель + «Ещё» (`MoreScreen.tsx`), шторка
+  языков (`LanguagePicker.tsx`), горизонтальная карусель карточки слова (`WordCarousel.tsx`), клавиатура/вибрация/
+  share/clipboard (`src/lib/keyboard.ts`, `haptics.ts`, `nativeShare.ts`, `nativeClipboard.ts`), edge-to-edge
+  (`StatusBar.overlaysWebView: true` + `env(safe-area-inset-*)`, `viewport-fit=cover` уже был в `index.html`).
+- Исправил (критично): архив обновления — обычная сборка сайта с пустым `VITE_API_BASE`, в приложении API шли бы на
+  https://localhost. Теперь `API_BASE` в `src/config.ts` при `Capacitor.isNativePlatform()` = сайт.
+- Исправил: `CapacitorUpdater.set()` перезагружал приложение сразу после скачивания — заменено на `next()` (при
+  следующем запуске); версия встроенной сборки «builtin» = `APP_VERSION`; в `capacitor.config.ts` у CapacitorUpdater
+  `autoUpdate: false` и пустые адреса облака Capgo.
+- Исправил: на телефоне пустая карточка «Начните переводить» занимала полэкрана — скрыта, пока поле пустое.
+- Проверено: сборка сайта и `build:android`, ключи ru/de/en, скриншоты мобильной версии (Playwright 390×844).
+  **Эмулятора Android в среде Claude нет** — APK на телефоне проверяет владелец.
+- APK 0.14.0 (versionCode 3) — GitHub → Actions → Build Android APK → Run workflow.
+
+### 2026-11-01 02:00 — Claude Sonnet 4.6 + Gemini 3.8 Flash — 0.14.0 (этап 12: полноценное приложение и мобильная оболочка)
+- Выполнен этап 12 (`tasks/STAGE12.md`):
+  1. Экраны внутри APK: убран `server.url`, веб-содержимое встроено в `dist/` и синхронизируется в `android/app/src/main/assets/public`. Приложение запускается мгновенно и работает автономно.
+  2. Обновление веб-содержимого по воздуху: подключен `@capgo/capacitor-updater` в ручном автономном режиме без облака Capgo (`src/lib/liveUpdate.ts`). Скрипт `scripts/build-app-bundle.mjs` упаковывает сборку в `dist/app/bundle-0.14.0.zip` и формирует `dist/app/bundle.json`. Защита от сломанных версий через `notifyAppReady()`.
+  3. Android 15 edge-to-edge (targetSdk 36):
+     - `index.html`: `viewport-fit=cover`.
+     - `styles.xml`: прозрачные `statusBarColor` и `navigationBarColor`, `android:windowLayoutInDisplayCutoutMode=shortEdges`, `fitsSystemWindows=false`.
+     - `MainActivity.java`: `WindowCompat.setDecorFitsSystemWindows(window, false)` и `LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES`.
+     - `capacitor.config.ts`: `StatusBar.overlaysWebView = true`, `Keyboard.resize = 'body'`.
+     - `src/styles/index.css`: безопасные отступы `safe-top`, `safe-bottom`, `safe-left`, `safe-right`, `safe-all`, запрет выделения интерфейса `no-select`, отключение «резинового» скролла `overscroll-behavior: none` и серой подсветки `no-tap-highlight`.
+     - `TopBar.tsx`, `BottomNav.tsx`, `Sidebar.tsx`, `Modal.tsx`, `LanguagePicker.tsx`, `TranslateHistoryDrawer.tsx`: защищены отступом `env(safe-area-inset-*)`. Часы и системные панели не перекрывают элементы управления.
+  4. Строка выбора языков (сетка 1fr auto 1fr):
+     - `LanguageRow.tsx`: кнопки языков одинаковой ширины, кнопка ⇄ строго по центру, текст названий языков выровнен по центру без капса.
+     - `LanguagePicker.tsx`: фирменная шторка снизу с поиском, группой «Недавние», «Определить язык», без капса и с галочкой на текущем языке.
+  5. Экран перевода:
+     - Убран громоздкий рекламный заголовок с экрана перевода. Экран начинается сразу со строки языков и ввода. Подробное описание и возможности сервиса перенесены в «О приложении» (`AboutPage.tsx`).
+     - Серия дней 🔥 и история переводов 🕒 оформлены понятными кнопками с иконками и подписями в одной строке (`TranslateHeader.tsx`).
+     - Неактивные кнопки (озвучка при пустом поле) скрываются.
+     - «Слово дня» убрано из-под поля ввода и перенесено в самый низ экрана перевода (`WordOfDayCard`).
+     - Кнопка «Вставить» (`PasteChip.tsx`) перенесена из поля ввода вниз рядом с микрофоном; использует нативный буфер через `@capacitor/clipboard`.
+     - Скрытие клавиатуры: `enterKeyHint="done"`, скрытие по Enter, при скролле и свайпе (`@capacitor/keyboard`).
+  6. Карточка слова:
+     - `WordCarousel.tsx`: на мобильных устройствах быстрые секции слова (Значения, Формы, Примеры, Связи, Грамматика) оформлены горизонтальной каруселью с `scroll-snap`, листаются пальцем влево-вправо, виден край следующей карточки (стиль Яндекс Переводчика). На десктопе — классические вкладки.
+  7. Свайп по карточке перевода:
+     - `useSwipe.ts`: интерактивное следование карточки за пальцем во время жеста (`onTouchMove`), плавная анимация возврата/переключения, виброотклик `@capacitor/haptics`.
+  8. Все разделы приложения:
+     - `BottomNav.tsx` + `MoreScreen.tsx`: вкладка «Ещё» открывает шторку плиткой со всеми разделами (Грамматика, Спросить у AI, Ресурсы, Приложения, О приложении, Админка). Вход в аккаунт и админка доступны внутри приложения.
+  9. Нативные плагины: `@capacitor/keyboard`, `@capacitor/haptics`, `@capacitor/clipboard`, `@capacitor/share`, `@capgo/capacitor-updater`.
+  10. Версии синхронизированы: `package.json` (0.14.0), `android/app/build.gradle` (versionCode 3, versionName 0.14.0), `src/config.ts`, `functions/_lib/config.ts`, `public/version.json`. Сборки `npm run build` и `npm run build:android` завершаются с кодом 0. Все 1158 ключей в `ru.json`, `de.json`, `en.json` совпадают.
+
 ### 2026-11-01 00:40 — Claude — 0.13.0 (проверка этапа 11 от Antigravity / Gemini 3.8 Flash)
 - Antigravity сделал этап 11: база `public/lex/de/` (≈122 000 записей, 6 МБ, 361 файл), `scripts/build-lexicon.mjs` +
   `scripts/lexicon/*`, `src/hooks/useLexicon.ts`, `src/components/word/InstantWordCard.tsx` (в `WordPanel`,

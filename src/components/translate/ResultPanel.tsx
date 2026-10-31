@@ -1,15 +1,18 @@
 /**
- * Карточка перевода (этап 8, «как в Яндексе»): строка «Определён · переводчик», разделитель,
- * крупный перевод, ниже действия 🔊 / копировать / «В карточки» / ⭐ / «⋯»
- * (Разобрать, Проверить мой немецкий, Поделиться). Под карточкой — «Как переводят другие».
+ * Карточка перевода (этап 12):
+ * - Свайп пальцем по карточке листает историю (карточка едет за пальцем с живым откликом).
+ * - Нативное окно «Поделиться» через @capacitor/share.
+ * - Скрытие клавиатуры при начале свайпа или прокрутке.
  */
-import { useRef, type ReactNode } from 'react';
+import { useEffect, useRef, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { LanguageCode, SourceLanguage, StudyCardInput, TranslateResponse } from '../../../shared/types';
 import { getLanguage, textDirection } from '../../../shared/languages';
 import type { TranslatorError } from '../../hooks/useTranslator';
 import type { SpeechController } from '../../hooks/useSpeech';
 import { useSwipe } from '../../hooks/useSwipe';
+import { hideKeyboard } from '../../lib/keyboard';
+import { shareText } from '../../lib/nativeShare';
 import { errorMessageKey, providerLabel } from '../../lib/errors';
 import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
@@ -32,7 +35,6 @@ interface ResultPanelProps {
   targetLang: LanguageCode;
   detectedLang: LanguageCode | null;
   isFavorite: boolean;
-  /** «⭐» работает только когда перевод сохранён в историю. */
   canFavorite: boolean;
   canUseTools: boolean;
   speech: SpeechController;
@@ -41,15 +43,10 @@ interface ResultPanelProps {
   onExplain: () => void;
   onCheck: () => void;
   onToggleFavorite: () => void;
-  /** Снимок слова для карточек, если перевод — 1–3 слова (этап 6). */
   studyInput?: StudyCardInput | null;
-  /** Блок «Как переводят другие» (или null, если он выключен в настройках). */
   others?: ReactNode;
-  /** «Ещё варианты» для 1–3 слов — переводы из карточки слова (брать, приносить, позвать…). */
   moreVariants?: string[];
-  /** Нажатие на вариант — перевести его обратно. */
   onPickVariant?: (value: string) => void;
-  /** Исходный текст — для «Поделиться». */
   sourceText: string;
   onPrevHistory?: () => void;
   onNextHistory?: () => void;
@@ -60,47 +57,48 @@ interface ResultPanelProps {
   onShareImage?: () => void;
 }
 
-/** Есть ли системное окно «Поделиться» (на телефоне) — иначе копируем текст. */
-function canShare(): boolean {
-  return typeof navigator !== 'undefined' && typeof navigator.share === 'function';
-}
-
 export function ResultPanel(props: ResultPanelProps) {
   const { result, loading, error, sourceLang, targetLang, detectedLang, speech } = props;
   const { t } = useTranslation();
   const panelRef = useRef<HTMLDivElement>(null);
 
-  useSwipe(panelRef, {
+  // Свайп с живым следованием карточки за пальцем
+  const { dragOffset, isDragging } = useSwipe(panelRef, {
     onSwipeLeft: props.onNextHistory,
     onSwipeRight: props.onPrevHistory,
   });
+
+  // При начале жеста свайпа прячем экранную клавиатуру
+  useEffect(() => {
+    if (isDragging) {
+      void hideKeyboard();
+    }
+  }, [isDragging]);
 
   const targetName = getLanguage(targetLang)?.nativeName ?? targetLang;
   const copyValue = result?.translatedText ?? '';
   const targetDir = textDirection(targetLang);
 
-  /** «Поделиться»: текст перевода + исходник; без navigator.share — копирование. */
-  const share = async () => {
+  const handleShare = async () => {
     if (!result) return;
-    const text = props.sourceText.trim() ? `${props.sourceText}\n→ ${result.translatedText}` : result.translatedText;
-    try {
-      if (canShare()) {
-        await navigator.share({ title: t('common.appName'), text });
-        return;
-      }
-      await navigator.clipboard.writeText(result.translatedText);
-    } catch {
-      // Пользователь закрыл окно или браузер запретил — ничего не показываем.
-    }
+    const text = props.sourceText.trim()
+      ? `${props.sourceText}\n→ ${result.translatedText}`
+      : result.translatedText;
+    await shareText({
+      title: t('common.appName'),
+      text,
+    });
   };
 
   return (
     <div ref={panelRef} className="group relative flex min-w-0 flex-col gap-3">
       <Card
-        className={`relative flex min-h-[220px] flex-col p-4 sm:p-5 ${result?.pro ? 'ring-1 ring-accent shadow-[0_0_0_4px_rgba(109,146,255,0.08)]' : ''}`}
+        className={`relative flex min-h-[220px] flex-col p-4 sm:p-5 select-text ${
+          result?.pro ? 'ring-1 ring-accent shadow-[0_0_0_4px_rgba(109,146,255,0.08)]' : ''
+        }`}
       >
         {props.historyCounter ? (
-          <div className="absolute right-3 top-3 z-10 rounded-full border border-line bg-card px-2 py-0.5 font-mono text-[11px] text-muted shadow-sm backdrop-blur-sm">
+          <div className="absolute right-3 top-3 z-10 rounded-full border border-line bg-card px-2.5 py-0.5 font-mono text-[11px] text-muted shadow-sm backdrop-blur-sm">
             {props.historyCounter}
           </div>
         ) : null}
@@ -144,13 +142,26 @@ export function ResultPanel(props: ResultPanelProps) {
         <div className="my-3 border-t border-line" />
 
         <div
-          className={`flex-1 transition-all duration-200 ${
-            props.slideDirection === 'left'
-              ? '-translate-x-3 opacity-60'
-              : props.slideDirection === 'right'
-                ? 'translate-x-3 opacity-60'
-                : 'translate-x-0 opacity-100'
+          className={`flex-1 ${
+            !isDragging
+              ? `transition-all duration-200 ${
+                  props.slideDirection === 'left'
+                    ? '-translate-x-3 opacity-60'
+                    : props.slideDirection === 'right'
+                      ? 'translate-x-3 opacity-60'
+                      : 'translate-x-0 opacity-100'
+                }`
+              : ''
           }`}
+          style={
+            isDragging
+              ? {
+                  transform: `translateX(${dragOffset}px)`,
+                  opacity: Math.max(0.4, 1 - Math.abs(dragOffset) / 300),
+                  transition: 'none',
+                }
+              : undefined
+          }
           aria-live="polite"
         >
           {error ? (
@@ -191,7 +202,7 @@ export function ResultPanel(props: ResultPanelProps) {
             <>
               <p
                 dir={targetDir}
-                className={`whitespace-pre-wrap break-words text-xl leading-relaxed sm:text-2xl ${
+                className={`select-text whitespace-pre-wrap break-words text-xl leading-relaxed sm:text-2xl ${
                   targetDir === 'rtl' ? 'text-right' : ''
                 }`}
               >
@@ -240,10 +251,10 @@ export function ResultPanel(props: ResultPanelProps) {
               <CardMenu
                 onExplain={props.onExplain}
                 onCheck={props.onCheck}
-                onShare={() => void share()}
+                onShare={() => void handleShare()}
                 onShareImage={props.onShareImage}
                 canUseTools={props.canUseTools}
-                shareSupported={canShare()}
+                shareSupported={true}
                 className="ml-auto"
               />
             </div>
