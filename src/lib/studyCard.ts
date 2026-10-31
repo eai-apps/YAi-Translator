@@ -92,7 +92,8 @@ export function cardFromDeckWord(word: DeckWord, targetLang: UiLanguage): StudyC
     article: word.article,
     plural: word.plural,
     partOfSpeech: word.partOfSpeech,
-    translations: cleanTranslations([deckTranslation(word, targetLang), word.translations.ru, word.translations.en]),
+    // Только один язык: «семья», а не «семья, family». Нет перевода на нужном языке — русский, потом английский.
+    translations: cleanTranslations([deckTranslation(word, targetLang) || word.translations.ru || word.translations.en]),
     example: word.example,
     perfekt: null,
   };
