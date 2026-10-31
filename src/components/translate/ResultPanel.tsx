@@ -17,6 +17,7 @@ import { CopyButton } from '../ui/CopyButton';
 import { IconButton } from '../ui/IconButton';
 import { Spinner } from '../ui/Spinner';
 import { SpeakButton } from '../ui/SpeakButton';
+import { ProExtras } from './ProExtras';
 import { IconAlert, IconStar, IconTranslate } from '../layout/icons';
 import { AddToStudyMenu } from '../study/AddToStudyMenu';
 import { AlternativesList } from './AlternativesList';
@@ -82,7 +83,9 @@ export function ResultPanel(props: ResultPanelProps) {
 
   return (
     <div className="flex min-w-0 flex-col gap-3">
-      <Card className="flex min-h-[220px] flex-col p-4 sm:p-5">
+      <Card
+        className={`flex min-h-[220px] flex-col p-4 sm:p-5 ${result?.pro ? 'ring-1 ring-accent/40 shadow-[0_0_0_4px_rgba(109,146,255,0.08)]' : ''}`}
+      >
         <div className="flex flex-wrap items-center justify-between gap-2">
           <span className="text-xs font-medium text-muted">
             {detectedLang && sourceLang === 'auto'
@@ -158,6 +161,7 @@ export function ResultPanel(props: ResultPanelProps) {
                   ))}
                 </div>
               ) : null}
+              {result.pro ? <ProExtras pro={result.pro} targetLang={targetLang} speech={speech} /> : null}
             </>
           )}
         </div>

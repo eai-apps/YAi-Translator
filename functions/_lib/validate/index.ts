@@ -1,5 +1,5 @@
 /** Единая точка входа: проверка всех ответов ИИ. */
-export { validateTranslate } from './translate';
+export { validateTranslate, validateTranslatePro } from './translate';
 export type { TranslateCore } from './translate';
 export { validateWordCard } from './word';
 export type { WordCore } from './word';

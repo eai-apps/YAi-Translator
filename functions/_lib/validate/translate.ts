@@ -30,3 +30,18 @@ export function validateTranslate(raw: unknown): TranslateCore | null {
     detectedLang: isLanguageCode(raw.detectedLang) ? raw.detectedLang : null,
   };
 }
+
+/** «ИИ Pro»: перевод + 3 примера и совет; без примеров ответ всё равно принимаем (совет и примеры — бонус). */
+export function validateTranslatePro(raw: unknown): TranslateCore | null {
+  const core = validateTranslate(raw);
+  if (!core || !isRecord(raw)) return core;
+  const examples = asArray(raw.examples, 3)
+    .map((item) => {
+      if (!isRecord(item)) return null;
+      const text = asText(item.text, 300);
+      return text ? { text, translation: asText(item.translation, 300) ?? '' } : null;
+    })
+    .filter((item): item is { text: string; translation: string } => item !== null);
+  const tip = asText(raw.tip, 400) || null;
+  return examples.length > 0 || tip ? { ...core, pro: { examples, tip } } : core;
+}

@@ -19,7 +19,8 @@ import { runJsonTask } from '../_lib/router';
 import type { UserKeys } from '../_lib/router';
 import { translateClassic } from '../_lib/classic';
 import { bump } from '../_lib/stats';
-import { validateTranslate } from '../_lib/validate';
+import { validateTranslate, validateTranslatePro } from '../_lib/validate';
+import { buildTranslateProPrompt } from '../_lib/promptsPro';
 import { readSetting, SETTINGS_KEYS } from '../_lib/settings';
 import { resolveAiModel } from '../_lib/paid/pick';
 
@@ -53,6 +54,8 @@ interface Job {
   isRegistered?: boolean;
   /** Нейросеть сайта, выбранная в списке: «id подключения|модель». */
   aiModel?: string;
+  /** «Суперточный перевод (ИИ Pro)»: перевод + примеры и совет. */
+  pro?: boolean;
 }
 
 /** Обычные переводчики: выбранный пользователем или все по очереди. */
@@ -89,11 +92,11 @@ async function runAi(job: Job, personal: PersonalAi | null = null): Promise<Tran
   }
   const { data, provider, model } = await runJsonTask({
     env: job.env,
-    prompt: buildTranslatePrompt(job),
+    prompt: job.pro ? buildTranslateProPrompt(job) : buildTranslatePrompt(job),
     userKeys: job.userKeys,
     signal: job.signal,
     beforeShared: job.limitGuard,
-    validate: validateTranslate,
+    validate: job.pro ? validateTranslatePro : validateTranslate,
     isRegistered: job.isRegistered,
     ...(personal ? { only: [personal], personalOnly: true } : {}),
     ...(!personal && job.aiModel ? { only: ['paid' as const], sharedPaidPick: job.aiModel } : {}),
@@ -131,6 +134,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       limitGuard: createLimitGuard(env, getClientIp(context.request), session?.userId),
       isRegistered: Boolean(session),
       aiModel,
+      pro: mode === 'ai' && body.aiModel === 'default' && Boolean(aiModel),
     };
     // Нейросети сайта только для вошедших (если так настроено в админке) — гостю понятная ошибка «войдите».
     if (aiModel && !session && ((await readSetting<boolean>(env, SETTINGS_KEYS.paidAiRegisteredOnly)) ?? true)) {
@@ -140,7 +144,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     // Кэш отдельно для каждого режима и выбранного переводчика.
     const cacheKey = await buildCacheKey({
       kind: 'translate',
-      text: `${mode}|${chosen ?? personalAi ?? aiModel ?? 'any'}|${text}`,
+      text: `${mode}|${job.pro ? 'pro:' : ''}${chosen ?? personalAi ?? aiModel ?? 'any'}|${text}`,
       sourceLang,
       targetLang,
       uiLang,

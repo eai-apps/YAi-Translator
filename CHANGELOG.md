@@ -1,5 +1,9 @@
 # История версий
 
+## 0.10.2 — 31.10.2026
+
+«ИИ Pro»: `promptsPro.ts` (примеры A1–A2 и совет), `validateTranslatePro`, поле `pro` в ответе, `ProExtras.tsx`. Автор — Claude.
+
 ## 0.10.1 — 31.10.2026
 
 Режимы `ai`/`pro` в выборе переводчика, `aiModel: "default"` (модель по умолчанию на сервере, `paid/pick.ts`),

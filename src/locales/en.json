@@ -108,7 +108,8 @@
     "moreAiAfterLogin": "★ Sign in or register — free",
     "taglineGuest": "Claude, ChatGPT, DeepSeek, Qwen and 10× more requests — after free sign-up",
     "modeAccuratePro": "Super-accurate translation (AI Pro)",
-    "proBadge": "AI Pro"
+    "proBadge": "AI Pro",
+    "proExtrasTitle": "AI Pro: examples and tip"
   },
   "others": {
     "title": "How others translate it",

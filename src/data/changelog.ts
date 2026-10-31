@@ -14,6 +14,15 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.10.2',
+    date: '2026-10-31',
+    items: {
+      ru: ['«Суперточный перевод (ИИ Pro)»: кроме перевода — 3 лёгких примера с озвучкой и один цепляющий совет, карточка выделена.'],
+      de: ['„Extra-genaue Übersetzung (KI Pro)“: dazu 3 einfache Beispiele mit Vorlesen und ein einprägsamer Tipp, die Karte ist hervorgehoben.'],
+      en: ['“Super-accurate (AI Pro)”: plus 3 easy examples with audio and one catchy tip; the card is highlighted.'],
+    },
+  },
+  {
     version: '0.10.1',
     date: '2026-10-31',
     items: {

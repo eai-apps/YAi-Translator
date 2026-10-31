@@ -108,7 +108,8 @@
     "moreAiAfterLogin": "★ Войти или зарегистрироваться — бесплатно",
     "taglineGuest": "Claude, ChatGPT, DeepSeek, Qwen и в 10 раз больше запросов — после бесплатной регистрации",
     "modeAccuratePro": "Суперточный перевод (ИИ Pro)",
-    "proBadge": "ИИ Pro"
+    "proBadge": "ИИ Pro",
+    "proExtrasTitle": "ИИ Pro: примеры и совет"
   },
   "others": {
     "title": "Как переводят другие",
