@@ -24,13 +24,15 @@ export function useAsk(uiLanguage: UiLanguage) {
   const abortRef = useRef<AbortController | null>(null);
 
   const submit = useCallback(
-    async (raw: string) => {
+    async (raw: string, aiModel?: string) => {
       const question = raw.replace(/\s+/g, ' ').trim();
       if (question.length < 3) return;
 
-      // Уже спрашивали — показываем сохранённый ответ, не тратя лимит.
-      const known = history.items.find((item) => item.question.toLowerCase() === question.toLowerCase());
-      if (known?.answer) {
+      // Уже спрашивали — показываем сохранённый ответ, не тратя лимит (если модель та же или не указана).
+      const known = history.items.find(
+        (item) => item.question.toLowerCase() === question.toLowerCase() && (!aiModel || aiModel === 'free' || item.answer?.model?.includes(aiModel.split('|').pop() ?? '')),
+      );
+      if (known?.answer && (!aiModel || aiModel === 'free')) {
         setState({ loading: false, answer: known.answer, error: null, shownQuestion: known.question });
         return;
       }
@@ -41,7 +43,7 @@ export function useAsk(uiLanguage: UiLanguage) {
       setState({ loading: true, answer: null, error: null, shownQuestion: question });
 
       try {
-        const answer = await api.ask({ question, uiLang: uiLanguage }, controller.signal);
+        const answer = await api.ask({ question, uiLang: uiLanguage, ...(aiModel ? { aiModel } : {}) }, controller.signal);
         if (controller.signal.aborted) return;
         setState({ loading: false, answer, error: null, shownQuestion: question });
         history.add(question, uiLanguage, answer);

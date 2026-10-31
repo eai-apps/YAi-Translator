@@ -7,6 +7,8 @@ import type { FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { UiLanguage } from '../../../shared/types';
 import { useWordChat } from '../../hooks/useWordChat';
+import { shortModelName } from '../../hooks/useSiteAiModels';
+import { AskModelSelect, useAskModelPreference } from '../ask/AskModelSelect';
 import { Card } from '../ui/Card';
 import { Spinner } from '../ui/Spinner';
 import { IconAsk, IconSparkles } from '../layout/icons';
@@ -22,6 +24,7 @@ interface WordChatPanelProps {
 export function WordChatPanel({ word, wordSummary, uiLang }: WordChatPanelProps) {
   const { t } = useTranslation();
   const [input, setInput] = useState('');
+  const [askModel, setAskModel] = useAskModelPreference();
   const { messages, loading, ask } = useWordChat(word, wordSummary, uiLang);
 
   const prompts = [
@@ -34,13 +37,13 @@ export function WordChatPanel({ word, wordSummary, uiLang }: WordChatPanelProps)
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault();
     if (!input.trim() || loading) return;
-    ask(input);
+    ask(input, askModel);
     setInput('');
   };
 
   const handlePromptClick = (query: string) => {
     if (loading) return;
-    ask(query);
+    ask(query, askModel);
   };
 
   return (
@@ -115,6 +118,12 @@ export function WordChatPanel({ word, wordSummary, uiLang }: WordChatPanelProps)
                           ))}
                         </div>
                       ) : null}
+
+                      {m.response?.model ? (
+                        <p className="mt-2 text-[11px] text-muted border-t border-line/60 pt-1.5">
+                          {t('ask.repliedBy', { model: shortModelName(m.response.model) })}
+                        </p>
+                      ) : null}
                     </div>
                   )}
                 </div>
@@ -131,6 +140,11 @@ export function WordChatPanel({ word, wordSummary, uiLang }: WordChatPanelProps)
           <span>{t('common.loading')}</span>
         </div>
       ) : null}
+
+      {/* Выбор нейросети над полем ввода */}
+      <div className="mb-2">
+        <AskModelSelect value={askModel} onChange={setAskModel} />
+      </div>
 
       {/* Поле ввода */}
       <form onSubmit={handleSubmit} className="flex gap-2">

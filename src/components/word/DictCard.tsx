@@ -2,6 +2,7 @@
  * Карточка слова только из словарей (когда ИИ недоступен: лимит, нет ключей, ошибка).
  * Значения, род, формы, синонимы и настоящие примеры — с пометкой «Без ИИ — данные словарей».
  */
+import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import type { DictEntry, LanguageCode } from '../../../shared/types';
 import { textDirection } from '../../../shared/languages';
@@ -39,7 +40,7 @@ export function DictCard({ entry, speech, withAi, onPick }: DictCardProps) {
   return (
     <article className="animate-fade-in">
       <header className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
-        {entry.gender ? (
+        {entry.sourceLang === 'de' && entry.gender ? (
           <span className={cn('text-base font-bold uppercase tracking-wide', ARTICLE_COLORS[entry.gender])}>
             {entry.gender}
           </span>
@@ -154,6 +155,15 @@ export function DictCard({ entry, speech, withAi, onPick }: DictCardProps) {
       <DictExamples examples={entry.examples} language={entry.sourceLang} speech={speech} />
 
       <SourcesLine sources={entry.sources} />
+
+      {!withAi ? (
+        <div className="mt-4 border-t border-line pt-3 text-xs text-muted">
+          <span>{t('dict.guestAiHintPrefix')}{' '}</span>
+          <Link to="/profile" className="font-medium text-accent hover:underline">
+            {t('dict.guestAiHintLink')}
+          </Link>
+        </div>
+      ) : null}
     </article>
   );
 }

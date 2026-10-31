@@ -14,6 +14,33 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.10.0',
+    date: '2026-10-31',
+    items: {
+      ru: [
+        'Админка: карточки платных подключений с таблицей моделей, статус-точками, временем ответа, кнопкой «Проверить все» и выбором модели по умолчанию.',
+        'Новый режим перевода «Точный перевод (ИИ) Pro» через модель по умолчанию сайта.',
+        'Выбор нейросети на странице «Спросить у AI» и в диалоге словаря («Бесплатно», «Pro», модели сайта, свой ключ).',
+        'Боковое меню: отображение логина вошедшего пользователя с зелёной точкой или «Гость · Войти».',
+        'Словарь без ИИ для гостей: качественный перевод ru → de через ru.wiktionary с артиклями, de.wiktionary (формы, падежи), OpenThesaurus и Tatoeba без английских толкований.',
+      ],
+      de: [
+        'Admin: Karten für kostenpflichtige Verbindungen mit Modelltabelle, Statuspunkten, Latenz, „Alle testen“ und Standardmodell-Auswahl.',
+        'Neuer Übersetzungsmodus „Genaue Übersetzung (KI) Pro“ über das Standardmodell der Website.',
+        'Auswahl des KI-Modells auf der Seite „KI fragen“ und im Wörterbuch-Chat („Kostenlos“, „Pro“, Website-Modelle, eigener Schlüssel).',
+        'Seitenleiste: Anzeige des angemeldeten Benutzers mit grünem Punkt oder „Gast · Anmelden“.',
+        'Wörterbuch ohne KI für Gäste: Hochwertige ru → de Übersetzungen über ru.wiktionary mit Artikeln, de.wiktionary (Formen, Fälle), OpenThesaurus und Tatoeba ohne englische Definitionen.',
+      ],
+      en: [
+        'Admin: Paid connection cards with models table, status dots, latency, “Test all” button, and default model selection.',
+        'New translation mode “Accurate translation (AI) Pro” using the site default model.',
+        'AI model selector on “Ask AI” page and dictionary chat (“Free”, “Pro”, site models, personal key).',
+        'Sidebar: Shows logged-in username with green dot or “Guest · Sign in”.',
+        'No-AI dictionary for guests: High-quality ru → de lookup via ru.wiktionary with articles, de.wiktionary (forms, cases), OpenThesaurus, and Tatoeba without English definitions.',
+      ],
+    },
+  },
+  {
     version: '0.9.4',
     date: '2026-10-31',
     items: {

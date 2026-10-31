@@ -9,40 +9,8 @@ import { encryptKey, decryptKey, keyLast4 } from '../../_lib/auth/crypto';
 import { readSetting, writeSetting, SETTINGS_KEYS } from '../../_lib/settings';
 import { validatePaidBaseUrl } from '../../_lib/providers/paid';
 import type { PaidConnectionRow, EnabledModelInfo } from '../../_lib/paid/manager';
-
-interface RawModelItem {
-  id?: string;
-  pricing?: { prompt?: string | number; completion?: string | number };
-}
-
-interface ParsedModel {
-  id: string;
-  priceIn?: number;
-  priceOut?: number;
-  slow: boolean;
-}
-
-function parseOpenAiModels(data: unknown): ParsedModel[] {
-  const list = (data && typeof data === 'object' && Array.isArray((data as { data?: unknown[] }).data))
-    ? (data as { data: RawModelItem[] }).data
-    : Array.isArray(data) ? (data as RawModelItem[]) : [];
-
-  const result: ParsedModel[] = [];
-  for (const m of list) {
-    if (typeof m?.id !== 'string' || !m.id) continue;
-    const id = m.id;
-    const lower = id.toLowerCase();
-    const notChat = /(embed|moderation|tts|whisper|dall-e|image|audio|realtime)/.test(lower);
-    if (notChat) continue;
-
-    const pIn = m.pricing?.prompt !== undefined ? Number(m.pricing.prompt) * 1_000_000 : undefined;
-    const pOut = m.pricing?.completion !== undefined ? Number(m.pricing.completion) * 1_000_000 : undefined;
-    const slow = /(pro|opus|o1|reasoning|-thinking|r1)/.test(lower);
-    result.push({ id, priceIn: pIn, priceOut: pOut, slow });
-  }
-
-  return result.sort((a, b) => (a.priceIn ?? 999) - (b.priceIn ?? 999));
-}
+import { executeModelTest, loadModelStatesMap, parseOpenAiModels, recordModelState } from '../../_lib/paid/modelTester';
+import type { PaidModelOption } from '../../../shared/types';
 
 export const onRequestGet: PagesFunction<Env> = async (context) => {
   const uiLang = getUiLanguage(context.request);
@@ -50,12 +18,34 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     await requireAdmin(context.env, context.request);
     await ensureSchema(context.env);
 
-    const rows = await context.env.DB?.prepare('SELECT * FROM paid_connections ORDER BY created_at ASC')
-      .all<PaidConnectionRow>();
+    const [rows, stateMap, defaultId, order, regOnly, dailyLimit, monthlyLimit] = await Promise.all([
+      context.env.DB?.prepare('SELECT * FROM paid_connections ORDER BY created_at ASC').all<PaidConnectionRow>(),
+      loadModelStatesMap(context.env),
+      readSetting<string>(context.env, SETTINGS_KEYS.paidDefaultModel),
+      readSetting<'free_first' | 'paid_first' | 'paid_off'>(context.env, SETTINGS_KEYS.paidAiOrder),
+      readSetting<boolean>(context.env, SETTINGS_KEYS.paidAiRegisteredOnly),
+      readSetting<number>(context.env, SETTINGS_KEYS.paidDailyTokenLimit),
+      readSetting<number>(context.env, SETTINGS_KEYS.paidMonthlyTokenLimit),
+    ]);
 
     const connections = (rows?.results ?? []).map((r) => {
-      let models: EnabledModelInfo[] = [];
-      try { models = JSON.parse(r.enabled_models || '[]'); } catch { models = []; }
+      let rawModels: EnabledModelInfo[] = [];
+      try { rawModels = JSON.parse(r.enabled_models || '[]'); } catch { rawModels = []; }
+      const models: PaidModelOption[] = rawModels.map((item) => {
+        const state = stateMap.get(`${r.id}|${item.id}`);
+        return {
+          id: item.id,
+          enabled: item.enabled ?? true,
+          priceIn: item.priceIn,
+          priceOut: item.priceOut,
+          isSlowOrExpensive: item.isSlowOrExpensive,
+          ok: state ? state.ok : null,
+          latencyMs: state?.latencyMs ?? null,
+          reply: state?.reply ?? null,
+          error: state?.error ?? null,
+          checkedAt: state?.checkedAt ?? null,
+        };
+      });
       return {
         id: r.id,
         name: r.name,
@@ -67,19 +57,13 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
       };
     });
 
-    const [order, regOnly, dailyLimit, monthlyLimit] = await Promise.all([
-      readSetting<'free_first' | 'paid_first' | 'paid_off'>(context.env, SETTINGS_KEYS.paidAiOrder),
-      readSetting<boolean>(context.env, SETTINGS_KEYS.paidAiRegisteredOnly),
-      readSetting<number>(context.env, SETTINGS_KEYS.paidDailyTokenLimit),
-      readSetting<number>(context.env, SETTINGS_KEYS.paidMonthlyTokenLimit),
-    ]);
-
     return jsonResponse({
       connections,
       order: order ?? 'free_first',
       regOnly: regOnly ?? true,
       dailyLimit: dailyLimit ?? 50_000,
       monthlyLimit: monthlyLimit ?? 1_000_000,
+      defaultId: defaultId ?? null,
     });
   } catch (error) {
     return errorResponse(error, uiLang);
@@ -93,12 +77,11 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     const body = await readJsonBody(context.request);
     const action = String(body.action || '');
 
-    // Форма в админке шлёт action 'save' и поле apiKey — принимаем оба варианта (исправление Claude, 0.9.3).
     if (action === 'add' || action === 'save') {
       const baseUrl = String(body.baseUrl || '').trim().replace(/\/$/, '');
       const key = String(body.key || body.apiKey || '').trim();
       const picked = Array.isArray(body.models)
-        ? body.models.filter((item): item is string => typeof item === 'string' && item.length > 0).slice(0, 20)
+        ? body.models.filter((item): item is string => typeof item === 'string' && item.length > 0).slice(0, 30)
         : [];
       const defaultModel = String(body.defaultModel || picked[0] || '').trim();
       const name = String(body.name || '').trim() || defaultModel;
@@ -106,8 +89,9 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         (picked.length > 0 ? picked : defaultModel ? [defaultModel] : []).map((id) => ({ id, enabled: true })),
       );
 
-      if (!name || !baseUrl || !key || !defaultModel) throw new ApiError('VALIDATION', 400);
-      if (!validatePaidBaseUrl(baseUrl)) throw new ApiError('VALIDATION', 400);
+      if (!name || !baseUrl || !key || !defaultModel || !validatePaidBaseUrl(baseUrl)) {
+        throw new ApiError('VALIDATION', 400);
+      }
 
       const id = crypto.randomUUID();
       const { ciphertext, iv } = await encryptKey(context.env, key, `site:paid:${id}`);
@@ -124,6 +108,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     if (action === 'delete') {
       const id = String(body.id || '');
       await context.env.DB?.prepare('DELETE FROM paid_connections WHERE id = ?').bind(id).run();
+      await context.env.DB?.prepare('DELETE FROM paid_model_state WHERE connection_id = ?').bind(id).run();
       return jsonResponse({ ok: true });
     }
 
@@ -137,6 +122,12 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         .bind(defaultModel, models, Date.now(), id)
         .run();
       return jsonResponse({ ok: true });
+    }
+
+    if (action === 'set-default') {
+      const value = String(body.value || '').trim();
+      await writeSetting(context.env, SETTINGS_KEYS.paidDefaultModel, value);
+      return jsonResponse({ ok: true, defaultId: value });
     }
 
     if (action === 'update-settings') {
@@ -161,7 +152,6 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
       if (!baseUrl || !apiKey || !validatePaidBaseUrl(baseUrl)) throw new ApiError('VALIDATION', 400);
 
-      // Ошибку сервиса показываем в админке как есть (код и начало ответа) — так понятно, что не так с ключом.
       try {
         const resp = await fetch(`${baseUrl}/models`, {
           headers: { Authorization: `Bearer ${apiKey}`, Accept: 'application/json', 'User-Agent': 'YAi-Translator/1.0' },
@@ -199,11 +189,11 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     if (action === 'test') {
       let baseUrl = String(body.baseUrl || '').trim().replace(/\/$/, '');
       let apiKey = String(body.key || body.apiKey || '').trim();
-      // Кнопка «Проверить» в списке шлёт только id — тогда проверяем модель по умолчанию (исправление Claude, 0.9.4).
       let model = String(body.model || '').trim();
+      const connId = body.id ? String(body.id) : undefined;
 
-      if (body.id) {
-        const row = await context.env.DB?.prepare('SELECT * FROM paid_connections WHERE id = ?').bind(body.id).first<PaidConnectionRow>();
+      if (connId) {
+        const row = await context.env.DB?.prepare('SELECT * FROM paid_connections WHERE id = ?').bind(connId).first<PaidConnectionRow>();
         if (row) {
           baseUrl = row.base_url;
           apiKey = await decryptKey(context.env, row.ciphertext, row.iv, `site:paid:${row.id}`);
@@ -213,25 +203,26 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
       if (!baseUrl || !apiKey || !model || !validatePaidBaseUrl(baseUrl)) throw new ApiError('VALIDATION', 400);
 
-      const start = Date.now();
-      const resp = await fetch(`${baseUrl}/chat/completions`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json', 'User-Agent': 'YAi-Translator/1.0' },
-        body: JSON.stringify({
-          model,
-          messages: [{ role: 'user', content: 'Translate to Russian: Hello' }],
-          max_tokens: 30,
-        }),
-        signal: AbortSignal.timeout(12_000),
-      });
-
-      const latencyMs = Date.now() - start;
-      if (!resp.ok) {
-        const errText = await resp.text().catch(() => '');
-        return jsonResponse({ ok: false, model, status: resp.status, error: `HTTP ${resp.status}: ${errText.slice(0, 150)}`, latencyMs });
+      const res = await executeModelTest(baseUrl, apiKey, model);
+      if (connId) {
+        await recordModelState(context.env, {
+          connectionId: connId,
+          model: res.model,
+          ok: res.ok,
+          latencyMs: res.latencyMs,
+          reply: res.reply,
+          error: res.error,
+        });
       }
-      const answer = (await resp.json().catch(() => null)) as { choices?: Array<{ message?: { content?: string } }> } | null;
-      return jsonResponse({ ok: true, model, latencyMs, reply: answer?.choices?.[0]?.message?.content?.slice(0, 80) ?? '' });
+
+      return jsonResponse({
+        ok: res.ok,
+        model: res.model,
+        latencyMs: res.latencyMs,
+        reply: res.reply,
+        error: res.error,
+        status: res.status,
+      });
     }
 
     throw new ApiError('VALIDATION', 400);

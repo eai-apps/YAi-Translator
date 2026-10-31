@@ -1,6 +1,7 @@
 /** Ответ учителя: короткое объяснение, разделы, примеры и ссылки на темы справочника. */
 import { useTranslation } from 'react-i18next';
 import type { AskResponse } from '../../../shared/types';
+import { shortModelName } from '../../hooks/useSiteAiModels';
 import { Badge } from '../ui/Badge';
 import { SectionTitle } from '../ui/SectionTitle';
 import { GrammarLinkedInline } from '../grammar/GrammarLinkedText';
@@ -51,6 +52,11 @@ export function AskAnswer({ answer, question }: AskAnswerProps) {
 
         <div className="flex flex-wrap items-center gap-2 border-t border-line pt-2">
           <Badge>{t('ask.answeredBy', { provider: answer.provider })}</Badge>
+          {answer.model ? (
+            <span className="text-xs text-muted">
+              {t('ask.repliedBy', { model: shortModelName(answer.model) })}
+            </span>
+          ) : null}
           {answer.cached ? <Badge tone="accent">{t('ask.fromCache')}</Badge> : null}
         </div>
       </div>

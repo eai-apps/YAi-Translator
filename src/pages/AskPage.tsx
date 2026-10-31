@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next';
 import { ASK_EXAMPLE_QUESTIONS, ASK_MAX_QUESTION_LENGTH } from '../config';
 import { useAsk } from '../hooks/useAsk';
 import { useSettings } from '../hooks/useSettings';
+import { AskModelSelect, useAskModelPreference } from '../components/ask/AskModelSelect';
 import { AskAnswer } from '../components/ask/AskAnswer';
 import { AskHistory } from '../components/ask/AskHistory';
 import { Button } from '../components/ui/Button';
@@ -24,12 +25,14 @@ export default function AskPage() {
   const [params, setParams] = useSearchParams();
   const [question, setQuestion] = useState('');
   const [limitOpen, setLimitOpen] = useState(false);
+  const [askModel, setAskModel] = useAskModelPreference();
 
-  const send = (value: string) => {
+  const send = (value: string, modelOverride?: string) => {
     const trimmed = value.trim();
     if (trimmed.length < 3 || ask.loading) return;
     setQuestion(trimmed);
-    void ask.submit(trimmed);
+    const chosenModel = modelOverride ?? askModel;
+    void ask.submit(trimmed, chosenModel === 'free' ? undefined : chosenModel);
   };
 
   // Вопрос из адреса (?q=…): пришёл со страницы темы или из окна «Спросить у AI».
@@ -37,7 +40,7 @@ export default function AskPage() {
   useEffect(() => {
     if (!incoming) return;
     setQuestion(incoming);
-    void ask.submit(incoming);
+    void ask.submit(incoming, askModel === 'free' ? undefined : askModel);
     const next = new URLSearchParams(params);
     next.delete('q');
     setParams(next, { replace: true });
@@ -66,6 +69,9 @@ export default function AskPage() {
       />
 
       <Card className="p-4 sm:p-5">
+        <div className="mb-3 flex items-center justify-between">
+          <AskModelSelect value={askModel} onChange={setAskModel} />
+        </div>
         <form
           onSubmit={(event) => {
             event.preventDefault();

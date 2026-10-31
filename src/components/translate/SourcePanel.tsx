@@ -37,7 +37,7 @@ interface SourcePanelProps {
   providerChoice: ProviderChoice;
   onProviderChange: (next: ProviderChoice) => void;
   aiLoading: boolean;
-  onAskAi: () => void;
+  onAskAi: (aiModel?: string) => void;
 }
 
 export function SourcePanel(props: SourcePanelProps) {

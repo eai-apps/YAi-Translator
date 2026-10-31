@@ -22,6 +22,7 @@ import { runJsonTask } from '../_lib/router';
 import { bump } from '../_lib/stats';
 import { validateAsk } from '../_lib/validate';
 import { ASK, LIMITS } from '../_lib/config';
+import { readSetting, SETTINGS_KEYS } from '../_lib/settings';
 
 const MAX_WORD_LENGTH = LIMITS.maxWordLength;
 const MAX_CONTEXT_LENGTH = 600;
@@ -68,14 +69,24 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     const history = normalizeHistory(body.history);
     const answerLang = requireUiLanguage(body.uiLang ?? uiLang);
 
+    const aiModel =
+      typeof body.aiModel === 'string' && body.aiModel.includes('|') && body.aiModel.length <= 200
+        ? body.aiModel
+        : undefined;
+    const personal = body.aiModel === 'personal';
+
     const env = context.env;
     const session = await findRequestSession(env, context.request);
+    if (aiModel && !session && ((await readSetting<boolean>(env, SETTINGS_KEYS.paidAiRegisteredOnly)) ?? true)) {
+      throw new ApiError('UNAUTHORIZED', 401);
+    }
+
     const userKeys = await resolveUserKeys(env, context.request, getHeaderKeys(context.request));
     const limitGuard = createLimitGuard(env, getClientIp(context.request), session?.userId);
 
     const prompt = buildWordAskPrompt({ word, wordContext, question, history, uiLang: answerLang });
 
-    const { data, provider } = await runJsonTask({
+    const { data, provider, model } = await runJsonTask({
       env,
       prompt,
       userKeys,
@@ -83,9 +94,11 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       beforeShared: limitGuard,
       validate: validateAsk,
       isRegistered: Boolean(session),
+      ...(personal ? { only: ['paid', 'gemini', 'groq'], personalOnly: true } : {}),
+      ...(aiModel ? { only: ['paid'], sharedPaidPick: aiModel } : {}),
     });
 
-    const result: AskResponse = { ...data, provider, cached: false };
+    const result: AskResponse = { ...data, provider, ...(model ? { model } : {}), cached: false };
     void bump(env, ['ask', 'ai_requests', 'total']);
     return jsonResponse(result);
   } catch (error) {

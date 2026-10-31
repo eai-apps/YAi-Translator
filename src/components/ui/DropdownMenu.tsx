@@ -15,6 +15,10 @@ export interface MenuItem {
   /** Необязательное пояснение справа (например, «мой ключ»). */
   hint?: string;
   disabled?: boolean;
+  /** Разделитель перед этим пунктом. */
+  separatorBefore?: boolean;
+  /** Статус-точка (6 px): зелёная — работает, красная — ошибка, серая — не проверено. */
+  dot?: 'green' | 'red' | 'gray';
 }
 
 interface DropdownMenuProps {
@@ -88,7 +92,9 @@ export function DropdownMenu({
         >
           {items.map((item) => (
             <div key={item.id}>
-              {separatorBeforeId === item.id ? <div className="my-1 border-t border-line" /> : null}
+              {separatorBeforeId === item.id || item.separatorBefore ? (
+                <div className="my-1 border-t border-line" />
+              ) : null}
               <button
                 type="button"
                 role="menuitemradio"
@@ -104,7 +110,22 @@ export function DropdownMenu({
                   'disabled:cursor-not-allowed disabled:opacity-40',
                 )}
               >
-                <span className="w-4 shrink-0 text-center">{item.checked ? '✓' : ''}</span>
+                <span className="flex w-4 shrink-0 items-center justify-center text-center">
+                  {item.checked ? (
+                    '✓'
+                  ) : item.dot ? (
+                    <span
+                      className={cn(
+                        'h-1.5 w-1.5 rounded-full',
+                        item.dot === 'green' && 'bg-emerald-500',
+                        item.dot === 'red' && 'bg-rose-500',
+                        item.dot === 'gray' && 'bg-neutral-400',
+                      )}
+                    />
+                  ) : (
+                    ''
+                  )}
+                </span>
                 <span className="min-w-0 flex-1 truncate">{item.label}</span>
                 {item.hint ? <span className="shrink-0 text-[11px] text-muted">{item.hint}</span> : null}
               </button>

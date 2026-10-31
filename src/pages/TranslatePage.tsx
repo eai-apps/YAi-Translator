@@ -195,7 +195,7 @@ export default function TranslatePage() {
             providerChoice={translator.providerChoice}
             onProviderChange={translator.setProviderChoice}
             aiLoading={translator.aiLoading}
-            onAskAi={() => void translator.askAi()}
+            onAskAi={(model?: string) => void translator.askAi(model)}
           />
 
           {/* Под пустым полем — маленькое слово дня; крестик скрывает его до завтра. */}

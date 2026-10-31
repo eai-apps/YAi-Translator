@@ -85,6 +85,8 @@ export interface AskRequest {
   question: string;
   /** Язык ответа (по умолчанию — язык интерфейса). */
   uiLang?: UiLanguage;
+  /** Выбранная нейросеть сайта («connId|model») или 'free' / 'personal'. */
+  aiModel?: string;
 }
 
 /** Раздел ответа ИИ: заголовок + 1–3 абзаца. */
@@ -100,6 +102,8 @@ export interface AskResponse {
   /** Slug тем справочника, на которые ссылается ответ. */
   topics: string[];
   provider: string;
+  /** Модель нейросети (например «deepseek-v4.1-flash»). */
+  model?: string;
   cached: boolean;
 }
 
@@ -114,6 +118,8 @@ export interface WordAskRequest {
   question: string;
   history?: WordAskHistoryItem[];
   uiLang?: UiLanguage;
+  /** Выбранная нейросеть сайта («connId|model») или 'free' / 'personal'. */
+  aiModel?: string;
 }
 
 /* ------------------------------ Админка ------------------------------ */

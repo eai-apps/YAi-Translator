@@ -29,7 +29,7 @@ export function useWordChat(word: string, wordContext: string, uiLang: UiLanguag
   }, [word]);
 
   const ask = useCallback(
-    async (questionText: string) => {
+    async (questionText: string, aiModel?: string) => {
       const q = questionText.trim();
       if (!q || !word || loading) return;
 
@@ -54,6 +54,7 @@ export function useWordChat(word: string, wordContext: string, uiLang: UiLanguag
           question: q,
           history,
           uiLang,
+          ...(aiModel && aiModel !== 'free' ? { aiModel } : {}),
         });
 
         const assistantMsg: ChatMessage = {

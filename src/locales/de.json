@@ -33,7 +33,8 @@
     "profile": "Profil",
     "about": "Über die App",
     "admin": "Admin",
-    "resources": "Nützliche Links"
+    "resources": "Nützliche Links",
+    "guestSignIn": "Gast · Anmelden"
   },
   "languages": {
     "auto": "Sprache erkennen",
@@ -105,7 +106,8 @@
     "afterLogin": "nach Anmeldung",
     "siteAi": "KI",
     "moreAiAfterLogin": "★ Anmelden oder registrieren — kostenlos",
-    "taglineGuest": "Claude, ChatGPT, DeepSeek, Qwen und 10× mehr Anfragen — nach kostenloser Registrierung"
+    "taglineGuest": "Claude, ChatGPT, DeepSeek, Qwen und 10× mehr Anfragen — nach kostenloser Registrierung",
+    "modeAccuratePro": "Extra-genaue Übersetzung (KI Pro)"
   },
   "others": {
     "title": "Wie andere übersetzen",
@@ -770,7 +772,20 @@
       "creditsBtn": "Guthaben",
       "creditsAlert": "OpenRouter-Guthaben:\nLimit: {{limit}}\nVerwendet: {{usage}}",
       "creditsFail": "Guthaben konnte nicht abgerufen werden",
-      "pickModel": "Wählen Sie mindestens ein Modell"
+      "pickModel": "Wählen Sie mindestens ein Modell",
+      "addModelsTitle": "Modelle hinzufügen",
+      "addModelsBtn": "Modelle hinzufügen",
+      "searchModels": "Modelle suchen...",
+      "balance": "Guthaben",
+      "testAll": "Alle testen",
+      "sortBy": "Sortieren",
+      "sort_price": "nach Preis",
+      "sort_speed": "nach Tempo",
+      "sort_name": "nach Name",
+      "noModelsInConnection": "Keine Modelle hinzugefügt",
+      "enabledLabel": "Aktiviert",
+      "isDefault": "Standardmodell der Website",
+      "makeDefault": "Als Standard festlegen"
     },
     "buyLinks": {
       "title": "Links „Wo Schlüssel kaufen“ im Profil",
@@ -792,7 +807,9 @@
     "fromLife": "Aus dem Leben",
     "fromTatoeba": "Tatoeba",
     "fromWiktionary": "Wiktionary",
-    "sourcesLine": "Quellen:"
+    "sourcesLine": "Quellen:",
+    "guestAiHintPrefix": "Ausführliche Analyse mit Grammatik A1–B2 und KI —",
+    "guestAiHintLink": "nach kostenloser Registrierung"
   },
   "resources": {
     "title": "Nützliche Links",
@@ -956,7 +973,12 @@
     "clearHistory": "Leeren",
     "error": "Der Lehrer hat gerade nicht geantwortet. Prüfe das Internet und versuche es erneut.",
     "limitHint": "Dein eigener kostenloser Gemini- oder Groq-Schlüssel im Profil hebt das Tageslimit auf.",
-    "hint": "Dieselbe Frage wird für alle nur einmal von der KI beantwortet: Die nächste Antwort kommt aus der Datenbank und kostet kein Limit. Die Fragen bleiben auf dem Gerät, nach der Anmeldung auch im Konto."
+    "hint": "Dieselbe Frage wird für alle nur einmal von der KI beantwortet: Die nächste Antwort kommt aus der Datenbank und kostet kein Limit. Die Fragen bleiben auf dem Gerät, nach der Anmeldung auch im Konto.",
+    "chooseModel": "KI-Modell auswählen",
+    "modelPrefix": "Modell",
+    "modelFree": "Kostenlos (Gemini/Groq)",
+    "modelPersonal": "Mein Schlüssel",
+    "repliedBy": "Antwort von: {{model}}"
   },
   "study": {
     "title": "Lernen",

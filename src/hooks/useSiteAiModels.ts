@@ -1,13 +1,21 @@
 /**
- * Нейросети сайта (платные подключения из админки) для списка «Быстрый перевод ▾» (0.9.3).
+ * Нейросети сайта (платные подключения из админки) для списка «Быстрый перевод ▾» (0.9.3, Claude).
+ * defaultId и статус ok моделей (0.10.0, Antigravity).
  * Ответ запоминается на всё время работы страницы.
  */
 import { useEffect, useState } from 'react';
 import { api } from '../api/client';
 
+export interface SiteAiModelItem {
+  id: string;
+  model: string;
+  ok?: boolean | null;
+}
+
 export interface SiteAiModels {
-  models: Array<{ id: string; model: string }>;
+  models: SiteAiModelItem[];
   regOnly: boolean;
+  defaultId?: string | null;
 }
 
 let cached: SiteAiModels | null = null;

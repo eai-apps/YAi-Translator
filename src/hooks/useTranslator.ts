@@ -286,13 +286,19 @@ export function useTranslator(onLimitReached: () => void) {
   }, [result, sourceLang, targetLang, setTargetLangState]);
 
   /** «Спросить у AI»: перевод ИИ с альтернативами, заменяет обычный перевод. */
-  const askAi = useCallback(async () => {
+  const askAi = useCallback(async (aiModel?: string) => {
     const trimmed = text.trim();
     if (!trimmed) return;
     const requestId = requestRef.current;
     setAiLoading(true);
     try {
-      const response = await api.translate({ text: trimmed, sourceLang, targetLang, mode: 'ai' });
+      const response = await api.translate({
+        text: trimmed,
+        sourceLang,
+        targetLang,
+        mode: 'ai',
+        ...(aiModel ? { aiModel } : {}),
+      });
       if (requestId !== requestRef.current) return;
       setResult(response);
       setError(null);

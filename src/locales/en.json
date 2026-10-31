@@ -33,7 +33,8 @@
     "profile": "Profile",
     "about": "About",
     "admin": "Admin",
-    "resources": "Useful resources"
+    "resources": "Useful resources",
+    "guestSignIn": "Guest · Sign in"
   },
   "languages": {
     "auto": "Detect language",
@@ -105,7 +106,8 @@
     "afterLogin": "after sign-in",
     "siteAi": "AI",
     "moreAiAfterLogin": "★ Sign in or register — free",
-    "taglineGuest": "Claude, ChatGPT, DeepSeek, Qwen and 10× more requests — after free sign-up"
+    "taglineGuest": "Claude, ChatGPT, DeepSeek, Qwen and 10× more requests — after free sign-up",
+    "modeAccuratePro": "Super-accurate translation (AI Pro)"
   },
   "others": {
     "title": "How others translate it",
@@ -770,7 +772,20 @@
       "creditsBtn": "Credits",
       "creditsAlert": "OpenRouter balance:\nLimit: {{limit}}\nUsage: {{usage}}",
       "creditsFail": "Failed to fetch credits",
-      "pickModel": "Pick at least one model"
+      "pickModel": "Pick at least one model",
+      "addModelsTitle": "Add models",
+      "addModelsBtn": "Add models",
+      "searchModels": "Search models...",
+      "balance": "Balance",
+      "testAll": "Test all",
+      "sortBy": "Sort by",
+      "sort_price": "by price",
+      "sort_speed": "by speed",
+      "sort_name": "by name",
+      "noModelsInConnection": "No models added",
+      "enabledLabel": "Enabled",
+      "isDefault": "Default model on site",
+      "makeDefault": "Set as default"
     },
     "buyLinks": {
       "title": "“Where to buy key” links in profile",
@@ -792,7 +807,9 @@
     "fromLife": "Real life",
     "fromTatoeba": "Tatoeba",
     "fromWiktionary": "Wiktionary",
-    "sourcesLine": "Sources:"
+    "sourcesLine": "Sources:",
+    "guestAiHintPrefix": "Detailed breakdown with A1–B2 grammar and AI —",
+    "guestAiHintLink": "after free registration"
   },
   "resources": {
     "title": "Useful resources",
@@ -956,7 +973,12 @@
     "clearHistory": "Clear",
     "error": "The teacher did not answer right now. Check the internet and try again.",
     "limitHint": "Your own free Gemini or Groq key in the profile lifts the daily limit.",
-    "hint": "The same question is answered by the AI only once for everyone: the next answer comes from the database and costs no limit. Questions stay on your device, and in your account after signing in."
+    "hint": "The same question is answered by the AI only once for everyone: the next answer comes from the database and costs no limit. Questions stay on your device, and in your account after signing in.",
+    "chooseModel": "Choose AI model",
+    "modelPrefix": "Model",
+    "modelFree": "Free (Gemini/Groq)",
+    "modelPersonal": "My key",
+    "repliedBy": "Replied by: {{model}}"
   },
   "study": {
     "title": "Learn",

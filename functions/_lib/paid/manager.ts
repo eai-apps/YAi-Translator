@@ -25,6 +25,7 @@ export interface EnabledModelInfo {
   enabled: boolean;
   priceIn?: number;
   priceOut?: number;
+  isSlowOrExpensive?: boolean;
 }
 
 export interface SharedPaidModelAttempt {

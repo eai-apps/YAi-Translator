@@ -70,7 +70,11 @@ export const coreMethods = {
   },
 
   /** Нейросети сайта (без ключей) для списка режимов перевода. */
-  aiModels(signal?: AbortSignal): Promise<{ models: Array<{ id: string; model: string }>; regOnly: boolean }> {
+  aiModels(signal?: AbortSignal): Promise<{
+    models: Array<{ id: string; model: string; ok?: boolean | null }>;
+    regOnly: boolean;
+    defaultId?: string | null;
+  }> {
     return request('/api/ai-models', { method: 'GET' }, signal);
   },
 

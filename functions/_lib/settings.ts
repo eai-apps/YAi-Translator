@@ -28,6 +28,8 @@ export const SETTINGS_KEYS = {
   paidDailyTokenLimit: 'paid_daily_token_limit',
   /** Месячный лимит платных токенов. */
   paidMonthlyTokenLimit: 'paid_monthly_token_limit',
+  /** Модель нейросети по умолчанию для всего сайта («connId|model»). */
+  paidDefaultModel: 'paid_default_model',
 } as const;
 
 /** Простая проверка адреса: без @ или пробелов ничего не сохраняем. */

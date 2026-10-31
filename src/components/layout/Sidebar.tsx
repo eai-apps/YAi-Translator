@@ -50,7 +50,24 @@ export function Sidebar() {
         aria-label={t('common.appName')}
       >
         {items.map((item) => (
-          <NavRow key={item.to} {...item} />
+          <div key={item.to}>
+            <NavRow {...item} />
+            {item.to === '/profile' ? (
+              account ? (
+                <div className="-mt-1 mb-1 flex items-center gap-1.5 pl-11 text-xs text-muted">
+                  <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />
+                  <span className="truncate">{account.login}</span>
+                </div>
+              ) : (
+                <Link
+                  to="/profile"
+                  className="-mt-1 mb-1 flex items-center gap-1.5 pl-11 text-xs text-muted transition-colors hover:text-ink"
+                >
+                  <span className="truncate">{t('nav.guestSignIn')}</span>
+                </Link>
+              )
+            ) : null}
+          </div>
         ))}
       </nav>
 

@@ -1,17 +1,17 @@
 /**
- * Вкладка «Нейросети» в админке: общие платные подключения, порядок и лимиты токенов, ссылки покупки.
+ * Вкладка «Нейросети» в админке: общие платные подключения, порядок и лимиты токенов, ссылки покупки (этап 9).
  */
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { PaidConnectionItem } from '../../../shared/types';
+import type { AdminPaidConnectionsResponse, PaidConnectionItem, PaidModelOption } from '../../../shared/types';
 import { api } from '../../api/client';
 import { Button } from '../ui/Button';
 import { Card } from '../ui/Card';
 import { SectionTitle } from '../ui/SectionTitle';
 import { Spinner } from '../ui/Spinner';
-import { IconTrash } from '../layout/icons';
 import { AdminBuyLinksSection } from './AdminBuyLinksSection';
 import { AdminAddPaidConnectionForm } from './AdminAddPaidConnectionForm';
+import { AdminPaidConnectionCard } from './AdminPaidConnectionCard';
 
 export function AdminPaidTab({ onError }: { onError: (msg: string | null) => void }) {
   const { t } = useTranslation();
@@ -20,20 +20,21 @@ export function AdminPaidTab({ onError }: { onError: (msg: string | null) => voi
   const [regOnly, setRegOnly] = useState(false);
   const [dailyLimit, setDailyLimit] = useState(0);
   const [monthlyLimit, setMonthlyLimit] = useState(0);
+  const [defaultId, setDefaultId] = useState<string | null>(null);
   const [connections, setConnections] = useState<PaidConnectionItem[]>([]);
   const [notice, setNotice] = useState<string | null>(null);
   const [showAdd, setShowAdd] = useState(false);
-  const [testResult, setTestResult] = useState<Record<string, string>>({});
 
   const load = async () => {
     setLoading(true);
     try {
-      const res = await api.adminPaidConnections();
-      setConnections(res.connections);
+      const res = await api.adminPaidConnections() as AdminPaidConnectionsResponse;
+      setConnections(res.connections || []);
       setOrder(res.order);
       setRegOnly(res.regOnly);
       setDailyLimit(res.dailyLimit);
       setMonthlyLimit(res.monthlyLimit);
+      setDefaultId(res.defaultId ?? null);
     } catch {
       onError(t('admin.loadError'));
     } finally {
@@ -55,36 +56,29 @@ export function AdminPaidTab({ onError }: { onError: (msg: string | null) => voi
     }
   };
 
-  const handleTest = async (conn: PaidConnectionItem) => {
+  const handleSetDefault = async (value: string) => {
     try {
-      setTestResult((prev) => ({ ...prev, [conn.id]: t('common.loading') }));
-      const res = await api.adminPaidAction<{ ok: boolean; reply?: string; error?: string; latencyMs?: number; model?: string }>({
-        action: 'test',
-        id: conn.id,
-      });
-      const head = `${res.model ?? conn.defaultModel}: `;
-      setTestResult((prev) => ({
-        ...prev,
-        [conn.id]: res.ok
-          ? `✅ ${head}${t('admin.paid.testSuccess')} ${res.latencyMs ?? '?'} мс${res.reply ? ` — «${res.reply}»` : ''}`
-          : `❌ ${head}${res.error ?? t('admin.paid.testFail')}`,
-      }));
+      await api.adminPaidAction({ action: 'set-default', value });
+      setDefaultId(value || null);
     } catch {
-      setTestResult((prev) => ({ ...prev, [conn.id]: t('admin.paid.testFail') }));
+      onError(t('admin.saveError'));
     }
   };
 
-  const handleCredits = async (id: string) => {
+  const handleDeleteConnection = async (id: string) => {
     try {
-      const res = await api.adminPaidAction<{ ok: boolean; credits?: { limit?: number; usage?: number } }>({
-        action: 'credits',
-        id,
-      });
-      if (res.credits) {
-        alert(t('admin.paid.creditsAlert', { limit: res.credits.limit ?? '-', usage: res.credits.usage ?? '-' }));
-      }
+      await api.adminPaidAction({ action: 'delete', id });
+      void load();
     } catch {
-      alert(t('admin.paid.creditsFail'));
+      onError(t('admin.saveError'));
+    }
+  };
+
+  const handleUpdateModels = async (id: string, defaultModel: string, models: PaidModelOption[]) => {
+    try {
+      await api.adminPaidAction({ action: 'update-models', id, defaultModel, models });
+    } catch {
+      onError(t('admin.saveError'));
     }
   };
 
@@ -166,43 +160,18 @@ export function AdminPaidTab({ onError }: { onError: (msg: string | null) => voi
         ) : connections.length === 0 ? (
           <p className="text-xs text-muted">{t('admin.paid.noConnections')}</p>
         ) : (
-          <div className="space-y-2">
+          <div className="space-y-3">
             {connections.map((c) => (
-              <div key={c.id} className="p-3 border border-line rounded-xl flex items-center justify-between text-sm">
-                <div>
-                  <div className="font-medium flex items-center gap-2">
-                    <span>{c.name}</span>
-                    <span className="text-xs text-muted">({c.defaultModel})</span>
-                  </div>
-                  <div className="text-xs text-muted">{c.baseUrl}</div>
-                  {c.models.length > 0 ? (
-                    <div className="mt-1 text-xs text-ink">{c.models.map((m) => m.id).join(' · ')}</div>
-                  ) : null}
-                  {testResult[c.id] && <div className="text-xs mt-1 text-ink">{testResult[c.id]}</div>}
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <Button size="sm" variant="ghost" onClick={() => void handleTest(c)}>
-                    {t('admin.paid.testBtn')}
-                  </Button>
-                  {c.baseUrl.includes('openrouter') && (
-                    <Button size="sm" variant="ghost" onClick={() => void handleCredits(c.id)}>
-                      {t('admin.paid.creditsBtn')}
-                    </Button>
-                  )}
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={async () => {
-                      if (confirm(t('common.confirmDelete'))) {
-                        await api.adminPaidAction({ action: 'delete', id: c.id });
-                        void load();
-                      }
-                    }}
-                  >
-                    <IconTrash className="h-4 w-4 text-danger" />
-                  </Button>
-                </div>
-              </div>
+              <AdminPaidConnectionCard
+                key={c.id}
+                connection={c}
+                defaultId={defaultId}
+                onSetDefault={handleSetDefault}
+                onDeleteConnection={handleDeleteConnection}
+                onUpdateModels={handleUpdateModels}
+                onError={onError}
+                onReload={() => void load()}
+              />
             ))}
           </div>
         )}

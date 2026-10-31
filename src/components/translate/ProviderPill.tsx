@@ -1,7 +1,8 @@
 /**
- * Пилюля режима перевода (этап 8) вместо маленького списка «Переводчик».
- * Пункты: «Быстрый перевод» (Авто), «Точный перевод (ИИ)» (кнопка «Спросить у AI»),
- * затем подключённые сервисы и «… — мой ключ» (как в ProviderSelect).
+ * Пилюля режима перевода (этап 8, 9) вместо маленького списка «Переводчик».
+ * Пункты: «Быстрый перевод» (Авто), «Точный перевод (ИИ)»,
+ * «Суперточный перевод (ИИ Pro)» (модель по умолчанию — только в админке), затем подключённые сервисы,
+ * и «✦ модели сайта» со статус-точками (0.10.0, Antigravity).
  */
 import { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -20,10 +21,8 @@ import type { MenuItem } from '../ui/DropdownMenu';
 interface ProviderPillProps {
   value: ProviderChoice;
   onChange: (next: ProviderChoice) => void;
-  /** «Точный перевод (ИИ)»: идёт запрос. */
   aiLoading: boolean;
-  onAskAi: () => void;
-  /** Есть ли текст для перевода. */
+  onAskAi: (aiModel?: string) => void;
   hasText: boolean;
 }
 
@@ -33,11 +32,11 @@ export function ProviderPill({ value, onChange, aiLoading, onAskAi, hasText }: P
   const { account } = useAccount();
   const siteAi = useSiteAiModels();
   const navigate = useNavigate();
-  // Нейросети сайта (0.9.3): вошедшим — выбор, гостям (если «только для зарегистрированных») — видны, но закрыты.
+
   const siteModels = siteAi?.models ?? [];
   const siteLocked = Boolean(siteAi?.regOnly) && !account;
+  const defaultId = siteAi?.defaultId;
 
-  // Подключённые сервисы и личные ключи — тот же список, что в ProviderSelect.
   const options = useMemo<ProviderChoice[]>(() => {
     const classic = site ? CLASSIC_PROVIDERS.filter((id) => site[id]) : [];
     const personal = PERSONAL_AI_CHOICES.filter(
@@ -49,7 +48,6 @@ export function ProviderPill({ value, onChange, aiLoading, onAskAi, hasText }: P
     return [...classic, ...personal, ...siteChoices];
   }, [site, account, siteLocked, siteModels]);
 
-  // Сервис, который выключили или ключ которого удалили, возвращает выбор к «Быстрый перевод».
   useEffect(() => {
     if (value !== 'auto' && site && !options.includes(value)) onChange('auto');
   }, [value, site, options, onChange]);
@@ -64,28 +62,50 @@ export function ProviderPill({ value, onChange, aiLoading, onAskAi, hasText }: P
       checked: value === 'auto',
       onSelect: () => onChange('auto'),
     },
+    {
+      id: 'ai',
+      label: t('translate.modeAccurate'),
+      hint: aiLoading ? t('common.loading') : undefined,
+      disabled: !hasText || aiLoading,
+      onSelect: () => onAskAi(),
+    },
   ];
 
-  // «Точный перевод» — не выбор сервиса, а кнопка: сбрасывает обычный выбор и просит ИИ.
-  items.push({
-    id: 'ai',
-    label: t('translate.modeAccurate'),
-    hint: aiLoading ? t('common.loading') : undefined,
-    disabled: !hasText || aiLoading,
-    onSelect: onAskAi,
-  });
-
-  for (const id of options) {
-    if (id.startsWith('site:')) continue;
+  if (defaultId) {
     items.push({
-      id: `provider-${id}`,
-      label: providerLabel(id),
-      hint: personal(id) ? t('translate.mine') : undefined,
-      checked: value === id,
-      onSelect: () => onChange(id),
+      id: 'ai-pro',
+      label: t('translate.modeAccuratePro'),
+      hint: siteLocked ? t('translate.afterLogin') : aiLoading ? t('common.loading') : undefined,
+      disabled: siteLocked || !hasText || aiLoading,
+      onSelect: () => onAskAi(defaultId),
     });
   }
 
+  let firstClassic = true;
+  for (const id of options) {
+    if (id.startsWith('site:')) continue;
+    const isPers = personal(id);
+    const isClassic = (CLASSIC_PROVIDERS as readonly string[]).includes(id);
+    const dotStatus: 'green' | 'red' | undefined = isPers
+      ? 'green'
+      : site && isClassic
+        ? site[id as keyof typeof site]
+          ? 'green'
+          : 'red'
+        : undefined;
+    items.push({
+      id: `provider-${id}`,
+      label: providerLabel(id),
+      hint: isPers ? t('translate.mine') : undefined,
+      checked: value === id,
+      dot: dotStatus,
+      separatorBefore: firstClassic,
+      onSelect: () => onChange(id),
+    });
+    firstClassic = false;
+  }
+
+  let firstSiteModel = true;
   for (const item of siteModels) {
     const id = `site:${item.id}` as ProviderChoice;
     items.push({
@@ -94,11 +114,19 @@ export function ProviderPill({ value, onChange, aiLoading, onAskAi, hasText }: P
       hint: siteLocked ? t('translate.afterLogin') : t('translate.siteAi'),
       checked: value === id,
       disabled: siteLocked,
+      dot: item.ok === true ? 'green' : item.ok === false ? 'red' : undefined,
+      separatorBefore: firstSiteModel,
       onSelect: () => onChange(id),
     });
+    firstSiteModel = false;
   }
+
   if (siteLocked && siteModels.length > 0) {
-    items.push({ id: 'register', label: t('translate.moreAiAfterLogin'), onSelect: () => navigate('/profile') });
+    items.push({
+      id: 'register',
+      label: t('translate.moreAiAfterLogin'),
+      onSelect: () => navigate('/profile'),
+    });
   }
 
   const current =
@@ -107,13 +135,11 @@ export function ProviderPill({ value, onChange, aiLoading, onAskAi, hasText }: P
       : value.startsWith('site:')
         ? shortModelName(value.split('|').pop() ?? value)
         : providerLabel(value);
-  const firstExtra = items.find((item) => item.id.startsWith('provider-'))?.id ?? null;
 
   return (
     <DropdownMenu
       label={t('translate.mode')}
       items={items}
-      separatorBeforeId={firstExtra}
       trigger={
         <>
           <span className="max-w-[9rem] truncate">{current}</span>

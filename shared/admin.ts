@@ -125,6 +125,11 @@ export interface PaidModelOption {
   priceIn?: number;
   priceOut?: number;
   isSlowOrExpensive?: boolean;
+  ok?: boolean | null;
+  latencyMs?: number | null;
+  reply?: string | null;
+  error?: string | null;
+  checkedAt?: number | null;
 }
 
 export interface PaidConnectionItem {
@@ -136,6 +141,15 @@ export interface PaidConnectionItem {
   defaultModel: string;
   models: PaidModelOption[];
   createdAt: number;
+}
+
+export interface AdminPaidConnectionsResponse {
+  connections: PaidConnectionItem[];
+  order: 'free_first' | 'paid_first' | 'paid_off';
+  regOnly: boolean;
+  dailyLimit: number;
+  monthlyLimit: number;
+  defaultId?: string | null;
 }
 
 export interface BuyLinkItem {

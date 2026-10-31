@@ -116,8 +116,28 @@
 
 ## Журнал работ (новые записи — сверху)
 
-Формат записи:
-```
+### 2026-10-31 20:40 — Claude — 0.10.0 (проверка этапа 9 от Antigravity / Gemini 3.8 Flash)
+- Проверил: сборка и `tsc` без ошибок, мои исправления 0.9.3–0.9.4 (поля `apiKey`/`save`, модель в «Проверить»)
+  сохранены и перенесены в `paid/modelTester.ts` — хорошо. Промпты не тронуты.
+- Исправил: пункт меню назывался «Точный перевод (ИИ) Pro · модель» — владелец просил **«Суперточный перевод (ИИ Pro)»
+  без имени модели** (модель видна только в админке): `ProviderPill.tsx`, `AskModelSelect.tsx`, ключ `translate.modeAccuratePro`.
+- Исправил: «мой ключ» в «Спросить у AI» и в словаре работал только с платным личным ключом — теперь и с Gemini/Groq.
+- Внимание: в папке на компьютере лишний пустой файл `test_wikt_ru.html` (проба Antigravity) — удалить вручную, в Git не нужен.
+
+### 2026-10-31 20:30 — Antigravity (Gemini 3.8 Flash) — 0.10.0 (этап 9)
+- Выполнил этап 9 (`tasks/STAGE9.md`) целиком:
+  1. Админка → «Нейросети»: карточки платных подключений с подробной таблицей моделей (галочка «включена», цена за 1M, статус-точка, latency в мс, короткий ответ, кнопка «Проверить», значок ★ «по умолчанию», корзина), кнопка «Проверить все» (по очереди с индикатором прогресса) и сортировка («по цене / по скорости / по имени»). Баланс OpenRouter выводится текстом в карточке (без `alert`).
+  2. D1 и бэкенд: таблица `paid_model_state` (схема `schema.ts`, миграция `0009_paid_model_state.sql`), настройка `paid_default_model`, сохранение результатов тестирования моделей; модуль `functions/_lib/paid/modelTester.ts`.
+  3. `GET /api/ai-models`: возвращает `defaultId` и `ok` (true/false/null) для каждой модели сайта.
+  4. «Точный перевод (ИИ) Pro»: в выпадающем меню перевода (`ProviderPill.tsx`) пункт «Точный перевод (ИИ) Pro · <модель>» (вошедшим — переводит через модель по умолчанию сайта; гостю — заблокирован с подсказкой «после входа»). Статус-точки 6 px у переводчиков (зелёная — работает, красная — ошибка).
+  5. «Спросить у AI» (`AskPage.tsx`) и словарь-чат (`WordChatPanel.tsx`): компактный селектор модели (`AskModelSelect.tsx`: «Бесплатно», «Pro», ✦ модели сайта, «мой ключ»), сохранение в `localStorage.yai.askModel`. Эндпоинты `/api/ask` и `/api/word-ask` принимают `aiModel`, проверяют авторизацию и отдают `model`. В интерфейсе под ответом показывается подпись «Ответила: <модель>».
+  6. Боковое меню (`Sidebar.tsx`): под пунктом «Профиль» выводится логин пользователя с зелёной точкой; у гостя — «Гость · Войти» со ссылкой на `/profile`.
+  7. Словарь без ИИ для гостей: новый модуль `functions/_lib/dict/wiktionaryRu.ts` для качественного перевода ru → de через `ru.wiktionary.org` (с определением рода `Blume f` → «die Blume», «die Blüte» и русских толкований), формы и склонение из `de.wiktionary`, синонимы OpenThesaurus и примеры Tatoeba. Английские толкования en.wiktionary при переводе ru/de исключены. В `DictCard.tsx` добавлена мягкая подсказка для гостей: «Подробный разбор с грамматикой A1–B2 и нейросетями — после бесплатной регистрации».
+- Файлы:
+  - Новые: `functions/_lib/dict/wiktionaryRu.ts`, `functions/_lib/paid/modelTester.ts`, `migrations/0009_paid_model_state.sql`, `src/components/admin/AdminAddModelsModal.tsx`, `src/components/admin/AdminPaidConnectionCard.tsx`, `src/components/ask/AskModelSelect.tsx`.
+  - Изменённые: `package.json`, `functions/_lib/config.ts`, `src/config.ts`, `src/data/changelog.ts`, `CHANGELOG.md`, `REPORT.md`, `HANDOFF.md`, `functions/_lib/schema.ts`, `functions/_lib/settings.ts`, `functions/_lib/dict/index.ts`, `functions/api/ai-models.ts`, `functions/api/ask.ts`, `functions/api/word-ask.ts`, `functions/api/admin/paid-connections.ts`, `shared/admin.ts`, `shared/grammar.ts`, `src/api/methods/core.ts`, `src/hooks/useSiteAiModels.ts`, `src/hooks/useTranslator.ts`, `src/hooks/useAsk.ts`, `src/hooks/useWordChat.ts`, `src/pages/TranslatePage.tsx`, `src/pages/AskPage.tsx`, `src/components/translate/SourcePanel.tsx`, `src/components/translate/ProviderPill.tsx`, `src/components/ui/DropdownMenu.tsx`, `src/components/layout/Sidebar.tsx`, `src/components/word/DictCard.tsx`, `src/components/dictionary/WordChatPanel.tsx`, `src/components/ask/AskAnswer.tsx`, `src/components/admin/AdminPaidTab.tsx`, `src/locales/ru.json`, `de.json`, `en.json`.
+- Проверки: `npm run build` и `npx tsc -p tsconfig.functions.json --noEmit` без ошибок; все файлы ≤ 250 строк; 1074 ключа во всех 3 локалях строго синхронизированы; на GitHub ничего не отправлялось.
+
 ### 2026-10-31 20:00 — Claude — 0.9.4
 - «Проверить» у платного подключения всегда давал «Ошибка теста»: кнопка шлёт только `id`, а сервер требовал `model`
   (ошибка Antigravity). Теперь берётся модель по умолчанию; в ответе — время, ответ модели или код ошибки.

@@ -1,8 +1,7 @@
 /**
- * Сборка карточки из настоящих словарей (версия 0.5.0).
+ * Сборка карточки из настоящих словарей (версия 0.10.0).
  * Источники опрашиваются параллельно, у каждого таймаут 6 секунд (dictFetch).
- * Источник, который не ответил или ответил не по формату, молча пропускается:
- * карточка собирается из того, что пришло, и подписывается только реально ответившими источниками.
+ * Для перевода ru → de используется ru.wiktionary + de.wiktionary (без английских толкований).
  */
 import type { DictEntry, DictSourceId, DictSourceRef, LanguageCode } from '../../../shared/types';
 import { DICT } from '../config';
@@ -12,6 +11,7 @@ import { lookupSynonyms } from './openthesaurus';
 import { lookupPons } from './pons';
 import { lookupExamples } from './tatoeba';
 import { lookupWiktionary } from './wiktionary';
+import { lookupWiktionaryRu } from './wiktionaryRu';
 
 /** Подписи источников и ссылки по умолчанию. */
 export const SOURCE_NAMES: Record<DictSourceId, string> = {
@@ -21,7 +21,7 @@ export const SOURCE_NAMES: Record<DictSourceId, string> = {
   pons: 'PONS',
 };
 
-/** Общие адреса источников (ключ за пределами карточки — тоже источник). */
+/** Общие адреса источников. */
 export function sourceHomeUrl(id: DictSourceId): string {
   switch (id) {
     case 'wiktionary':
@@ -48,6 +48,57 @@ export async function buildDictEntry(
   targetLang: LanguageCode,
   signal: AbortSignal | undefined,
 ): Promise<DictEntry | null> {
+  // Для слова не на немецком при переводе на немецкий (ru → de): ru.wiktionary + de.wiktionary
+  if (sourceLang !== 'de' && targetLang === 'de') {
+    const [wiktRu, pons, examples] = await Promise.all([
+      lookupWiktionaryRu(word, signal).catch(() => null),
+      lookupPons(env, word, sourceLang, targetLang, signal).catch(() => null),
+      lookupExamples(word, sourceLang, targetLang, signal).catch(() => null),
+    ]);
+
+    if (wiktRu) {
+      const mainGerman = wiktRu.mainGermanWord;
+      const [synonyms, germanExamples] = await Promise.all([
+        mainGerman ? lookupSynonyms(mainGerman, 'de', signal).catch(() => null) : Promise.resolve(null),
+        mainGerman && (!examples || examples.length === 0)
+          ? lookupExamples(mainGerman, 'de', sourceLang, signal).catch(() => null)
+          : Promise.resolve(null),
+      ]);
+
+      const sources: DictSourceRef[] = [{ id: 'wiktionary', name: SOURCE_NAMES.wiktionary, url: wiktRu.url }];
+      if (synonyms && synonyms.length > 0 && mainGerman) {
+        sources.push({ id: 'openthesaurus', name: SOURCE_NAMES.openthesaurus, url: `${DICT.openThesaurusPage}/synonyme/${encodeURIComponent(mainGerman)}` });
+      }
+      const combinedExamples = [...(examples ?? []), ...(germanExamples ?? [])].slice(0, DICT.maxExamples);
+      if (combinedExamples.length > 0) {
+        sources.push({ id: 'tatoeba', name: SOURCE_NAMES.tatoeba, url: `https://tatoeba.org/de/sentences/search?query=${encodeURIComponent(word)}` });
+      }
+      if (pons && pons.length > 0) {
+        sources.push({ id: 'pons', name: SOURCE_NAMES.pons, url: `${DICT.ponsPage}/dictionary/german-russian/search?q=${encodeURIComponent(word)}` });
+      }
+
+      // Значения: PONS + толкования ru.wiktionary (без английских токований en.wiktionary)
+      const senses = [...(pons ?? []), ...wiktRu.senses].slice(0, DICT.maxSenses * 2);
+
+      return {
+        word,
+        sourceLang,
+        targetLang,
+        sources,
+        senses,
+        gender: wiktRu.gender,
+        plural: wiktRu.plural,
+        partOfSpeech: wiktRu.partOfSpeech,
+        transcription: wiktRu.transcription,
+        forms: wiktRu.forms,
+        synonyms: synonyms ?? [],
+        examples: combinedExamples,
+        definitions: [],
+      };
+    }
+  }
+
+  // Обычный путь (для немецкого слова de → ru/en или других пар)
   const [wiktionary, synonyms, examples, pons, definitions] = await Promise.all([
     lookupWiktionary(word, sourceLang, signal).catch(() => null),
     lookupSynonyms(word, sourceLang, signal).catch(() => null),
@@ -67,8 +118,13 @@ export async function buildDictEntry(
   if (examples && examples.length > 0) addSource('tatoeba', `https://tatoeba.org/de/sentences/search?query=${encodeURIComponent(word)}`);
   if (pons && pons.length > 0) addSource('pons', `${DICT.ponsPage}/dictionary/german-${targetLang === 'ru' ? 'russian' : targetLang === 'en' ? 'english' : 'german'}/search?q=${encodeURIComponent(word)}`);
 
-  // Значения: сначала двуязычный PONS (перевод), затем толкования Wiktionary.
-  const senses = [...(pons ?? []), ...(wiktionary?.senses ?? [])].slice(0, DICT.maxSenses * 2);
+  // Английские толкования en.wiktionary не показываем при интерфейсе ru/de, если есть PONS или DWDS
+  const rawWiktSenses = wiktionary?.senses ?? [];
+  const filteredWiktSenses = (targetLang === 'ru' || targetLang === 'de') && ((pons && pons.length > 0) || definitions.length > 0)
+    ? rawWiktSenses.filter((s) => s.translationLang === targetLang)
+    : rawWiktSenses;
+
+  const senses = [...(pons ?? []), ...filteredWiktSenses].slice(0, DICT.maxSenses * 2);
   if (senses.length === 0 && (!examples || examples.length === 0) && !synonyms && definitions.length === 0) {
     return null;
   }
@@ -85,7 +141,6 @@ export async function buildDictEntry(
     transcription: wiktionary?.transcription ?? null,
     forms: wiktionary?.forms ?? [],
     synonyms: synonyms ?? [],
-    // Примеры сначала из корпуса Tatoeba, затем из словаря.
     examples: [...(examples ?? []), ...(wiktionary?.examples ?? [])].slice(0, DICT.maxExamples),
     definitions,
   };
@@ -93,10 +148,8 @@ export async function buildDictEntry(
 
 /**
  * Ключ кэша карточки: слово + языковая пара.
- * Не зависит от языка интерфейса: все тексты источников в карточке на своих языках.
  */
 export function dictCacheKey(word: string, sourceLang: LanguageCode, targetLang: LanguageCode): string {
-  // PURGE_VERSION меняется при исправлении разбора источников — старый кэш тогда не мешает.
-  const purge = 'v3';
+  const purge = 'v4';
   return `dict|${purge}|${sourceLang}|${targetLang}|${word.trim().toLowerCase().replace(/\s+/g, ' ')}`;
 }
