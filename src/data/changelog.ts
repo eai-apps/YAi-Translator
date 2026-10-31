@@ -14,6 +14,15 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.12.2',
+    date: '2026-10-31',
+    items: {
+      ru: ['Новый раздел «Приложения» (слева в меню и в Профиле): скачать YAi Translator для Android и Android TV, установка на iPhone/iPad, версия приложения и обновления.'],
+      de: ['Neuer Bereich „Apps“ (im Menü links und im Profil): YAi Translator für Android und Android TV herunterladen, Installation auf iPhone/iPad, App-Version und Updates.'],
+      en: ['New “Apps” section (left menu and Profile): download YAi Translator for Android and Android TV, install on iPhone/iPad, app version and updates.'],
+    },
+  },
+  {
     version: '0.12.1',
     date: '2026-10-31',
     items: {

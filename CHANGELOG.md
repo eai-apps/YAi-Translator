@@ -1,5 +1,9 @@
 # История версий
 
+## 0.12.2 — 31.10.2026
+
+Страница «Приложения» `/apps` (`AppsPage.tsx`, `components/apps/*`, `useLatestRelease.ts` — версия, дата и размер APK из GitHub Releases API, запасной вариант — `/version.json`); ссылки в боковом меню и в Профиле. Автор — Claude.
+
 ## 0.12.1 — 31.10.2026
 
 Приложение Android грузит экраны с сайта (`capacitor.config.ts` → `server.url`, нет сети — `public/offline.html`),

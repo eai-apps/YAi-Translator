@@ -34,7 +34,8 @@
     "about": "About",
     "admin": "Admin",
     "resources": "Useful resources",
-    "guestSignIn": "Guest · Sign in"
+    "guestSignIn": "Guest · Sign in",
+    "apps": "Apps"
   },
   "languages": {
     "auto": "Detect language",
@@ -1197,5 +1198,35 @@
     "available": "Version {{version}} is available",
     "offline": "Can’t reach the website — try again later",
     "autoNote": "The app’s screens and features update by themselves. A new APK file is only needed occasionally — the app will offer to download it."
+  },
+  "apps": {
+    "badge": "Apps",
+    "title": "YAi Translator in your pocket",
+    "subtitle": "Translator, dictionary and German learning on your phone, tablet and TV. Free and ad-free. History and cards sync when you sign in.",
+    "androidSubtitle": "One app for phone, tablet and Android TV · Android 7+",
+    "downloadAndroid": "Download YAi Translator for Android",
+    "latestApk": "Latest APK version",
+    "sizeMb": "{{size}} MB",
+    "soon": "soon",
+    "sameVersion": "same version",
+    "contentUpdate": "Content update",
+    "contentAuto": "arrives in the app automatically",
+    "inAppNote": "The app is installed. Screens and features update by themselves.",
+    "androidStep1": "Download the file and open it.",
+    "androidStep2": "Allow installing from the browser if your phone asks.",
+    "androidStep3": "Tap “Install” (Play Protect may warn — the app isn’t in the store yet).",
+    "tvSubtitle": "The same app — adapts to the TV and remote control",
+    "tvLink": "APK link",
+    "tvStep1": "Install the “Downloader” app from Google Play on your TV.",
+    "tvStep2": "Open the APK link (above) in it and install.",
+    "tvStep3": "YAi Translator appears in your app list; use the remote.",
+    "iosSubtitle": "A full app on your Home Screen — no App Store needed",
+    "iosVersion": "iPhone / iPad version (via Safari)",
+    "iosAuto": "updates itself",
+    "iosStep1": "Open yai-translator.pages.dev in Safari.",
+    "iosStep2": "Tap “Share” — the square with an up arrow.",
+    "iosStep3": "Choose “Add to Home Screen”, then “Add”.",
+    "iosStep4": "Launch YAi Translator from the icon — full screen, no address bar.",
+    "iosTitle": "iPhone and iPad"
   }
 }

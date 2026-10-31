@@ -8,7 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { APP_VERSION } from '../../config';
 import { useAccount } from '../../hooks/useAccount';
 import { cn } from '../../lib/cn';
-import { IconCompass, IconInfo, IconSparkles } from './icons';
+import { IconCompass, IconInfo, IconSparkles, IconPhone } from './icons';
 import { useSidebarItems } from './navItems';
 import type { NavItem } from './navItems';
 import { Logo } from './Logo';
@@ -78,6 +78,13 @@ export function Sidebar() {
           <LanguageSwitch compact />
         </div>
         <div className="space-y-0.5">
+          <Link
+            to="/apps"
+            className="flex items-center gap-2.5 rounded-lg px-2 py-1.5 text-xs font-medium text-muted transition-colors hover:bg-soft hover:text-ink"
+          >
+            <IconPhone className="h-4 w-4 shrink-0" />
+            <span className="truncate">{t('nav.apps')}</span>
+          </Link>
           <Link
             to="/resources"
             className="flex items-center gap-2.5 rounded-lg px-2 py-1.5 text-xs font-medium text-muted transition-colors hover:bg-soft hover:text-ink"

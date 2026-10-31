@@ -19,6 +19,7 @@ const AdminPage = lazy(() => import('./pages/AdminPage'));
 const AboutPage = lazy(() => import('./pages/AboutPage'));
 // Ресурсы, грамматика и «Спросить у AI» — тоже отдельными кусками.
 const ResourcesPage = lazy(() => import('./pages/ResourcesPage'));
+const AppsPage = lazy(() => import('./pages/AppsPage'));
 const GrammarPage = lazy(() => import('./pages/GrammarPage'));
 const AskPage = lazy(() => import('./pages/AskPage'));
 // Учёба (этап 6): повторение, карточки, наборы и упражнения — отдельными кусками.
@@ -75,6 +76,7 @@ export default function App() {
                 <Route path="/about" element={<AboutPage />} />
                 <Route path="/help" element={<HelpPage />} />
                 <Route path="/resources" element={<ResourcesPage />} />
+                <Route path="/apps" element={<AppsPage />} />
                 <Route path="/admin" element={<AdminPage />} />
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>

@@ -34,7 +34,8 @@
     "about": "Über die App",
     "admin": "Admin",
     "resources": "Nützliche Links",
-    "guestSignIn": "Gast · Anmelden"
+    "guestSignIn": "Gast · Anmelden",
+    "apps": "Apps"
   },
   "languages": {
     "auto": "Sprache erkennen",
@@ -1197,5 +1198,35 @@
     "available": "Version {{version}} verfügbar",
     "offline": "Keine Verbindung zur Website — bitte später erneut versuchen",
     "autoNote": "Bildschirme und Funktionen der App aktualisieren sich selbst. Eine neue APK-Datei ist nur manchmal nötig — die App bietet sie dann zum Download an."
+  },
+  "apps": {
+    "badge": "Apps",
+    "title": "YAi Translator für unterwegs",
+    "subtitle": "Übersetzer, Wörterbuch und Deutschlernen auf Smartphone, Tablet und Fernseher. Kostenlos und ohne Werbung. Verlauf und Karten werden über das Konto synchronisiert.",
+    "androidSubtitle": "Eine App für Smartphone, Tablet und Android TV · Android 7+",
+    "downloadAndroid": "YAi Translator für Android herunterladen",
+    "latestApk": "Neueste APK-Version",
+    "sizeMb": "{{size}} MB",
+    "soon": "bald",
+    "sameVersion": "gleiche Version",
+    "contentUpdate": "Inhalts-Update",
+    "contentAuto": "kommt automatisch in die App",
+    "inAppNote": "Die App ist installiert. Bildschirme und Funktionen aktualisieren sich selbst.",
+    "androidStep1": "Datei herunterladen und öffnen.",
+    "androidStep2": "Installation aus dem Browser erlauben, falls gefragt.",
+    "androidStep3": "„Installieren“ tippen (Play Protect kann warnen — die App ist noch nicht im Store).",
+    "tvSubtitle": "Dieselbe App — passt sich an Fernseher und Fernbedienung an",
+    "tvLink": "APK-Link",
+    "tvStep1": "Installieren Sie die App „Downloader“ aus Google Play auf dem Fernseher.",
+    "tvStep2": "Öffnen Sie darin den APK-Link (oben) und installieren Sie.",
+    "tvStep3": "YAi Translator erscheint in der App-Liste, Bedienung per Fernbedienung.",
+    "iosSubtitle": "Vollwertige App auf dem Home-Bildschirm — ohne App Store",
+    "iosVersion": "Version für iPhone / iPad (über Safari)",
+    "iosAuto": "aktualisiert sich selbst",
+    "iosStep1": "Öffnen Sie yai-translator.pages.dev in Safari.",
+    "iosStep2": "Tippen Sie auf „Teilen“ — Quadrat mit Pfeil nach oben.",
+    "iosStep3": "Wählen Sie „Zum Home-Bildschirm“ und dann „Hinzufügen“.",
+    "iosStep4": "Starten Sie YAi Translator über das Symbol — im Vollbild, ohne Adressleiste.",
+    "iosTitle": "iPhone und iPad"
   }
 }

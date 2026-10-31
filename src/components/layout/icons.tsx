@@ -296,3 +296,21 @@ export function IconDownload({ className }: IconProps) {
     </Svg>
   );
 }
+
+export function IconPhone({ className }: IconProps) {
+  return (
+    <Svg className={className}>
+      <rect x="7" y="3" width="10" height="18" rx="2.5" />
+      <path d="M11 18h2" />
+    </Svg>
+  );
+}
+
+export function IconTv({ className }: IconProps) {
+  return (
+    <Svg className={className}>
+      <rect x="3" y="5" width="18" height="12" rx="2" />
+      <path d="M8 21h8M12 17v4" />
+    </Svg>
+  );
+}

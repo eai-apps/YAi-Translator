@@ -1,7 +1,7 @@
 {
   "name": "yai-translator",
   "private": true,
-  "version": "0.12.1",
+  "version": "0.12.2",
   "type": "module",
   "description": "YAi Translator — онлайн-переводчик, словарь и учебник немецкого",
   "scripts": {

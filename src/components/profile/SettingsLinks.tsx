@@ -30,6 +30,11 @@ export function SettingsLinks() {
     <div className="mt-4 border-t border-line pt-4">
       <p className="text-sm font-medium">{t('profile.appLinksTitle')}</p>
       <div className="mt-2 flex flex-wrap gap-2">
+        <Link to="/apps">
+          <Button size="sm" variant="primary">
+            {t('nav.apps')}
+          </Button>
+        </Link>
         <Link to="/about">
           <Button size="sm" variant="secondary">
             {t('profile.aboutLinkShort')}

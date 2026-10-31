@@ -116,6 +116,14 @@
 
 ## Журнал работ (новые записи — сверху)
 
+### 2026-10-31 23:55 — Claude — 0.12.2 (раздел «Приложения»)
+- Страница `/apps` как в SlyNet Radio: Android (кнопка «Скачать» → `releases/latest/download/YAi-Translator.apk`,
+  «Последняя версия APK» с датой и размером из GitHub API, «Google Play — скоро», «Обновление содержимого» = версия
+  сайта), Android TV (тот же APK, шаги с Downloader), iPhone/iPad (через Safari). Внутри приложения вместо кнопки —
+  «Приложение уже установлено» и «Проверить обновления». Ссылки: боковое меню (над «Полезные ресурсы») и Профиль.
+- Файлы: `src/pages/AppsPage.tsx`, `src/components/apps/{AndroidCards,IosCard,AppInfoRow}.tsx`,
+  `src/hooks/useLatestRelease.ts`, иконки `IconPhone`/`IconTv`, ключи `apps.*`, `nav.apps`.
+
 ### 2026-10-31 23:30 — Claude — 0.12.1 (самообновление приложения, подпись APK)
 - Приложение грузит экраны прямо с сайта (`capacitor.config.ts` → `server.url: https://yai-translator.pages.dev`):
   каждый push в `main` сразу виден в приложении, без нового APK. Нет сети — встроенная `public/offline.html`.
