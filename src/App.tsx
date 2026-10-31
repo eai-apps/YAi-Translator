@@ -2,6 +2,7 @@
 import { lazy, Suspense } from 'react';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { AppShell } from './components/layout/AppShell';
+import { AppPlatformBridge } from './components/app/AppPlatformBridge';
 import { GrammarProvider } from './components/grammar/GrammarProvider';
 import { Spinner } from './components/ui/Spinner';
 import { useGrammarTopics } from './hooks/useGrammarTopics';
@@ -47,6 +48,8 @@ export default function App() {
 
   return (
     <BrowserRouter>
+      {/* Мост нативных функций Android / Android TV (статус-бар, кнопка «Назад», обновления). */}
+      <AppPlatformBridge />
       {/* Карточки и прогресс учёбы: нужны «Переводу» (кнопка «В карточки») и всем экранам учёбы. */}
       <StudyProvider>
         {/* Справочник грамматики: попап темы открывается с любой страницы. */}

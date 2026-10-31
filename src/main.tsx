@@ -10,21 +10,24 @@ import { AccountProvider } from './hooks/useAccount';
 import { HistoryProvider } from './hooks/useHistory';
 import { TranslateSettingsProvider } from './hooks/useTranslateSettings';
 import { registerSW } from 'virtual:pwa-register';
+import { storeBuild } from './config';
 
 // Новая версия сайта применяется сама: офлайн-копия обновляется и страница перезагружается.
-// Без этого браузер показывал старую версию до второго захода (старые надписи, «зависший» перевод).
-registerSW({
-  immediate: true,
-  onRegisteredSW(_url, registration) {
-    if (!registration) return;
-    const check = () => void registration.update().catch(() => undefined);
-    // Проверяем обновления при возвращении на вкладку и раз в час.
-    document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'visible') check();
-    });
-    window.setInterval(check, 60 * 60 * 1000);
-  },
-});
+// В нативном приложении (Capacitor) service worker не используется: ассеты встроены в APK.
+if (storeBuild() === 'web') {
+  registerSW({
+    immediate: true,
+    onRegisteredSW(_url, registration) {
+      if (!registration) return;
+      const check = () => void registration.update().catch(() => undefined);
+      // Проверяем обновления при возвращении на вкладку и раз в час.
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') check();
+      });
+      window.setInterval(check, 60 * 60 * 1000);
+    },
+  });
+}
 
 const container = document.getElementById('root');
 if (!container) throw new Error('Не найден корневой элемент #root');

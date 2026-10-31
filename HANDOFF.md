@@ -116,6 +116,24 @@
 
 ## Журнал работ (новые записи — сверху)
 
+### 2026-10-31 21:30 — Antigravity (Gemini 3.8 Flash) — 0.11.0 (этап 10)
+- Выполнил этап 10 (`tasks/STAGE10.md` и `tasks/APPS-NOTES.md`):
+  1. Capacitor: установлены `@capacitor/core`, `@capacitor/cli`, `@capacitor/android`, `@capacitor/app`, `@capacitor/splash-screen`, `@capacitor/status-bar`; добавлен `capacitor.config.ts` (`appId: "app.yai.translator"`, `appName: "YAi Translator"`, `webDir: "dist"`).
+  2. Нативный проект `android/` инициализирован (`npx cap add android`) и включен в репозиторий без мусора сборки (`.gitignore`).
+  3. Манифест `android/app/src/main/AndroidManifest.xml`: категории `LAUNCHER` и `LEANBACK_LAUNCHER`, фичи `leanback`, `touchscreen` и `microphone` с `required="false"`, разрешения `RECORD_AUDIO` и `INTERNET`, баннер `tv_banner`. Один универсальный APK без NDK под телефоны, планшеты и Android TV.
+  4. Ресурсы: генерация ТВ-баннера `tv_banner.png` 320×180 и иконок всех плотностей (`mipmap-mdpi`...`xxxhdpi`, foreground и round) из `public/logo.svg` скриптами `scripts/render-android-icons.mjs` и `scripts/render-android-res.ps1`.
+  5. Управление пультом (Android TV): заметный контрастный фокус `:focus-visible` для кнопок, вкладок, чипсов и полей ввода в `src/styles/index.css`.
+  6. Мост нативных возможностей `src/components/app/AppPlatformBridge.tsx`:
+     - Кнопка «Назад» закрывает модальные окна/диалоги (через Escape / стейт), переходит назад в истории маршрутов, а на главной сворачивает приложение (`CapApp.minimizeApp()`).
+     - Сплэш-экран скрывается плавно (`SplashScreen.hide()`).
+     - Статус-бар автоматически подстраивается под тему (светлая/тёмная).
+  7. PWA Service Worker: отключен в сборке приложения (`storeBuild() === 'web'` в `src/main.tsx`).
+  8. Обновления без магазина: манифест `public/version.json` на сайте, проверка версии при старте приложения, модальное окно «Доступно обновление» (`AppUpdateModal`) со списком изменений на языке пользователя и кнопкой скачивания APK.
+  9. Сборка и синхронизация: скрипт `scripts/build-android.mjs` (`npm run build:android`) с `VITE_STORE_BUILD=android` и `VITE_API_BASE=https://yai-translator.pages.dev`, вызов `cap sync android`.
+  10. GitHub Actions: `.github/workflows/android.yml` — автоматическая сборка релизного APK с подписью из секретов в GitHub Releases по тегу `v*`, либо отладочного APK в артефакты сборки при отсутствии секретов.
+- Сервер `functions/**` не менялся (сайт и API работают как прежде, обновлена константа `APP_VERSION = '0.11.0'`).
+- Проверки: `npm run build` и `npm run build:android` завершились с кодом 0; 1079 ключей локализации в `ru.json`, `de.json`, `en.json` строго совпадают; все файлы ≤ ~250 строк; на GitHub ничего не отправлялось.
+
 ### 2026-10-31 21:00 — Claude — 0.10.1
 - По скриншотам владельца: выбор ✦ модели/«ИИ Pro» сбрасывался на «Быстрый перевод» (проверка списка в `ProviderPill`
   шла раньше, чем приходил список нейросетей) — теперь сброс только когда оба списка загружены.

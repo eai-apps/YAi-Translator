@@ -1159,5 +1159,11 @@
     "modelPlaceholder": "Zuerst „Modelle laden“ drücken",
     "picked": "{{count}} gewählt",
     "keyHintMulti": "Schlüssel einfügen, „Modelle laden“ drücken und die gewünschten Modelle ankreuzen (mehrere möglich) — jedes erscheint auf der Startseite in der Liste „Schnelle Übersetzung ▾“."
+  },
+  "appUpdate": {
+    "title": "Update verfügbar",
+    "version": "Version",
+    "update": "Aktualisieren",
+    "later": "Später"
   }
 }
