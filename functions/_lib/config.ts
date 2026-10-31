@@ -7,7 +7,7 @@ export { LANGUAGES, LANGUAGE_CODES, getLanguage, isLanguageCode, isUiLanguage } 
 
 import { CLASSIC_PROVIDERS } from '../../shared/types';
 
-export const APP_VERSION = '0.8.1';
+export const APP_VERSION = '0.8.2';
 
 export const LIMITS = {
   /** Максимальная длина текста для перевода и разбора. */
@@ -27,7 +27,7 @@ export const LIMITS = {
 } as const;
 
 /** Версия промптов: меняется вместе с prompts.ts и автоматически сбрасывает кэш. */
-export const PROMPT_VERSION = '6';
+export const PROMPT_VERSION = '7';
 
 /** Аккаунт, сессии и синхронизация избранного (этап 2). */
 export const AUTH = {

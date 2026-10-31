@@ -14,6 +14,27 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.8.2',
+    date: '2026-10-31',
+    items: {
+      ru: [
+        'Поле ввода стало ниже и растёт вместе с текстом — перевод стоит сразу под словом, без пустого места.',
+        'Убрано пояснение под заголовком «Перевод»: всё на экране поднялось выше.',
+        'Перевод у синонимов, антонимов и однокоренных слов теперь всегда на языке интерфейса — и при переводе с русского на немецкий.',
+      ],
+      de: [
+        'Das Eingabefeld ist niedriger und wächst mit dem Text — die Übersetzung steht direkt darunter.',
+        'Der Hinweis unter der Überschrift „Übersetzen“ ist weg: alles rückt nach oben.',
+        'Verwandte Wörter werden immer in der Sprache der Oberfläche übersetzt.',
+      ],
+      en: [
+        'The input box is shorter and grows with your text — the translation sits right below it.',
+        'The hint under the "Translate" heading is gone, so everything moves up.',
+        'Related words are always glossed in the interface language, also when translating into German.',
+      ],
+    },
+  },
+  {
     version: '0.8.1',
     date: '2026-10-31',
     items: {

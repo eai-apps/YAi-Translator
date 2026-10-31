@@ -54,6 +54,14 @@ export function SourcePanel(props: SourcePanelProps) {
   const listOpen = focused && !dismissed && suggestions.length > 0;
 
   // Новый текст — выбор подсказки снова с начала списка.
+  // Поле растёт вместе с текстом: короткое слово — низкое поле, длинный текст — выше (до 420 px).
+  useEffect(() => {
+    const element = textareaRef.current;
+    if (!element) return;
+    element.style.height = 'auto';
+    element.style.height = `${Math.min(element.scrollHeight, 420)}px`;
+  }, [text]);
+
   const acceptedRef = useRef<string | null>(null);
   useEffect(() => {
     setHighlighted(-1);
@@ -154,11 +162,11 @@ export function SourcePanel(props: SourcePanelProps) {
               onBlur={() => window.setTimeout(() => setFocused(false), 150)}
               maxLength={props.maxLength}
               placeholder={t('translate.placeholder')}
-              rows={5}
+              rows={2}
               spellCheck
               /* Арабский текст пишется справа налево; для остальных языков — обычное направление. */
               dir={sourceLang === 'auto' ? 'auto' : textDirection(sourceLang)}
-              className="min-h-[130px] w-full resize-none bg-transparent py-2 pl-1 pr-10 text-lg leading-relaxed text-ink outline-none placeholder:text-muted sm:min-h-[190px] sm:text-xl"
+              className="min-h-[64px] max-h-[420px] w-full resize-none overflow-y-auto bg-transparent py-2 pl-1 pr-10 text-lg leading-relaxed text-ink outline-none placeholder:text-muted sm:min-h-[80px] sm:text-xl"
             />
           </label>
           {/* Крестик «очистить» — справа в поле, как в Яндекс.Переводчике. */}

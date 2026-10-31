@@ -174,7 +174,8 @@ export default function TranslatePage() {
 
   return (
     <>
-      <PageHeader title={t('translate.title')} subtitle={t('translate.subtitle')} />
+      {/* Без пояснения под заголовком: так поле ввода и перевод стоят выше (подсказка есть в пустом блоке перевода). */}
+      <PageHeader title={t('translate.title')} />
 
       {/* Две колонки идут сверху вниз независимо: под полем ввода нет пустой дыры (этап 8Б). */}
       <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:gap-4">
