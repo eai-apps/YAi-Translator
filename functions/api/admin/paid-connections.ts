@@ -198,14 +198,16 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
     if (action === 'test') {
       let baseUrl = String(body.baseUrl || '').trim().replace(/\/$/, '');
-      let apiKey = String(body.key || '').trim();
-      const model = String(body.model || '').trim();
+      let apiKey = String(body.key || body.apiKey || '').trim();
+      // Кнопка «Проверить» в списке шлёт только id — тогда проверяем модель по умолчанию (исправление Claude, 0.9.4).
+      let model = String(body.model || '').trim();
 
       if (body.id) {
         const row = await context.env.DB?.prepare('SELECT * FROM paid_connections WHERE id = ?').bind(body.id).first<PaidConnectionRow>();
         if (row) {
           baseUrl = row.base_url;
           apiKey = await decryptKey(context.env, row.ciphertext, row.iv, `site:paid:${row.id}`);
+          model ||= row.default_model;
         }
       }
 
@@ -214,7 +216,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       const start = Date.now();
       const resp = await fetch(`${baseUrl}/chat/completions`, {
         method: 'POST',
-        headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+        headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json', 'User-Agent': 'YAi-Translator/1.0' },
         body: JSON.stringify({
           model,
           messages: [{ role: 'user', content: 'Translate to Russian: Hello' }],
@@ -226,10 +228,10 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       const latencyMs = Date.now() - start;
       if (!resp.ok) {
         const errText = await resp.text().catch(() => '');
-        return jsonResponse({ ok: false, status: resp.status, message: errText.slice(0, 150), latencyMs });
+        return jsonResponse({ ok: false, model, status: resp.status, error: `HTTP ${resp.status}: ${errText.slice(0, 150)}`, latencyMs });
       }
-
-      return jsonResponse({ ok: true, latencyMs });
+      const answer = (await resp.json().catch(() => null)) as { choices?: Array<{ message?: { content?: string } }> } | null;
+      return jsonResponse({ ok: true, model, latencyMs, reply: answer?.choices?.[0]?.message?.content?.slice(0, 80) ?? '' });
     }
 
     throw new ApiError('VALIDATION', 400);

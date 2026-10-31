@@ -48,7 +48,9 @@ export function isAiProvider(provider: string): boolean {
 }
 
 /** Названия провайдеров для бейджа «Перевод: …». */
-export function providerLabel(provider: string): string {
+/** Модель платной нейросети показываем коротко: «deepseek/deepseek-v4.1-flash» → «deepseek-v4.1-flash». */
+export function providerLabel(provider: string, model?: string): string {
+  if (provider === 'paid' && model) return model.split('/').pop() ?? model;
   switch (provider) {
     case 'gemini':
       return 'Gemini';

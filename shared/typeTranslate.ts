@@ -46,6 +46,8 @@ export interface TranslateResponse {
   /** Язык, определённый автоматически (null, если он был выбран вручную). */
   detectedLang: LanguageCode | null;
   provider: ProviderId;
+  /** Модель платной нейросети (provider 'paid'), например «deepseek-v4.1-flash». */
+  model?: string;
   cached: boolean;
 }
 

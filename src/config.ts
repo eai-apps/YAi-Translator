@@ -5,7 +5,7 @@
 export const API_BASE = (import.meta.env.VITE_API_BASE ?? '').replace(/\/+$/, '');
 
 /** Версия показывается в профиле; совпадает с package.json. */
-export const APP_VERSION = '0.9.3';
+export const APP_VERSION = '0.9.4';
 
 export const STORAGE_KEYS = {
   theme: 'yai.theme',

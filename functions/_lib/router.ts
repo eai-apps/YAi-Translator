@@ -132,7 +132,7 @@ async function buildAttempts(env: Env, userKeys: UserKeys, isRegistered = false,
   return attempts;
 }
 
-export async function runJsonTask<T>(options: RunJsonOptions<T>): Promise<{ data: T; provider: ProviderId }> {
+export async function runJsonTask<T>(options: RunJsonOptions<T>): Promise<{ data: T; provider: ProviderId; model?: string }> {
   const disabled = await readDisabledProviders(options.env);
   const attempts = (await buildAttempts(options.env, options.userKeys, options.isRegistered, options.sharedPaidPick)).filter(
     (attempt) =>
@@ -169,7 +169,7 @@ export async function runJsonTask<T>(options: RunJsonOptions<T>): Promise<{ data
         } else if (attempt.pooledKeyId && attempt.id === 'paid' && usedTokens > 0) {
           void recordPaidTokens(options.env, usedTokens);
         }
-        return { data, provider: attempt.id };
+        return { data, provider: attempt.id, ...(attempt.paidModel ? { model: attempt.paidModel } : {}) };
       }
       console.warn(`Провайдер ${attempt.id} вернул JSON без нужных полей`);
     } catch (error) {

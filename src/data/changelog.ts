@@ -14,6 +14,15 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.9.4',
+    date: '2026-10-31',
+    items: {
+      ru: ['Под переводом видно, какая нейросеть ответила (например, deepseek-v4.1-flash), а не «OpenAI».', 'Админка: кнопка «Проверить» у платной нейросети показывает время ответа и ответ модели.'],
+      de: ['Unter der Übersetzung steht das antwortende KI-Modell (z. B. deepseek-v4.1-flash) statt „OpenAI“.', 'Admin: „Prüfen“ bei bezahlter KI zeigt Antwortzeit und Antwort des Modells.'],
+      en: ['The translation shows which model answered (e.g. deepseek-v4.1-flash) instead of “OpenAI”.', 'Admin: “Test” on a paid model shows response time and the model reply.'],
+    },
+  },
+  {
     version: '0.9.3',
     date: '2026-10-31',
     items: {

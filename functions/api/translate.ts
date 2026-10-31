@@ -86,7 +86,7 @@ async function runAi(job: Job, personal: PersonalAi | null = null): Promise<Tran
   } else if (personal && !job.userKeys[personal]) {
     throw new ApiError('LIMIT_REACHED', 429);
   }
-  const { data, provider } = await runJsonTask({
+  const { data, provider, model } = await runJsonTask({
     env: job.env,
     prompt: buildTranslatePrompt(job),
     userKeys: job.userKeys,
@@ -97,7 +97,7 @@ async function runAi(job: Job, personal: PersonalAi | null = null): Promise<Tran
     ...(personal ? { only: [personal], personalOnly: true } : {}),
     ...(!personal && job.aiModel ? { only: ['paid' as const], sharedPaidPick: job.aiModel } : {}),
   });
-  return { ...data, provider, cached: false };
+  return { ...data, provider, ...(model ? { model } : {}), cached: false };
 }
 
 export const onRequestPost: PagesFunction<Env> = async (context) => {

@@ -64,7 +64,7 @@ export function AiVariant({ text, sourceLang, targetLang, speech, used, onUse, o
     <div className="mt-2 rounded-xl border border-accent/40 bg-accentSoft/40 px-3 py-2.5">
       <p className="flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wide text-muted">
         <IconSparkles className="h-3.5 w-3.5 text-accent" />
-        {t('others.aiLabel', { provider: providerLabel(result.provider) })}
+        {t('others.aiLabel', { provider: providerLabel(result.provider, result.model) })}
       </p>
       <p dir={textDirection(targetLang)} className="mt-1 whitespace-pre-wrap break-words text-sm leading-relaxed">
         {result.translatedText}

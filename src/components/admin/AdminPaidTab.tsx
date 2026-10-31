@@ -58,11 +58,17 @@ export function AdminPaidTab({ onError }: { onError: (msg: string | null) => voi
   const handleTest = async (conn: PaidConnectionItem) => {
     try {
       setTestResult((prev) => ({ ...prev, [conn.id]: t('common.loading') }));
-      const res = await api.adminPaidAction<{ ok: boolean; reply?: string; error?: string }>({
+      const res = await api.adminPaidAction<{ ok: boolean; reply?: string; error?: string; latencyMs?: number; model?: string }>({
         action: 'test',
         id: conn.id,
       });
-      setTestResult((prev) => ({ ...prev, [conn.id]: res.ok ? t('admin.paid.testSuccess') : String(res.error) }));
+      const head = `${res.model ?? conn.defaultModel}: `;
+      setTestResult((prev) => ({
+        ...prev,
+        [conn.id]: res.ok
+          ? `✅ ${head}${t('admin.paid.testSuccess')} ${res.latencyMs ?? '?'} мс${res.reply ? ` — «${res.reply}»` : ''}`
+          : `❌ ${head}${res.error ?? t('admin.paid.testFail')}`,
+      }));
     } catch {
       setTestResult((prev) => ({ ...prev, [conn.id]: t('admin.paid.testFail') }));
     }

@@ -91,7 +91,7 @@ export function ResultPanel(props: ResultPanelProps) {
           </span>
           <div className="flex items-center gap-2">
             {loading ? <Spinner className="text-muted" /> : null}
-            {result ? <Badge tone="accent">{providerLabel(result.provider)}</Badge> : null}
+            {result ? <Badge tone="accent">{providerLabel(result.provider, result.model)}</Badge> : null}
           </div>
         </div>
 
@@ -191,7 +191,7 @@ export function ResultPanel(props: ResultPanelProps) {
               />
             </div>
             <p className="mt-2 text-[11px] text-muted">
-              {t('translate.provider', { provider: providerLabel(result.provider) })}
+              {t('translate.provider', { provider: providerLabel(result.provider, result.model) })}
               {result.cached ? ` · ${t('translate.fromCache')}` : ''}
             </p>
           </div>
