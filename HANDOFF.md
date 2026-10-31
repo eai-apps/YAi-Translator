@@ -124,8 +124,10 @@
   (`src/lib/appUpdate.ts`), а не из констант сайта.
 - **Новый APK нужен только при изменении нативной части** (плагины Capacitor, `AndroidManifest.xml`, `MainActivity.java`,
   `capacitor.config.ts`, иконки). Тогда: поднять `versionCode`/`versionName` в `android/app/build.gradle`,
-  `ANDROID_VERSION_CODE` в `src/config.ts`, `public/version.json`; push; затем тег `vX.Y.Z` → GitHub Actions соберёт и
-  выложит `YAi-Translator.apk` в Releases; приложение само предложит обновиться.
+  `ANDROID_VERSION_CODE` в `src/config.ts`, `public/version.json`; push; затем github.com/eai-apps/YAi-Translator → вкладка **Actions** → слева
+  **Build Android APK** → справа **Run workflow** → зелёная **Run workflow** (тег из этой среды не пушится — обрыв).
+  Сборка (~4 мин) сама создаёт релиз `v<версия>` с `YAi-Translator.apk`; приложение само предложит обновиться.
+- 2026-10-31: выпущен первый APK 0.12.1 (versionCode 2): https://github.com/eai-apps/YAi-Translator/releases/latest/download/YAi-Translator.apk
 - Профиль → карточка с версией: «Приложение: версия X (сборка N)» и «Проверить обновления» → «У вас актуальная версия».
 - Подпись APK: `signingConfigs` в `android/app/build.gradle` (переменные `YAI_KEYSTORE_*`), секреты GitHub
   `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD`.
