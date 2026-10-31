@@ -76,7 +76,7 @@ export function validateWordCard(raw: unknown): WordCore | null {
   const source = isRecord(raw) && isRecord(raw.card) ? raw.card : raw;
   if (!isRecord(source)) return null;
 
-  const meanings = asArray(source.meanings, 5)
+  const meanings = asArray(source.meanings, 6)
     .map((item) => {
       if (!isRecord(item)) return null;
       const translations = asStringList(item.translations, 5);
@@ -104,7 +104,7 @@ export function validateWordCard(raw: unknown): WordCore | null {
 
   const conjugation = toConjugation(source.conjugation);
 
-  const examples = asArray(source.examples, 9)
+  const examples = asArray(source.examples, 10)
     .map((item): WordExample | null => {
       if (!isRecord(item)) return null;
       const text = asText(item.text, 400);

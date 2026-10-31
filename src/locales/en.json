@@ -98,7 +98,8 @@
     "suggestionsLabel": "Typing suggestions",
     "suggestIcon": "▸",
     "share": "Share",
-    "shareCopy": "Copy translation"
+    "shareCopy": "Copy translation",
+    "moreVariants": "More options:"
   },
   "others": {
     "title": "How others translate it",
@@ -235,7 +236,8 @@
     "formHintFutur2": "What will already be finished at a future moment.",
     "formHintKonjunktiv1": "Reporting other people’s words without “dass”.",
     "formHintKonjunktiv2": "Polite requests and unreal situations: hätte, würde, könnte.",
-    "formHintImperativ": "Request and command: du, ihr, Sie."
+    "formHintImperativ": "Request and command: du, ihr, Sie.",
+    "tabAll": "All"
   },
   "explain": {
     "title": "Explanation",

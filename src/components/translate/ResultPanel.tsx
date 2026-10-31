@@ -43,6 +43,10 @@ interface ResultPanelProps {
   studyInput?: StudyCardInput | null;
   /** Блок «Как переводят другие» (или null, если он выключен в настройках). */
   others?: ReactNode;
+  /** «Ещё варианты» для 1–3 слов — переводы из карточки слова (брать, приносить, позвать…). */
+  moreVariants?: string[];
+  /** Нажатие на вариант — перевести его обратно. */
+  onPickVariant?: (value: string) => void;
   /** Исходный текст — для «Поделиться». */
   sourceText: string;
 }
@@ -139,6 +143,21 @@ export function ResultPanel(props: ResultPanelProps) {
                 {result.translatedText}
               </p>
               <AlternativesList alternatives={result.alternatives} targetLang={targetLang} speech={speech} />
+              {props.moreVariants && props.moreVariants.length > 0 ? (
+                <div className="mt-2 flex flex-wrap items-center gap-1.5" dir={targetDir}>
+                  <span className="text-xs text-muted">{t('translate.moreVariants')}</span>
+                  {props.moreVariants.map((variant) => (
+                    <button
+                      key={variant}
+                      type="button"
+                      onClick={() => props.onPickVariant?.(variant)}
+                      className="rounded-full bg-accentSoft px-2.5 py-0.5 text-sm text-accent transition hover:ring-2 hover:ring-accent/40"
+                    >
+                      {variant}
+                    </button>
+                  ))}
+                </div>
+              ) : null}
             </>
           )}
         </div>

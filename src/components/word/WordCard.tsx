@@ -25,7 +25,7 @@ import { SourcesLine } from './SourcesLine';
 import { usePick } from './pick';
 import { WordCardHeader } from './WordCardHeader';
 
-type TabId = 'dictionary' | 'examples' | 'forms' | 'related' | 'grammar';
+type TabId = 'all' | 'dictionary' | 'examples' | 'forms' | 'related' | 'grammar';
 
 interface WordCardProps {
   card: WordCardData;
@@ -52,7 +52,8 @@ export function WordCard({
   headerMenu,
 }: WordCardProps) {
   const { t } = useTranslation();
-  const [tab, setTab] = useState<TabId>('dictionary');
+  // По умолчанию «Всё» — вся карточка одной лентой, как было раньше; остальные вкладки — быстрый переход.
+  const [tab, setTab] = useState<TabId>('all');
   const pick = usePick();
   const studyInput = useMemo(() => cardFromWord(card), [card]);
 
@@ -67,6 +68,7 @@ export function WordCard({
     card.phrases.length > 0;
 
   const available: CardTab<TabId>[] = [
+    { id: 'all', label: t('word.tabAll') },
     { id: 'dictionary', label: t('word.tabDictionary') },
     ...(card.examples.length > 0 || dictExamples.length > 0
       ? [{ id: 'examples' as TabId, label: t('word.tabExamples') }]
@@ -78,6 +80,28 @@ export function WordCard({
   // Вкладка могла исчезнуть у нового слова — тогда первая доступная.
   const active = available.some((item) => item.id === tab) ? tab : available[0].id;
   const lang = translationLang ?? 'ru';
+
+  const grammarBlock = (
+    <section>
+    {card.grammarNotes.length > 0 ? (
+      <>
+        <SectionTitle>{t('word.grammarNotes')}</SectionTitle>
+        {/* Названия тем в пояснениях — ссылки на справочник грамматики (этап 5). */}
+        <ul className="mt-2 space-y-1.5">
+          {card.grammarNotes.map((note, index) => (
+            <li key={index} className="flex gap-2 text-sm leading-relaxed">
+              <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-accent" aria-hidden="true" />
+              <span>
+                <GrammarLinkedInline text={note} />
+              </span>
+            </li>
+          ))}
+        </ul>
+      </>
+    ) : null}
+    <GrammarTopicLinks topics={card.grammarTopics ?? []} />
+    </section>
+  );
 
   return (
     <article className="animate-fade-in">
@@ -104,6 +128,28 @@ export function WordCard({
       </div>
 
       <div className="mt-3">
+        {active === 'all' ? (
+          <div className="space-y-6">
+            <div>
+              <SectionTitle>{t('word.tabDictionary')}</SectionTitle>
+              <MeaningList meanings={card.meanings} translationLang={lang} onPickTranslation={onPickTranslation} />
+            </div>
+            {card.examples.length > 0 || dictExamples.length > 0 ? (
+              <ExamplesList
+                card={card}
+                speech={speech}
+                dictExamples={dictExamples}
+                dictLang={dictLang}
+                translationLang={lang}
+              />
+            ) : null}
+            {hasForms ? <FormsSection card={card} speech={speech} /> : null}
+            {hasRelated ? <RelatedSection card={card} onPick={pick ?? undefined} /> : null}
+            {hasGrammar ? grammarBlock : null}
+            <SourcesLine sources={card.dictSources ?? []} />
+          </div>
+        ) : null}
+
         {active === 'dictionary' ? (
           <div>
             <MeaningList
@@ -131,31 +177,11 @@ export function WordCard({
           <RelatedSection card={card} onPick={pick ?? undefined} />
         ) : null}
 
-        {active === 'grammar' ? (
-          <section>
-            {card.grammarNotes.length > 0 ? (
-              <>
-                <SectionTitle>{t('word.grammarNotes')}</SectionTitle>
-                {/* Названия тем в пояснениях — ссылки на справочник грамматики (этап 5). */}
-                <ul className="mt-2 space-y-1.5">
-                  {card.grammarNotes.map((note, index) => (
-                    <li key={index} className="flex gap-2 text-sm leading-relaxed">
-                      <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-accent" aria-hidden="true" />
-                      <span>
-                        <GrammarLinkedInline text={note} />
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </>
-            ) : null}
-            <GrammarTopicLinks topics={card.grammarTopics ?? []} />
-          </section>
-        ) : null}
+        {active === 'grammar' ? grammarBlock : null}
       </div>
 
       {/* Управление предлогами — короткая строка под вкладками, как в словаре. */}
-      {card.governance.length > 0 && active !== 'related' ? (
+      {card.governance.length > 0 && active !== 'related' && active !== 'all' ? (
         <div className="mt-4">
           <SectionTitle>{t('word.governance')}</SectionTitle>
           <Chips className="mt-1.5" items={card.governance} onPick={(value) => pick?.(value)} />

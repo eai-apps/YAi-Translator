@@ -98,7 +98,8 @@
     "suggestionsLabel": "Подсказки при наборе",
     "suggestIcon": "▸",
     "share": "Поделиться",
-    "shareCopy": "Скопировать перевод"
+    "shareCopy": "Скопировать перевод",
+    "moreVariants": "Ещё варианты:"
   },
   "others": {
     "title": "Как переводят другие",
@@ -235,7 +236,8 @@
     "formHintFutur2": "Что будет уже закончено к моменту в будущем.",
     "formHintKonjunktiv1": "Передача чужих слов без «dass».",
     "formHintKonjunktiv2": "Вежливые просьбы и нереальное: hätte, würde, könnte.",
-    "formHintImperativ": "Просьба и команда: du, ihr, Sie."
+    "formHintImperativ": "Просьба и команда: du, ihr, Sie.",
+    "tabAll": "Всё"
   },
   "explain": {
     "title": "Разбор",

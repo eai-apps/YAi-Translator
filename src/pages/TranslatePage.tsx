@@ -137,6 +137,24 @@ export default function TranslatePage() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  // «Ещё варианты» под переводом: все переводы из карточки слова, кроме основного (до 8).
+  const moreVariants = (() => {
+    const card = translator.word.data?.card;
+    const main = (shown?.translatedText ?? '').trim().toLowerCase();
+    if (!card || !shown) return [];
+    const seen = new Set<string>([main]);
+    const list: string[] = [];
+    for (const meaning of card.meanings) {
+      for (const value of meaning.translations) {
+        const key = value.trim().toLowerCase();
+        if (!key || seen.has(key)) continue;
+        seen.add(key);
+        list.push(value.trim());
+      }
+    }
+    return list.slice(0, 8);
+  })();
+
   // «Поделиться»: системное окно телефона, без него — перевод кладётся в буфер обмена.
   const shareSupported = typeof navigator !== 'undefined' && typeof navigator.share === 'function';
   const share = async () => {
@@ -192,6 +210,8 @@ export default function TranslatePage() {
         </div>
 
         <ResultPanel
+          moreVariants={moreVariants}
+          onPickVariant={(value) => pickTranslation(value, targetLang)}
           result={shown}
           loading={translator.loading}
           error={translator.error}

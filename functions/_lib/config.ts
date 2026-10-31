@@ -27,7 +27,7 @@ export const LIMITS = {
 } as const;
 
 /** Версия промптов: меняется вместе с prompts.ts и автоматически сбрасывает кэш. */
-export const PROMPT_VERSION = '4';
+export const PROMPT_VERSION = '5';
 
 /** Аккаунт, сессии и синхронизация избранного (этап 2). */
 export const AUTH = {

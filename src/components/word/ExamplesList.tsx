@@ -27,6 +27,8 @@ interface ExamplesListProps {
 
 /** Значение фильтра: «все» или номер значения. */
 type SenseFilter = 'all' | number;
+type LevelFilter = 'all' | 'A1' | 'A2' | 'B1' | 'B2' | 'life';
+const LEVEL_ORDER = ['A1', 'A2', 'B1', 'B2'] as const;
 
 /** Подпись источника примера ИИ: уровень CEFR A2 / B1 / B2. */
 function aiSourceLabel(example: WordExample): string {
@@ -48,6 +50,8 @@ export function ExamplesList({
   const { t } = useTranslation();
   const pick = usePick();
   const [filter, setFilter] = useState<SenseFilter>('all');
+  // Уровень, как раньше: A1 / A2 / B1 / B2 и «Из жизни» (Tatoeba, Wiktionary).
+  const [level, setLevel] = useState<LevelFilter>('all');
 
   // Значения для фильтра: только те, у которых есть примеры.
   const senseOptions = useMemo(() => {
@@ -57,9 +61,17 @@ export function ExamplesList({
   }, [card.examples]);
 
   const active: SenseFilter = filter === 'all' || senseOptions.includes(filter) ? filter : 'all';
-  const aiExamples = card.examples.filter((example) => active === 'all' || example.sense === active);
-  // Примеры «из жизни» показываем во вкладке «все»: они не привязаны к значениям ИИ.
-  const lifeExamples = active === 'all' ? dictExamples : [];
+  const levels = LEVEL_ORDER.filter((value) => card.examples.some((example) => example.level === value));
+  const levelOptions: LevelFilter[] = ['all', ...levels, ...(dictExamples.length > 0 ? (['life'] as LevelFilter[]) : [])];
+  const activeLevel: LevelFilter = levelOptions.includes(level) ? level : 'all';
+  const aiExamples =
+    activeLevel === 'life'
+      ? []
+      : card.examples.filter(
+          (example) => (active === 'all' || example.sense === active) && (activeLevel === 'all' || example.level === activeLevel),
+        );
+  // Примеры «из жизни» не привязаны к значениям ИИ: показываем при «все» или «Из жизни».
+  const lifeExamples = active === 'all' && (activeLevel === 'all' || activeLevel === 'life') ? dictExamples : [];
   const forms = useMemo(() => knownWordForms(card), [card]);
 
   if (card.examples.length === 0 && dictExamples.length === 0) return null;
@@ -67,6 +79,28 @@ export function ExamplesList({
   return (
     <section>
       <h4 className="text-sm font-semibold">{t('word.examplesTitle')}</h4>
+
+      {levelOptions.length > 2 ? (
+        <div className="mt-2 inline-flex flex-wrap gap-1 rounded-xl bg-soft p-1" role="group" aria-label={t('word.examplesTitle')}>
+          {levelOptions.map((value) => {
+            const isActive = value === activeLevel;
+            return (
+              <button
+                key={value}
+                type="button"
+                aria-pressed={isActive}
+                onClick={() => setLevel(value)}
+                className={cn(
+                  'rounded-lg px-3 py-1 text-sm font-medium transition-colors',
+                  isActive ? 'bg-card text-ink shadow-sm' : 'text-muted hover:text-ink',
+                )}
+              >
+                {value === 'all' ? t('word.filterAll') : value === 'life' ? t('dict.fromLife') : value}
+              </button>
+            );
+          })}
+        </div>
+      ) : null}
 
       {senseOptions.length > 1 ? (
         <div className="no-scrollbar -mx-1 mt-2 flex gap-1.5 overflow-x-auto px-1 pb-1">
@@ -111,7 +145,14 @@ export function ExamplesList({
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <p className="text-sm font-medium leading-relaxed">
-                    <HighlightedText parts={partsSource} />
+                    {/* Нажатие на предложение переводит его целиком. */}
+                    {pick ? (
+                      <button type="button" onClick={() => pick(example.text)} className="text-left hover:underline hover:decoration-dotted hover:underline-offset-4">
+                        <HighlightedText parts={partsSource} />
+                      </button>
+                    ) : (
+                      <HighlightedText parts={partsSource} />
+                    )}
                   </p>
                   {example.translation ? (
                     <p

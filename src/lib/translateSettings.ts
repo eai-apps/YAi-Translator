@@ -23,7 +23,8 @@ export interface TranslateSettings {
 export const DEFAULT_TRANSLATE_SETTINGS: TranslateSettings = {
   saveHistory: true,
   detectLanguage: true,
-  suggestions: true,
+  // Подсказки при наборе выключены по умолчанию: владельцу они мешали (включаются в «Профиль → Настройки»).
+  suggestions: false,
   enterToTranslate: false,
   showOthers: true,
 };

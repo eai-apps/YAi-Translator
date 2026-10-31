@@ -98,7 +98,8 @@
     "suggestionsLabel": "Vorschläge beim Tippen",
     "suggestIcon": "▸",
     "share": "Teilen",
-    "shareCopy": "Übersetzung kopieren"
+    "shareCopy": "Übersetzung kopieren",
+    "moreVariants": "Weitere Varianten:"
   },
   "others": {
     "title": "Wie andere übersetzen",
@@ -235,7 +236,8 @@
     "formHintFutur2": "Was in der Zukunft bereits abgeschlossen sein wird.",
     "formHintKonjunktiv1": "Fremde Worte wiedergeben, ohne „dass“.",
     "formHintKonjunktiv2": "Höfliche Bitten und Unrealistisches: hätte, würde, könnte.",
-    "formHintImperativ": "Bitte und Befehl: du, ihr, Sie."
+    "formHintImperativ": "Bitte und Befehl: du, ihr, Sie.",
+    "tabAll": "Alles"
   },
   "explain": {
     "title": "Analyse",

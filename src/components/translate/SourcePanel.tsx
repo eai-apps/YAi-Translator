@@ -48,11 +48,17 @@ export function SourcePanel(props: SourcePanelProps) {
   const [highlighted, setHighlighted] = useState(-1);
 
   const suggestions = useSuggestions(text, sourceLang, props.suggestionsEnabled);
-  const listOpen = suggestions.length > 0;
+  // Подсказки — только пока человек печатает в поле; после выбора или ухода из поля прячутся.
+  const [focused, setFocused] = useState(false);
+  const [dismissed, setDismissed] = useState(false);
+  const listOpen = focused && !dismissed && suggestions.length > 0;
 
   // Новый текст — выбор подсказки снова с начала списка.
+  const acceptedRef = useRef<string | null>(null);
   useEffect(() => {
     setHighlighted(-1);
+    // Выбранную подсказку не показываем снова для того же слова.
+    setDismissed(acceptedRef.current === text);
   }, [text]);
 
   /** Вставляем символ в позицию курсора, а не в конец текста. */
@@ -73,6 +79,8 @@ export function SourcePanel(props: SourcePanelProps) {
   };
 
   const acceptSuggestion = (value: string) => {
+    acceptedRef.current = value;
+    setDismissed(true);
     onChange(value);
     setHighlighted(-1);
     textareaRef.current?.focus();
@@ -94,8 +102,9 @@ export function SourcePanel(props: SourcePanelProps) {
       });
       return;
     }
-    if (event.key === 'Escape' && listOpen && highlighted >= 0) {
+    if (event.key === 'Escape' && listOpen) {
       setHighlighted(-1);
+      setDismissed(true);
       return;
     }
     if (event.key !== 'Enter' || event.shiftKey) return;
@@ -132,15 +141,6 @@ export function SourcePanel(props: SourcePanelProps) {
       />
 
       <div className="mt-1.5 border-t border-line pt-2">
-        {listOpen ? (
-          <SuggestionList
-            items={suggestions}
-            highlighted={highlighted}
-            onPick={acceptSuggestion}
-            onHighlight={setHighlighted}
-          />
-        ) : null}
-
         <div className="relative">
           <label className="flex flex-col">
             <span className="sr-only">{t('translate.placeholder')}</span>
@@ -149,6 +149,9 @@ export function SourcePanel(props: SourcePanelProps) {
               value={text}
               onChange={(event) => onChange(event.target.value)}
               onKeyDown={handleKeyDown}
+              onFocus={() => setFocused(true)}
+              // Небольшая пауза: нажатие на подсказку успевает сработать до скрытия списка.
+              onBlur={() => window.setTimeout(() => setFocused(false), 150)}
               maxLength={props.maxLength}
               placeholder={t('translate.placeholder')}
               rows={5}
@@ -174,6 +177,15 @@ export function SourcePanel(props: SourcePanelProps) {
             </button>
           ) : null}
         </div>
+
+        {listOpen ? (
+          <SuggestionList
+            items={suggestions}
+            highlighted={highlighted}
+            onPick={acceptSuggestion}
+            onHighlight={setHighlighted}
+          />
+        ) : null}
 
         {speech.listening ? (
           <p className="px-1 pb-1 text-xs font-medium text-danger" role="status">
