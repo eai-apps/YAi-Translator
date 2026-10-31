@@ -1,21 +1,26 @@
-/** Язык интерфейса, тема и другие переводчики под переводом. */
+/**
+ * Настройки профиля (этап 8): язык интерфейса, тема и переключатели перевода —
+ * история, определение языка, подсказки, Enter, «Как переводят другие».
+ * Ниже — офлайн-режим и ссылки «О приложении», «Обратная связь», «Справка».
+ */
 import { useTranslation } from 'react-i18next';
 import type { UiLanguage } from '../../../shared/types';
-import { STORAGE_KEYS } from '../../config';
-import { useLocalStorage } from '../../hooks/useLocalStorage';
 import { useSettings } from '../../hooks/useSettings';
 import { useTheme } from '../../hooks/useTheme';
 import type { ThemeMode } from '../../hooks/useTheme';
+import { useTranslateSettings } from '../../hooks/useTranslateSettings';
 import { Card } from '../ui/Card';
 import { SectionTitle } from '../ui/SectionTitle';
 import { Segmented } from '../ui/Segmented';
+import { Toggle } from '../ui/Toggle';
+import { OfflineCard } from './OfflineCard';
+import { SettingsLinks } from './SettingsLinks';
 
 export function SettingsCard() {
   const { t } = useTranslation();
   const { uiLanguage, setUiLanguage } = useSettings();
   const { theme, setTheme } = useTheme();
-  // По умолчанию включено: блок «Как переводят другие» появляется сам.
-  const [showOthers, setShowOthers] = useLocalStorage<boolean>(STORAGE_KEYS.showOthers, true);
+  const { settings, update } = useTranslateSettings();
 
   return (
     <Card className="p-4 sm:p-5">
@@ -48,19 +53,45 @@ export function SettingsCard() {
         <p className="mt-2 text-xs leading-relaxed text-muted">{t('profile.themeHint')}</p>
       </div>
 
+      {/* Переключатели перевода — как в Яндекс.Переводчике. */}
       <div className="mt-5 border-t border-line pt-4">
-        <SectionTitle>{t('profile.otherTranslatorsTitle')}</SectionTitle>
-        <label className="mt-2 flex cursor-pointer items-start gap-3">
-          <input
-            type="checkbox"
-            checked={showOthers}
-            onChange={(event) => setShowOthers(event.target.checked)}
-            className="mt-0.5 h-4 w-4 shrink-0 accent-[var(--color-accent)]"
+        <SectionTitle>{t('profile.settingsTitle')}</SectionTitle>
+        <div className="mt-1 divide-y divide-line">
+          <Toggle
+            label={t('profile.saveHistory')}
+            hint={t('profile.saveHistoryHint')}
+            checked={settings.saveHistory}
+            onChange={(value) => update({ saveHistory: value })}
           />
-          <span className="text-sm leading-relaxed">{t('profile.showOthers')}</span>
-        </label>
-        <p className="mt-2 text-xs leading-relaxed text-muted">{t('profile.showOthersHint')}</p>
+          <Toggle
+            label={t('profile.detectLanguage')}
+            hint={t('profile.detectLanguageHint')}
+            checked={settings.detectLanguage}
+            onChange={(value) => update({ detectLanguage: value })}
+          />
+          <Toggle
+            label={t('profile.suggestions')}
+            hint={t('profile.suggestionsHint')}
+            checked={settings.suggestions}
+            onChange={(value) => update({ suggestions: value })}
+          />
+          <Toggle
+            label={t('profile.enterToTranslate')}
+            hint={t('profile.enterToTranslateHint')}
+            checked={settings.enterToTranslate}
+            onChange={(value) => update({ enterToTranslate: value })}
+          />
+          <Toggle
+            label={t('profile.showOthers')}
+            hint={t('profile.showOthersHint')}
+            checked={settings.showOthers}
+            onChange={(value) => update({ showOthers: value })}
+          />
+        </div>
       </div>
+
+      <OfflineCard />
+      <SettingsLinks />
     </Card>
   );
 }

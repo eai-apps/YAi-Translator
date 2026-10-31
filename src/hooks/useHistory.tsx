@@ -8,6 +8,7 @@ import type { ReactNode } from 'react';
 import type { LanguageCode, SourceLanguage } from '../../shared/types';
 import { HISTORY_LIMIT, HISTORY_STORAGE_LIMIT, STORAGE_KEYS, SYNC_MARKS } from '../config';
 import { readStorage, writeStorage } from '../lib/storage';
+import { readTranslateSettings } from '../lib/translateSettings';
 import type { Tombstones } from '../lib/syncTombstones';
 import { useAccount } from './useAccount';
 import { useHistorySync } from './useHistorySync';
@@ -101,6 +102,9 @@ export function HistoryProvider({ children }: { children: ReactNode }) {
 
   const addItem = useCallback<HistoryContextValue['addItem']>((item) => {
     const id = createId();
+    // Настройка «История переводов» выключена: новый перевод не сохраняем.
+    // Id всё равно возвращаем: на него опирается кнопка «Избранное» (у выключенной истории она неактивна).
+    if (!readTranslateSettings().saveHistory) return id;
     setItems((previous) => {
       // Повторный перевод того же текста заменяет старую запись, но сохраняет избранное.
       const duplicate = previous.find(

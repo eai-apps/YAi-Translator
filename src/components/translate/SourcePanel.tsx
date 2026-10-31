@@ -1,30 +1,61 @@
-/** Поле ввода: умлауты, голосовой ввод, озвучка, очистка и счётчик символов. */
-import { useRef } from 'react';
+/**
+ * Поле ввода карточки перевода (этап 8, «как в Яндексе»): строка языков внутри карточки,
+ * крупный текст с крестиком «очистить» справа, подсказки при наборе и нижняя панель действий:
+ * 🔊 озвучить, пилюля режима, 🎤 микрофон.
+ */
+import { useEffect, useRef, useState } from 'react';
+import type { KeyboardEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { LanguageCode, SourceLanguage } from '../../../shared/types';
 import { textDirection } from '../../../shared/languages';
+import type { ProviderChoice } from '../../hooks/useTranslator';
 import type { SpeechController } from '../../hooks/useSpeech';
+import { useSuggestions } from '../../hooks/useSuggestions';
 import { cn } from '../../lib/cn';
 import { Card } from '../ui/Card';
 import { IconButton } from '../ui/IconButton';
 import { IconClose, IconMic, IconVolume } from '../layout/icons';
-
-const UMLAUTS = ['ä', 'ö', 'ü', 'ß', 'Ä', 'Ö', 'Ü'];
+import { LanguageRow } from './LanguageRow';
+import { ProviderPill } from './ProviderPill';
+import { SuggestionList } from './SuggestionList';
 
 interface SourcePanelProps {
   text: string;
   onChange: (value: string) => void;
   sourceLang: SourceLanguage;
+  targetLang: LanguageCode;
+  onSourceChange: (language: SourceLanguage) => void;
+  onTargetChange: (language: LanguageCode) => void;
+  onSwap: () => void;
   maxLength: number;
   speech: SpeechController;
+  /** Настройки перевода: подсказки и Enter вместо перевода через 600 мс. */
+  suggestionsEnabled: boolean;
+  enterToTranslate: boolean;
+  /** Enter в режиме «переводить по Enter». */
+  onSubmit: () => void;
+  providerChoice: ProviderChoice;
+  onProviderChange: (next: ProviderChoice) => void;
+  aiLoading: boolean;
+  onAskAi: () => void;
 }
 
-export function SourcePanel({ text, onChange, sourceLang, maxLength, speech }: SourcePanelProps) {
+export function SourcePanel(props: SourcePanelProps) {
   const { t } = useTranslation();
+  const { text, onChange, sourceLang, speech } = props;
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const showUmlauts = sourceLang === 'auto' || sourceLang === 'de';
+  // -1 — подсказка не подсвечена (Enter в этом случае просто переводит текст).
+  const [highlighted, setHighlighted] = useState(-1);
 
-  // Вставляем букву в позицию курсора, а не в конец текста.
+  const suggestions = useSuggestions(text, sourceLang, props.suggestionsEnabled);
+  const listOpen = suggestions.length > 0;
+
+  // Новый текст — выбор подсказки снова с начала списка.
+  useEffect(() => {
+    setHighlighted(-1);
+  }, [text]);
+
+  /** Вставляем символ в позицию курсора, а не в конец текста. */
   const insertCharacter = (character: string) => {
     const element = textareaRef.current;
     if (!element) {
@@ -41,10 +72,42 @@ export function SourcePanel({ text, onChange, sourceLang, maxLength, speech }: S
     });
   };
 
+  const acceptSuggestion = (value: string) => {
+    onChange(value);
+    setHighlighted(-1);
+    textareaRef.current?.focus();
+  };
+
   const handleVoice = () => {
     speech.listen(sourceLang, (transcript) => {
       onChange(text.trim() ? `${text.trim()} ${transcript}` : transcript);
     });
+  };
+
+  /** Enter: подсвеченная подсказка, перевод (в режиме «по Enter») или новая строка. */
+  const handleKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
+    if (listOpen && (event.key === 'ArrowDown' || event.key === 'ArrowUp')) {
+      event.preventDefault();
+      setHighlighted((previous) => {
+        const next = event.key === 'ArrowDown' ? previous + 1 : previous - 1;
+        return (next + suggestions.length) % suggestions.length;
+      });
+      return;
+    }
+    if (event.key === 'Escape' && listOpen && highlighted >= 0) {
+      setHighlighted(-1);
+      return;
+    }
+    if (event.key !== 'Enter' || event.shiftKey) return;
+    if (listOpen && highlighted >= 0) {
+      event.preventDefault();
+      acceptSuggestion(suggestions[Math.min(highlighted, suggestions.length - 1)]);
+      return;
+    }
+    if (props.enterToTranslate) {
+      event.preventDefault();
+      props.onSubmit();
+    }
   };
 
   const speechLanguage: LanguageCode = sourceLang === 'auto' ? 'de' : sourceLang;
@@ -59,56 +122,72 @@ export function SourcePanel({ text, onChange, sourceLang, maxLength, speech }: S
 
   return (
     <Card className="flex flex-col p-3 sm:p-4">
-      {showUmlauts ? (
-        <div className="flex flex-wrap items-center gap-1 border-b border-line pb-2">
-          {UMLAUTS.map((character) => (
+      <LanguageRow
+        sourceLang={sourceLang}
+        targetLang={props.targetLang}
+        onSourceChange={props.onSourceChange}
+        onTargetChange={props.onTargetChange}
+        onSwap={props.onSwap}
+        onUmlaut={insertCharacter}
+      />
+
+      <div className="mt-1.5 border-t border-line pt-2">
+        {listOpen ? (
+          <SuggestionList
+            items={suggestions}
+            highlighted={highlighted}
+            onPick={acceptSuggestion}
+            onHighlight={setHighlighted}
+          />
+        ) : null}
+
+        <div className="relative">
+          <label className="flex flex-col">
+            <span className="sr-only">{t('translate.placeholder')}</span>
+            <textarea
+              ref={textareaRef}
+              value={text}
+              onChange={(event) => onChange(event.target.value)}
+              onKeyDown={handleKeyDown}
+              maxLength={props.maxLength}
+              placeholder={t('translate.placeholder')}
+              rows={5}
+              spellCheck
+              /* Арабский текст пишется справа налево; для остальных языков — обычное направление. */
+              dir={sourceLang === 'auto' ? 'auto' : textDirection(sourceLang)}
+              className="min-h-[130px] w-full resize-none bg-transparent py-2 pl-1 pr-10 text-lg leading-relaxed text-ink outline-none placeholder:text-muted sm:min-h-[190px] sm:text-xl"
+            />
+          </label>
+          {/* Крестик «очистить» — справа в поле, как в Яндекс.Переводчике. */}
+          {text ? (
             <button
-              key={character}
               type="button"
-              onClick={() => insertCharacter(character)}
-              className="h-7 w-7 rounded-lg bg-soft text-sm font-medium text-ink transition-colors hover:bg-accentSoft hover:text-accent"
+              aria-label={t('translate.clearInput')}
+              title={t('translate.clearInput')}
+              onClick={() => {
+                onChange('');
+                textareaRef.current?.focus();
+              }}
+              className="absolute right-1 top-1 flex h-8 w-8 items-center justify-center rounded-full text-muted transition-colors hover:bg-soft hover:text-ink"
             >
-              {character}
+              <IconClose className="h-[18px] w-[18px]" />
             </button>
-          ))}
+          ) : null}
         </div>
-      ) : null}
 
-      <label className="flex flex-1 flex-col">
-        <span className="sr-only">{t('translate.placeholder')}</span>
-        <textarea
-          ref={textareaRef}
-          value={text}
-          onChange={(event) => onChange(event.target.value)}
-          maxLength={maxLength}
-          placeholder={t('translate.placeholder')}
-          rows={6}
-          spellCheck
-          /* Арабский текст пишется справа налево; для остальных языков — обычное направление. */
-          dir={sourceLang === 'auto' ? 'auto' : textDirection(sourceLang)}
-          className="min-h-[150px] w-full flex-1 resize-none bg-transparent px-1 py-3 text-base leading-relaxed text-ink outline-none placeholder:text-muted sm:min-h-[210px] sm:text-lg"
-        />
-      </label>
+        {speech.listening ? (
+          <p className="px-1 pb-1 text-xs font-medium text-danger" role="status">
+            {t('translate.voiceListening')}
+          </p>
+        ) : null}
+        {voiceError ? (
+          <p className="px-1 pb-1 text-xs text-danger" role="alert">
+            {voiceError}
+          </p>
+        ) : null}
+      </div>
 
-      {speech.listening ? (
-        <p className="px-1 pb-1 text-xs font-medium text-danger" role="status">
-          {t('translate.voiceListening')}
-        </p>
-      ) : null}
-      {voiceError ? (
-        <p className="px-1 pb-1 text-xs text-danger" role="alert">
-          {voiceError}
-        </p>
-      ) : null}
-
-      <div className="flex items-center gap-1.5 border-t border-line pt-2">
-        <IconButton
-          label={speech.listening ? t('common.stop') : t('translate.voice')}
-          icon={<IconMic className="h-[18px] w-[18px]" />}
-          active={speech.listening}
-          onClick={handleVoice}
-          className={cn(speech.listening && 'border-danger bg-danger text-white')}
-        />
+      <div className="mt-1 flex flex-wrap items-center gap-1.5 border-t border-line pt-2">
         <IconButton
           label={t('translate.speakSource')}
           icon={<IconVolume className="h-[18px] w-[18px]" />}
@@ -116,18 +195,24 @@ export function SourcePanel({ text, onChange, sourceLang, maxLength, speech }: S
           disabled={!text.trim()}
           active={speech.speakingId === 'source'}
         />
-        <span className="ml-auto text-[11px] tabular-nums text-muted">
-          {t('translate.chars', { used: text.length, max: maxLength })}
-        </span>
-        <IconButton
-          label={t('translate.clearInput')}
-          icon={<IconClose className="h-[18px] w-[18px]" />}
-          onClick={() => {
-            onChange('');
-            textareaRef.current?.focus();
-          }}
-          disabled={!text}
+        <ProviderPill
+          value={props.providerChoice}
+          onChange={props.onProviderChange}
+          aiLoading={props.aiLoading}
+          onAskAi={props.onAskAi}
+          hasText={text.trim().length > 0}
         />
+        <IconButton
+          className={cn('ml-auto', speech.listening && 'border-danger bg-danger text-white')}
+          label={speech.listening ? t('common.stop') : t('translate.voice')}
+          icon={<IconMic className="h-[18px] w-[18px]" />}
+          active={speech.listening}
+          onClick={handleVoice}
+        />
+        <span className="w-full text-right text-[11px] tabular-nums text-muted">
+          {props.enterToTranslate ? `${t('translate.enterHint')} · ` : ''}
+          {t('translate.chars', { used: text.length, max: props.maxLength })}
+        </span>
       </div>
     </Card>
   );

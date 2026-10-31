@@ -20,6 +20,7 @@ export * from './admin';
 export * from './dict';
 export * from './grammar';
 export * from './study';
+export * from './suggest';
 
 import type { LanguageCode, UiLanguage } from './languages';
 

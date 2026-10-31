@@ -25,6 +25,8 @@ const ReviewPage = lazy(() => import('./pages/learn/ReviewPage'));
 const CardsPage = lazy(() => import('./pages/learn/CardsPage'));
 const DecksPage = lazy(() => import('./pages/learn/DecksPage'));
 const PracticePage = lazy(() => import('./pages/learn/PracticePage'));
+// Справка (этап 8) — тоже отдельным куском.
+const HelpPage = lazy(() => import('./pages/HelpPage'));
 
 function PageFallback() {
   // Пустая обёртка со спиннером: блок не прыгает при загрузке куска.
@@ -63,6 +65,7 @@ export default function App() {
                 <Route path="/grammar/:slug" element={<GrammarPage topics={topics} />} />
                 <Route path="/ask" element={<AskPage />} />
                 <Route path="/about" element={<AboutPage />} />
+                <Route path="/help" element={<HelpPage />} />
                 <Route path="/resources" element={<ResourcesPage />} />
                 <Route path="/admin" element={<AdminPage />} />
                 <Route path="*" element={<Navigate to="/" replace />} />

@@ -3,7 +3,7 @@
  * Значения, род, формы, синонимы и настоящие примеры — с пометкой «Без ИИ — данные словарей».
  */
 import { useTranslation } from 'react-i18next';
-import type { DictEntry } from '../../../shared/types';
+import type { DictEntry, LanguageCode } from '../../../shared/types';
 import { textDirection } from '../../../shared/languages';
 import type { SpeechController } from '../../hooks/useSpeech';
 import { useSettings } from '../../hooks/useSettings';
@@ -15,6 +15,7 @@ import { Badge } from '../ui/Badge';
 import { SectionTitle } from '../ui/SectionTitle';
 import { AddToCardsButton } from '../study/AddToCardsButton';
 import { ChipList } from './ChipList';
+import { Chips } from './Chips';
 import { DictExamples } from './DictExamples';
 import { SourcesLine } from './SourcesLine';
 
@@ -23,9 +24,11 @@ interface DictCardProps {
   speech: SpeechController;
   /** true — ИИ ответил и данные словарей только дополняют его карточку. */
   withAi: boolean;
+  /** Нажатие на перевод значения: перевести обратно (этап 8). */
+  onPick?: (translation: string, lang: LanguageCode) => void;
 }
 
-export function DictCard({ entry, speech, withAi }: DictCardProps) {
+export function DictCard({ entry, speech, withAi, onPick }: DictCardProps) {
   const { t } = useTranslation();
   const { uiLanguage } = useSettings();
   // Значения на исходном языке и их переводы, если источник их даёт (PONS).
@@ -58,12 +61,21 @@ export function DictCard({ entry, speech, withAi }: DictCardProps) {
           <ul className="mt-2 space-y-2">
             {translations.map((sense, index) => (
               <li key={`translation-${index}`}>
-                <p
-                  dir={sense.translationLang ? textDirection(sense.translationLang) : 'auto'}
-                  className="text-base font-medium leading-snug"
-                >
-                  {sense.translation}
-                </p>
+                {onPick && sense.translationLang ? (
+                  // Перевод из двуязычного словаря — чипса: нажатие переводит его обратно.
+                  <Chips
+                    items={(sense.translation ?? '').split(',').map((part) => part.trim()).filter(Boolean)}
+                    tone="accent"
+                    onPick={(value) => onPick(value, sense.translationLang as LanguageCode)}
+                  />
+                ) : (
+                  <p
+                    dir={sense.translationLang ? textDirection(sense.translationLang) : 'auto'}
+                    className="text-base font-medium leading-snug"
+                  >
+                    {sense.translation}
+                  </p>
+                )}
                 {sense.definition ? (
                   <p className="text-xs leading-relaxed text-muted">{sense.definition}</p>
                 ) : null}

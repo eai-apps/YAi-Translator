@@ -12,7 +12,21 @@ export const SETTINGS_KEYS = {
   dailyLimit: 'daily_limit',
   banner: 'banner',
   disabledProviders: 'disabled_providers',
+  /** Почта для пункта «Обратная связь» в настройках (этап 8). */
+  feedbackEmail: 'feedback_email',
 } as const;
+
+/** Простая проверка адреса: без @ или пробелов ничего не сохраняем. */
+export function normalizeFeedbackEmail(value: unknown): string {
+  if (typeof value !== 'string') return '';
+  const text = value.trim().slice(0, ADMIN.maxFeedbackEmailLength);
+  return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(text) ? text : '';
+}
+
+export async function readFeedbackEmail(env: Env): Promise<string> {
+  const stored = await readSetting<string>(env, SETTINGS_KEYS.feedbackEmail);
+  return normalizeFeedbackEmail(stored ?? '');
+}
 
 /**
  * Переводчики, выключенные тумблером в админке. MyMemory выключен по умолчанию:

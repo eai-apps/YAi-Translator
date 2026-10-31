@@ -68,6 +68,8 @@ export interface AdminSettings {
   banner: { enabled: boolean; ru: string; de: string; en: string };
   /** Переводчики и ИИ, выключенные тумблером (по умолчанию — MyMemory). */
   disabledProviders: string[];
+  /** Почта для пункта «Обратная связь» в настройках; пусто — пункт скрыт (этап 8). */
+  feedbackEmail: string;
 }
 
 export interface AdminUserItem {
@@ -99,4 +101,6 @@ export interface SiteSettingsResponse {
   version: string;
   dailyLimit: number;
   banner: { ru: string; de: string; en: string } | null;
+  /** Адрес из админки для ссылки mailto: в настройках; null — пункт «Обратная связь» скрыт. */
+  feedbackEmail: string | null;
 }

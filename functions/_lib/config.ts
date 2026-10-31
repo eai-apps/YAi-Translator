@@ -7,7 +7,7 @@ export { LANGUAGES, LANGUAGE_CODES, getLanguage, isLanguageCode, isUiLanguage } 
 
 import { CLASSIC_PROVIDERS } from '../../shared/types';
 
-export const APP_VERSION = '0.7.0';
+export const APP_VERSION = '0.8.0';
 
 export const LIMITS = {
   /** Максимальная длина текста для перевода и разбора. */
@@ -27,7 +27,7 @@ export const LIMITS = {
 } as const;
 
 /** Версия промптов: меняется вместе с prompts.ts и автоматически сбрасывает кэш. */
-export const PROMPT_VERSION = '3';
+export const PROMPT_VERSION = '4';
 
 /** Аккаунт, сессии и синхронизация избранного (этап 2). */
 export const AUTH = {
@@ -155,6 +155,8 @@ export const ADMIN = {
   chartDays: 30,
   /** Максимальная длина строки баннера. */
   maxBannerLength: 280,
+  /** Длина адреса обратной связи в настройках. */
+  maxFeedbackEmailLength: 120,
   /** Границы дневного лимита, который можно задать в админке. */
   minDailyLimit: 1,
   maxDailyLimit: 10_000,
@@ -224,8 +226,7 @@ export const GRAMMAR = {
   maxRelated: 6,
 } as const;
 
-/** «Спросить у AI» — учитель в чате. */
-export const ASK = {
+/** «Спросить у AI» — учитель в чате. */export const ASK = {
   /** Длина вопроса. */
   maxQuestionLength: 500,
   /**
@@ -235,6 +236,24 @@ export const ASK = {
   cacheTtlSeconds: 60 * 60 * 24 * 90,
   /** Сколько вопросов помнит история у пользователя (localStorage и аккаунт). */
   historyLimit: 200,
+} as const;
+
+/**
+ * Подсказки при наборе одного слова (версия 0.8.0, /api/suggest).
+ * Источник: Wiktionary opensearch на языке слова (de.wiktionary.org, ru.wiktionary.org …).
+ */
+export const SUGGEST = {
+  /** Сколько подсказок показываем в интерфейсе. */
+  maxItems: 6,
+  /** Сколько слов просим у Wiktionary (лишние отбрасываем: часть ответа — не начала слов). */
+  limit: 8,
+  /** Минимальная длина запроса: с одной буквы подсказок нет. */
+  minQueryLength: 2,
+  /** Ответ держим в D1 30 дней: одно слово стоит одного запроса на всех. */
+  cacheTtlSeconds: 60 * 60 * 24 * 30,
+  timeoutMs: 6_000,
+  /** Подпись запросов, как у словарей (OpenThesaurus просит контакт в User-Agent). */
+  userAgent: 'YAi-Translator/0.9 (+https://yai-translator.pages.dev/about)',
 } as const;
 
 /** Учёба (версия 0.7.0): карточки, прогресс и слово дня. */

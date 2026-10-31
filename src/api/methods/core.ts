@@ -11,8 +11,10 @@ import type {
   HealthResponse,
   KeyTestRequest,
   KeyTestResponse,
+  LanguageCode,
   ResourcesResponse,
   SiteSettingsResponse,
+  SuggestResponse,
   TranslateRequest,
   TranslateResponse,
   WordRequest,
@@ -67,5 +69,16 @@ export const coreMethods = {
   /** Баннер-объявление и дневной лимит — для всех посетителей. */
   siteSettings(signal?: AbortSignal): Promise<SiteSettingsResponse> {
     return request<SiteSettingsResponse>('/api/site-settings', { method: 'GET' }, signal);
+  },
+
+  /** Подсказки при наборе одного слова (Wiktionary, кэш на сервере 30 дней). */
+  suggest(query: string, lang: LanguageCode, signal?: AbortSignal): Promise<SuggestResponse> {
+    const params = new URLSearchParams({ q: query, lang });
+    return request<SuggestResponse>(`/api/suggest?${params.toString()}`, { method: 'GET' }, signal);
+  },
+
+  /** Сколько слов уже в кэше подсказок — для кнопки «Проверить офлайн-готовность». */
+  suggestCount(signal?: AbortSignal): Promise<SuggestResponse> {
+    return request<SuggestResponse>('/api/suggest?count=1', { method: 'GET' }, signal);
   },
 };

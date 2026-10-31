@@ -19,6 +19,7 @@ export function AdminSettingsTab({ onError, onSaved }: SettingsTabProps) {
   const [limitValue, setLimitValue] = useState('');
   const [useDefault, setUseDefault] = useState(false);
   const [banner, setBanner] = useState({ enabled: false, ru: '', de: '', en: '' });
+  const [feedbackEmail, setFeedbackEmail] = useState('');
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
 
@@ -29,6 +30,7 @@ export function AdminSettingsTab({ onError, onSaved }: SettingsTabProps) {
       setLimitValue(data.dailyLimit === null ? '' : String(data.dailyLimit));
       setUseDefault(data.dailyLimit === null);
       setBanner(data.banner);
+      setFeedbackEmail(data.feedbackEmail);
       onError(null);
     } catch {
       onError(t('admin.loadError'));
@@ -51,6 +53,7 @@ export function AdminSettingsTab({ onError, onSaved }: SettingsTabProps) {
       const saved = await api.adminSaveSettings({
         dailyLimit: useDefault ? null : parsed,
         banner,
+        feedbackEmail: feedbackEmail.trim(),
       });
       setSettings(saved);
       setNotice(t('admin.settings.saved'));
@@ -128,6 +131,26 @@ export function AdminSettingsTab({ onError, onSaved }: SettingsTabProps) {
           </label>
         ))}
 
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          <Button variant="primary" loading={busy} onClick={() => void save()}>
+            {t('admin.settings.save')}
+          </Button>
+          {notice ? <span className="text-sm text-ink">{notice}</span> : null}
+        </div>
+      </Card>
+
+      {/* Почта для пункта «Обратная связь» в настройках (этап 8): пусто — пункт скрыт. */}
+      <Card className="p-4">
+        <SectionTitle>{t('admin.settings.feedbackTitle')}</SectionTitle>
+        <p className="mt-1 text-xs leading-relaxed text-muted">{t('admin.settings.feedbackHint')}</p>
+        <input
+          type="email"
+          value={feedbackEmail}
+          onChange={(event) => setFeedbackEmail(event.target.value.slice(0, 120))}
+          placeholder="name@example.com"
+          dir="ltr"
+          className="mt-2 h-11 w-full max-w-sm rounded-xl border border-line bg-card px-3 text-sm text-ink"
+        />
         <div className="mt-3 flex flex-wrap items-center gap-2">
           <Button variant="primary" loading={busy} onClick={() => void save()}>
             {t('admin.settings.save')}

@@ -1,7 +1,7 @@
 /**
  * Настройки сайта.
- * GET  /api/admin/settings — дневной лимит и баннер (только для админа).
- * PUT  /api/admin/settings {dailyLimit, banner} — сохранить.
+ * GET  /api/admin/settings — дневной лимит, баннер и почта обратной связи (только для админа).
+ * PUT  /api/admin/settings {dailyLimit, banner, disabledProviders, feedbackEmail} — сохранить.
  */
 import type { AdminSettings } from '../../../shared/types';
 import type { Env } from '../../_lib/env';
@@ -13,9 +13,11 @@ import {
   normalizeBanner,
   readBanner,
   readDisabledProviders,
+  readFeedbackEmail,
   readSetting,
   writeDisabledProviders,
   SETTINGS_KEYS,
+  normalizeFeedbackEmail,
   writeSetting,
 } from '../../_lib/settings';
 
@@ -37,6 +39,7 @@ async function currentSettings(env: Env): Promise<AdminSettings> {
     defaultDailyLimit: LIMITS.freeRequestsPerDay,
     banner,
     disabledProviders: [...(await readDisabledProviders(env))],
+    feedbackEmail: await readFeedbackEmail(env),
   };
 }
 
@@ -81,6 +84,14 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
       const banner = normalizeBanner(body.banner);
       await writeSetting(env, SETTINGS_KEYS.banner, banner);
       await logAdminAction(env, admin, 'settings.banner', banner.enabled ? 'on' : 'off');
+    }
+
+    // Почта для «Обратной связи»: пустая строка — пункт в настройках скрыт.
+    if (body.feedbackEmail !== undefined) {
+      const email = normalizeFeedbackEmail(body.feedbackEmail);
+      if (email) await writeSetting(env, SETTINGS_KEYS.feedbackEmail, email);
+      else if (env.DB) await env.DB.prepare('DELETE FROM settings WHERE key = ?').bind(SETTINGS_KEYS.feedbackEmail).run();
+      await logAdminAction(env, admin, 'settings.feedback', email ? 'set' : 'off');
     }
 
     return jsonResponse(await currentSettings(env));

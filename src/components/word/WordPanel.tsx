@@ -1,8 +1,9 @@
 /**
  * Карточка слова на экране «Перевод».
- * Если ответил ИИ — карточка как раньше, но синонимы дополнены OpenThesaurus, а к примерам
- * добавлена вкладка «Из жизни» (Tatoeba). Если ИИ недоступен — карточка только из словарей.
+ * Если ответил ИИ — карточка с вкладками (этап 8), к примерам добавлены настоящие предложения
+ * из Tatoeba. Если ИИ недоступен — карточка только из словарей.
  */
+import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { LanguageCode, WordCard } from '../../../shared/types';
 import type { DictState, WordState } from '../../hooks/useTranslator';
@@ -22,6 +23,12 @@ interface WordPanelProps {
   speech: SpeechController;
   onRetry: () => void;
   onOpenLimit: () => void;
+  /** Язык переводов карточки (цель перевода) — для чипсов значений. */
+  translationLang?: LanguageCode;
+  /** Нажатие на перевод значения: перевести обратно. */
+  onPickTranslation?: (translation: string, lang: LanguageCode) => void;
+  /** «⋯» в заголовке карточки. */
+  headerMenu?: ReactNode;
 }
 
 /** Скелет карточки на время загрузки: заголовок и несколько строк-заглушек. */
@@ -40,7 +47,17 @@ function CardSkeleton({ label }: { label: string }) {
   );
 }
 
-export function WordPanel({ word, dict, sourceLang, speech, onRetry, onOpenLimit }: WordPanelProps) {
+export function WordPanel({
+  word,
+  dict,
+  sourceLang,
+  speech,
+  onRetry,
+  onOpenLimit,
+  translationLang,
+  onPickTranslation,
+  headerMenu,
+}: WordPanelProps) {
   const { t } = useTranslation();
   const hasDict = Boolean(dict.data);
   const dictEntry = dict.data?.entry ?? null;
@@ -50,11 +67,19 @@ export function WordPanel({ word, dict, sourceLang, speech, onRetry, onOpenLimit
   if (!word.loading && !word.data && !dict.loading && !dict.data && !word.error) return null;
 
   if (aiCard) {
-    // Карточка ИИ: все примеры ИИ + вкладка «Из жизни» из Tatoeba.
+    // Карточка ИИ: все примеры ИИ + настоящие предложения из Tatoeba.
     const life = dictEntry?.examples.filter((example) => example.source === 'tatoeba') ?? [];
     return (
       <Card className="mt-4 p-4 sm:p-5">
-        <AiWordCard card={aiCard} speech={speech} dictExamples={life} dictLang={sourceLang} />
+        <AiWordCard
+          card={aiCard}
+          speech={speech}
+          dictExamples={life}
+          dictLang={sourceLang}
+          translationLang={translationLang}
+          onPickTranslation={onPickTranslation}
+          headerMenu={headerMenu}
+        />
       </Card>
     );
   }
@@ -62,7 +87,7 @@ export function WordPanel({ word, dict, sourceLang, speech, onRetry, onOpenLimit
   if (hasDict && dictEntry) {
     return (
       <Card className="mt-4 p-4 sm:p-5">
-        <DictCard entry={dictEntry} speech={speech} withAi={false} />
+        <DictCard entry={dictEntry} speech={speech} withAi={false} onPick={onPickTranslation} />
         {word.error ? (
           <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-line pt-3">
             {word.error.code === 'LIMIT_REACHED' ? (

@@ -5,7 +5,7 @@
 export const API_BASE = (import.meta.env.VITE_API_BASE ?? '').replace(/\/+$/, '');
 
 /** Версия показывается в профиле; совпадает с package.json. */
-export const APP_VERSION = '0.7.0';
+export const APP_VERSION = '0.8.0';
 
 export const STORAGE_KEYS = {
   theme: 'yai.theme',
@@ -25,6 +25,8 @@ export const STORAGE_KEYS = {
   syncSince: 'yai.syncSince',
   /** Блок «Как переводят другие» показывается автоматически (по умолчанию да). */
   showOthers: 'yai.showOthers',
+  /** Настройки перевода (этап 8): история, определение языка, подсказки, Enter и «другие». */
+  translateSettings: 'yai.translateSettings',
   /** Последняя версия, про которую пользователь видел окно «Что нового». */
   seenVersion: 'yai.seenVersion',
   /** Закрытый посетителем баннер-объявление (по тексту). */

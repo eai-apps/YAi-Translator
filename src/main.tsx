@@ -8,6 +8,7 @@ import { ThemeProvider } from './hooks/useTheme';
 import { SettingsProvider } from './hooks/useSettings';
 import { AccountProvider } from './hooks/useAccount';
 import { HistoryProvider } from './hooks/useHistory';
+import { TranslateSettingsProvider } from './hooks/useTranslateSettings';
 import { registerSW } from 'virtual:pwa-register';
 
 // Новая версия сайта применяется сама: офлайн-копия обновляется и страница перезагружается.
@@ -34,9 +35,12 @@ ReactDOM.createRoot(container).render(
       <SettingsProvider>
         {/* История знает об аккаунте: вошёл — синхронизируется с сервером. */}
         <AccountProvider>
-          <HistoryProvider>
-            <App />
-          </HistoryProvider>
+          {/* Настройки перевода (этап 8): история спрашивает их при записи, экран перевода — при вводе. */}
+          <TranslateSettingsProvider>
+            <HistoryProvider>
+              <App />
+            </HistoryProvider>
+          </TranslateSettingsProvider>
         </AccountProvider>
       </SettingsProvider>
     </ThemeProvider>

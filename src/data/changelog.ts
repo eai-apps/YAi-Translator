@@ -14,6 +14,39 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.8.0',
+    date: '2026-10-31',
+    items: {
+      ru: [
+        'Экран перевода как в Яндекс Переводчике: крупное поле, пилюля «Быстрый перевод ▾» (быстрый, точный через ИИ, выбор сервиса) и меню «⋯».',
+        'Карточка слова по вкладкам: Словарь · Примеры · Формы · Связанные слова. В заголовке — транскрипция и главные формы (holte, geholt).',
+        'Переводы в словаре — кнопки: нажмите «получать», и слово переведётся обратно.',
+        'Примеры с фильтром по значениям, искомое слово подсвечено и в немецком, и в переводе.',
+        'Формы глагола: прошедшее / настоящее / будущее — Partizip, Präsens, Konjunktiv I и II, Imperativ, Perfekt, Futur. Таблицы склонения прилагательных.',
+        'Подсказки при наборе слова (Wiktionary и ваша история).',
+        'Новые настройки: история вкл/выкл, определять язык, подсказки, «Enter для перевода», офлайн-режим, справка.',
+      ],
+      de: [
+        'Übersetzer wie bei Yandex: großes Eingabefeld, Auswahl „Schnelle Übersetzung ▾“ (schnell, genau mit KI, Dienst wählen) und Menü „⋯“.',
+        'Wortkarte mit Reitern: Wörterbuch · Beispiele · Formen · Verwandte Wörter. Im Kopf Lautschrift und Hauptformen (holte, geholt).',
+        'Übersetzungen im Wörterbuch sind Schaltflächen: Tippen übersetzt das Wort zurück.',
+        'Beispiele mit Filter nach Bedeutung, das gesuchte Wort ist markiert.',
+        'Verbformen: Vergangenheit / Gegenwart / Zukunft — Partizip, Präsens, Konjunktiv I und II, Imperativ, Perfekt, Futur. Adjektivdeklination.',
+        'Vorschläge beim Tippen (Wiktionary und Ihr Verlauf).',
+        'Neue Einstellungen: Verlauf an/aus, Sprache erkennen, Vorschläge, „Enter zum Übersetzen“, Offline, Hilfe.',
+      ],
+      en: [
+        'Translator screen like Yandex Translate: large input, "Quick translation ▾" pill (quick, accurate with AI, choose a service) and a "⋯" menu.',
+        'Word card with tabs: Dictionary · Examples · Forms · Related. Header shows transcription and main forms (holte, geholt).',
+        'Dictionary translations are buttons: tap one to translate it back.',
+        'Examples with a meaning filter, the word is highlighted in both languages.',
+        'Verb forms: past / present / future — Partizip, Präsens, Konjunktiv I and II, Imperativ, Perfekt, Futur. Adjective declension tables.',
+        'Suggestions while typing (Wiktionary and your history).',
+        'New settings: history on/off, detect language, suggestions, "Enter to translate", offline mode, help.',
+      ],
+    },
+  },
+  {
     version: '0.7.0',
     date: '2026-10-31',
     items: {

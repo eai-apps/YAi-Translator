@@ -33,18 +33,43 @@ export interface VerbForm {
   form: string;
 }
 
+/** Imperativ: три формы — du, ihr, Sie (этап 8). */
+export interface Imperative {
+  du: string;
+  ihr: string;
+  sie: string;
+}
+
 export interface Conjugation {
   praesens: VerbForm[];
   praeteritum: VerbForm[];
   /** Готовая форма Perfekt, например «hat gemacht». */
   perfekt: string;
   auxiliary: 'haben' | 'sein';
+  /** Partizip II одним словом («gemacht») — из него строятся Perfekt, Plusquamperfekt, Futur II. */
+  partizip2?: string | null;
+  /** Konjunktiv II, 6 форм в том же порядке, что и Präsens. */
+  konjunktiv2?: VerbForm[];
+  /** Imperativ du / ihr / Sie. */
+  imperativ?: Imperative | null;
+}
+
+/** Что подсветить в примере: точные куски предложения и перевода (этап 8). */
+export interface ExampleMatch {
+  /** Форма слова, как она стоит в немецком предложении. */
+  source: string;
+  /** Перевод этой формы в переводе предложения. */
+  target: string;
 }
 
 export interface WordExample {
   level: CefrLevel;
   text: string;
   translation: string;
+  /** Подсветка слова в предложении и в переводе; без неё пример показывается как есть. */
+  match?: ExampleMatch | null;
+  /** Номер значения (с 1), к которому относится пример — для фильтра «все / значение». */
+  sense?: number | null;
 }
 
 export interface Phrase {
@@ -71,6 +96,8 @@ export interface WordCard {
   examples: WordExample[];
   synonyms: string[];
   antonyms: string[];
+  /** Однокоренные слова: abholen, nachholen, die Abholung (этап 8). */
+  family?: string[];
   phrases: Phrase[];
   /**
    * Грамматические пояснения на языке интерфейса: возвратный ли глагол, отделяемая ли приставка,

@@ -2,8 +2,10 @@
 import { useCallback, useEffect, useState } from 'react';
 import { readStorage, writeStorage } from '../lib/storage';
 
-export function useLocalStorage<T>(key: string, initialValue: T) {
-  const [value, setValue] = useState<T>(() => readStorage<T>(key, initialValue));
+export function useLocalStorage<T>(key: string, initialValue: T | (() => T)) {
+  const [value, setValue] = useState<T>(() =>
+    readStorage<T>(key, typeof initialValue === 'function' ? (initialValue as () => T)() : initialValue),
+  );
 
   useEffect(() => {
     writeStorage(key, value);

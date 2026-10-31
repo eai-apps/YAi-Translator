@@ -17,6 +17,7 @@ import { api } from '../api/client';
 import { STORAGE_KEYS, TRANSLATE_DEBOUNCE_MS } from '../config';
 import { toTranslatorError } from '../lib/errors';
 import type { TranslatorError } from '../lib/errors';
+import { initialSourceLanguage, readTranslateSettings } from '../lib/translateSettings';
 import { useHistory } from './useHistory';
 import type { HistoryItem } from './useHistory';
 import { useDictLookup } from './useDictLookup';
@@ -102,7 +103,11 @@ export function useTranslator(onLimitReached: () => void) {
   const { addItem } = useHistory();
   const restored = useRef(readSnapshot()).current;
   const [text, setText] = useState(restored?.text ?? '');
-  const [sourceLang, setSourceLangState] = useLocalStorage<SourceLanguage>(STORAGE_KEYS.sourceLang, 'auto');
+  // Настройка «Определять язык» (этап 8): выключена — при открытии стоит последний выбранный язык ввода.
+  const [sourceLang, setSourceLangState] = useLocalStorage<SourceLanguage>(
+    STORAGE_KEYS.sourceLang,
+    () => initialSourceLanguage(readTranslateSettings().detectLanguage),
+  );
   // Немецкий интерфейс по умолчанию переводит на русский, остальные — на немецкий.
   const defaultTarget: LanguageCode = i18n.language === 'de' ? 'ru' : 'de';
   const [targetLang, setTargetLangState] = useLocalStorage<LanguageCode>(STORAGE_KEYS.targetLang, defaultTarget);

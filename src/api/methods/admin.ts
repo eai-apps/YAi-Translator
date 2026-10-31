@@ -47,6 +47,8 @@ export const adminMethods = {
     dailyLimit?: number | null;
     banner?: AdminSettings['banner'];
     disabledProviders?: string[];
+    /** Почта для «Обратной связи» в настройках; пустая строка — пункт скрыт (этап 8). */
+    feedbackEmail?: string;
   }): Promise<AdminSettings> {
     return request<AdminSettings>('/api/admin/settings', { method: 'PUT', body: payload });
   },
