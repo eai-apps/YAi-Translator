@@ -69,6 +69,8 @@ export default function GrammarPage({ topics }: GrammarPageProps) {
   const select = (next: string) => {
     const query = params.toString();
     navigate(`/grammar/${next}${query ? `?${query}` : ''}`);
+    // На телефоне список был прокручен вниз — тему показываем с начала.
+    if (window.matchMedia('(max-width: 1023px)').matches) window.scrollTo({ top: 0 });
   };
 
   return (
@@ -86,7 +88,8 @@ export default function GrammarPage({ topics }: GrammarPageProps) {
       />
 
       <div className="grid items-start gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] lg:gap-4">
-        <Card className="p-4 sm:p-5">
+        {/* На телефоне — либо список, либо тема (иначе тема оказывалась под списком из 69 строк). */}
+        <Card className={`p-4 sm:p-5 ${slug ? 'hidden lg:block' : ''}`}>
           {topics.loading && !topics.data ? (
             <div className="flex items-center gap-2 py-6 text-sm text-muted">
               <Spinner />
@@ -109,7 +112,14 @@ export default function GrammarPage({ topics }: GrammarPageProps) {
           )}
         </Card>
 
-        <Card className="p-4 sm:p-5 lg:sticky lg:top-5">
+        <Card className={`p-4 sm:p-5 lg:sticky lg:top-5 ${slug ? '' : 'hidden lg:block'}`}>
+          {slug ? (
+            <Link to={`/grammar${params.toString() ? `?${params.toString()}` : ''}`} className="mb-3 inline-block lg:hidden">
+              <Button size="sm" variant="ghost" icon={<IconArrowLeft className="h-4 w-4" />}>
+                {t('grammar.allTopics')}
+              </Button>
+            </Link>
+          ) : null}
           {!slug ? (
             <div className="flex flex-col items-start gap-2 py-4">
               <p className="text-sm font-medium">{t('grammar.pickTopic')}</p>
