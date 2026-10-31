@@ -46,10 +46,11 @@ function plainInfinitive(infinitive: string): string {
   return infinitive.trim().toLowerCase().replace(/^sich\s+/, '');
 }
 
-/** Инфинитив для показа: «sich freuen» → «Sich freuen» → «Freuen». */
+/** Инфинитив для показа: глаголы пишутся с маленькой буквы, возвратные — с «sich»: «holen», «sich freuen». */
 export function displayInfinitive(infinitive: string): string {
   const plain = plainInfinitive(infinitive);
-  return plain ? plain.charAt(0).toUpperCase() + plain.slice(1) : plain;
+  if (!plain) return plain;
+  return /^sich\s+/i.test(infinitive.trim()) ? `sich ${plain}` : plain;
 }
 
 /** Причастие настоящего времени: machen → machend, aufstehen → aufstehend. */
