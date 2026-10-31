@@ -32,49 +32,38 @@ function parseGender(text: string): 'der' | 'die' | 'das' | null {
   return null;
 }
 
-/** Извлекает фрагмент немецкого перевода из HTML ru.wiktionary. */
+/** Род по подсказке ru.wiktionary: <span title="форма (формы) женского рода"><i>ж</i>.</span>. */
+function genderFromTitle(fragment: string): 'der' | 'die' | 'das' | null {
+  const title = /title="([^"]*)"/.exec(fragment)?.[1]?.toLowerCase() ?? '';
+  const mark = stripHtml(fragment).trim().toLowerCase();
+  if (title.includes('женск') || /^ж\.?$/.test(mark)) return 'die';
+  if (title.includes('мужск') || /^м\.?$/.test(mark)) return 'der';
+  if (title.includes('средн') || /^с\.?$/.test(mark)) return 'das';
+  return parseGender(mark);
+}
+
+/**
+ * Немецкие переводы из строк «Немецкий (de)» раздела «Перевод». Строка выглядит так:
+ * <span lang="de"><a>Blume</a> <span title="…женского рода"><i>ж</i>.</span>; <a>Blüte</a> …</span></li>
+ * Внутри есть вложенные <span>, поэтому строку берём целиком до </li> (исправление Claude, 0.10.0).
+ */
 function extractGermanTranslations(html: string): Array<{ word: string; gender: 'der' | 'die' | 'das' | null }> {
   const results: Array<{ word: string; gender: 'der' | 'die' | 'das' | null }> = [];
   const seen = new Set<string>();
-
-  // Ищем блоки перевода на немецкий: <span class="perev-code">de</span></span> <span lang="de">...</span>
-  // или <li>...Немецкий...de...<span lang="de">...</span>
-  const deBlockRegex = /<span class="perev-code">de<\/span><\/span>\s*<span lang="de">([\s\S]*?)<\/span>/gi;
-  let match: RegExpExecArray | null;
-
-  while ((match = deBlockRegex.exec(html)) !== null) {
-    const content = match[1];
-    // Внутри span: ссылки на слова <a ...>Слово</a> и рядом род <i>ж</i> / title="..."
-    const itemRegex = /<a[^>]*>([^<]+)<\/a>([^;<]*)/gi;
-    let itemMatch: RegExpExecArray | null;
-
-    while ((itemMatch = itemRegex.exec(content)) !== null) {
-      const rawWord = stripHtml(itemMatch[1]).trim();
-      if (!rawWord || seen.has(rawWord.toLowerCase())) continue;
-      const after = itemMatch[2] ?? '';
-      const gender = parseGender(after);
-      seen.add(rawWord.toLowerCase());
-      results.push({ word: rawWord, gender });
+  const lineRegex = /<span class="perev-code">de<\/span><\/span>\s*<span lang="de">([\s\S]*?)<\/li>/gi;
+  let line: RegExpExecArray | null;
+  while ((line = lineRegex.exec(html)) !== null) {
+    // Слово и всё до следующего слова (там подсказка рода).
+    const itemRegex = /<a[^>]*>([^<]+)<\/a>([\s\S]*?)(?=<a |$)/gi;
+    let item: RegExpExecArray | null;
+    while ((item = itemRegex.exec(line[1])) !== null) {
+      const word = stripHtml(item[1]).trim();
+      if (!word || !/^[A-Za-zÄÖÜäöüß][A-Za-zÄÖÜäöüß\s-]*$/.test(word) || seen.has(word.toLowerCase())) continue;
+      const tail = item[2].split(';')[0] ?? '';
+      seen.add(word.toLowerCase());
+      results.push({ word, gender: tail.includes('<span') || tail.trim() ? genderFromTitle(tail) : null });
     }
   }
-
-  // Запасной вариант: если perev-code не сработал, ищем строку с «Немецкий»
-  if (results.length === 0) {
-    const lineRegex = /Немецкий[^<]*<\/a>[\s\S]*?<span lang="de">([\s\S]*?)<\/span>/gi;
-    while ((match = lineRegex.exec(html)) !== null) {
-      const content = match[1];
-      const itemRegex = /<a[^>]*>([^<]+)<\/a>([^;<]*)/gi;
-      let itemMatch: RegExpExecArray | null;
-      while ((itemMatch = itemRegex.exec(content)) !== null) {
-        const rawWord = stripHtml(itemMatch[1]).trim();
-        if (!rawWord || seen.has(rawWord.toLowerCase())) continue;
-        const gender = parseGender(itemMatch[2] ?? '');
-        seen.add(rawWord.toLowerCase());
-        results.push({ word: rawWord, gender });
-      }
-    }
-  }
-
   return results.slice(0, 10);
 }
 
@@ -94,9 +83,14 @@ function extractRussianDefinitions(html: string): string[] {
   let liMatch: RegExpExecArray | null;
 
   while ((liMatch = liRegex.exec(olContent)) !== null) {
-    const text = stripHtml(liMatch[1])
-      .replace(/^◆.*$/gm, '') // цитаты-примеры в ru.wiktionary начинаются с ◆
+    // Цитаты-примеры (◆ …) идут внутри того же пункта — отрезаем их до разбора текста.
+    const body = liMatch[1].split(/<span class="example-fullblock/)[0];
+    const text = stripHtml(body)
+      .replace(/◆[\s\S]*$/, '')
+      // Значки синонимов/антонимов «[ ≈ 1 ] [ ≠ 1 ]» и сноски «[7]» не нужны в толковании.
+      .replace(/\[\s*[≈≠▲▼]?\s*\d+\s*\]/g, '')
       .replace(/\s+/g, ' ')
+      .replace(/\s+([,.;:)])/g, '$1')
       .trim();
     if (text && text.length > 2 && text.length < 250) {
       definitions.push(text);
@@ -144,7 +138,8 @@ export async function lookupWiktionaryRu(
         source: 'wiktionary',
         partOfSpeech: germanData?.partOfSpeech ?? 'noun',
         definition: russianDefs[i],
-        translation: i === 0 ? allFormatted : translations[i]?.formatted ?? translations[0].formatted,
+        // Ru.wiktionary не связывает переводы с конкретным значением — все переводы у первого значения.
+        translation: i === 0 ? allFormatted : null,
         translationLang: 'de',
       });
     }

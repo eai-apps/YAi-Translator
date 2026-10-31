@@ -150,6 +150,6 @@ export async function buildDictEntry(
  * Ключ кэша карточки: слово + языковая пара.
  */
 export function dictCacheKey(word: string, sourceLang: LanguageCode, targetLang: LanguageCode): string {
-  const purge = 'v4';
+  const purge = 'v5';
   return `dict|${purge}|${sourceLang}|${targetLang}|${word.trim().toLowerCase().replace(/\s+/g, ' ')}`;
 }
