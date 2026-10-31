@@ -64,6 +64,10 @@ export async function buildOverview(env: Env): Promise<AdminOverview> {
     translationsTodayTotal,
     cacheHitRate: translationsTodayTotal > 0 ? Math.min(1, cacheHits / translationsTodayTotal) : 0,
     aiRequestsToday,
+    study: {
+      reviewsToday: todayTotals.study_reviews ?? 0,
+      exercisesToday: todayTotals.study_exercises ?? 0,
+    },
     popularPairs: popularPairs(todayTotals),
     daily,
   };

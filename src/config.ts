@@ -5,7 +5,7 @@
 export const API_BASE = (import.meta.env.VITE_API_BASE ?? '').replace(/\/+$/, '');
 
 /** Версия показывается в профиле; совпадает с package.json. */
-export const APP_VERSION = '0.6.0';
+export const APP_VERSION = '0.7.0';
 
 export const STORAGE_KEYS = {
   theme: 'yai.theme',
@@ -33,6 +33,20 @@ export const STORAGE_KEYS = {
   resourcesLang: 'yai.resourcesLang',
   /** История «Спросить у AI»: вопросы и сохранённые ответы (этап 5). */
   askHistory: 'yai.askHistory',
+  /** Учёба (этап 6): карточки, прогресс, дни, цель и слово дня. */
+  studyCards: 'yai.study.cards',
+  studyProgress: 'yai.study.progress',
+  studyDays: 'yai.study.days',
+  studyGoal: 'yai.study.goal',
+  studyNewPerDay: 'yai.study.newPerDay',
+  /** До какого момента прогресс уже забрали с сервера. */
+  studySyncSince: 'yai.study.since',
+  /** День, на который посетитель скрыл слово дня. */
+  studyWordOfDayClosed: 'yai.study.wordOfDayClosed',
+  /** Уже отправленные на сервер карточки, прогресс и дни (id → updatedAt). */
+  studyMarksCards: 'yai.study.marks.cards',
+  studyMarksProgress: 'yai.study.marks.progress',
+  studyMarksDays: 'yai.study.marks.days',
 } as const;
 
 /** Отметки отправленного для синхронизации: у истории переводов и у вопросов ИИ — свои. */

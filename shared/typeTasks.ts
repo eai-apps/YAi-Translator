@@ -7,7 +7,8 @@ import type { SourceLanguage } from './typeCore';
 /** Тип задачи — входит в ключ кэша и определяет промпт. */
 /** 'dict' и 'resources' — данные без ИИ (этап 4), тоже живут в таблице кэша D1. */
 /** 'grammar' и 'ask' — справочник грамматики и «Спросить у AI» (этап 5); 'ask' кэшируется на 90 дней. */
-export type TaskKind = 'translate' | 'word' | 'explain' | 'check' | 'dict' | 'resources' | 'grammar' | 'ask';
+/** 'study' — слово дня (этап 6): данные без ИИ, живут в таблице кэша D1 до конца дня. */
+export type TaskKind = 'translate' | 'word' | 'explain' | 'check' | 'dict' | 'resources' | 'grammar' | 'ask' | 'study';
 
 /** Провайдер ИИ, который реально ответил. */
 /** ИИ: gemini, groq, workersai. Обычные переводчики: deepl, lara, microsoft, google, mymemory, m2m100. */

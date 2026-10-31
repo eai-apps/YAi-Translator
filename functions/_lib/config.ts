@@ -7,7 +7,7 @@ export { LANGUAGES, LANGUAGE_CODES, getLanguage, isLanguageCode, isUiLanguage } 
 
 import { CLASSIC_PROVIDERS } from '../../shared/types';
 
-export const APP_VERSION = '0.6.0';
+export const APP_VERSION = '0.7.0';
 
 export const LIMITS = {
   /** Максимальная длина текста для перевода и разбора. */
@@ -235,6 +235,21 @@ export const ASK = {
   cacheTtlSeconds: 60 * 60 * 24 * 90,
   /** Сколько вопросов помнит история у пользователя (localStorage и аккаунт). */
   historyLimit: 200,
+} as const;
+
+/** Учёба (версия 0.7.0): карточки, прогресс и слово дня. */
+export const STUDY = {
+  /** Лимит карточек на аккаунт; совпадает со STUDY_MAX_CARDS в shared/study.ts. */
+  maxCardsPerUser: 3000,
+  /** Сколько записей можно передать в одном запросе синхронизации. */
+  maxItemsPerRequest: 200,
+  /** Сколько дней учёбы возвращать (серия и график): года с запасом. */
+  maxDayRows: 400,
+  /** Защита счётчиков админки от случайных значений. */
+  maxPingReviews: 200,
+  maxPingExercises: 100,
+  /** Слово дня лежит в кэше до конца дня; значение в секундах — минимум. */
+  wordOfDayTtlSeconds: 60,
 } as const;
 
 /** Адрес DeepL для конкретного ключа: path — 'translate' или 'usage'. */

@@ -4,7 +4,7 @@
  */
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { LanguageCode, SourceLanguage, TranslateResponse } from '../../../shared/types';
+import type { LanguageCode, SourceLanguage, StudyCardInput, TranslateResponse } from '../../../shared/types';
 import { getLanguage, textDirection } from '../../../shared/languages';
 import type { ProviderChoice, TranslatorError } from '../../hooks/useTranslator';
 import type { SpeechController } from '../../hooks/useSpeech';
@@ -17,6 +17,7 @@ import { IconButton } from '../ui/IconButton';
 import { Spinner } from '../ui/Spinner';
 import { SpeakButton } from '../ui/SpeakButton';
 import { IconAlert, IconCheck, IconSparkles, IconStar, IconTranslate } from '../layout/icons';
+import { AddToCardsButton } from '../study/AddToCardsButton';
 import { AlternativesList } from './AlternativesList';
 import { ProviderSelect } from './ProviderSelect';
 
@@ -39,6 +40,8 @@ interface ResultPanelProps {
   onExplain: () => void;
   onCheck: () => void;
   onToggleFavorite: () => void;
+  /** Снимок слова для карточек, если перевод — 1–3 слова (этап 6). */
+  studyInput?: StudyCardInput | null;
   /** Блок «Как переводят другие» (или null, если он выключен в настройках). */
   others?: ReactNode;
 }
@@ -139,6 +142,7 @@ export function ResultPanel(props: ResultPanelProps) {
                 active={props.isFavorite}
                 onClick={props.onToggleFavorite}
               />
+              <AddToCardsButton input={props.studyInput ?? null} iconOnly />
               {!answeredByAi ? (
                 <Button
                   size="sm"

@@ -54,6 +54,11 @@ export function AdminOverviewTab({ data }: { data: AdminOverview }) {
             <Stat label={t('admin.overview.cacheHitRate')} value={percent} />
             <Stat label={t('admin.overview.aiRequests')} value={data.aiRequestsToday} />
           </div>
+          <p className="mt-3 text-xs font-medium text-muted">{t('admin.overview.studyTitle')}</p>
+          <div className="mt-1 grid grid-cols-2 gap-2">
+            <Stat label={t('admin.overview.studyReviews')} value={data.study.reviewsToday} />
+            <Stat label={t('admin.overview.studyExercises')} value={data.study.exercisesToday} />
+          </div>
           <p className="mt-3 text-xs font-medium text-muted">{t('admin.overview.byService')}</p>
           {services.length === 0 ? (
             <p className="mt-1 text-sm text-muted">{t('admin.overview.noTranslations')}</p>

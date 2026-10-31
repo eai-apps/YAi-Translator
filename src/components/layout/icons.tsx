@@ -270,3 +270,29 @@ export function IconLock(props: IconProps) {
     </Svg>
   );
 }
+
+export function IconBookmark({ className, filled = false }: IconProps & { filled?: boolean }) {
+  return (
+    <Svg className={className}>
+      <path d="M6 4h12v17l-6-4-6 4V4z" fill={filled ? 'currentColor' : 'none'} />
+    </Svg>
+  );
+}
+
+export function IconFlame({ className }: IconProps) {
+  return (
+    <Svg className={className}>
+      <path d="M12 3c3 4 5 6 5 9a5 5 0 0 1-10 0c0-1.5.7-2.7 1.7-4C10 9.3 11 7 12 3z" />
+      <path d="M12 20a3 3 0 0 1-3-3c0-1.6 1.3-2.8 3-5 1.7 2.2 3 3.4 3 5a3 3 0 0 1-3 3z" />
+    </Svg>
+  );
+}
+
+export function IconDownload({ className }: IconProps) {
+  return (
+    <Svg className={className}>
+      <path d="M12 4v11M7 10l5 5 5-5" />
+      <path d="M5 19h14" />
+    </Svg>
+  );
+}

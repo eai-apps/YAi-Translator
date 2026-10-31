@@ -21,8 +21,10 @@ import { OthersPanel } from '../components/translate/OthersPanel';
 import { ExplanationPanel } from '../components/translate/ExplanationPanel';
 import { CheckPanel } from '../components/translate/CheckPanel';
 import { WordPanel } from '../components/word/WordPanel';
+import { WordOfDayCard } from '../components/study/WordOfDayCard';
 import { PickContext } from '../components/word/pick';
 import { LimitDialog } from '../components/limit/LimitDialog';
+import { cardFromTranslation } from '../lib/studyCard';
 
 export default function TranslatePage() {
   const { t } = useTranslation();
@@ -103,6 +105,16 @@ export default function TranslatePage() {
       : result
     : null;
 
+  // Для 1–3 слов рядом со звёздочкой появляется «+ В карточки» (этап 6).
+  const resolvedSource = sourceLang === 'auto' ? translator.detectedLang : sourceLang;
+  const studyInput = shown
+    ? resolvedSource === 'de'
+      ? cardFromTranslation(text, shown.translatedText)
+      : targetLang === 'de'
+        ? cardFromTranslation(shown.translatedText, text)
+        : null
+    : null;
+
   // Нажатое слово из карточки становится новым запросом; язык ввода определится сам.
   const pickText = (value: string) => {
     translator.setSourceLang('auto');
@@ -123,13 +135,17 @@ export default function TranslatePage() {
       />
 
       <div className="mt-3 grid items-start gap-3 lg:grid-cols-2 lg:gap-4">
-        <SourcePanel
-          text={translator.text}
-          onChange={translator.setText}
-          sourceLang={translator.sourceLang}
-          maxLength={MAX_TEXT_LENGTH}
-          speech={speech}
-        />
+        <div className="flex flex-col gap-3">
+          <SourcePanel
+            text={translator.text}
+            onChange={translator.setText}
+            sourceLang={translator.sourceLang}
+            maxLength={MAX_TEXT_LENGTH}
+            speech={speech}
+          />
+          {/* Под пустым полем — маленькое слово дня; крестик скрывает его до завтра. */}
+          {translator.text.trim() === '' ? <WordOfDayCard compact /> : null}
+        </div>
         <ResultPanel
           result={shown}
           loading={translator.loading}
@@ -151,6 +167,7 @@ export default function TranslatePage() {
           onToggleFavorite={() => {
             if (translator.historyId) toggleFavorite(translator.historyId);
           }}
+          studyInput={studyInput}
           others={
             showOthers && result && !translator.error ? (
               <OthersPanel

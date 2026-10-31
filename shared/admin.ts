@@ -54,6 +54,8 @@ export interface AdminOverview {
   /** Доля ответов из кэша за сегодня, 0…1. */
   cacheHitRate: number;
   aiRequestsToday: number;
+  /** Учёба за сегодня (этап 6): повторённые карточки и сделанные упражнения. */
+  study: { reviewsToday: number; exercisesToday: number };
   popularPairs: Array<{ from: string; to: string; count: number }>;
   /** Последние 30 дней начиная с самого раннего: переводы и уникальные посетители. */
   daily: Array<{ day: string; translations: number; visitors: number }>;

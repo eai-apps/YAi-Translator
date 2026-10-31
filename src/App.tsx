@@ -6,6 +6,7 @@ import { GrammarProvider } from './components/grammar/GrammarProvider';
 import { Spinner } from './components/ui/Spinner';
 import { useGrammarTopics } from './hooks/useGrammarTopics';
 import { useSettings } from './hooks/useSettings';
+import { StudyProvider } from './hooks/useStudy';
 import TranslatePage from './pages/TranslatePage';
 import DictionaryPage from './pages/DictionaryPage';
 import LearnPage from './pages/LearnPage';
@@ -19,6 +20,11 @@ const AboutPage = lazy(() => import('./pages/AboutPage'));
 const ResourcesPage = lazy(() => import('./pages/ResourcesPage'));
 const GrammarPage = lazy(() => import('./pages/GrammarPage'));
 const AskPage = lazy(() => import('./pages/AskPage'));
+// Учёба (этап 6): повторение, карточки, наборы и упражнения — отдельными кусками.
+const ReviewPage = lazy(() => import('./pages/learn/ReviewPage'));
+const CardsPage = lazy(() => import('./pages/learn/CardsPage'));
+const DecksPage = lazy(() => import('./pages/learn/DecksPage'));
+const PracticePage = lazy(() => import('./pages/learn/PracticePage'));
 
 function PageFallback() {
   // Пустая обёртка со спиннером: блок не прыгает при загрузке куска.
@@ -36,27 +42,35 @@ export default function App() {
 
   return (
     <BrowserRouter>
-      {/* Справочник грамматики: попап темы открывается с любой страницы. */}
-      <GrammarProvider topics={topics} uiLanguage={uiLanguage}>
-        <AppShell>
-          <Suspense fallback={<PageFallback />}>
-            <Routes>
-              <Route path="/" element={<TranslatePage />} />
-              <Route path="/dictionary" element={<DictionaryPage />} />
-              <Route path="/learn" element={<LearnPage withGrammarLink />} />
-              <Route path="/conversation" element={<ConversationPage />} />
-              <Route path="/profile" element={<ProfilePage />} />
-              <Route path="/grammar" element={<GrammarPage topics={topics} />} />
-              <Route path="/grammar/:slug" element={<GrammarPage topics={topics} />} />
-              <Route path="/ask" element={<AskPage />} />
-              <Route path="/about" element={<AboutPage />} />
-              <Route path="/resources" element={<ResourcesPage />} />
-              <Route path="/admin" element={<AdminPage />} />
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
-          </Suspense>
-        </AppShell>
-      </GrammarProvider>
+      {/* Карточки и прогресс учёбы: нужны «Переводу» (кнопка «В карточки») и всем экранам учёбы. */}
+      <StudyProvider>
+        {/* Справочник грамматики: попап темы открывается с любой страницы. */}
+        <GrammarProvider topics={topics} uiLanguage={uiLanguage}>
+          <AppShell>
+            <Suspense fallback={<PageFallback />}>
+              <Routes>
+                <Route path="/" element={<TranslatePage />} />
+                <Route path="/dictionary" element={<DictionaryPage />} />
+                <Route path="/learn" element={<LearnPage withGrammarLink />} />
+                <Route path="/learn/review" element={<ReviewPage />} />
+                <Route path="/learn/cards" element={<CardsPage />} />
+                <Route path="/learn/decks" element={<DecksPage />} />
+                <Route path="/learn/practice" element={<Navigate to="/learn/practice/article" replace />} />
+                <Route path="/learn/practice/:type" element={<PracticePage />} />
+                <Route path="/conversation" element={<ConversationPage />} />
+                <Route path="/profile" element={<ProfilePage />} />
+                <Route path="/grammar" element={<GrammarPage topics={topics} />} />
+                <Route path="/grammar/:slug" element={<GrammarPage topics={topics} />} />
+                <Route path="/ask" element={<AskPage />} />
+                <Route path="/about" element={<AboutPage />} />
+                <Route path="/resources" element={<ResourcesPage />} />
+                <Route path="/admin" element={<AdminPage />} />
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Routes>
+            </Suspense>
+          </AppShell>
+        </GrammarProvider>
+      </StudyProvider>
     </BrowserRouter>
   );
 }

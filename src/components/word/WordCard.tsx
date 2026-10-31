@@ -1,14 +1,17 @@
 /** Карточка слова: артикль с цветом, значения, склонение, спряжение, примеры. */
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { DictExample, LanguageCode, WordCard as WordCardData } from '../../../shared/types';
 import type { SpeechController } from '../../hooks/useSpeech';
 import { ARTICLE_COLORS } from '../../config';
 import { cn } from '../../lib/cn';
 import { partOfSpeechKey } from '../../lib/labels';
+import { cardFromWord } from '../../lib/studyCard';
 import { Badge } from '../ui/Badge';
 import { SectionTitle } from '../ui/SectionTitle';
 import { GrammarLinkedInline } from '../grammar/GrammarLinkedText';
 import { GrammarTopicLinks } from '../grammar/GrammarTopicLinks';
+import { AddToCardsButton } from '../study/AddToCardsButton';
 import { ChipList } from './ChipList';
 import { ExamplesList } from './ExamplesList';
 import { MeaningList } from './MeaningList';
@@ -29,6 +32,8 @@ interface WordCardProps {
 export function WordCard({ card, speech, dictExamples = [], dictLang = null }: WordCardProps) {
   const { t } = useTranslation();
   const hasTranslation = card.meanings.length > 0;
+  // Снимок для карточек учёбы: из уже загруженной карточки, без запросов к ИИ.
+  const studyInput = useMemo(() => cardFromWord(card), [card]);
 
   return (
     <article className="animate-fade-in">
@@ -48,6 +53,10 @@ export function WordCard({ card, speech, dictExamples = [], dictLang = null }: W
           <span className="text-sm text-muted">{card.transcription}</span>
         ) : null}
       </header>
+
+      <div className="mt-3 flex flex-wrap items-center gap-2">
+        <AddToCardsButton input={studyInput} />
+      </div>
 
       {hasTranslation ? <MeaningList meanings={card.meanings} /> : null}
 

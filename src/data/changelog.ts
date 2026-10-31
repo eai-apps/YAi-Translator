@@ -14,6 +14,39 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.7.0',
+    date: '2026-10-31',
+    items: {
+      ru: [
+        'Вкладка «Учёба» больше не «Скоро»: слова из переводчика теперь запоминаются надолго — карточки, повторение и упражнения.',
+        'Кнопка «В карточки» в карточке слова, в словаре и рядом со звёздочкой на экране «Перевод».',
+        'Повторение по интервалам 1 → 3 → 7 → 16 → 35 дней: «Не помню», «Трудно», «Помню», «Легко», режим «наоборот» и озвучка.',
+        'Пять упражнений из ваших же карточек, без ИИ: артикль, множественное число, перевод, аудирование и сборка предложения.',
+        'Восемь готовых наборов A1–A2 по 20 слов — артикли и множественное число сверены по Wiktionary.',
+        'Слово дня — одно на всех, с кнопками «Знаю» и «Не знаю», серия дней и цель дня (10 / 20 / 30).',
+        '«Мои карточки»: поиск, фильтр, экспорт в CSV и Anki, добавление всех избранных слов одним нажатием.',
+      ],
+      de: [
+        'Der Reiter „Lernen“ ist kein „Bald“-Bildschirm mehr: Wörter aus dem Übersetzer bleiben jetzt im Kopf — Karten, Wiederholung und Übungen.',
+        'Die Schaltfläche „In Karten“ in der Wortkarte, im Wörterbuch und neben dem Stern im Übersetzer.',
+        'Wiederholung mit Abständen 1 → 3 → 7 → 16 → 35 Tage: „Weiß nicht“, „Schwer“, „Kenne ich“, „Leicht“, dazu die umgekehrte Seite und Vorlesen.',
+        'Fünf Übungen aus deinen eigenen Karten, ohne KI: Artikel, Plural, Übersetzung, Hören und Satz bauen.',
+        'Acht fertige Sets A1–A2 mit je 20 Wörtern — Artikel und Plural nach Wiktionary geprüft.',
+        'Wort des Tages — für alle gleich, mit „Kenne ich“ und „Weiß nicht“, Serie der Tage und Tagesziel (10 / 20 / 30).',
+        '„Meine Karten“: Suche, Filter, Export nach CSV und Anki, alle Favoriten mit einem Tippen hinzufügen.',
+      ],
+      en: [
+        'The “Learn” tab is no longer a “Coming soon” screen: words from the translator now stick — cards, review and exercises.',
+        'An “Add to cards” button in the word card, in the dictionary and next to the star in the translator.',
+        'Spaced review with intervals 1 → 3 → 7 → 16 → 35 days: “Forgot”, “Hard”, “Good”, “Easy”, plus reverse mode and pronunciation.',
+        'Five exercises built from your own cards, no AI: article, plural, translation, listening and sentence building.',
+        'Eight ready-made A1–A2 sets of 20 words — articles and plurals checked against Wiktionary.',
+        'Word of the day — the same for everyone, with “I know it” and “Not sure”, a day streak and a daily goal (10 / 20 / 30).',
+        '“My cards”: search, filters, CSV and Anki export, and adding all favourites in one tap.',
+      ],
+    },
+  },
+  {
     version: '0.6.0',
     date: '2026-10-31',
     items: {

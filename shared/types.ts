@@ -19,6 +19,7 @@ export * from './typeAccount';
 export * from './admin';
 export * from './dict';
 export * from './grammar';
+export * from './study';
 
 import type { LanguageCode, UiLanguage } from './languages';
 

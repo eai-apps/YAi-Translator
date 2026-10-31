@@ -6,11 +6,14 @@ import { useTranslation } from 'react-i18next';
 import type { DictEntry } from '../../../shared/types';
 import { textDirection } from '../../../shared/languages';
 import type { SpeechController } from '../../hooks/useSpeech';
+import { useSettings } from '../../hooks/useSettings';
 import { ARTICLE_COLORS } from '../../config';
 import { cn } from '../../lib/cn';
 import { partOfSpeechKey } from '../../lib/labels';
+import { cardFromDict } from '../../lib/studyCard';
 import { Badge } from '../ui/Badge';
 import { SectionTitle } from '../ui/SectionTitle';
+import { AddToCardsButton } from '../study/AddToCardsButton';
 import { ChipList } from './ChipList';
 import { DictExamples } from './DictExamples';
 import { SourcesLine } from './SourcesLine';
@@ -24,9 +27,11 @@ interface DictCardProps {
 
 export function DictCard({ entry, speech, withAi }: DictCardProps) {
   const { t } = useTranslation();
+  const { uiLanguage } = useSettings();
   // Значения на исходном языке и их переводы, если источник их даёт (PONS).
   const translations = entry.senses.filter((sense) => sense.translation);
   const definitions = entry.senses.filter((sense) => !sense.translation);
+  const studyInput = cardFromDict(entry, uiLanguage);
 
   return (
     <article className="animate-fade-in">
@@ -44,6 +49,7 @@ export function DictCard({ entry, speech, withAi }: DictCardProps) {
       <div className="mt-2 flex flex-wrap items-center gap-2">
         <Badge tone={withAi ? 'success' : 'accent'}>{t('dict.badge')}</Badge>
         {!withAi ? <span className="text-xs text-muted">{t('dict.withoutAi')}</span> : null}
+        <AddToCardsButton input={studyInput} className="ml-auto" />
       </div>
 
       {translations.length > 0 ? (
