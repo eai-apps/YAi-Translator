@@ -31,13 +31,14 @@ export const DEFAULT_TRANSLATE_SETTINGS: TranslateSettings = {
 
 /** Сохранённые настройки + старый отдельный ключ showOthers (совместимость). */
 export function readTranslateSettings(): TranslateSettings {
-  const stored = readStorage<Partial<TranslateSettings>>(STORAGE_KEYS.translateSettings, {});
+  const stored = readStorage<Partial<TranslateSettings> & { suggestionsV2?: boolean }>(STORAGE_KEYS.translateSettings, {});
   const legacyShowOthers = readStorage<boolean>(STORAGE_KEYS.showOthers, DEFAULT_TRANSLATE_SETTINGS.showOthers);
   return {
     saveHistory: typeof stored.saveHistory === 'boolean' ? stored.saveHistory : DEFAULT_TRANSLATE_SETTINGS.saveHistory,
     detectLanguage:
       typeof stored.detectLanguage === 'boolean' ? stored.detectLanguage : DEFAULT_TRANSLATE_SETTINGS.detectLanguage,
-    suggestions: typeof stored.suggestions === 'boolean' ? stored.suggestions : DEFAULT_TRANSLATE_SETTINGS.suggestions,
+    // Старое значение «suggestions» (до 0.8.1 было включено у всех) не читаем — только новое, выбранное вручную.
+    suggestions: typeof stored.suggestionsV2 === 'boolean' ? stored.suggestionsV2 : DEFAULT_TRANSLATE_SETTINGS.suggestions,
     enterToTranslate:
       typeof stored.enterToTranslate === 'boolean'
         ? stored.enterToTranslate
@@ -47,7 +48,7 @@ export function readTranslateSettings(): TranslateSettings {
 }
 
 export function writeTranslateSettings(settings: TranslateSettings): void {
-  writeStorage(STORAGE_KEYS.translateSettings, settings);
+  writeStorage(STORAGE_KEYS.translateSettings, { ...settings, suggestionsV2: settings.suggestions });
   // Старый ключ тоже держим в актуальном виде: его читает прежний код и синхронизация профиля.
   writeStorage(STORAGE_KEYS.showOthers, settings.showOthers);
 }
