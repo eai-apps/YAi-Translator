@@ -756,7 +756,7 @@
       "fetchModelsError": "Fehler beim Laden der Modellliste",
       "connectionsTitle": "Verbindungen zu kostenpflichtigen KIs",
       "addConnection": "Verbindung hinzufügen",
-      "namePlaceholder": "Name (z.B. OpenRouter GPT-4o-mini)",
+      "namePlaceholder": "Name (optional — sonst nach dem Modell)",
       "keyPlaceholder": "API-Schlüssel (sk-...)",
       "loadModels": "Modelle laden",
       "noConnections": "Keine konfigurierten Verbindungen",
@@ -1116,5 +1116,18 @@
     "q10": "Wohin gehen meine Übersetzungen?",
     "a10": "Der Text geht an den Übersetzungsdienst und kommt sofort zurück. Verlauf und Favoriten liegen standardmäßig nur im Browser; im Konto werden sie zwischen Geräten synchronisiert.",
     "backToProfile": "Zurück zum Profil"
+  },
+  "paidPicker": {
+    "service": "1. Dienst, bei dem der Schlüssel gekauft wurde",
+    "custom": "Anderer Dienst — eigene Adresse (Base URL)",
+    "key": "2. Schlüssel",
+    "load": "Modelle laden",
+    "keyHint": "Schlüssel einfügen und „Modelle laden“ drücken — dann erscheinen alle KI-Modelle, die mit diesem Schlüssel verfügbar sind.",
+    "model": "3. KI-Modell",
+    "found": "{{count}} gefunden",
+    "search": "Suche: gemini, claude, gpt, deepseek…",
+    "slow": "langsam/teuer",
+    "nothing": "Nichts gefunden",
+    "modelPlaceholder": "Zuerst „Modelle laden“ drücken"
   }
 }

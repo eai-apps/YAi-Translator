@@ -756,7 +756,7 @@
       "fetchModelsError": "Failed to load model list",
       "connectionsTitle": "Paid AI Connections",
       "addConnection": "Add connection",
-      "namePlaceholder": "Name (e.g. OpenRouter GPT-4o-mini)",
+      "namePlaceholder": "Name (optional — otherwise the model name)",
       "keyPlaceholder": "API Key (sk-...)",
       "loadModels": "Load models",
       "noConnections": "No configured connections",
@@ -1116,5 +1116,18 @@
     "q10": "Where do my translations go?",
     "a10": "The text goes to the translation service and comes straight back. History and favorites stay in your browser by default; in an account they sync between devices.",
     "backToProfile": "Back to profile"
+  },
+  "paidPicker": {
+    "service": "1. Service where you bought the key",
+    "custom": "Other service — enter your own Base URL",
+    "key": "2. Key",
+    "load": "Load models",
+    "keyHint": "Paste the key and press “Load models” — you will see every model available with this key.",
+    "model": "3. Model",
+    "found": "{{count}} found",
+    "search": "Search: gemini, claude, gpt, deepseek…",
+    "slow": "slow/expensive",
+    "nothing": "Nothing found",
+    "modelPlaceholder": "Press “Load models” first"
   }
 }

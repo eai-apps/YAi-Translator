@@ -14,6 +14,15 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.9.2',
+    date: '2026-10-31',
+    items: {
+      ru: ['Платная нейросеть: выберите сервис из списка, вставьте ключ — и выберите любую нейросеть из полного списка с поиском и ценами.'],
+      de: ['Bezahlte KI: Dienst aus der Liste wählen, Schlüssel einfügen und ein beliebiges Modell aus der vollständigen Liste mit Suche und Preisen wählen.'],
+      en: ['Paid AI: pick the service from a list, paste your key and choose any model from the full list with search and prices.'],
+    },
+  },
+  {
     version: '0.9.1',
     date: '2026-10-31',
     items: {

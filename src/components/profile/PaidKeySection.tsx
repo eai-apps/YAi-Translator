@@ -9,6 +9,7 @@ import { storeBuild, STORAGE_KEYS } from '../../config';
 import { getUserKeys } from '../../lib/userKeys';
 import { writeStorage } from '../../lib/storage';
 import { Button } from '../ui/Button';
+import { PaidConnectionFields } from '../paid/PaidConnectionFields';
 import { IconTrash } from '../layout/icons';
 
 export function PaidKeySection() {
@@ -113,57 +114,17 @@ export function PaidKeySection() {
       </div>
 
       <div className="space-y-2 text-sm">
-        <div>
-          <label className="block text-xs text-muted mb-1">Base URL</label>
-          <input
-            type="url"
-            value={baseUrl}
-            onChange={(e) => setBaseUrl(e.target.value)}
-            placeholder="https://openrouter.ai/api/v1"
-            className="w-full h-9 rounded-lg border border-line bg-card px-3 text-xs text-ink"
-          />
-        </div>
-
-        <div>
-          <label className="block text-xs text-muted mb-1">API Key</label>
-          <input
-            type="password"
-            value={apiKey}
-            onChange={(e) => setApiKey(e.target.value)}
-            placeholder="sk-or-v1-..."
-            className="w-full h-9 rounded-lg border border-line bg-card px-3 text-xs text-ink"
-          />
-        </div>
-
-        <div className="flex gap-2 items-end">
-          <div className="flex-1">
-            <label className="block text-xs text-muted mb-1">{t('keys.paid.modelLabel')}</label>
-            {models.length > 0 ? (
-              <select
-                value={model}
-                onChange={(e) => setModel(e.target.value)}
-                className="w-full h-9 rounded-lg border border-line bg-card px-3 text-xs text-ink"
-              >
-                {models.map((m) => (
-                  <option key={m.id} value={m.id}>
-                    {m.id}
-                  </option>
-                ))}
-              </select>
-            ) : (
-              <input
-                type="text"
-                value={model}
-                onChange={(e) => setModel(e.target.value)}
-                placeholder="openai/gpt-4o-mini"
-                className="w-full h-9 rounded-lg border border-line bg-card px-3 text-xs text-ink"
-              />
-            )}
-          </div>
-          <Button size="sm" variant="secondary" loading={loadingModels} onClick={() => void loadModels()}>
-            {t('keys.paid.loadModelsBtn')}
-          </Button>
-        </div>
+        <PaidConnectionFields
+          baseUrl={baseUrl}
+          onBaseUrl={setBaseUrl}
+          apiKey={apiKey}
+          onApiKey={setApiKey}
+          models={models}
+          model={model}
+          onModel={setModel}
+          onLoadModels={() => void loadModels()}
+          loading={loadingModels}
+        />
 
         <div className="flex flex-wrap items-center gap-2 pt-1">
           <Button size="sm" variant="primary" onClick={handleSave}>

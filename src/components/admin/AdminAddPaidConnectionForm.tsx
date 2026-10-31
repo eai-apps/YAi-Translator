@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import type { PaidModelOption } from '../../../shared/types';
 import { api } from '../../api/client';
 import { Button } from '../ui/Button';
+import { PaidConnectionFields } from '../paid/PaidConnectionFields';
 
 interface Props {
   onSaved: () => void;
@@ -41,11 +42,11 @@ export function AdminAddPaidConnectionForm({ onSaved, onError }: Props) {
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim() || !baseUrl.trim() || !apiKey.trim() || !defaultModel) return;
+    if (!baseUrl.trim() || !apiKey.trim() || !defaultModel) return;
     try {
       await api.adminPaidAction({
         action: 'save',
-        name: name.trim(),
+        name: name.trim() || defaultModel,
         baseUrl: baseUrl.trim(),
         apiKey: apiKey.trim(),
         defaultModel,
@@ -58,49 +59,25 @@ export function AdminAddPaidConnectionForm({ onSaved, onError }: Props) {
   };
 
   return (
-    <form onSubmit={(e) => void handleAdd(e)} className="p-3 border border-line rounded-xl space-y-2 bg-soft">
+    <form onSubmit={(e) => void handleAdd(e)} className="p-3 border border-line rounded-xl space-y-3 bg-soft">
       <input
         type="text"
         placeholder={t('admin.paid.namePlaceholder')}
         value={name}
         onChange={(e) => setName(e.target.value)}
-        className="w-full h-8 px-2 text-sm rounded border border-line bg-card text-ink"
-        required
+        className="w-full h-9 px-3 text-sm rounded-lg border border-line bg-card text-ink"
       />
-      <input
-        type="url"
-        placeholder="https://openrouter.ai/api/v1"
-        value={baseUrl}
-        onChange={(e) => setBaseUrl(e.target.value)}
-        className="w-full h-8 px-2 text-sm rounded border border-line bg-card text-ink"
-        required
+      <PaidConnectionFields
+        baseUrl={baseUrl}
+        onBaseUrl={setBaseUrl}
+        apiKey={apiKey}
+        onApiKey={setApiKey}
+        models={models}
+        model={defaultModel}
+        onModel={setDefaultModel}
+        onLoadModels={() => void fetchModelsList()}
+        loading={fetchLoading}
       />
-      <div className="flex gap-2">
-        <input
-          type="password"
-          placeholder={t('admin.paid.keyPlaceholder')}
-          value={apiKey}
-          onChange={(e) => setApiKey(e.target.value)}
-          className="flex-1 h-8 px-2 text-sm rounded border border-line bg-card text-ink"
-          required
-        />
-        <Button type="button" size="sm" variant="secondary" loading={fetchLoading} onClick={() => void fetchModelsList()}>
-          {t('admin.paid.loadModels')}
-        </Button>
-      </div>
-      {models.length > 0 && (
-        <select
-          value={defaultModel}
-          onChange={(e) => setDefaultModel(e.target.value)}
-          className="w-full h-8 px-2 text-sm rounded border border-line bg-card text-ink"
-        >
-          {models.map((m) => (
-            <option key={m.id} value={m.id}>
-              {m.id}
-            </option>
-          ))}
-        </select>
-      )}
       <Button size="sm" variant="primary" type="submit">
         {t('common.save')}
       </Button>
