@@ -5,6 +5,7 @@
 import type { Env } from '../_lib/env';
 import { errorResponse, getUiLanguage, jsonResponse } from '../_lib/http';
 import { ensureSchema } from '../_lib/schema';
+import { seedBuyLinksOnce } from '../_lib/paid/buyLinksSeed';
 import type { BuyLinkItem } from '../../shared/types';
 
 interface BuyLinkRow {
@@ -22,6 +23,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
   const uiLang = getUiLanguage(context.request);
   try {
     await ensureSchema(context.env);
+    await seedBuyLinksOnce(context.env);
 
     const rows = await context.env.DB?.prepare(
       'SELECT * FROM buy_links WHERE hidden = 0 ORDER BY sort ASC, id ASC',

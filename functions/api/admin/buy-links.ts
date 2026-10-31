@@ -5,6 +5,7 @@ import type { Env } from '../../_lib/env';
 import { requireAdmin } from '../../_lib/admin/require';
 import { ApiError, errorResponse, getUiLanguage, jsonResponse, readJsonBody } from '../../_lib/http';
 import { ensureSchema } from '../../_lib/schema';
+import { seedBuyLinksOnce } from '../../_lib/paid/buyLinksSeed';
 import type { BuyLinkItem } from '../../../shared/types';
 
 interface BuyLinkRow {
@@ -36,6 +37,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
   try {
     await requireAdmin(context.env, context.request);
     await ensureSchema(context.env);
+    await seedBuyLinksOnce(context.env);
 
     const rows = await context.env.DB?.prepare('SELECT * FROM buy_links ORDER BY sort ASC, id ASC')
       .all<BuyLinkRow>();
