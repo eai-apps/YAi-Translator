@@ -31,10 +31,15 @@ export const PERSONAL_AI_CHOICES = ['gemini', 'groq', 'paid'] as const;
 type PersonalAiChoice = (typeof PERSONAL_AI_CHOICES)[number];
 
 /** Выбор переводчика: «авто» — по очереди, конкретный сервис или свой ключ Gemini / Groq. */
-export type ProviderChoice = 'auto' | ClassicProviderId | PersonalAiChoice;
+export type ProviderChoice = 'auto' | ClassicProviderId | PersonalAiChoice | `site:${string}`;
 
 function isPersonalAi(choice: ProviderChoice): choice is PersonalAiChoice {
   return (PERSONAL_AI_CHOICES as readonly string[]).includes(choice);
+}
+
+/** Нейросеть сайта из списка (0.9.3): «site:id подключения|модель». */
+export function isSiteAi(choice: ProviderChoice): choice is `site:${string}` {
+  return choice.startsWith('site:');
 }
 
 /**
@@ -199,8 +204,8 @@ export function useTranslator(onLimitReached: () => void) {
             text: trimmed,
             sourceLang: source,
             targetLang: target,
-            mode: isPersonalAi(choice) ? 'ai' : 'classic',
-            ...(choice !== 'auto' ? { provider: choice } : {}),
+            mode: isPersonalAi(choice) || isSiteAi(choice) ? 'ai' : 'classic',
+            ...(isSiteAi(choice) ? { aiModel: choice.slice(5) } : choice !== 'auto' ? { provider: choice } : {}),
           },
           controller.signal,
         );

@@ -10,6 +10,8 @@ import type { ProviderChoice } from '../../hooks/useTranslator';
 import { PERSONAL_AI_CHOICES } from '../../hooks/useTranslator';
 import { useAccount } from '../../hooks/useAccount';
 import { useSiteProviders } from '../../hooks/useSiteProviders';
+import { shortModelName, useSiteAiModels } from '../../hooks/useSiteAiModels';
+import { useNavigate } from 'react-router-dom';
 import { keyStateFor } from '../../lib/accountKeys';
 import { providerLabel } from '../../lib/errors';
 import { DropdownMenu } from '../ui/DropdownMenu';
@@ -29,6 +31,11 @@ export function ProviderPill({ value, onChange, aiLoading, onAskAi, hasText }: P
   const { t } = useTranslation();
   const site = useSiteProviders();
   const { account } = useAccount();
+  const siteAi = useSiteAiModels();
+  const navigate = useNavigate();
+  // Нейросети сайта (0.9.3): вошедшим — выбор, гостям (если «только для зарегистрированных») — видны, но закрыты.
+  const siteModels = siteAi?.models ?? [];
+  const siteLocked = Boolean(siteAi?.regOnly) && !account;
 
   // Подключённые сервисы и личные ключи — тот же список, что в ProviderSelect.
   const options = useMemo<ProviderChoice[]>(() => {
@@ -38,8 +45,9 @@ export function ProviderPill({ value, onChange, aiLoading, onAskAi, hasText }: P
         (site ? site[id] !== false : true) &&
         keyStateFor(id, id === 'paid' ? null : (account?.keys[id] ?? null)).mask !== null,
     );
-    return [...classic, ...personal];
-  }, [site, account]);
+    const siteChoices = siteLocked ? [] : siteModels.map((item) => `site:${item.id}` as ProviderChoice);
+    return [...classic, ...personal, ...siteChoices];
+  }, [site, account, siteLocked, siteModels]);
 
   // Сервис, который выключили или ключ которого удалили, возвращает выбор к «Быстрый перевод».
   useEffect(() => {
@@ -68,6 +76,7 @@ export function ProviderPill({ value, onChange, aiLoading, onAskAi, hasText }: P
   });
 
   for (const id of options) {
+    if (id.startsWith('site:')) continue;
     items.push({
       id: `provider-${id}`,
       label: providerLabel(id),
@@ -77,13 +86,34 @@ export function ProviderPill({ value, onChange, aiLoading, onAskAi, hasText }: P
     });
   }
 
-  const current = value === 'auto' ? t('translate.modeFast') : providerLabel(value);
+  for (const item of siteModels) {
+    const id = `site:${item.id}` as ProviderChoice;
+    items.push({
+      id: `provider-${id}`,
+      label: `✦ ${shortModelName(item.model)}`,
+      hint: siteLocked ? t('translate.afterLogin') : t('translate.siteAi'),
+      checked: value === id,
+      disabled: siteLocked,
+      onSelect: () => onChange(id),
+    });
+  }
+  if (siteLocked && siteModels.length > 0) {
+    items.push({ id: 'register', label: t('translate.moreAiAfterLogin'), onSelect: () => navigate('/profile') });
+  }
+
+  const current =
+    value === 'auto'
+      ? t('translate.modeFast')
+      : value.startsWith('site:')
+        ? shortModelName(value.split('|').pop() ?? value)
+        : providerLabel(value);
+  const firstExtra = items.find((item) => item.id.startsWith('provider-'))?.id ?? null;
 
   return (
     <DropdownMenu
       label={t('translate.mode')}
       items={items}
-      separatorBeforeId={options.length > 0 ? `provider-${options[0]}` : null}
+      separatorBeforeId={firstExtra}
       trigger={
         <>
           <span className="max-w-[9rem] truncate">{current}</span>

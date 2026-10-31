@@ -16,7 +16,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     if (!validatePaidBaseUrl(baseUrl)) throw new ApiError('VALIDATION', 400);
 
     const resp = await fetch(`${baseUrl}/models`, {
-      headers: { Authorization: `Bearer ${apiKey}` },
+      headers: { Authorization: `Bearer ${apiKey}`, Accept: 'application/json', 'User-Agent': 'YAi-Translator/1.0' },
       signal: AbortSignal.timeout(10_000),
     });
 

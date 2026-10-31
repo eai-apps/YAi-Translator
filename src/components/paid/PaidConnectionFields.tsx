@@ -25,6 +25,9 @@ interface Props {
   onModel: (value: string) => void;
   onLoadModels: () => void;
   loading: boolean;
+  /** Несколько моделей сразу (админка): отмеченные и переключение галочки. */
+  selected?: string[];
+  onToggle?: (id: string) => void;
 }
 
 const FIELD = 'w-full h-9 rounded-lg border border-line bg-card px-3 text-sm text-ink';
@@ -37,7 +40,9 @@ function priceLabel(price: number | undefined): string | null {
 
 export function PaidConnectionFields(props: Props) {
   const { t } = useTranslation();
-  const { baseUrl, onBaseUrl, apiKey, onApiKey, models, model, onModel, onLoadModels, loading } = props;
+  const { baseUrl, onBaseUrl, apiKey, onApiKey, models, model, onModel, onLoadModels, loading, selected, onToggle } = props;
+  const multi = Boolean(selected && onToggle);
+  const isOn = (id: string) => (multi ? (selected ?? []).includes(id) : id === model);
   const [query, setQuery] = useState('');
   const presetId = presetForUrl(baseUrl);
   const [custom, setCustom] = useState(presetId === CUSTOM_PRESET_ID);
@@ -104,13 +109,14 @@ export function PaidConnectionFields(props: Props) {
             {t('paidPicker.load')}
           </Button>
         </div>
-        <p className="mt-1 text-[11px] text-muted">{t('paidPicker.keyHint')}</p>
+        <p className="mt-1 text-[11px] text-muted">{t(multi ? 'paidPicker.keyHintMulti' : 'paidPicker.keyHint')}</p>
       </div>
 
       <div>
         <label className="mb-1 block text-xs font-medium text-muted">
           {t('paidPicker.model')}
           {models.length > 0 ? ` · ${t('paidPicker.found', { count: models.length })}` : ''}
+          {multi && (selected ?? []).length > 0 ? ` · ${t('paidPicker.picked', { count: (selected ?? []).length })}` : ''}
         </label>
         {models.length > 0 ? (
           <>
@@ -129,13 +135,15 @@ export function PaidConnectionFields(props: Props) {
                   <li key={item.id}>
                     <button
                       type="button"
-                      onClick={() => onModel(item.id)}
+                      onClick={() => (multi ? onToggle?.(item.id) : onModel(item.id))}
                       className={cn(
                         'flex w-full items-center gap-2 border-b border-line px-3 py-2 text-left text-xs last:border-b-0 hover:bg-soft',
-                        item.id === model && 'bg-accentSoft text-accent',
+                        isOn(item.id) && 'bg-accentSoft text-accent',
                       )}
                     >
-                      <span className={cn('h-3 w-3 shrink-0 rounded-full border', item.id === model ? 'border-accent bg-accent' : 'border-line')} />
+                      <span className={cn('flex h-3.5 w-3.5 shrink-0 items-center justify-center border text-[9px] leading-none', multi ? 'rounded' : 'rounded-full', isOn(item.id) ? 'border-accent bg-accent text-accentInk' : 'border-line')}>
+                        {multi && isOn(item.id) ? '✓' : ''}
+                      </span>
                       <span className="min-w-0 flex-1 truncate font-medium">{item.id}</span>
                       {slow ? <span className="shrink-0 text-[10px] text-warning">{t('paidPicker.slow')}</span> : null}
                       {price ? <span className="shrink-0 text-[10px] text-muted">{price}</span> : null}

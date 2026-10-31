@@ -45,6 +45,8 @@ export interface RunJsonOptions<T> {
   beforeShared?: () => Promise<void>;
   /** true — пользователь авторизован (для бонусов и платных моделей). */
   isRegistered?: boolean;
+  /** Выбранная в списке нейросеть сайта: «id подключения|модель» — только она (0.9.3). */
+  sharedPaidPick?: string;
 }
 
 interface Attempt {
@@ -73,7 +75,7 @@ function statusOf(error: unknown): number | null {
   return match ? Number(match[1]) : null;
 }
 
-async function buildAttempts(env: Env, userKeys: UserKeys, isRegistered = false): Promise<Attempt[]> {
+async function buildAttempts(env: Env, userKeys: UserKeys, isRegistered = false, pick?: string): Promise<Attempt[]> {
   const attempts: Attempt[] = [];
 
   // 1. Платная нейросеть пользователя — самый высокий приоритет среди личных ключей.
@@ -103,7 +105,9 @@ async function buildAttempts(env: Env, userKeys: UserKeys, isRegistered = false)
 
   // 4. Общие платные модели сайта.
   const { order, models: sharedPaid } = await getUsableSharedPaidModels(env, isRegistered);
-  const paidShared: Attempt[] = sharedPaid.map((m) => ({
+  const paidShared: Attempt[] = sharedPaid
+    .filter((m) => !pick || `${m.connectionId}|${m.model}` === pick)
+    .map((m) => ({
     id: 'paid',
     apiKey: m.apiKey,
     baseUrl: m.baseUrl,
@@ -112,7 +116,9 @@ async function buildAttempts(env: Env, userKeys: UserKeys, isRegistered = false)
     shared: true,
   }));
 
-  if (order === 'paid_first') {
+  if (pick) {
+    attempts.push(...paidShared);
+  } else if (order === 'paid_first') {
     attempts.push(...paidShared, ...freeShared);
   } else if (order === 'free_first') {
     attempts.push(...freeShared, ...paidShared);
@@ -128,7 +134,7 @@ async function buildAttempts(env: Env, userKeys: UserKeys, isRegistered = false)
 
 export async function runJsonTask<T>(options: RunJsonOptions<T>): Promise<{ data: T; provider: ProviderId }> {
   const disabled = await readDisabledProviders(options.env);
-  const attempts = (await buildAttempts(options.env, options.userKeys, options.isRegistered)).filter(
+  const attempts = (await buildAttempts(options.env, options.userKeys, options.isRegistered, options.sharedPaidPick)).filter(
     (attempt) =>
       (!options.only || options.only.includes(attempt.id)) &&
       !disabled.has(attempt.id) &&

@@ -93,22 +93,29 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     const body = await readJsonBody(context.request);
     const action = String(body.action || '');
 
-    if (action === 'add') {
-      const name = String(body.name || '').trim();
+    // Форма в админке шлёт action 'save' и поле apiKey — принимаем оба варианта (исправление Claude, 0.9.3).
+    if (action === 'add' || action === 'save') {
       const baseUrl = String(body.baseUrl || '').trim().replace(/\/$/, '');
-      const key = String(body.key || '').trim();
-      const defaultModel = String(body.defaultModel || '').trim();
+      const key = String(body.key || body.apiKey || '').trim();
+      const picked = Array.isArray(body.models)
+        ? body.models.filter((item): item is string => typeof item === 'string' && item.length > 0).slice(0, 20)
+        : [];
+      const defaultModel = String(body.defaultModel || picked[0] || '').trim();
+      const name = String(body.name || '').trim() || defaultModel;
+      const enabledModels = JSON.stringify(
+        (picked.length > 0 ? picked : defaultModel ? [defaultModel] : []).map((id) => ({ id, enabled: true })),
+      );
 
-      if (!name || !baseUrl || !key) throw new ApiError('VALIDATION', 400);
+      if (!name || !baseUrl || !key || !defaultModel) throw new ApiError('VALIDATION', 400);
       if (!validatePaidBaseUrl(baseUrl)) throw new ApiError('VALIDATION', 400);
 
       const id = crypto.randomUUID();
       const { ciphertext, iv } = await encryptKey(context.env, key, `site:paid:${id}`);
       await context.env.DB?.prepare(
         `INSERT INTO paid_connections (id, name, base_url, ciphertext, iv, last4, default_model, enabled_models, created_at, updated_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, '[]', ?, ?)`,
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       )
-        .bind(id, name, baseUrl, ciphertext, iv, keyLast4(key), defaultModel, Date.now(), Date.now())
+        .bind(id, name, baseUrl, ciphertext, iv, keyLast4(key), defaultModel, enabledModels, Date.now(), Date.now())
         .run();
 
       return jsonResponse({ ok: true, id });
@@ -142,7 +149,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
     if (action === 'fetch-models') {
       let baseUrl = String(body.baseUrl || '').trim().replace(/\/$/, '');
-      let apiKey = String(body.key || '').trim();
+      let apiKey = String(body.key || body.apiKey || '').trim();
 
       if (body.id) {
         const row = await context.env.DB?.prepare('SELECT * FROM paid_connections WHERE id = ?').bind(body.id).first<PaidConnectionRow>();
@@ -154,14 +161,19 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
       if (!baseUrl || !apiKey || !validatePaidBaseUrl(baseUrl)) throw new ApiError('VALIDATION', 400);
 
-      const resp = await fetch(`${baseUrl}/models`, {
-        headers: { Authorization: `Bearer ${apiKey}` },
-        signal: AbortSignal.timeout(10_000),
-      });
-      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-      const data = await resp.json();
-      const models = parseOpenAiModels(data);
-      return jsonResponse({ models });
+      // Ошибку сервиса показываем в админке как есть (код и начало ответа) — так понятно, что не так с ключом.
+      try {
+        const resp = await fetch(`${baseUrl}/models`, {
+          headers: { Authorization: `Bearer ${apiKey}`, Accept: 'application/json', 'User-Agent': 'YAi-Translator/1.0' },
+          signal: AbortSignal.timeout(15_000),
+        });
+        const raw = await resp.text();
+        if (!resp.ok) return jsonResponse({ models: [], error: `HTTP ${resp.status}: ${raw.slice(0, 160)}` });
+        const models = parseOpenAiModels(JSON.parse(raw));
+        return jsonResponse(models.length > 0 ? { models } : { models, error: raw.slice(0, 160) || 'empty' });
+      } catch (fetchError) {
+        return jsonResponse({ models: [], error: fetchError instanceof Error ? fetchError.message : String(fetchError) });
+      }
     }
 
     if (action === 'credits') {

@@ -20,19 +20,24 @@ export function AdminAddPaidConnectionForm({ onSaved, onError }: Props) {
   const [apiKey, setApiKey] = useState('');
   const [models, setModels] = useState<PaidModelOption[]>([]);
   const [defaultModel, setDefaultModel] = useState('');
+  // Несколько моделей одного ключа: каждая появится в списке «Быстрый перевод ▾» на главной.
+  const [picked, setPicked] = useState<string[]>([]);
+  const toggle = (id: string) =>
+    setPicked((list) => (list.includes(id) ? list.filter((item) => item !== id) : [...list, id].slice(0, 20)));
   const [fetchLoading, setFetchLoading] = useState(false);
 
   const fetchModelsList = async () => {
     if (!baseUrl.trim() || !apiKey.trim()) return;
     setFetchLoading(true);
     try {
-      const res = await api.adminPaidAction<{ models: PaidModelOption[] }>({
+      onError(null);
+      const res = await api.adminPaidAction<{ models: PaidModelOption[]; error?: string }>({
         action: 'fetch-models',
         baseUrl: baseUrl.trim(),
         apiKey: apiKey.trim(),
       });
       setModels(res.models);
-      if (res.models.length > 0 && !defaultModel) setDefaultModel(res.models[0].id);
+      if (res.models.length === 0) onError(`${t('admin.paid.fetchModelsError')}${res.error ? ` — ${res.error}` : ''}`);
     } catch {
       onError(t('admin.paid.fetchModelsError'));
     } finally {
@@ -42,15 +47,19 @@ export function AdminAddPaidConnectionForm({ onSaved, onError }: Props) {
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!baseUrl.trim() || !apiKey.trim() || !defaultModel) return;
+    const chosen = picked.length > 0 ? picked : defaultModel ? [defaultModel] : [];
+    if (!baseUrl.trim() || !apiKey.trim() || chosen.length === 0) {
+      onError(t('admin.paid.pickModel'));
+      return;
+    }
     try {
       await api.adminPaidAction({
         action: 'save',
-        name: name.trim() || defaultModel,
+        name: name.trim() || chosen[0],
         baseUrl: baseUrl.trim(),
         apiKey: apiKey.trim(),
-        defaultModel,
-        enabled: true,
+        defaultModel: chosen[0],
+        models: chosen,
       });
       onSaved();
     } catch {
@@ -77,6 +86,8 @@ export function AdminAddPaidConnectionForm({ onSaved, onError }: Props) {
         onModel={setDefaultModel}
         onLoadModels={() => void fetchModelsList()}
         loading={fetchLoading}
+        selected={picked}
+        onToggle={toggle}
       />
       <Button size="sm" variant="primary" type="submit">
         {t('common.save')}

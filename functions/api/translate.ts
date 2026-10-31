@@ -20,6 +20,7 @@ import type { UserKeys } from '../_lib/router';
 import { translateClassic } from '../_lib/classic';
 import { bump } from '../_lib/stats';
 import { validateTranslate } from '../_lib/validate';
+import { readSetting, SETTINGS_KEYS } from '../_lib/settings';
 
 /** Языковая пара для статистики: «auto» заменяется языком, определённым при переводе. */
 async function recordTranslation(env: Env, response: TranslateResponse, sourceLang: SourceLanguage, targetLang: LanguageCode) {
@@ -49,6 +50,8 @@ interface Job {
   signal: AbortSignal;
   limitGuard: () => Promise<void>;
   isRegistered?: boolean;
+  /** Нейросеть сайта, выбранная в списке: «id подключения|модель». */
+  aiModel?: string;
 }
 
 /** Обычные переводчики: выбранный пользователем или все по очереди. */
@@ -92,6 +95,7 @@ async function runAi(job: Job, personal: PersonalAi | null = null): Promise<Tran
     validate: validateTranslate,
     isRegistered: job.isRegistered,
     ...(personal ? { only: [personal], personalOnly: true } : {}),
+    ...(!personal && job.aiModel ? { only: ['paid' as const], sharedPaidPick: job.aiModel } : {}),
   });
   return { ...data, provider, cached: false };
 }
@@ -106,6 +110,10 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     const mode = body.mode === 'ai' ? 'ai' : 'classic';
     const chosen = CLASSIC_PROVIDERS.find((id) => id === body.provider) ?? null;
     const personalAi = mode === 'ai' ? (PERSONAL_AI.find((id) => id === body.provider) ?? null) : null;
+    const aiModel =
+      mode === 'ai' && typeof body.aiModel === 'string' && body.aiModel.includes('|') && body.aiModel.length <= 200
+        ? body.aiModel
+        : undefined;
 
     if (sourceLang !== 'auto' && sourceLang === targetLang) {
       throw new ApiError('VALIDATION', 400);
@@ -124,12 +132,17 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       signal: context.request.signal,
       limitGuard: createLimitGuard(env, getClientIp(context.request), session?.userId),
       isRegistered: Boolean(session),
+      aiModel,
     };
+    // Нейросети сайта только для вошедших (если так настроено в админке) — гостю понятная ошибка «войдите».
+    if (aiModel && !session && ((await readSetting<boolean>(env, SETTINGS_KEYS.paidAiRegisteredOnly)) ?? true)) {
+      throw new ApiError('UNAUTHORIZED', 401);
+    }
 
     // Кэш отдельно для каждого режима и выбранного переводчика.
     const cacheKey = await buildCacheKey({
       kind: 'translate',
-      text: `${mode}|${chosen ?? personalAi ?? 'any'}|${text}`,
+      text: `${mode}|${chosen ?? personalAi ?? aiModel ?? 'any'}|${text}`,
       sourceLang,
       targetLang,
       uiLang,

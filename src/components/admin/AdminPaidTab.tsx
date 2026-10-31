@@ -169,6 +169,9 @@ export function AdminPaidTab({ onError }: { onError: (msg: string | null) => voi
                     <span className="text-xs text-muted">({c.defaultModel})</span>
                   </div>
                   <div className="text-xs text-muted">{c.baseUrl}</div>
+                  {c.models.length > 0 ? (
+                    <div className="mt-1 text-xs text-ink">{c.models.map((m) => m.id).join(' · ')}</div>
+                  ) : null}
                   {testResult[c.id] && <div className="text-xs mt-1 text-ink">{testResult[c.id]}</div>}
                 </div>
                 <div className="flex items-center gap-1.5">

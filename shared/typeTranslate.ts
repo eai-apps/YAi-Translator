@@ -14,6 +14,8 @@ export interface TranslateRequest {
   mode?: 'classic' | 'ai';
   /** Конкретный обычный переводчик, выбранный пользователем (иначе — по очереди). */
   provider?: ProviderId;
+  /** Нейросеть сайта из списка «Быстрый перевод ▾»: «id подключения|модель» (только с mode 'ai'). */
+  aiModel?: string;
 }
 
 export interface CompareRequest {

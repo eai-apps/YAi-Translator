@@ -101,7 +101,11 @@
     "shareCopy": "Übersetzung kopieren",
     "moreVariants": "Weitere Varianten:",
     "tagline": "Ein moderner Übersetzer, der alles erklärt",
-    "taglineSub": "Formen, Grammatik und Beispiele A1–B2 zu jedem Wort · mehrere KI-Modelle und Dienste auf einmal"
+    "taglineSub": "Formen, Grammatik und Beispiele A1–B2 zu jedem Wort · mehrere KI-Modelle und Dienste auf einmal",
+    "afterLogin": "nach Anmeldung",
+    "siteAi": "KI",
+    "moreAiAfterLogin": "★ Anmelden oder registrieren — kostenlos",
+    "taglineGuest": "Claude, ChatGPT, DeepSeek, Qwen und 10× mehr Anfragen — nach kostenloser Registrierung"
   },
   "others": {
     "title": "Wie andere übersetzen",
@@ -765,7 +769,8 @@
       "testFail": "Testfehler",
       "creditsBtn": "Guthaben",
       "creditsAlert": "OpenRouter-Guthaben:\nLimit: {{limit}}\nVerwendet: {{usage}}",
-      "creditsFail": "Guthaben konnte nicht abgerufen werden"
+      "creditsFail": "Guthaben konnte nicht abgerufen werden",
+      "pickModel": "Wählen Sie mindestens ein Modell"
     },
     "buyLinks": {
       "title": "Links „Wo Schlüssel kaufen“ im Profil",
@@ -1128,6 +1133,8 @@
     "search": "Suche: gemini, claude, gpt, deepseek…",
     "slow": "langsam/teuer",
     "nothing": "Nichts gefunden",
-    "modelPlaceholder": "Zuerst „Modelle laden“ drücken"
+    "modelPlaceholder": "Zuerst „Modelle laden“ drücken",
+    "picked": "{{count}} gewählt",
+    "keyHintMulti": "Schlüssel einfügen, „Modelle laden“ drücken und die gewünschten Modelle ankreuzen (mehrere möglich) — jedes erscheint auf der Startseite in der Liste „Schnelle Übersetzung ▾“."
   }
 }

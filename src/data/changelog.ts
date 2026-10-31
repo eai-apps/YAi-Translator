@@ -14,6 +14,27 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.9.3',
+    date: '2026-10-31',
+    items: {
+      ru: [
+        'Нейросети сайта (Claude, ChatGPT, DeepSeek, Qwen…) можно выбрать прямо в списке «Быстрый перевод ▾» — после входа.',
+        'В админке к одному ключу можно подключить сразу несколько нейросетей галочками; исправлена загрузка списка моделей.',
+        'Под заголовком «Перевод» для гостей — что даёт бесплатная регистрация.',
+      ],
+      de: [
+        'KI-Modelle der Website (Claude, ChatGPT, DeepSeek, Qwen…) direkt in der Liste „Schnelle Übersetzung ▾“ wählbar — nach Anmeldung.',
+        'Im Admin-Bereich mehrere Modelle pro Schlüssel ankreuzbar; das Laden der Modellliste wurde repariert.',
+        'Für Gäste unter „Übersetzen“: was die kostenlose Registrierung bringt.',
+      ],
+      en: [
+        'Site AI models (Claude, ChatGPT, DeepSeek, Qwen…) can be picked right in the “Fast translation ▾” list — after sign-in.',
+        'Admin: tick several models per key; loading the model list is fixed.',
+        'Guests see what free sign-up gives under the “Translate” heading.',
+      ],
+    },
+  },
+  {
     version: '0.9.2',
     date: '2026-10-31',
     items: {

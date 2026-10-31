@@ -69,6 +69,11 @@ export const coreMethods = {
     return request<HealthResponse>('/api/health', { method: 'GET' }, signal);
   },
 
+  /** Нейросети сайта (без ключей) для списка режимов перевода. */
+  aiModels(signal?: AbortSignal): Promise<{ models: Array<{ id: string; model: string }>; regOnly: boolean }> {
+    return request('/api/ai-models', { method: 'GET' }, signal);
+  },
+
   /** Настоящая проверка всех настроенных сервисов сайта (кэшируется на сервере 10 минут). */
   healthCheck(signal?: AbortSignal): Promise<HealthResponse> {
     return request<HealthResponse>('/api/health?check=1', { method: 'GET' }, signal);

@@ -101,7 +101,11 @@
     "shareCopy": "Copy translation",
     "moreVariants": "More options:",
     "tagline": "A modern translator that explains everything",
-    "taglineSub": "Forms, grammar and A1–B2 examples for every word · several AI models and services at once"
+    "taglineSub": "Forms, grammar and A1–B2 examples for every word · several AI models and services at once",
+    "afterLogin": "after sign-in",
+    "siteAi": "AI",
+    "moreAiAfterLogin": "★ Sign in or register — free",
+    "taglineGuest": "Claude, ChatGPT, DeepSeek, Qwen and 10× more requests — after free sign-up"
   },
   "others": {
     "title": "How others translate it",
@@ -765,7 +769,8 @@
       "testFail": "Test error",
       "creditsBtn": "Credits",
       "creditsAlert": "OpenRouter balance:\nLimit: {{limit}}\nUsage: {{usage}}",
-      "creditsFail": "Failed to fetch credits"
+      "creditsFail": "Failed to fetch credits",
+      "pickModel": "Pick at least one model"
     },
     "buyLinks": {
       "title": "“Where to buy key” links in profile",
@@ -1128,6 +1133,8 @@
     "search": "Search: gemini, claude, gpt, deepseek…",
     "slow": "slow/expensive",
     "nothing": "Nothing found",
-    "modelPlaceholder": "Press “Load models” first"
+    "modelPlaceholder": "Press “Load models” first",
+    "picked": "{{count}} selected",
+    "keyHintMulti": "Paste the key, press “Load models” and tick the models you want (several are fine) — each appears on the home page in the “Fast translation ▾” list."
   }
 }
