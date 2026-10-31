@@ -52,6 +52,8 @@ export interface TranslateResponse {
   pro?: { examples: Array<{ text: string; translation: string }>; tip: string | null };
   /** Подпись в блоке перевода, которую ставит сам сайт (например, «ИИ Pro»), — вместо имени сервиса. */
   label?: string;
+  /** Только на клиенте: перевод открыт из истории (листание, «История»), без запроса к серверу. */
+  fromHistory?: boolean;
   cached: boolean;
 }
 

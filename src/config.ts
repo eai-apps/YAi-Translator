@@ -5,10 +5,10 @@
 export const API_BASE = (import.meta.env.VITE_API_BASE ?? '').replace(/\/+$/, '');
 
 /** Версия показывается в профиле; совпадает с package.json. */
-export const APP_VERSION = '0.11.0';
+export const APP_VERSION = '0.12.0';
 
 /** Код версии приложения Android (увеличивается при каждом обновлении APK). */
-export const ANDROID_VERSION_CODE = 1;
+export const ANDROID_VERSION_CODE = 2;
 
 export const STORAGE_KEYS = {
   theme: 'yai.theme',

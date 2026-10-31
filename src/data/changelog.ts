@@ -14,6 +14,45 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.12.0',
+    date: '2026-10-31',
+    items: {
+      ru: [
+        'Листание переводов свайпом влево/вправо, кнопками ‹ › и клавишами Alt+←/Alt+→.',
+        'Синхронизация адреса (?q=...&from=...&to=...): кнопки «Назад» и «Вперёд» перебирают предыдущие переводы.',
+        'Кнопка «История» в шапке перевода с быстрым поиском, открытием и очисткой.',
+        'Озвучка в Android-приложении через нативный движок Text-to-Speech.',
+        '«Перевести в YAi» из контекстного меню выделения текста и меню «Поделиться» любого приложения Android.',
+        'Серия дней активности 🔥 и ежедневное напоминание (в приложении).',
+        'Карточка «Повтори 5 слов из истории» после каждых 10 переводов слов.',
+        'Поделиться красивой карточкой перевода (1080×1350) в соцсетях.',
+        'Чипс «Вставить» для быстрой вставки из буфера обмена в пустое поле.',
+      ],
+      de: [
+        'Übersetzungsverlauf durchblättern: Wischen, ‹ ›-Tasten und Alt+←/Alt+→.',
+        'Adresszeilensynchronisierung (?q=...): Vor- und Zurück-Buttons wechseln Übersetzungen.',
+        'Verlauf-Button in der Kopfzeile mit Schnellsuche, Öffnen und Leeren.',
+        'Sprachausgabe in der Android-App über die native Text-to-Speech-Engine.',
+        '„In YAi übersetzen“ aus dem Textauswahl- und Teilen-Menü jeder Android-App.',
+        'Tagesserie 🔥 und tägliche Erinnerung (in der App).',
+        '„5 Wörter aus dem Verlauf wiederholen“-Karte nach jeweils 10 Wortübersetzungen.',
+        'Übersetzung als ansprechende Bildkarte (1080×1350) teilen.',
+        '„Einfügen“-Chip für schnelles Einfügen aus der Zwischenablage.',
+      ],
+      en: [
+        'Swipe navigation through translation history, ‹ › buttons, and Alt+←/Alt+→ shortcuts.',
+        'URL synchronization (?q=...): browser Back and Forward buttons navigate through translations.',
+        'History drawer button in the header with search, open, and clear options.',
+        'In-app speech synthesis via native Text-to-Speech engine on Android.',
+        '“Translate in YAi” from text selection context menu and share sheet in any Android app.',
+        'Activity day streak 🔥 and daily reminder (in-app).',
+        '“Review 5 words from history” card after every 10 word translations.',
+        'Share beautiful translation card image (1080×1350).',
+        'Quick “Paste” chip for one-tap clipboard paste into empty input.',
+      ],
+    },
+  },
+  {
     version: '0.11.0',
     date: '2026-10-31',
     items: {

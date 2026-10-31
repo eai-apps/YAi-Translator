@@ -382,6 +382,42 @@ export function useTranslator(onLimitReached: () => void) {
     [setSourceLangState, setTargetLangState],
   );
 
+  const applyHistoryItem = useCallback(
+    (item: HistoryItem) => {
+      abortRef.current?.abort();
+      requestRef.current += 1;
+      setSourceLangState(item.sourceLang);
+      setTargetLangState(item.targetLang);
+      setText(item.text);
+      setHistoryId(item.id);
+      if (item.translation) {
+        setResult({
+          translatedText: item.translation,
+          detectedLang: item.sourceLang === 'auto' ? null : item.sourceLang,
+          provider: 'cached' as any,
+          label: t('translate.fromHistory'),
+          fromHistory: true,
+          cached: true,
+          alternatives: [],
+        });
+        setError(null);
+        setLoading(false);
+        skipRestoredRef.current = true;
+      }
+      if (isWordQuery(item.text.trim())) {
+        const reqId = requestRef.current;
+        const ctrl = new AbortController();
+        abortRef.current = ctrl;
+        void loadWord(item.text.trim(), item.sourceLang, item.targetLang, reqId, ctrl.signal, aiModelFor(providerChoice));
+        loadDictFor(item.text.trim(), item.targetLang, reqId, ctrl.signal);
+      } else {
+        setWord(EMPTY_WORD);
+        resetDict();
+      }
+    },
+    [loadDictFor, loadWord, providerChoice, resetDict, setSourceLangState, setTargetLangState, t],
+  );
+
   return {
     text,
     setText,
@@ -405,6 +441,7 @@ export function useTranslator(onLimitReached: () => void) {
     retryWord,
     clearAll,
     applyIncoming,
+    applyHistoryItem,
   };
 }
 

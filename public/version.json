@@ -1,9 +1,9 @@
 {
-  "versionCode": 1,
-  "versionName": "0.11.0",
+  "versionCode": 2,
+  "versionName": "0.12.0",
   "apkUrl": "https://github.com/eai-apps/YAi-Translator/releases/latest",
-  "notes_ru": "Первая версия универсального приложения YAi Translator для Android, планшетов и Android TV с поддержкой пульта и диктовки.",
-  "notes_de": "Erste Version der universellen YAi Translator App für Android, Tablets und Android TV mit Fernbedienung und Spracheingabe.",
-  "notes_en": "First release of the universal YAi Translator app for Android, tablets and Android TV with D-pad remote support and voice input.",
+  "notes_ru": "Свайп по истории переводов, кнопка «История», серия дней 🔥, озвучка в приложении, перевод текста из любого приложения и карточки для соцсетей.",
+  "notes_de": "Wischen durch den Übersetzungsverlauf, Verlauf-Button, Tagesserie 🔥, Sprachausgabe in der App, Textübersetzung aus jeder App und Bild-Export.",
+  "notes_en": "Swipe through translation history, history button, day streak 🔥, in-app speech synthesis, translate text from any app, and share as image.",
   "required": false
 }

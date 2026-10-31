@@ -12,6 +12,7 @@ interface CardMenuProps {
   onExplain: () => void;
   onCheck: () => void;
   onShare: () => void;
+  onShareImage?: () => void;
   /** Есть ли текст для «Разобрать» и «Проверить». */
   canUseTools: boolean;
   /** Телефон умеет системное «Поделиться» — иначе пункт копирует перевод. */
@@ -25,6 +26,7 @@ export function CardMenu({
   onExplain,
   onCheck,
   onShare,
+  onShareImage,
   canUseTools,
   shareSupported,
   variant = 'dots',
@@ -50,6 +52,15 @@ export function CardMenu({
       label: shareSupported ? t('translate.share') : t('translate.shareCopy'),
       onSelect: onShare,
     },
+    ...(onShareImage
+      ? [
+          {
+            id: 'shareImage',
+            label: t('translate.shareImage'),
+            onSelect: onShareImage,
+          },
+        ]
+      : []),
   ];
 
   return (

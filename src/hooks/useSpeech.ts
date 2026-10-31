@@ -1,7 +1,13 @@
-/** Озвучка и голосовой ввод через бесплатные Web Speech API браузера. */
+/**
+ * Озвучка и голосовой ввод:
+ * - В браузере (Web) — через Web Speech API (speechSynthesis / SpeechRecognition).
+ * - В приложении (Android) — синтез речи через нативный плагин @capacitor-community/text-to-speech.
+ */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { TextToSpeech } from '@capacitor-community/text-to-speech';
 import type { LanguageCode } from '../../shared/types';
 import { getLanguage } from '../../shared/languages';
+import { storeBuild } from '../config';
 
 export type SpeechError = 'unsupported' | 'denied' | 'no-speech' | 'failed' | null;
 
@@ -13,6 +19,7 @@ function speechCode(language: LanguageCode | 'auto'): string {
 }
 
 export function useSpeech() {
+  const isAndroid = storeBuild() === 'android';
   const [speakingId, setSpeakingId] = useState<string | null>(null);
   const [listening, setListening] = useState(false);
   const [error, setError] = useState<SpeechError>(null);
@@ -20,26 +27,34 @@ export function useSpeech() {
 
   const supported = useMemo(
     () => ({
-      synthesis: typeof window !== 'undefined' && 'speechSynthesis' in window,
+      synthesis: isAndroid || (typeof window !== 'undefined' && 'speechSynthesis' in window),
       recognition:
         typeof window !== 'undefined' &&
         Boolean(window.SpeechRecognition ?? window.webkitSpeechRecognition),
     }),
-    [],
+    [isAndroid],
   );
 
   // Останавливаем озвучку при уходе со страницы.
   useEffect(() => {
     return () => {
-      if (supported.synthesis) window.speechSynthesis.cancel();
+      if (isAndroid) {
+        TextToSpeech.stop().catch(() => undefined);
+      } else if (supported.synthesis && typeof window !== 'undefined' && 'speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
       recognitionRef.current?.abort();
     };
-  }, [supported.synthesis]);
+  }, [isAndroid, supported.synthesis]);
 
   const stopSpeaking = useCallback(() => {
-    if (supported.synthesis) window.speechSynthesis.cancel();
+    if (isAndroid) {
+      TextToSpeech.stop().catch(() => undefined);
+    } else if (supported.synthesis && typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+    }
     setSpeakingId(null);
-  }, [supported.synthesis]);
+  }, [isAndroid, supported.synthesis]);
 
   const speak = useCallback(
     (text: string, language: LanguageCode | 'auto', id = 'default') => {
@@ -56,20 +71,42 @@ export function useSpeech() {
         return;
       }
 
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(clean);
-      utterance.lang = speechCode(language);
-      utterance.rate = 0.95;
-      utterance.onend = () => setSpeakingId(null);
-      utterance.onerror = () => {
-        setSpeakingId(null);
-        setError('failed');
-      };
       setError(null);
       setSpeakingId(id);
-      window.speechSynthesis.speak(utterance);
+
+      if (isAndroid) {
+        TextToSpeech.stop()
+          .catch(() => undefined)
+          .then(() =>
+            TextToSpeech.speak({
+              text: clean,
+              lang: speechCode(language),
+              rate: 0.95,
+              pitch: 1.0,
+              volume: 1.0,
+            }),
+          )
+          .then(() => {
+            setSpeakingId(null);
+          })
+          .catch(() => {
+            setSpeakingId(null);
+            setError('failed');
+          });
+      } else {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(clean);
+        utterance.lang = speechCode(language);
+        utterance.rate = 0.95;
+        utterance.onend = () => setSpeakingId(null);
+        utterance.onerror = () => {
+          setSpeakingId(null);
+          setError('failed');
+        };
+        window.speechSynthesis.speak(utterance);
+      }
     },
-    [speakingId, stopSpeaking, supported.synthesis],
+    [isAndroid, speakingId, stopSpeaking, supported.synthesis],
   );
 
   const stopListening = useCallback(() => {

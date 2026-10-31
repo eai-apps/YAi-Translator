@@ -3,12 +3,14 @@
  * история, определение языка, подсказки, Enter, «Как переводят другие».
  * Ниже — офлайн-режим и ссылки «О приложении», «Обратная связь», «Справка».
  */
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { UiLanguage } from '../../../shared/types';
 import { useSettings } from '../../hooks/useSettings';
 import { useTheme } from '../../hooks/useTheme';
 import type { ThemeMode } from '../../hooks/useTheme';
 import { useTranslateSettings } from '../../hooks/useTranslateSettings';
+import { isReminderSupported, readReminderSettings, writeReminderSettings, type ReminderSettings } from '../../lib/dailyReminder';
 import { Card } from '../ui/Card';
 import { SectionTitle } from '../ui/SectionTitle';
 import { Segmented } from '../ui/Segmented';
@@ -21,6 +23,21 @@ export function SettingsCard() {
   const { uiLanguage, setUiLanguage } = useSettings();
   const { theme, setTheme } = useTheme();
   const { settings, update } = useTranslateSettings();
+  const [reminder, setReminder] = useState<ReminderSettings>(readReminderSettings);
+
+  const handleReminderToggle = async (val: boolean) => {
+    const next = { ...reminder, enabled: val };
+    setReminder(next);
+    // Нет разрешения на уведомления — переключатель возвращается в «выключено».
+    const ok = await writeReminderSettings(next);
+    if (!ok) setReminder(readReminderSettings());
+  };
+
+  const handleReminderTime = async (time: string) => {
+    const next = { ...reminder, time };
+    setReminder(next);
+    await writeReminderSettings(next);
+  };
 
   return (
     <Card className="p-4 sm:p-5">
@@ -87,6 +104,33 @@ export function SettingsCard() {
             checked={settings.showOthers}
             onChange={(value) => update({ showOthers: value })}
           />
+          <Toggle
+            label={t('profile.quizEnabled')}
+            hint={t('profile.quizEnabledHint')}
+            checked={settings.quizEnabled}
+            onChange={(value) => update({ quizEnabled: value })}
+          />
+          {isReminderSupported() ? (
+            <div className="py-2.5">
+              <Toggle
+                label={t('profile.dailyReminder')}
+                hint={t('profile.dailyReminderHint')}
+                checked={reminder.enabled}
+                onChange={(value) => void handleReminderToggle(value)}
+              />
+              {reminder.enabled ? (
+                <div className="mt-2 flex items-center justify-between pl-1">
+                  <span className="text-xs text-muted">{t('profile.dailyReminderTime')}</span>
+                  <input
+                    type="time"
+                    value={reminder.time}
+                    onChange={(e) => void handleReminderTime(e.target.value)}
+                    className="rounded-lg border border-line bg-soft px-2 py-1 text-xs text-ink outline-none"
+                  />
+                </div>
+              ) : null}
+            </div>
+          ) : null}
         </div>
       </div>
 

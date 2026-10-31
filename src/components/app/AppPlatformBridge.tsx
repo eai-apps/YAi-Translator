@@ -76,7 +76,14 @@ export const AppPlatformBridge: React.FC = () => {
         return;
       }
 
-      // Г) На главной странице — сворачиваем приложение
+      // Г) На главной странице: если в истории браузера есть предыдущий перевод — идём к нему
+      const historyStep = ((window.history.state as { step?: number } | null)?.step ?? 0);
+      if (historyStep > 0) {
+        window.history.back();
+        return;
+      }
+
+      // Д) Если предыдущего перевода нет — сворачиваем приложение
       CapApp.minimizeApp().catch(() => undefined);
     });
 
@@ -104,6 +111,33 @@ export const AppPlatformBridge: React.FC = () => {
 
     checkUpdate();
   }, [isAndroid]);
+
+  // 5. Текст из меню выделения Android (PROCESS_TEXT) или «Поделиться» (SEND) — см. MainActivity.java.
+  // Java кладёт текст в window.__YAI_PENDING_SHARED_TEXT__ и шлёт событие «yaiSharedText»:
+  // событие ловим, если приложение уже открыто; переменную читаем при старте.
+  useEffect(() => {
+    if (!isAndroid) return;
+    const holder = window as unknown as { __YAI_PENDING_SHARED_TEXT__?: string | null };
+
+    const handleText = (rawText: string | null | undefined) => {
+      holder.__YAI_PENDING_SHARED_TEXT__ = null;
+      const clean = (rawText ?? '').trim();
+      if (!clean) return;
+      // Экран перевода следит за адресом (useTranslationUrlSync) и сразу переводит ?q=.
+      navigate(`/?q=${encodeURIComponent(clean)}`);
+    };
+
+    if (holder.__YAI_PENDING_SHARED_TEXT__) handleText(holder.__YAI_PENDING_SHARED_TEXT__);
+
+    const onSharedText = (event: Event) => {
+      const detail = (event as CustomEvent<{ text?: string }>).detail;
+      const loose = event as unknown as { text?: string };
+      handleText(detail?.text ?? loose.text ?? holder.__YAI_PENDING_SHARED_TEXT__);
+    };
+
+    window.addEventListener('yaiSharedText', onSharedText);
+    return () => window.removeEventListener('yaiSharedText', onSharedText);
+  }, [isAndroid, navigate]);
 
   if (!isAndroid || !updateInfo) {
     return null;

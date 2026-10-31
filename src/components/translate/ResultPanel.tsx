@@ -3,12 +3,13 @@
  * крупный перевод, ниже действия 🔊 / копировать / «В карточки» / ⭐ / «⋯»
  * (Разобрать, Проверить мой немецкий, Поделиться). Под карточкой — «Как переводят другие».
  */
-import type { ReactNode } from 'react';
+import { useRef, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { LanguageCode, SourceLanguage, StudyCardInput, TranslateResponse } from '../../../shared/types';
 import { getLanguage, textDirection } from '../../../shared/languages';
 import type { TranslatorError } from '../../hooks/useTranslator';
 import type { SpeechController } from '../../hooks/useSpeech';
+import { useSwipe } from '../../hooks/useSwipe';
 import { errorMessageKey, providerLabel } from '../../lib/errors';
 import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
@@ -50,6 +51,13 @@ interface ResultPanelProps {
   onPickVariant?: (value: string) => void;
   /** Исходный текст — для «Поделиться». */
   sourceText: string;
+  onPrevHistory?: () => void;
+  onNextHistory?: () => void;
+  canPrevHistory?: boolean;
+  canNextHistory?: boolean;
+  historyCounter?: string | null;
+  slideDirection?: 'left' | 'right' | null;
+  onShareImage?: () => void;
 }
 
 /** Есть ли системное окно «Поделиться» (на телефоне) — иначе копируем текст. */
@@ -60,6 +68,12 @@ function canShare(): boolean {
 export function ResultPanel(props: ResultPanelProps) {
   const { result, loading, error, sourceLang, targetLang, detectedLang, speech } = props;
   const { t } = useTranslation();
+  const panelRef = useRef<HTMLDivElement>(null);
+
+  useSwipe(panelRef, {
+    onSwipeLeft: props.onNextHistory,
+    onSwipeRight: props.onPrevHistory,
+  });
 
   const targetName = getLanguage(targetLang)?.nativeName ?? targetLang;
   const copyValue = result?.translatedText ?? '';
@@ -80,12 +94,17 @@ export function ResultPanel(props: ResultPanelProps) {
     }
   };
 
-
   return (
-    <div className="flex min-w-0 flex-col gap-3">
+    <div ref={panelRef} className="group relative flex min-w-0 flex-col gap-3">
       <Card
-        className={`flex min-h-[220px] flex-col p-4 sm:p-5 ${result?.pro ? 'ring-1 ring-accent/40 shadow-[0_0_0_4px_rgba(109,146,255,0.08)]' : ''}`}
+        className={`relative flex min-h-[220px] flex-col p-4 sm:p-5 ${result?.pro ? 'ring-1 ring-accent shadow-[0_0_0_4px_rgba(109,146,255,0.08)]' : ''}`}
       >
+        {props.historyCounter ? (
+          <div className="absolute right-3 top-3 z-10 rounded-full border border-line bg-card px-2 py-0.5 font-mono text-[11px] text-muted shadow-sm backdrop-blur-sm">
+            {props.historyCounter}
+          </div>
+        ) : null}
+
         <div className="flex flex-wrap items-center justify-between gap-2">
           <span className="text-xs font-medium text-muted">
             {detectedLang && sourceLang === 'auto'
@@ -93,6 +112,30 @@ export function ResultPanel(props: ResultPanelProps) {
               : targetName}
           </span>
           <div className="flex items-center gap-2">
+            {(props.canPrevHistory || props.canNextHistory) ? (
+              <div className="flex items-center gap-1 opacity-90 sm:opacity-0 sm:group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
+                <button
+                  type="button"
+                  aria-label={t('translate.historyPrev')}
+                  title={`${t('translate.historyPrev')} (Alt+←)`}
+                  disabled={!props.canPrevHistory}
+                  onClick={props.onPrevHistory}
+                  className="flex h-6 w-6 items-center justify-center rounded-md border border-line bg-card text-xs text-muted hover:bg-soft hover:text-ink disabled:opacity-30 disabled:pointer-events-none focus-visible:ring-2 focus-visible:ring-accent"
+                >
+                  ‹
+                </button>
+                <button
+                  type="button"
+                  aria-label={t('translate.historyNext')}
+                  title={`${t('translate.historyNext')} (Alt+→)`}
+                  disabled={!props.canNextHistory}
+                  onClick={props.onNextHistory}
+                  className="flex h-6 w-6 items-center justify-center rounded-md border border-line bg-card text-xs text-muted hover:bg-soft hover:text-ink disabled:opacity-30 disabled:pointer-events-none focus-visible:ring-2 focus-visible:ring-accent"
+                >
+                  ›
+                </button>
+              </div>
+            ) : null}
             {loading ? <Spinner className="text-muted" /> : null}
             {result ? <Badge tone="accent">{result.label ?? providerLabel(result.provider, result.model)}</Badge> : null}
           </div>
@@ -100,7 +143,16 @@ export function ResultPanel(props: ResultPanelProps) {
 
         <div className="my-3 border-t border-line" />
 
-        <div className="flex-1" aria-live="polite">
+        <div
+          className={`flex-1 transition-all duration-200 ${
+            props.slideDirection === 'left'
+              ? '-translate-x-3 opacity-60'
+              : props.slideDirection === 'right'
+                ? 'translate-x-3 opacity-60'
+                : 'translate-x-0 opacity-100'
+          }`}
+          aria-live="polite"
+        >
           {error ? (
             <div className="flex flex-col items-start justify-center gap-3 py-6">
               <div className="flex items-start gap-2 text-danger">
@@ -154,7 +206,7 @@ export function ResultPanel(props: ResultPanelProps) {
                       key={variant}
                       type="button"
                       onClick={() => props.onPickVariant?.(variant)}
-                      className="rounded-full bg-accentSoft px-2.5 py-0.5 text-sm text-accent transition hover:ring-2 hover:ring-accent/40"
+                      className="rounded-full bg-accentSoft px-2.5 py-0.5 text-sm text-accent transition hover:ring-2 hover:ring-accent"
                     >
                       {variant}
                     </button>
@@ -189,6 +241,7 @@ export function ResultPanel(props: ResultPanelProps) {
                 onExplain={props.onExplain}
                 onCheck={props.onCheck}
                 onShare={() => void share()}
+                onShareImage={props.onShareImage}
                 canUseTools={props.canUseTools}
                 shareSupported={canShare()}
                 className="ml-auto"

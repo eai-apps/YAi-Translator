@@ -20,6 +20,7 @@ import { IconClose, IconMic, IconVolume } from '../layout/icons';
 import { LanguageRow } from './LanguageRow';
 import { ProviderPill } from './ProviderPill';
 import { SuggestionList } from './SuggestionList';
+import { PasteChip } from './PasteChip';
 
 interface SourcePanelProps {
   text: string;
@@ -152,7 +153,7 @@ export function SourcePanel(props: SourcePanelProps) {
               className="min-h-[64px] max-h-[420px] w-full resize-none overflow-y-auto bg-transparent py-2 pl-1 pr-10 text-lg leading-relaxed text-ink outline-none placeholder:text-muted sm:min-h-[80px] sm:text-xl"
             />
           </label>
-          {/* Крестик «очистить» — справа в поле, как в Яндекс.Переводчике. */}
+          {/* Крестик «очистить» — справа в поле, либо чипс «Вставить» для пустого поля. */}
           {text ? (
             <button
               type="button"
@@ -166,7 +167,9 @@ export function SourcePanel(props: SourcePanelProps) {
             >
               <IconClose className="h-[18px] w-[18px]" />
             </button>
-          ) : null}
+          ) : (
+            <PasteChip onPaste={onChange} />
+          )}
         </div>
 
         {listOpen ? (

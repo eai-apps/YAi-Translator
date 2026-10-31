@@ -18,6 +18,8 @@ export interface TranslateSettings {
   enterToTranslate: boolean;
   /** Показывать блок «Как переводят другие» автоматически. */
   showOthers: boolean;
+  /** Предлагать тест на 5 слов из истории после каждых 10 переводов (этап 10Б). */
+  quizEnabled: boolean;
 }
 
 export const DEFAULT_TRANSLATE_SETTINGS: TranslateSettings = {
@@ -27,6 +29,7 @@ export const DEFAULT_TRANSLATE_SETTINGS: TranslateSettings = {
   suggestions: false,
   enterToTranslate: false,
   showOthers: true,
+  quizEnabled: true,
 };
 
 /** Сохранённые настройки + старый отдельный ключ showOthers (совместимость). */
@@ -44,6 +47,7 @@ export function readTranslateSettings(): TranslateSettings {
         ? stored.enterToTranslate
         : DEFAULT_TRANSLATE_SETTINGS.enterToTranslate,
     showOthers: typeof stored.showOthers === 'boolean' ? stored.showOthers : legacyShowOthers,
+    quizEnabled: typeof stored.quizEnabled === 'boolean' ? stored.quizEnabled : DEFAULT_TRANSLATE_SETTINGS.quizEnabled,
   };
 }
 

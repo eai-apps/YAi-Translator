@@ -1,28 +1,31 @@
 /**
- * Экран «Перевод» (этап 8Б): две независимые колонки на широком экране —
- * слева поле ввода, сразу под ним перевод (без пустой дыры под полем);
- * справа «Как переводят другие» и перевод ИИ на всю высоту.
- * На телефоне порядок: поле ввода → перевод → «Как переводят другие» → карточка слова.
- * Связывает ввод, API, разбор, проверку и окно ключей.
+ * Экран «Перевод» (этап 10Б): две колонки, свайп/навигация по истории переводов,
+ * синхронизация адреса ?q=..., озвучка в приложении, кнопка «История», серия дней 🔥,
+ * карточка повторения 5 слов и поделиться картинкой.
  */
-import { useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { LanguageCode, ProviderId, SourceLanguage, TranslateResponse } from '../../shared/types';
-import { isLanguageCode } from '../../shared/languages';
+import type { LanguageCode, ProviderId, TranslateResponse } from '../../shared/types';
 import { isAiProvider } from '../lib/errors';
 import { MAX_TEXT_LENGTH } from '../config';
 import { useExplainAndCheck } from '../hooks/useExplainAndCheck';
 import { useHistory } from '../hooks/useHistory';
+import { useHistoryBrowse } from '../hooks/useHistoryBrowse';
+import { useHistoryQuizPrompt } from '../hooks/useHistoryQuizPrompt';
 import { useOthers } from '../hooks/useOthers';
 import { useSettings } from '../hooks/useSettings';
 import { useSpeech } from '../hooks/useSpeech';
+import { useStreak } from '../hooks/useStreak';
 import { useTranslateSettings } from '../hooks/useTranslateSettings';
 import { useTranslationActions } from '../hooks/useTranslationActions';
-import { useTranslator } from '../hooks/useTranslator';
+import { useTranslationUrlSync } from '../hooks/useTranslationUrlSync';
+import { isWordQuery, useTranslator } from '../hooks/useTranslator';
 import { TranslateHeader } from '../components/translate/TranslateHeader';
+import { TranslateHistoryDrawer } from '../components/translate/TranslateHistoryDrawer';
 import { SourcePanel } from '../components/translate/SourcePanel';
 import { ResultPanel } from '../components/translate/ResultPanel';
+import { HistoryQuizPromptCard } from '../components/translate/HistoryQuizPromptCard';
+import { HistoryQuizModal } from '../components/translate/HistoryQuizModal';
 import { OthersPanel } from '../components/translate/OthersPanel';
 import { CardMenu } from '../components/translate/CardMenu';
 import { ExplanationPanel } from '../components/translate/ExplanationPanel';
@@ -32,7 +35,8 @@ import { WordOfDayCard } from '../components/study/WordOfDayCard';
 import { PickContext } from '../components/word/pick';
 import { LimitDialog } from '../components/limit/LimitDialog';
 import { cardFromTranslation } from '../lib/studyCard';
-import { initialSourceLanguage, readTranslateSettings } from '../lib/translateSettings';
+import { shareTranslationImage } from '../lib/renderShareImage';
+import { extractMoreVariants } from '../components/translate/variants';
 
 export default function TranslatePage() {
   const { t } = useTranslation();
@@ -41,18 +45,54 @@ export default function TranslatePage() {
   const { items, toggleFavorite } = useHistory();
   const speech = useSpeech();
   const translator = useTranslator(() => setLimitOpen(true));
+  const { streak, todayActive, markTodayActivity } = useStreak();
 
   const [limitOpen, setLimitOpen] = useState(false);
-  /** Вариант другого переводчика, выбранный кнопкой «Использовать этот вариант». */
+  const [historyDrawerOpen, setHistoryDrawerOpen] = useState(false);
   const [chosen, setChosen] = useState<{ provider: ProviderId; text: string } | null>(null);
-  const [searchParams, setSearchParams] = useSearchParams();
 
-  const { text, sourceLang, targetLang, applyIncoming, result } = translator;
+  const { text, sourceLang, targetLang, result } = translator;
 
-  // Нажатые слова и «Поделиться» — в useTranslationActions.ts.
+  // Нажатые слова и «Поделиться»
   const { pickText, pickTranslation, share, shareSupported, shareCopied } = useTranslationActions(translator);
 
-  // «Разобрать» и «Проверить мой немецкий» — отдельный хук (useExplainAndCheck.ts).
+  // Синхронизация с URL (?q=...&from=...&to=...) и кнопками «Назад/Вперёд»
+  useTranslationUrlSync({
+    text: translator.text,
+    sourceLang: translator.sourceLang,
+    targetLang: translator.targetLang,
+    result: translator.result,
+    loading: translator.loading,
+    error: translator.error,
+    applyIncoming: translator.applyIncoming,
+    clearAll: translator.clearAll,
+  });
+
+  // Листание истории свайпом, ‹ › и Alt+←/Alt+→
+  const historyBrowse = useHistoryBrowse({
+    items,
+    currentText: translator.text,
+    currentSource: translator.sourceLang,
+    currentTarget: translator.targetLang,
+    onSelect: translator.applyHistoryItem,
+  });
+
+  // Тест на 5 слов из истории
+  const quiz = useHistoryQuizPrompt(items, settings.quizEnabled);
+
+  // Серия дней и счётчик для теста: один раз на каждый новый перевод (не на каждую перерисовку,
+  // и не для перевода, открытого из истории).
+  const countedResultRef = useRef<TranslateResponse | null>(null);
+  const { onWordTranslated } = quiz;
+  useEffect(() => {
+    if (!result || translator.loading || translator.error) return;
+    if (countedResultRef.current === result) return;
+    countedResultRef.current = result;
+    markTodayActivity();
+    if (!result.fromHistory && isWordQuery(text)) onWordTranslated();
+  }, [result, translator.loading, translator.error, text, markTodayActivity, onWordTranslated]);
+
+  // «Разобрать» и «Проверить мой немецкий»
   const { explain, check, runExplain, runCheck, closeExplain, closeCheck } = useExplainAndCheck({
     text,
     sourceLang,
@@ -61,7 +101,6 @@ export default function TranslatePage() {
     onLimitReached: () => setLimitOpen(true),
   });
 
-  // Выбранный вариант действует только для этого текста и языков.
   useEffect(() => {
     setChosen(null);
   }, [text, sourceLang, targetLang, translator.providerChoice]);
@@ -75,25 +114,6 @@ export default function TranslatePage() {
     detectedLang: translator.detectedLang,
   });
 
-  // Текст и языки из истории («Открыть» в словаре).
-  useEffect(() => {
-    const textParam = searchParams.get('text');
-    if (!textParam) return;
-    const fromParam = searchParams.get('from') ?? (readTranslateSettings().detectLanguage ? 'auto' : initialSourceLanguage(false));
-    const toParam = searchParams.get('to') ?? 'de';
-    const source: SourceLanguage =
-      fromParam === 'auto' || isLanguageCode(fromParam) ? fromParam : 'auto';
-    const target: LanguageCode = isLanguageCode(toParam) ? toParam : 'de';
-    applyIncoming(textParam, source, target);
-
-    const next = new URLSearchParams(searchParams);
-    next.delete('text');
-    next.delete('from');
-    next.delete('to');
-    setSearchParams(next, { replace: true });
-  }, [searchParams, setSearchParams, applyIncoming]);
-
-  // «Использовать этот вариант»: чужой текст становится основным переводом.
   const useVariant = (provider: ProviderId, variantText: string) => {
     setChosen({ provider, text: variantText });
   };
@@ -102,20 +122,17 @@ export default function TranslatePage() {
     ? items.find((item) => item.id === translator.historyId)?.favorite ?? false
     : false;
 
-  // Язык исходного слова для карточки из словарей: выбранный или определённый автоматически.
   const wordLanguage: LanguageCode | null =
     sourceLang !== 'auto'
       ? sourceLang
       : translator.dict.data?.entry.sourceLang ?? translator.word.data?.card.language ?? null;
 
-  // Показанный перевод: выбранный вариант или ответ сервера.
   const shown: TranslateResponse | null = result
     ? chosen
       ? { ...result, translatedText: chosen.text, provider: chosen.provider, alternatives: [] }
       : result
     : null;
 
-  // Для 1–3 слов рядом со звёздочкой появляется «В карточки» (этап 6).
   const resolvedSource = sourceLang === 'auto' ? translator.detectedLang : sourceLang;
   const studyInput = shown
     ? resolvedSource === 'de'
@@ -125,23 +142,7 @@ export default function TranslatePage() {
         : null
     : null;
 
-  // «Ещё варианты» под переводом: все переводы из карточки слова, кроме основного (до 8).
-  const moreVariants = (() => {
-    const card = translator.word.data?.card;
-    const main = (shown?.translatedText ?? '').trim().toLowerCase();
-    if (!card || !shown) return [];
-    const seen = new Set<string>([main]);
-    const list: string[] = [];
-    for (const meaning of card.meanings) {
-      for (const value of meaning.translations) {
-        const key = value.trim().toLowerCase();
-        if (!key || seen.has(key)) continue;
-        seen.add(key);
-        list.push(value.trim());
-      }
-    }
-    return list.slice(0, 8);
-  })();
+  const moreVariants = extractMoreVariants(translator.word.data, shown);
 
   const tools = {
     onExplain: runExplain,
@@ -149,7 +150,17 @@ export default function TranslatePage() {
     canUseTools: translator.text.trim().length > 0,
   };
 
-  // «Как переводят другие»: только когда есть основной перевод (в правой колонке).
+  const handleShareImage = () => {
+    if (!shown) return;
+    void shareTranslationImage({
+      sourceText: text,
+      translatedText: shown.translatedText,
+      sourceLang,
+      targetLang,
+      article: translator.word.data?.card.article ?? null,
+    });
+  };
+
   const othersBlock =
     settings.showOthers && result && !translator.error ? (
       <OthersPanel
@@ -174,9 +185,12 @@ export default function TranslatePage() {
 
   return (
     <>
-      <TranslateHeader />
+      <TranslateHeader
+        onOpenHistory={() => setHistoryDrawerOpen(true)}
+        streak={streak}
+        todayActive={todayActive}
+      />
 
-      {/* Две колонки идут сверху вниз независимо: под полем ввода нет пустой дыры (этап 8Б). */}
       <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:gap-4">
         <div className="flex min-w-0 flex-1 flex-col gap-3">
           <SourcePanel
@@ -198,7 +212,6 @@ export default function TranslatePage() {
             onAskAi={(model?: string) => void translator.askAi(model)}
           />
 
-          {/* Под пустым полем — маленькое слово дня; крестик скрывает его до завтра. */}
           {translator.text.trim() === '' ? <WordOfDayCard compact /> : null}
 
           <ResultPanel
@@ -221,10 +234,20 @@ export default function TranslatePage() {
             }}
             studyInput={studyInput}
             sourceText={text}
+            onPrevHistory={historyBrowse.goPrev}
+            onNextHistory={historyBrowse.goNext}
+            canPrevHistory={historyBrowse.canPrev}
+            canNextHistory={historyBrowse.canNext}
+            historyCounter={historyBrowse.counterText}
+            slideDirection={historyBrowse.slideDirection}
+            onShareImage={handleShareImage}
           />
+
+          {quiz.shouldPrompt ? (
+            <HistoryQuizPromptCard onStart={quiz.startQuiz} onDismiss={quiz.dismiss} />
+          ) : null}
         </div>
 
-        {/* Правая колонка: другие переводчики и ИИ, на всю высоту (на телефоне — ниже перевода). */}
         {othersBlock ? <div className="flex min-w-0 flex-1 flex-col gap-3 lg:sticky lg:top-4">{othersBlock}</div> : null}
       </div>
 
@@ -234,7 +257,6 @@ export default function TranslatePage() {
         </p>
       ) : null}
 
-      {/* Синонимы, выражения и примеры в карточке можно нажать — они сразу переводятся. */}
       <PickContext.Provider value={pickText}>
         <WordPanel
           word={translator.word}
@@ -251,6 +273,7 @@ export default function TranslatePage() {
                 variant="dots"
                 {...tools}
                 onShare={() => void share(text, shown.translatedText, t('common.appName'))}
+                onShareImage={handleShareImage}
                 shareSupported={shareSupported}
               />
             ) : undefined
@@ -278,6 +301,19 @@ export default function TranslatePage() {
           onRetry={runCheck}
         />
       ) : null}
+
+      <TranslateHistoryDrawer
+        open={historyDrawerOpen}
+        onClose={() => setHistoryDrawerOpen(false)}
+        onSelect={translator.applyHistoryItem}
+      />
+
+      <HistoryQuizModal
+        open={quiz.modalOpen}
+        onClose={quiz.closeQuiz}
+        items={quiz.wordItems}
+        onComplete={markTodayActivity}
+      />
 
       <LimitDialog open={limitOpen} onClose={() => setLimitOpen(false)} onSaved={translator.retry} />
     </>
