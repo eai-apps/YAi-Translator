@@ -76,9 +76,13 @@ jobs:
           rm -f "$YAI_KEYSTORE_FILE"
 
       - name: Upload Release APK to GitHub Release
-        if: steps.check_secrets.outputs.has_secrets == 'true' && startsWith(github.ref, 'refs/tags/v')
+        if: steps.check_secrets.outputs.has_secrets == 'true'
         uses: softprops/action-gh-release@v2
         with:
+          # Тег создаётся сам и при запуске кнопкой «Run workflow» (вкладка Actions).
+          tag_name: v${{ env.APP_VERSION }}
+          target_commitish: ${{ github.sha }}
+          make_latest: true
           files: |
             YAi-Translator-${{ env.APP_VERSION }}.apk
             YAi-Translator.apk
