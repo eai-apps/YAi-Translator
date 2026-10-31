@@ -40,6 +40,9 @@ export default defineConfig({
         // Запросы к API никогда не подменяем офлайн-страницей.
         navigateFallbackDenylist: [/^\/api\//],
         cleanupOutdatedCaches: true,
+        // Новая версия включается сразу, не дожидаясь закрытия всех вкладок сайта.
+        skipWaiting: true,
+        clientsClaim: true,
         runtimeCaching: [
           {
             // Шрифт Inter: кэшируем, чтобы интерфейс выглядел одинаково офлайн.
