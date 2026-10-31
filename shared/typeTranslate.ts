@@ -46,3 +46,7 @@ export interface TranslateResponse {
   provider: ProviderId;
   cached: boolean;
 }
+
+export interface TranscribeResponse {
+  text: string;
+}

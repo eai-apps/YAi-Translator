@@ -8,6 +8,7 @@ import { useAccount } from '../../hooks/useAccount';
 import { Card } from '../ui/Card';
 import { SectionTitle } from '../ui/SectionTitle';
 import { KeyWizard } from '../keys/KeyWizard';
+import { PaidKeySection } from './PaidKeySection';
 import { IconLock } from '../layout/icons';
 
 export function KeysCard() {
@@ -26,6 +27,7 @@ export function KeysCard() {
       <div className="mt-3 space-y-3">
         <KeyWizard provider="gemini" />
         <KeyWizard provider="groq" />
+        <PaidKeySection />
       </div>
 
       {status === 'signedIn' && account && !account.keysStorageEnabled ? (

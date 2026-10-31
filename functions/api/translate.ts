@@ -12,7 +12,7 @@ import type { Env } from '../_lib/env';
 import { buildCacheKey, requireLanguage, requireSourceLanguage, requireText } from '../_lib/request';
 import { readCache, writeCache } from '../_lib/cache';
 import { ApiError, errorResponse, getClientIp, getHeaderKeys, getUiLanguage, jsonResponse, readJsonBody } from '../_lib/http';
-import { resolveUserKeys } from '../_lib/auth/keys';
+import { findRequestSession, resolveUserKeys } from '../_lib/auth/keys';
 import { createLimitGuard } from '../_lib/usage';
 import { buildTranslatePrompt } from '../_lib/prompts';
 import { runJsonTask } from '../_lib/router';
@@ -36,7 +36,7 @@ async function recordTranslation(env: Env, response: TranslateResponse, sourceLa
 }
 
 function isAi(response: TranslateResponse): boolean {
-  return response.provider === 'gemini' || response.provider === 'groq' || response.provider === 'workersai';
+  return response.provider === 'gemini' || response.provider === 'groq' || response.provider === 'workersai' || response.provider === 'paid';
 }
 
 interface Job {
@@ -48,6 +48,7 @@ interface Job {
   userKeys: UserKeys;
   signal: AbortSignal;
   limitGuard: () => Promise<void>;
+  isRegistered?: boolean;
 }
 
 /** Обычные переводчики: выбранный пользователем или все по очереди. */
@@ -67,15 +68,21 @@ async function runClassic(job: Job, only: ClassicProviderId | null): Promise<Tra
 }
 
 /** ИИ, который можно выбрать в списке переводчиков: только с личным ключом пользователя. */
-const PERSONAL_AI = ['gemini', 'groq'] as const;
+const PERSONAL_AI = ['gemini', 'groq', 'paid'] as const;
 type PersonalAi = (typeof PERSONAL_AI)[number];
 
 /**
  * ИИ с альтернативами. Ошибку LIMIT_REACHED пробрасываем — фронтенд покажет окно ключа.
- * personal — человек выбрал в списке «Gemini» или «Groq»: работает только его личный ключ.
+ * personal — человек выбрал в списке «Gemini», «Groq» или «paid»: работает только его личный ключ.
  */
 async function runAi(job: Job, personal: PersonalAi | null = null): Promise<TranslateResponse> {
-  if (personal && !job.userKeys[personal]) throw new ApiError('LIMIT_REACHED', 429);
+  if (personal === 'paid') {
+    if (!job.userKeys.paidUrl || !job.userKeys.paidKey || !job.userKeys.paidModel) {
+      throw new ApiError('LIMIT_REACHED', 429);
+    }
+  } else if (personal && !job.userKeys[personal]) {
+    throw new ApiError('LIMIT_REACHED', 429);
+  }
   const { data, provider } = await runJsonTask({
     env: job.env,
     prompt: buildTranslatePrompt(job),
@@ -83,6 +90,7 @@ async function runAi(job: Job, personal: PersonalAi | null = null): Promise<Tran
     signal: job.signal,
     beforeShared: job.limitGuard,
     validate: validateTranslate,
+    isRegistered: job.isRegistered,
     ...(personal ? { only: [personal], personalOnly: true } : {}),
   });
   return { ...data, provider, cached: false };
@@ -104,7 +112,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     }
 
     const env = context.env;
-    // Ключи: заголовки X-User-* важнее, затем расшифрованные ключи аккаунта.
+    const session = await findRequestSession(env, context.request);
     const userKeys = await resolveUserKeys(env, context.request, getHeaderKeys(context.request));
     const job: Job = {
       env,
@@ -114,7 +122,8 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       uiLang,
       userKeys,
       signal: context.request.signal,
-      limitGuard: createLimitGuard(env, getClientIp(context.request)),
+      limitGuard: createLimitGuard(env, getClientIp(context.request), session?.userId),
+      isRegistered: Boolean(session),
     };
 
     // Кэш отдельно для каждого режима и выбранного переводчика.

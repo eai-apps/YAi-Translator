@@ -56,12 +56,20 @@ export async function request<T>(path: string, init: RequestInit_, signal?: Abor
     const keys = getUserKeys();
     if (keys.gemini) headers['X-User-Gemini-Key'] = keys.gemini;
     if (keys.groq) headers['X-User-Groq-Key'] = keys.groq;
+    if (keys.paidUrl) headers['X-User-Paid-Url'] = keys.paidUrl;
+    if (keys.paidKey) headers['X-User-Paid-Key'] = keys.paidKey;
+    if (keys.paidModel) headers['X-User-Paid-Model'] = keys.paidModel;
     // На сайте сессия в cookie; токен нужен приложениям, где cookie недоступна.
     const token = getSessionToken();
     if (token) headers.Authorization = `Bearer ${token}`;
   }
 
-  if (init.body !== undefined) headers['Content-Type'] = 'application/json';
+  const isBlob = typeof Blob !== 'undefined' && init.body instanceof Blob;
+  if (init.body !== undefined && !isBlob) {
+    headers['Content-Type'] = 'application/json';
+  } else if (isBlob) {
+    headers['Content-Type'] = (init.body as Blob).type || 'audio/webm';
+  }
 
   // Защита от «вечного» спиннера: если сервер или сеть молчат 30 с, запрос прерывается с понятной ошибкой.
   const timeout = new AbortController();
@@ -74,7 +82,7 @@ export async function request<T>(path: string, init: RequestInit_, signal?: Abor
     response = await fetch(`${API_BASE}${path}`, {
       method: init.method,
       headers,
-      body: init.body === undefined ? undefined : JSON.stringify(init.body),
+      body: init.body === undefined ? undefined : isBlob ? (init.body as Blob) : JSON.stringify(init.body),
       // Cookie сессии отправляется и на другой домен (Capacitor); сервер разрешает это в CORS.
       credentials: withAuth ? 'include' : 'same-origin',
       signal: timeout.signal,

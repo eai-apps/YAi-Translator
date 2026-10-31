@@ -32,14 +32,22 @@ async function saveDailyLimit(env: Env, limit: number | null): Promise<void> {
 }
 
 async function currentSettings(env: Env): Promise<AdminSettings> {
-  const stored = await readSetting<number>(env, SETTINGS_KEYS.dailyLimit);
-  const banner = await readBanner(env);
+  const [stored, banner, guestLimit, regLimit, requiresLogin] = await Promise.all([
+    readSetting<number>(env, SETTINGS_KEYS.dailyLimit),
+    readBanner(env),
+    readSetting<number>(env, SETTINGS_KEYS.guestAiLimit),
+    readSetting<number>(env, SETTINGS_KEYS.registeredAiLimit),
+    readSetting<boolean>(env, SETTINGS_KEYS.aiRequiresLogin),
+  ]);
   return {
     dailyLimit: typeof stored === 'number' ? clampDailyLimit(stored) : null,
     defaultDailyLimit: LIMITS.freeRequestsPerDay,
     banner,
     disabledProviders: [...(await readDisabledProviders(env))],
     feedbackEmail: await readFeedbackEmail(env),
+    guestAiLimit: guestLimit ?? 5,
+    registeredAiLimit: regLimit ?? 50,
+    aiRequiresLogin: requiresLogin ?? false,
   };
 }
 
@@ -92,6 +100,16 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
       if (email) await writeSetting(env, SETTINGS_KEYS.feedbackEmail, email);
       else if (env.DB) await env.DB.prepare('DELETE FROM settings WHERE key = ?').bind(SETTINGS_KEYS.feedbackEmail).run();
       await logAdminAction(env, admin, 'settings.feedback', email ? 'set' : 'off');
+    }
+
+    if (body.guestAiLimit !== undefined) {
+      await writeSetting(env, SETTINGS_KEYS.guestAiLimit, Math.max(1, Math.min(1000, Number(body.guestAiLimit))));
+    }
+    if (body.registeredAiLimit !== undefined) {
+      await writeSetting(env, SETTINGS_KEYS.registeredAiLimit, Math.max(1, Math.min(1000, Number(body.registeredAiLimit))));
+    }
+    if (body.aiRequiresLogin !== undefined) {
+      await writeSetting(env, SETTINGS_KEYS.aiRequiresLogin, Boolean(body.aiRequiresLogin));
     }
 
     return jsonResponse(await currentSettings(env));

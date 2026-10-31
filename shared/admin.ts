@@ -59,6 +59,8 @@ export interface AdminOverview {
   popularPairs: Array<{ from: string; to: string; count: number }>;
   /** Последние 30 дней начиная с самого раннего: переводы и уникальные посетители. */
   daily: Array<{ day: string; translations: number; visitors: number }>;
+  /** Расход платных токенов нейросетей сайта (этап 7). */
+  paidTokens?: { today: number; month: number; dailyLimit: number; monthlyLimit: number };
 }
 
 export interface AdminSettings {
@@ -70,6 +72,14 @@ export interface AdminSettings {
   disabledProviders: string[];
   /** Почта для пункта «Обратная связь» в настройках; пусто — пункт скрыт (этап 8). */
   feedbackEmail: string;
+  /** Бонусы за регистрацию и платные нейросети (этап 7). */
+  guestAiLimit?: number;
+  registeredAiLimit?: number;
+  aiRequiresLogin?: boolean;
+  paidAiOrder?: 'free_first' | 'paid_first' | 'paid_off';
+  paidAiRegisteredOnly?: boolean;
+  paidDailyTokenLimit?: number;
+  paidMonthlyTokenLimit?: number;
 }
 
 export interface AdminUserItem {
@@ -103,4 +113,38 @@ export interface SiteSettingsResponse {
   banner: { ru: string; de: string; en: string } | null;
   /** Адрес из админки для ссылки mailto: в настройках; null — пункт «Обратная связь» скрыт. */
   feedbackEmail: string | null;
+  /** Бонусы за регистрацию (этап 7). */
+  guestAiLimit?: number;
+  registeredAiLimit?: number;
+  aiRequiresLogin?: boolean;
+}
+
+export interface PaidModelOption {
+  id: string;
+  enabled: boolean;
+  priceIn?: number;
+  priceOut?: number;
+  isSlowOrExpensive?: boolean;
+}
+
+export interface PaidConnectionItem {
+  id: string;
+  name: string;
+  baseUrl: string;
+  mask: string;
+  balance?: string | null;
+  defaultModel: string;
+  models: PaidModelOption[];
+  createdAt: number;
+}
+
+export interface BuyLinkItem {
+  id: number;
+  title: string;
+  url: string;
+  howtoRu: string;
+  howtoDe: string;
+  howtoEn: string;
+  sort: number;
+  hidden: boolean;
 }

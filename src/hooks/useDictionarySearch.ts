@@ -29,7 +29,7 @@ export interface DictionarySearch {
   error: TranslatorError | null;
   /** Лимит ИИ исчерпан — страница открывает окно подключения ключа. */
   onLimit: () => void;
-  search: (event?: FormEvent) => Promise<void>;
+  search: (eventOrWord?: FormEvent | string) => Promise<void>;
   limitOpen: boolean;
   closeLimit: () => void;
 }
@@ -55,10 +55,13 @@ export function useDictionarySearch(uiLanguage: string): DictionarySearch {
   useEffect(() => () => abortRef.current?.abort(), []);
 
   const search = useCallback(
-    async (event?: FormEvent) => {
-      event?.preventDefault();
-      const word = query.trim();
+    async (eventOrWord?: FormEvent | string) => {
+      if (typeof eventOrWord === 'object' && eventOrWord && 'preventDefault' in eventOrWord) {
+        eventOrWord.preventDefault();
+      }
+      const word = (typeof eventOrWord === 'string' ? eventOrWord : query).trim();
       if (!word) return;
+      if (typeof eventOrWord === 'string') setQuery(word);
 
       abortRef.current?.abort();
       const controller = new AbortController();
@@ -91,11 +94,11 @@ export function useDictionarySearch(uiLanguage: string): DictionarySearch {
 
   /** Новый запрос — сбрасываем прошлые карточки. */
   const searchFresh = useCallback(
-    async (event?: FormEvent) => {
+    async (eventOrWord?: FormEvent | string) => {
       resetDict();
       setCard(null);
       setError(null);
-      await search(event);
+      await search(eventOrWord);
     },
     [resetDict, search],
   );

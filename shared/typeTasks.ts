@@ -11,7 +11,7 @@ import type { SourceLanguage } from './typeCore';
 export type TaskKind = 'translate' | 'word' | 'explain' | 'check' | 'dict' | 'resources' | 'grammar' | 'ask' | 'study';
 
 /** Провайдер ИИ, который реально ответил. */
-/** ИИ: gemini, groq, workersai. Обычные переводчики: deepl, lara, microsoft, google, mymemory, m2m100. */
+/** ИИ: gemini, groq, workersai, paid. Обычные переводчики: deepl, lara, microsoft, google, mymemory, m2m100. */
 export type ProviderId =
   | 'gemini'
   | 'groq'
@@ -21,7 +21,8 @@ export type ProviderId =
   | 'microsoft'
   | 'google'
   | 'mymemory'
-  | 'm2m100';
+  | 'm2m100'
+  | 'paid';
 
 /** Часть речи для карточки слова. */
 export type PartOfSpeech =

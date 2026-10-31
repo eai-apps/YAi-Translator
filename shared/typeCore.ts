@@ -37,7 +37,9 @@ export type ApiErrorCode =
   | 'KEY_NO_ACCESS'
   | 'FORBIDDEN'
   | 'ACCOUNT_BLOCKED'
-  | 'GRAMMAR_NOT_READY';
+  | 'GRAMMAR_NOT_READY'
+  | 'AUDIO_TOO_LARGE'
+  | 'AUDIO_REQUIRED';
 
 export interface ApiErrorBody {
   error: {

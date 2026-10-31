@@ -11,9 +11,11 @@ import { textDirection } from '../../../shared/languages';
 import type { ProviderChoice } from '../../hooks/useTranslator';
 import type { SpeechController } from '../../hooks/useSpeech';
 import { useSuggestions } from '../../hooks/useSuggestions';
+import { useAudioVoice } from '../../hooks/useAudioVoice';
 import { cn } from '../../lib/cn';
 import { Card } from '../ui/Card';
 import { IconButton } from '../ui/IconButton';
+import { Spinner } from '../ui/Spinner';
 import { IconClose, IconMic, IconVolume } from '../layout/icons';
 import { LanguageRow } from './LanguageRow';
 import { ProviderPill } from './ProviderPill';
@@ -29,10 +31,8 @@ interface SourcePanelProps {
   onSwap: () => void;
   maxLength: number;
   speech: SpeechController;
-  /** Настройки перевода: подсказки и Enter вместо перевода через 600 мс. */
   suggestionsEnabled: boolean;
   enterToTranslate: boolean;
-  /** Enter в режиме «переводить по Enter». */
   onSubmit: () => void;
   providerChoice: ProviderChoice;
   onProviderChange: (next: ProviderChoice) => void;
@@ -69,20 +69,16 @@ export function SourcePanel(props: SourcePanelProps) {
     setDismissed(acceptedRef.current === text);
   }, [text]);
 
-  /** Вставляем символ в позицию курсора, а не в конец текста. */
-  const insertCharacter = (character: string) => {
-    const element = textareaRef.current;
-    if (!element) {
-      onChange(text + character);
-      return;
-    }
-    const start = element.selectionStart ?? text.length;
-    const end = element.selectionEnd ?? start;
-    onChange(text.slice(0, start) + character + text.slice(end));
+  const insertCharacter = (char: string) => {
+    const el = textareaRef.current;
+    if (!el) { onChange(text + char); return; }
+    const start = el.selectionStart ?? text.length;
+    const end = el.selectionEnd ?? start;
+    onChange(text.slice(0, start) + char + text.slice(end));
     requestAnimationFrame(() => {
-      element.focus();
-      const position = start + character.length;
-      element.setSelectionRange(position, position);
+      el.focus();
+      const pos = start + char.length;
+      el.setSelectionRange(pos, pos);
     });
   };
 
@@ -94,26 +90,26 @@ export function SourcePanel(props: SourcePanelProps) {
     textareaRef.current?.focus();
   };
 
+  const voice = useAudioVoice({
+    speech,
+    lang: sourceLang,
+    onText: (transcript) => onChange(text.trim() ? `${text.trim()} ${transcript}` : transcript),
+  });
+
   const handleVoice = () => {
-    speech.listen(sourceLang, (transcript) => {
-      onChange(text.trim() ? `${text.trim()} ${transcript}` : transcript);
-    });
+    if (voice.recording) voice.stop();
+    else if (speech.listening) speech.stopListening();
+    else voice.start();
   };
 
-  /** Enter: подсвеченная подсказка, перевод (в режиме «по Enter») или новая строка. */
   const handleKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
     if (listOpen && (event.key === 'ArrowDown' || event.key === 'ArrowUp')) {
       event.preventDefault();
-      setHighlighted((previous) => {
-        const next = event.key === 'ArrowDown' ? previous + 1 : previous - 1;
-        return (next + suggestions.length) % suggestions.length;
-      });
+      setHighlighted((prev) => (prev + (event.key === 'ArrowDown' ? 1 : -1) + suggestions.length) % suggestions.length);
       return;
     }
     if (event.key === 'Escape' && listOpen) {
-      setHighlighted(-1);
-      setDismissed(true);
-      return;
+      setHighlighted(-1); setDismissed(true); return;
     }
     if (event.key !== 'Enter' || event.shiftKey) return;
     if (listOpen && highlighted >= 0) {
@@ -122,32 +118,20 @@ export function SourcePanel(props: SourcePanelProps) {
       return;
     }
     if (props.enterToTranslate) {
-      event.preventDefault();
-      props.onSubmit();
+      event.preventDefault(); props.onSubmit();
     }
   };
 
   const speechLanguage: LanguageCode = sourceLang === 'auto' ? 'de' : sourceLang;
-  const voiceError =
-    speech.error === 'denied'
-      ? t('translate.voiceDenied')
-      : speech.error === 'unsupported'
-        ? t('translate.voiceUnsupported')
-        : speech.error
-          ? t('translate.voiceDenied')
-          : null;
+  const voiceError = speech.error === 'unsupported' ? t('translate.voiceUnsupported') : speech.error ? t('translate.voiceDenied') : null;
 
   return (
     <Card className="flex flex-col p-3 sm:p-4">
       <LanguageRow
-        sourceLang={sourceLang}
-        targetLang={props.targetLang}
-        onSourceChange={props.onSourceChange}
-        onTargetChange={props.onTargetChange}
-        onSwap={props.onSwap}
-        onUmlaut={insertCharacter}
+        sourceLang={sourceLang} targetLang={props.targetLang}
+        onSourceChange={props.onSourceChange} onTargetChange={props.onTargetChange}
+        onSwap={props.onSwap} onUmlaut={insertCharacter}
       />
-
       <div className="mt-1.5 border-t border-line pt-2">
         <div className="relative">
           <label className="flex flex-col">
@@ -158,7 +142,6 @@ export function SourcePanel(props: SourcePanelProps) {
               onChange={(event) => onChange(event.target.value)}
               onKeyDown={handleKeyDown}
               onFocus={() => setFocused(true)}
-              // Небольшая пауза: нажатие на подсказку успевает сработать до скрытия списка.
               onBlur={() => window.setTimeout(() => setFocused(false), 150)}
               maxLength={props.maxLength}
               placeholder={t('translate.placeholder')}
@@ -195,9 +178,19 @@ export function SourcePanel(props: SourcePanelProps) {
           />
         ) : null}
 
-        {speech.listening ? (
+        {voice.recording ? (
+          <p className="flex items-center gap-1.5 px-1 pb-1 text-xs font-medium text-danger" role="status">
+            <span className="inline-block h-2 w-2 animate-pulse rounded-full bg-danger" />
+            {t('translate.voiceListening')} {voice.seconds}s / 30s
+          </p>
+        ) : speech.listening ? (
           <p className="px-1 pb-1 text-xs font-medium text-danger" role="status">
             {t('translate.voiceListening')}
+          </p>
+        ) : voice.transcribing ? (
+          <p className="flex items-center gap-1.5 px-1 pb-1 text-xs font-medium text-muted" role="status">
+            <Spinner className="h-3 w-3" />
+            {t('common.loading')}
           </p>
         ) : null}
         {voiceError ? (
@@ -222,13 +215,29 @@ export function SourcePanel(props: SourcePanelProps) {
           onAskAi={props.onAskAi}
           hasText={text.trim().length > 0}
         />
-        <IconButton
-          className={cn('ml-auto', speech.listening && 'border-danger bg-danger text-white')}
-          label={speech.listening ? t('common.stop') : t('translate.voice')}
-          icon={<IconMic className="h-[18px] w-[18px]" />}
-          active={speech.listening}
+        <button
+          type="button"
+          aria-label={voice.recording || speech.listening ? t('common.stop') : t('translate.voice')}
+          title={voice.recording || speech.listening ? t('common.stop') : t('translate.voice')}
           onClick={handleVoice}
-        />
+          className={cn(
+            'ml-auto flex h-9 items-center justify-center gap-1.5 rounded-xl border border-line px-2.5 text-xs font-medium transition-colors',
+            (voice.recording || speech.listening)
+              ? 'border-danger bg-danger text-white'
+              : 'text-muted hover:bg-soft hover:text-ink',
+          )}
+        >
+          {voice.transcribing ? (
+            <Spinner className="h-4 w-4" />
+          ) : voice.recording ? (
+            <>
+              <span className="h-2 w-2 animate-pulse rounded-full bg-white" />
+              <span className="tabular-nums font-mono">{voice.seconds}s</span>
+            </>
+          ) : (
+            <IconMic className="h-[18px] w-[18px]" />
+          )}
+        </button>
         <span className="w-full text-right text-[11px] tabular-nums text-muted">
           {props.enterToTranslate ? `${t('translate.enterHint')} · ` : ''}
           {t('translate.chars', { used: text.length, max: props.maxLength })}

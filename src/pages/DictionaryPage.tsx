@@ -60,6 +60,8 @@ export default function DictionaryPage() {
           error={search.error}
           speech={speech}
           onOpenLimit={search.onLimit}
+          uiLang={uiLanguage}
+          onPickWord={(w) => void search.search(w)}
           sourceLang={search.sourceLang}
           targetLang={search.targetLang}
           onSourceChange={search.setSourceLang}

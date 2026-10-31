@@ -14,6 +14,20 @@ export const SETTINGS_KEYS = {
   disabledProviders: 'disabled_providers',
   /** Почта для пункта «Обратная связь» в настройках (этап 8). */
   feedbackEmail: 'feedback_email',
+  /** Лимит ИИ для гостей (без аккаунта), по умолчанию 5. */
+  guestAiLimit: 'guest_ai_limit',
+  /** Лимит ИИ для зарегистрированных, по умолчанию 50. */
+  registeredAiLimit: 'registered_ai_limit',
+  /** true — ИИ-функции требуют входа в аккаунт. */
+  aiRequiresLogin: 'ai_requires_login',
+  /** Порядок платных нейросетей: 'free_first' | 'paid_first' | 'paid_off'. */
+  paidAiOrder: 'paid_ai_order',
+  /** Платные нейросети — только для зарегистрированных (по умолчанию true). */
+  paidAiRegisteredOnly: 'paid_ai_registered_only',
+  /** Дневной лимит платных токенов. */
+  paidDailyTokenLimit: 'paid_daily_token_limit',
+  /** Месячный лимит платных токенов. */
+  paidMonthlyTokenLimit: 'paid_monthly_token_limit',
 } as const;
 
 /** Простая проверка адреса: без @ или пробелов ничего не сохраняем. */

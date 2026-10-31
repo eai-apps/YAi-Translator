@@ -7,7 +7,7 @@ export { LANGUAGES, LANGUAGE_CODES, getLanguage, isLanguageCode, isUiLanguage } 
 
 import { CLASSIC_PROVIDERS } from '../../shared/types';
 
-export const APP_VERSION = '0.8.3';
+export const APP_VERSION = '0.9.1';
 
 export const LIMITS = {
   /** Максимальная длина текста для перевода и разбора. */
@@ -269,6 +269,36 @@ export const STUDY = {
   maxPingExercises: 100,
   /** Слово дня лежит в кэше до конца дня; значение в секундах — минимум. */
   wordOfDayTtlSeconds: 60,
+} as const;
+
+/** Транскрипция голоса (версия 0.9.0): Workers AI Whisper. */
+export const TRANSCRIBE = {
+  /** Максимальный размер аудио в байтах (2 МБ). */
+  maxAudioBytes: 2 * 1024 * 1024,
+  /** Максимальная длина записи в секундах. */
+  maxDurationSec: 30,
+  /** Лимит запросов с одного IP в минуту (отдельно от ИИ-лимита). */
+  ratePerMinute: 30,
+  /** Модель Whisper в Workers AI. */
+  model: '@cf/openai/whisper-large-v3-turbo',
+} as const;
+
+/** Платные нейросети через OpenAI-совместимый API (версия 0.9.1). */
+export const PAID_AI = {
+  /** Максимальная длина Base URL. */
+  maxBaseUrlLength: 200,
+  /** Максимальная длина ключа. */
+  maxKeyLength: 200,
+  /** Максимальная длина id модели. */
+  maxModelIdLength: 100,
+  /** Таймаут, как у Groq. */
+  timeoutMs: 20_000,
+  /** Максимальный вывод токенов. */
+  maxOutputTokens: 8192,
+  /** Дневной лимит платных токенов по умолчанию. */
+  defaultDailyTokenLimit: 50_000,
+  /** Месячный лимит платных токенов по умолчанию. */
+  defaultMonthlyTokenLimit: 1_000_000,
 } as const;
 
 /** Адрес DeepL для конкретного ключа: path — 'translate' или 'usage'. */

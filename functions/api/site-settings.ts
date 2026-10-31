@@ -7,16 +7,19 @@ import type { SiteSettingsResponse } from '../../shared/types';
 import { APP_VERSION, LIMITS } from '../_lib/config';
 import type { Env } from '../_lib/env';
 import { errorResponse, getUiLanguage, jsonResponse } from '../_lib/http';
-import { bannerText, readBanner, readDailyLimit, readFeedbackEmail } from '../_lib/settings';
+import { bannerText, readBanner, readDailyLimit, readFeedbackEmail, readSetting, SETTINGS_KEYS } from '../_lib/settings';
 
 export const onRequestGet: PagesFunction<Env> = async (context) => {
   const uiLang = getUiLanguage(context.request);
   try {
     const env = context.env;
-    const [banner, dailyLimit, feedbackEmail] = await Promise.all([
+    const [banner, dailyLimit, feedbackEmail, guestLimit, regLimit, requiresLogin] = await Promise.all([
       readBanner(env),
       readDailyLimit(env),
       readFeedbackEmail(env),
+      readSetting<number>(env, SETTINGS_KEYS.guestAiLimit),
+      readSetting<number>(env, SETTINGS_KEYS.registeredAiLimit),
+      readSetting<boolean>(env, SETTINGS_KEYS.aiRequiresLogin),
     ]);
     const text = bannerText(banner, uiLang);
     const body: SiteSettingsResponse = {
@@ -24,6 +27,9 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
       dailyLimit: dailyLimit ?? LIMITS.freeRequestsPerDay,
       banner: text ? { ru: bannerText(banner, 'ru'), de: bannerText(banner, 'de'), en: bannerText(banner, 'en') } : null,
       feedbackEmail: feedbackEmail || null,
+      guestAiLimit: guestLimit ?? 5,
+      registeredAiLimit: regLimit ?? 50,
+      aiRequiresLogin: requiresLogin ?? false,
     };
     return jsonResponse(body);
   } catch (error) {

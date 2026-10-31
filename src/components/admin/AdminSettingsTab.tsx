@@ -18,6 +18,9 @@ export function AdminSettingsTab({ onError, onSaved }: SettingsTabProps) {
   const [settings, setSettings] = useState<AdminSettings | null>(null);
   const [limitValue, setLimitValue] = useState('');
   const [useDefault, setUseDefault] = useState(false);
+  const [guestAiLimit, setGuestAiLimit] = useState(5);
+  const [registeredAiLimit, setRegisteredAiLimit] = useState(50);
+  const [aiRequiresLogin, setAiRequiresLogin] = useState(false);
   const [banner, setBanner] = useState({ enabled: false, ru: '', de: '', en: '' });
   const [feedbackEmail, setFeedbackEmail] = useState('');
   const [busy, setBusy] = useState(false);
@@ -29,6 +32,9 @@ export function AdminSettingsTab({ onError, onSaved }: SettingsTabProps) {
       setSettings(data);
       setLimitValue(data.dailyLimit === null ? '' : String(data.dailyLimit));
       setUseDefault(data.dailyLimit === null);
+      setGuestAiLimit(data.guestAiLimit ?? 5);
+      setRegisteredAiLimit(data.registeredAiLimit ?? 50);
+      setAiRequiresLogin(data.aiRequiresLogin ?? false);
       setBanner(data.banner);
       setFeedbackEmail(data.feedbackEmail);
       onError(null);
@@ -54,6 +60,9 @@ export function AdminSettingsTab({ onError, onSaved }: SettingsTabProps) {
         dailyLimit: useDefault ? null : parsed,
         banner,
         feedbackEmail: feedbackEmail.trim(),
+        guestAiLimit,
+        registeredAiLimit,
+        aiRequiresLogin,
       });
       setSettings(saved);
       setNotice(t('admin.settings.saved'));
@@ -94,6 +103,50 @@ export function AdminSettingsTab({ onError, onSaved }: SettingsTabProps) {
             />
             {t('admin.settings.limitUseDefault')}
           </label>
+        </div>
+
+        <div className="mt-4 border-t border-line pt-3 space-y-3">
+          <p className="text-xs font-medium text-ink">{t('admin.settings.tierLimitsTitle')}</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs text-muted mb-1">{t('admin.settings.guestLimit')}</label>
+              <input
+                type="number"
+                min={1}
+                max={1000}
+                value={guestAiLimit}
+                onChange={(e) => setGuestAiLimit(Number(e.target.value))}
+                className="h-9 w-full rounded-lg border border-line bg-card px-3 text-sm text-ink"
+              />
+            </div>
+            <div>
+              <label className="block text-xs text-muted mb-1">{t('admin.settings.regLimit')}</label>
+              <input
+                type="number"
+                min={1}
+                max={1000}
+                value={registeredAiLimit}
+                onChange={(e) => setRegisteredAiLimit(Number(e.target.value))}
+                className="h-9 w-full rounded-lg border border-line bg-card px-3 text-sm text-ink"
+              />
+            </div>
+          </div>
+          <label className="flex cursor-pointer items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              checked={aiRequiresLogin}
+              onChange={(e) => setAiRequiresLogin(e.target.checked)}
+              className="h-4 w-4 accent-[var(--color-accent)]"
+            />
+            {t('admin.settings.aiRequiresLogin')}
+          </label>
+        </div>
+
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          <Button variant="primary" loading={busy} onClick={() => void save()}>
+            {t('admin.settings.save')}
+          </Button>
+          {notice ? <span className="text-sm text-ink">{notice}</span> : null}
         </div>
       </Card>
 

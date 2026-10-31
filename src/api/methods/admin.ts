@@ -13,6 +13,8 @@ import type {
   SiteKeyInfo,
   SiteKeyProvider,
   SiteKeyTestResponse,
+  BuyLinkItem,
+  PaidConnectionItem,
 } from '../../../shared/types';
 import { request } from '../request';
 
@@ -47,8 +49,10 @@ export const adminMethods = {
     dailyLimit?: number | null;
     banner?: AdminSettings['banner'];
     disabledProviders?: string[];
-    /** Почта для «Обратной связи» в настройках; пустая строка — пункт скрыт (этап 8). */
     feedbackEmail?: string;
+    guestAiLimit?: number;
+    registeredAiLimit?: number;
+    aiRequiresLogin?: boolean;
   }): Promise<AdminSettings> {
     return request<AdminSettings>('/api/admin/settings', { method: 'PUT', body: payload });
   },
@@ -88,5 +92,27 @@ export const adminMethods = {
   /** Грамматика: добавить, изменить, перегенерировать ИИ или удалить тему. */
   adminGrammarAction(payload: AdminGrammarAction): Promise<AdminGrammarResponse> {
     return request<AdminGrammarResponse>('/api/admin/grammar', { method: 'POST', body: payload });
+  },
+
+  adminPaidConnections(signal?: AbortSignal): Promise<{
+    connections: PaidConnectionItem[];
+    order: 'free_first' | 'paid_first' | 'paid_off';
+    regOnly: boolean;
+    dailyLimit: number;
+    monthlyLimit: number;
+  }> {
+    return request('/api/admin/paid-connections', { method: 'GET' }, signal);
+  },
+
+  adminPaidAction<T = unknown>(payload: Record<string, unknown>): Promise<T> {
+    return request<T>('/api/admin/paid-connections', { method: 'POST', body: payload });
+  },
+
+  adminBuyLinks(signal?: AbortSignal): Promise<{ items: BuyLinkItem[] }> {
+    return request('/api/admin/buy-links', { method: 'GET' }, signal);
+  },
+
+  adminBuyLinkAction(payload: Record<string, unknown>): Promise<{ ok: boolean }> {
+    return request('/api/admin/buy-links', { method: 'POST', body: payload });
   },
 };

@@ -15,10 +15,19 @@ export interface KeyState {
 }
 
 export function keyStateFor(
-  provider: KeyProvider,
+  provider: KeyProvider | 'paid',
   stored: StoredKeyInfo | null,
   localKeys = getUserKeys(),
 ): KeyState {
+  if (provider === 'paid') {
+    const local = Boolean(localKeys.paidUrl && localKeys.paidKey && localKeys.paidModel);
+    const last4 = local && localKeys.paidKey ? localKeys.paidKey.slice(-4) : '';
+    return {
+      stored: null,
+      local,
+      mask: local ? `••••${last4}` : null,
+    };
+  }
   const local = Boolean(localKeys[provider]);
   const last4 = stored?.last4 ?? (local ? localKeys[provider].slice(-4) : '');
   return {

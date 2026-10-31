@@ -50,7 +50,16 @@ export function AccountCard() {
 
       {status === 'anonymous' ? (
         <>
-          <p className="mt-2 text-xs leading-relaxed text-muted">
+          <div className="mt-3 rounded-xl border border-line bg-soft p-3 text-xs leading-relaxed">
+            <p className="font-semibold text-ink">{t('account.benefitsTitle')}</p>
+            <ul className="mt-1.5 space-y-1 text-muted list-disc list-inside">
+              <li>{t('account.benefitAiLimit')}</li>
+              <li>{t('account.benefitHistory')}</li>
+              <li>{t('account.benefitPaidAi')}</li>
+              <li>{t('account.benefitSync')}</li>
+            </ul>
+          </div>
+          <p className="mt-3 text-xs leading-relaxed text-muted">
             {t('account.intro')} <span className="text-ink">{t('account.sharedHint')}</span>
           </p>
           <AccountForm />

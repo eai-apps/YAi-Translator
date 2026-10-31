@@ -27,7 +27,7 @@ import { useLocalStorage } from './useLocalStorage';
 export type { TranslatorError };
 
 /** ИИ, который можно выбрать в списке, — только с личным ключом пользователя. */
-export const PERSONAL_AI_CHOICES = ['gemini', 'groq'] as const;
+export const PERSONAL_AI_CHOICES = ['gemini', 'groq', 'paid'] as const;
 type PersonalAiChoice = (typeof PERSONAL_AI_CHOICES)[number];
 
 /** Выбор переводчика: «авто» — по очереди, конкретный сервис или свой ключ Gemini / Groq. */

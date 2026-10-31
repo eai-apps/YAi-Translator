@@ -289,7 +289,17 @@
     "historyTitle": "Recent translations",
     "favoritesTitle": "Favorites",
     "detect": "Detect",
-    "swap": "Swap languages"
+    "swap": "Swap languages",
+    "chatTitle": "Ask about “{{word}}”",
+    "chatPlaceholder": "Ask about this word…",
+    "chatPromptExamples": "More examples",
+    "chatQueryExamples": "Give 3 more realistic examples with “{{word}}” and translations",
+    "chatPromptDiff": "Difference from…",
+    "chatQueryDiff": "What words are often confused with “{{word}}” and what is the difference?",
+    "chatPromptMnemonic": "How to remember",
+    "chatQueryMnemonic": "Give me a mnemonic or memory trick to easily remember “{{word}}”",
+    "chatPromptMistakes": "Common mistakes",
+    "chatQueryMistakes": "What common mistakes do learners make with the word “{{word}}”?"
   },
   "profile": {
     "title": "Profile",
@@ -388,7 +398,12 @@
       "keysStorageDisabled": "Storing keys in the account is turned off right now. The key can be saved on this device.",
       "keyNoAccess": "This key does not grant access. Make sure you copied all of it.",
       "blocked": "This account has been blocked by the administrator."
-    }
+    },
+    "benefitsTitle": "Benefits of free registration:",
+    "benefitAiLimit": "50 AI requests per day (instead of 5 for guests)",
+    "benefitHistory": "Translation history up to 1000 entries (instead of 50)",
+    "benefitPaidAi": "Access to the site's shared paid AI networks",
+    "benefitSync": "Sync favorites across all devices"
   },
   "keys": {
     "getFreeKey": "Get a free key",
@@ -419,7 +434,24 @@
     "introAccount": "Your own free key removes the daily limit. When you are signed in it is stored in the account and works on all your devices.",
     "introDevice": "Your own free key removes the daily limit. Until you sign in it is stored on this device only.",
     "privacyAccount": "The key is encrypted on the server and never shown in full — only the last 4 characters.",
-    "privacyDevice": "The key stays in this browser and goes to the server only in the request header."
+    "privacyDevice": "The key stays in this browser and goes to the server only in the request header.",
+    "paid": {
+      "title": "Paid AI (OpenRouter, DeepSeek, OpenAI)",
+      "iosTitle": "Custom API endpoint (for developers)",
+      "active": "Connected",
+      "modelLabel": "Model",
+      "loadModelsBtn": "Load models",
+      "testBtn": "Test",
+      "loadModelsError": "Failed to load models",
+      "testSuccess": "Key is working!",
+      "testFail": "Validation error"
+    },
+    "buy": {
+      "title": "Where to buy key from $1",
+      "hint": "$1 on OpenRouter is typically enough for several months of translations.",
+      "showHowto": "How to connect",
+      "hideHowto": "Hide"
+    }
   },
   "services": {
     "title": "Site services",
@@ -456,7 +488,10 @@
     "keyFail": "The key was not accepted. Make sure you copied all of it.",
     "saveAndUse": "Save and continue",
     "later": "Later",
-    "privacyNote": "The key is stored on your device only."
+    "privacyNote": "The key is stored on your device only.",
+    "guestPromptTitle": "Register — 50 requests per day instead of 5",
+    "guestPromptText": "Registration is free and provides increased AI limits, history up to 1000 entries, and access to shared AI models.",
+    "registerBtn": "Register"
   },
   "soon": {
     "learnTitle": "Learning is coming",
@@ -541,7 +576,10 @@
       "chartEmpty": "Data appears after the first translations.",
       "studyTitle": "Learning today",
       "studyReviews": "Cards reviewed",
-      "studyExercises": "Exercises done"
+      "studyExercises": "Exercises done",
+      "paidTokensTitle": "Paid AI Tokens",
+      "paidTokensToday": "Tokens today",
+      "paidTokensMonth": "Tokens this month"
     },
     "keys": {
       "title": "Site keys",
@@ -592,7 +630,11 @@
       "invalidLimit": "The limit must be a number from 1 to 10 000.",
       "logTitle": "Action log",
       "feedbackTitle": "Feedback e-mail",
-      "feedbackHint": "Shown in the profile as “Send feedback”. Empty — the item is hidden."
+      "feedbackHint": "Shown in the profile as “Send feedback”. Empty — the item is hidden.",
+      "tierLimitsTitle": "AI request limits by status",
+      "guestLimit": "Limit for guests (requests per day)",
+      "regLimit": "Limit for registered users (requests per day)",
+      "aiRequiresLogin": "AI requires login (block guests)"
     },
     "users": {
       "title": "Users",
@@ -700,6 +742,39 @@
       "confirmRemove": "Delete the link “{{title}}”?",
       "hiddenNote": "hidden",
       "empty": "No links in this group yet."
+    },
+    "tabPaid": "AI Networks",
+    "paid": {
+      "routingTitle": "Routing and Limits",
+      "orderFreeFirst": "Free first (Gemini, Groq), then paid",
+      "orderPaidFirst": "Paid first, then free",
+      "orderPaidOff": "Free only (paid disabled)",
+      "regOnly": "Paid AI for registered users only",
+      "dailyTokens": "Daily token limit (0 — unlimited)",
+      "monthlyTokens": "Monthly token limit (0 — unlimited)",
+      "settingsSaved": "Settings saved",
+      "fetchModelsError": "Failed to load model list",
+      "connectionsTitle": "Paid AI Connections",
+      "addConnection": "Add connection",
+      "namePlaceholder": "Name (e.g. OpenRouter GPT-4o-mini)",
+      "keyPlaceholder": "API Key (sk-...)",
+      "loadModels": "Load models",
+      "noConnections": "No configured connections",
+      "testBtn": "Test",
+      "testSuccess": "Test successful!",
+      "testFail": "Test error",
+      "creditsBtn": "Credits",
+      "creditsAlert": "OpenRouter balance:\nLimit: {{limit}}\nUsage: {{usage}}",
+      "creditsFail": "Failed to fetch credits"
+    },
+    "buyLinks": {
+      "title": "“Where to buy key” links in profile",
+      "hint": "Links and guides displayed in user profile (except iOS/Android app builds)",
+      "addBtn": "Add link",
+      "titlePlaceholder": "Title (e.g. Plati.market / OpenRouter $1)",
+      "urlPlaceholder": "https://...",
+      "howtoRuPlaceholder": "Instructions: 1. Purchase... 2. Activate...",
+      "noItems": "No purchase links"
     }
   },
   "dict": {

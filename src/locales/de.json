@@ -289,7 +289,17 @@
     "historyTitle": "Letzte Übersetzungen",
     "favoritesTitle": "Favoriten",
     "detect": "Erkennen",
-    "swap": "Sprachen tauschen"
+    "swap": "Sprachen tauschen",
+    "chatTitle": "Frage zum Wort „{{word}}“",
+    "chatPlaceholder": "Über dieses Wort fragen…",
+    "chatPromptExamples": "Mehr Beispiele",
+    "chatQueryExamples": "Gib 3 weitere lebensnahe Beispielsätze mit „{{word}}“ samt Übersetzung",
+    "chatPromptDiff": "Unterschied zu…",
+    "chatQueryDiff": "Mit welchen ähnlichen Wörtern wird „{{word}}“ oft verwechselt und was ist der Unterschied?",
+    "chatPromptMnemonic": "Merkhilfe",
+    "chatQueryMnemonic": "Gib mir eine Eselsbrücke oder Mnemotechnik, um mir „{{word}}“ leicht zu merken",
+    "chatPromptMistakes": "Typische Fehler",
+    "chatQueryMistakes": "Welche typischen Fehler machen Lernende beim Wort „{{word}}“?"
   },
   "profile": {
     "title": "Profil",
@@ -388,7 +398,12 @@
       "keysStorageDisabled": "Das Speichern von Schlüsseln im Konto ist ausgeschaltet. Der Schlüssel kann auf diesem Gerät gespeichert werden.",
       "keyNoAccess": "Dieser Schlüssel gibt keinen Zugriff. Prüfe, ob du ihn vollständig kopiert hast.",
       "blocked": "Dieses Konto wurde vom Administrator gesperrt."
-    }
+    },
+    "benefitsTitle": "Vorteile der kostenlosen Registrierung:",
+    "benefitAiLimit": "50 KI-Anfragen pro Tag (statt 5 für Gäste)",
+    "benefitHistory": "Übersetzungsverlauf bis zu 1000 Einträge (statt 50)",
+    "benefitPaidAi": "Zugriff auf die geteilten kostenpflichtigen KI-Netzwerke der Website",
+    "benefitSync": "Synchronisierung der Favoriten zwischen allen Geräten"
   },
   "keys": {
     "getFreeKey": "Kostenlosen Schlüssel holen",
@@ -419,7 +434,24 @@
     "introAccount": "Ein eigener kostenloser Schlüssel hebt das Tageslimit auf. Bei Anmeldung liegt er im Konto und gilt auf allen deinen Geräten.",
     "introDevice": "Ein eigener kostenloser Schlüssel hebt das Tageslimit auf. Solange du nicht angemeldet bist, bleibt er nur auf diesem Gerät.",
     "privacyAccount": "Der Schlüssel wird auf dem Server verschlüsselt und nie vollständig angezeigt — nur die letzten 4 Zeichen.",
-    "privacyDevice": "Der Schlüssel bleibt in diesem Browser und geht nur im Anfrage-Header an den Server."
+    "privacyDevice": "Der Schlüssel bleibt in diesem Browser und geht nur im Anfrage-Header an den Server.",
+    "paid": {
+      "title": "Kostenpflichtige KI (OpenRouter, DeepSeek, OpenAI)",
+      "iosTitle": "Eigener API-Endpunkt (für Entwickler)",
+      "active": "Verbunden",
+      "modelLabel": "Modell",
+      "loadModelsBtn": "Modelle laden",
+      "testBtn": "Testen",
+      "loadModelsError": "Modelle konnten nicht geladen werden",
+      "testSuccess": "Schlüssel funktioniert!",
+      "testFail": "Überprüfungsfehler"
+    },
+    "buy": {
+      "title": "Wo Schlüssel ab 1$ kaufen",
+      "hint": "1$ auf OpenRouter reicht normalerweise für mehrere Monate Übersetzung.",
+      "showHowto": "Anleitung",
+      "hideHowto": "Ausblenden"
+    }
   },
   "services": {
     "title": "Dienste der Seite",
@@ -456,7 +488,10 @@
     "keyFail": "Der Schlüssel passt nicht. Prüfe, ob du ihn vollständig kopiert hast.",
     "saveAndUse": "Speichern und weiter",
     "later": "Später",
-    "privacyNote": "Der Schlüssel bleibt nur auf deinem Gerät."
+    "privacyNote": "Der Schlüssel bleibt nur auf deinem Gerät.",
+    "guestPromptTitle": "Registrieren Sie sich — 50 Anfragen pro Tag statt 5",
+    "guestPromptText": "Die Registrierung ist kostenlos und bietet erweiterte KI-Limits, einen Verlauf von bis zu 1000 Einträgen und Zugriff auf geteilte KIs.",
+    "registerBtn": "Registrieren"
   },
   "soon": {
     "learnTitle": "Lernen kommt bald",
@@ -541,7 +576,10 @@
       "chartEmpty": "Daten erscheinen nach den ersten Übersetzungen.",
       "studyTitle": "Lernen heute",
       "studyReviews": "Wiederholte Karten",
-      "studyExercises": "Übungen gemacht"
+      "studyExercises": "Übungen gemacht",
+      "paidTokensTitle": "Kostenpflichtige KI-Tokens",
+      "paidTokensToday": "Tokens heute",
+      "paidTokensMonth": "Tokens diesen Monat"
     },
     "keys": {
       "title": "Schlüssel der Seite",
@@ -592,7 +630,11 @@
       "invalidLimit": "Das Limit muss eine Zahl von 1 bis 10 000 sein.",
       "logTitle": "Aktionsprotokoll",
       "feedbackTitle": "E-Mail für Feedback",
-      "feedbackHint": "Erscheint im Profil als „Feedback“. Leer — Eintrag ausgeblendet."
+      "feedbackHint": "Erscheint im Profil als „Feedback“. Leer — Eintrag ausgeblendet.",
+      "tierLimitsTitle": "KI-Anfragelimits nach Status",
+      "guestLimit": "Limit für Gäste (Anfragen pro Tag)",
+      "regLimit": "Limit für Registrierte (Anfragen pro Tag)",
+      "aiRequiresLogin": "KI nur nach Anmeldung (für Gäste sperren)"
     },
     "users": {
       "title": "Benutzer",
@@ -700,6 +742,39 @@
       "confirmRemove": "Link „{{title}}“ löschen?",
       "hiddenNote": "ausgeblendet",
       "empty": "In dieser Gruppe gibt es noch keine Links."
+    },
+    "tabPaid": "KI-Netzwerke",
+    "paid": {
+      "routingTitle": "Routing und Limits",
+      "orderFreeFirst": "Zuerst kostenlose (Gemini, Groq), dann kostenpflichtige",
+      "orderPaidFirst": "Zuerst kostenpflichtige, dann kostenlose",
+      "orderPaidOff": "Nur kostenlose (kostenpflichtige deaktiviert)",
+      "regOnly": "Kostenpflichtige KI nur für registrierte Benutzer",
+      "dailyTokens": "Tägliches Token-Limit (0 — unbegrenzt)",
+      "monthlyTokens": "Monatliches Token-Limit (0 — unbegrenzt)",
+      "settingsSaved": "Einstellungen gespeichert",
+      "fetchModelsError": "Fehler beim Laden der Modellliste",
+      "connectionsTitle": "Verbindungen zu kostenpflichtigen KIs",
+      "addConnection": "Verbindung hinzufügen",
+      "namePlaceholder": "Name (z.B. OpenRouter GPT-4o-mini)",
+      "keyPlaceholder": "API-Schlüssel (sk-...)",
+      "loadModels": "Modelle laden",
+      "noConnections": "Keine konfigurierten Verbindungen",
+      "testBtn": "Testen",
+      "testSuccess": "Test erfolgreich!",
+      "testFail": "Testfehler",
+      "creditsBtn": "Guthaben",
+      "creditsAlert": "OpenRouter-Guthaben:\nLimit: {{limit}}\nVerwendet: {{usage}}",
+      "creditsFail": "Guthaben konnte nicht abgerufen werden"
+    },
+    "buyLinks": {
+      "title": "Links „Wo Schlüssel kaufen“ im Profil",
+      "hint": "Links und Anleitungen werden im Profil angezeigt (außer bei iOS/Android-Builds)",
+      "addBtn": "Link hinzufügen",
+      "titlePlaceholder": "Titel (z.B. Plati.market / OpenRouter $1)",
+      "urlPlaceholder": "https://...",
+      "howtoRuPlaceholder": "Anleitung: 1. Kaufen Sie... 2. Aktivieren Sie...",
+      "noItems": "Keine Kauflinks"
     }
   },
   "dict": {

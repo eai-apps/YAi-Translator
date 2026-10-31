@@ -5,7 +5,7 @@ import { LIMITS } from '../_lib/config';
 import { buildCacheKey, requireLanguage, requireSourceLanguage, requireText } from '../_lib/request';
 import { readCache, writeCache } from '../_lib/cache';
 import { ApiError, errorResponse, getClientIp, getHeaderKeys, getUiLanguage, jsonResponse, readJsonBody } from '../_lib/http';
-import { resolveUserKeys } from '../_lib/auth/keys';
+import { findRequestSession, resolveUserKeys } from '../_lib/auth/keys';
 import { createLimitGuard } from '../_lib/usage';
 import { buildWordPrompt } from '../_lib/prompts';
 import { runJsonTask } from '../_lib/router';
@@ -93,8 +93,9 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       return jsonResponse({ ...cached, card, cached: true });
     }
 
+    const session = await findRequestSession(env, context.request);
     // Дневной лимит считается, только когда дело доходит до общих ключей сайта.
-    const limitGuard = createLimitGuard(env, getClientIp(context.request));
+    const limitGuard = createLimitGuard(env, getClientIp(context.request), session?.userId);
 
     const prompt = buildWordPrompt({ word, sourceLang, targetLang, uiLang });
     const { data, provider } = await runJsonTask({
@@ -104,6 +105,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       signal: context.request.signal,
       beforeShared: limitGuard,
       validate: validateWordCard,
+      isRegistered: Boolean(session),
     });
 
     // Синонимы, примеры «из жизни», переводы и толкования из словарей.

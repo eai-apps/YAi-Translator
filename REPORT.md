@@ -1,3 +1,57 @@
+# Отчёт по этапам 8В и 7 — 31.10.2026 (версия 0.9.1)
+
+Дата: 31.10.2026 · Версия: **0.9.1** · Автор этапов: Antigravity (модель Claude Sonnet 4.6) · Задания: `tasks/STAGE8C.md` и `tasks/STAGE7.md`.
+
+Сделано строго по инструкциям `tasks/STAGE8C.md` и `tasks/STAGE7.md`.
+Не нарушались правила проекта:
+- Логотип, Vite-конфиг, `auth/*`, `schemaReady`, `deeplUrl()` не изменялись.
+- Все файлы уложены в лимит ~250 строк.
+- Локализация `ru.json`, `de.json`, `en.json` полностью синхронизирована (по 1034 ключа в каждом, 100% совпадение).
+- Сборка `npm run build` и `npx tsc -p tsconfig.functions.json --noEmit` успешно завершены с кодом 0.
+- На GitHub ничего не отправлялось.
+
+---
+
+## 1. Этап 8В: диктовка через Whisper и словарь «в одном окне»
+
+1. **Голосовой ввод через Cloudflare Workers AI Whisper (`@cf/openai/whisper-large-v3-turbo`)**:
+   - `functions/api/transcribe.ts`: эндпоинт POST `/api/transcribe`, чанковая конвертация аудио-буфера в base64 без риска RangeError, лимит 30 запросов в минуту с IP, автоопределение и явное указание языка.
+   - `src/hooks/useAudioVoice.ts`: запись через `MediaRecorder` (до 30 с, автостоп по таймеру или паузе), отправка Blob на сервер с фолбэком на браузерный Web Speech API при отсутствии поддержки или сетевой ошибке.
+   - `src/components/translate/SourcePanel.tsx`: обновлена кнопка микрофона с отображением таймера и красной точки при записи и спиннера при распознавании.
+
+2. **Словарь «в одном окне» (вопросы ИИ про слово)**:
+   - `functions/api/word-ask.ts`: эндпоинт POST `/api/word-ask` с передачей контекста текущей карточки слова и истории сообщений (до 6 пар вопросов/ответов).
+   - `functions/_lib/prompts.ts`: функция `buildWordAskPrompt` для работы в роли репетитора немецкого языка.
+   - `src/hooks/useWordChat.ts`: состояние диалога с репетитором, очистка при переключении слова.
+   - `src/components/dictionary/WordChatPanel.tsx`: интерфейс переписки, быстрые кнопки-подсказки («Ещё примеры», «Чем отличается от…», «Как запомнить», «Типичные ошибки»), кликабельные слова через `PickText`.
+   - `src/components/dictionary/DictionarySearchPanel.tsx` и `src/pages/DictionaryPage.tsx`: встраивание `WordChatPanel` под карточкой слова с поддержкой мгновенного перехода к новому слову по клику.
+
+---
+
+## 2. Этап 7: платные нейросети, ссылки покупки и бонусы регистрации
+
+1. **Провайдер `paid` и бэкенд маршрутизации**:
+   - Миграция `migrations/0008_paid_ai.sql` и схема `functions/_lib/schema.ts`: таблицы `paid_connections` и `buy_links`.
+   - `functions/_lib/providers/paid.ts`: провайдер для любых OpenAI-совместимых сервисов с валидацией Base URL (только https, защита от SSRF) и фиксацией токенов.
+   - `functions/_lib/paid/manager.ts`, `functions/_lib/usage.ts`, `functions/_lib/router.ts`: учет токенов за день и за месяц, маршрутизация (`free_first`, `paid_first`, `paid_off`), тумблер ограничения только для зарегистрированных пользователей.
+   - Настройки сайта (`functions/api/admin/settings.ts`, `functions/_lib/settings.ts`): поддержка `guestAiLimit`, `registeredAiLimit`, `aiRequiresLogin`.
+   - Эндпоинты админки: `functions/api/admin/paid-connections.ts` (CRUD, тест, загрузка моделей, баланс OpenRouter) и `functions/api/admin/buy-links.ts` (CRUD, порядок, скрытие).
+   - Публичные эндпоинты: `functions/api/buy-links.ts`, `functions/api/paid-models.ts`, `functions/api/paid-test.ts`.
+
+2. **Фронтенд админки**:
+   - `src/components/admin/AdminPaidTab.tsx` и `src/components/admin/AdminAddPaidConnectionForm.tsx`: новая вкладка «Нейросети» в админке с настройкой порядка вызова, квот токенов, списком подключений и балансом.
+   - `src/components/admin/AdminBuyLinksSection.tsx`: управление ссылками на покупку ключей.
+   - `src/components/admin/AdminOverviewTab.tsx`: статистика платных токенов за сегодня и за месяц с показом лимитов.
+   - `src/components/admin/AdminSettingsTab.tsx`: поля настройки лимитов для гостей и зарегистрированных, тумблер требования входа для ИИ.
+
+3. **Фронтенд пользователя**:
+   - `src/components/profile/AccountCard.tsx`: карточка преимуществ бесплатной регистрации (50 запросов ИИ вместо 5, история до 1000 записей, общие платные сети).
+   - `src/components/profile/PaidKeySection.tsx`: секция личного платного ключа с автозагрузкой моделей, тестом соединения и блоком ссылок «Где купить ключ от 1$» с аккордеоном инструкции.
+   - `src/config.ts`: функция `storeBuild()`. При `ios` ссылки покупки скрыты, заголовок изменен на «Свой API-эндпоинт (для разработчиков)»; при `android` скрыты ссылки покупки для соблюдения правил модерации App Store и Google Play.
+   - `src/components/limit/LimitDialog.tsx`: кнопка регистрации для неавторизованных посетителей при достижении лимита.
+
+---
+
 # Версия 0.7.0 — этап 6: «Учёба» — карточки, повторение, упражнения, слово дня
 
 Дата: 31.10.2026 · Версия: **0.7.0** · Автор этапа: DeepSeek · Задание: `tasks/STAGE6.md`

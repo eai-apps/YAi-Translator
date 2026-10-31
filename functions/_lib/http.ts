@@ -6,7 +6,7 @@ export const CORS_HEADERS: Record<string, string> = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
   'Access-Control-Allow-Headers':
-    'Content-Type, Authorization, X-UI-Language, X-User-Gemini-Key, X-User-Groq-Key',
+    'Content-Type, Authorization, X-UI-Language, X-User-Gemini-Key, X-User-Groq-Key, X-User-Paid-Url, X-User-Paid-Key, X-User-Paid-Model',
   'Access-Control-Max-Age': '86400',
 };
 
@@ -131,6 +131,16 @@ const ERROR_MESSAGES: Record<ApiErrorCode, Record<UiLanguage, string>> = {
     de: 'Die Erklärung wird noch vorbereitet. Versuchen Sie es in einer Minute noch einmal.',
     en: 'The explanation is still being prepared. Try again in a minute.',
   },
+  AUDIO_TOO_LARGE: {
+    ru: 'Аудио слишком большое. Запись должна быть не длиннее 30 секунд (до 2 МБ).',
+    de: 'Die Audiodatei ist zu groß. Die Aufnahme darf nicht länger als 30 Sekunden sein (bis 2 MB).',
+    en: 'Audio is too large. Recording must be 30 seconds or less (up to 2 MB).',
+  },
+  AUDIO_REQUIRED: {
+    ru: 'Аудио не получено. Попробуйте ещё раз.',
+    de: 'Audio nicht empfangen. Bitte versuchen Sie es erneut.',
+    en: 'No audio received. Please try again.',
+  },
 };
 
 export function messageForError(code: ApiErrorCode, uiLang: UiLanguage): string {
@@ -195,12 +205,24 @@ export function getUiLanguage(request: Request): UiLanguage {
  * Ключи только из заголовков X-User-*. Ничего не сохраняют.
  * Если у запроса есть сессия, дополнительно берутся ключи из аккаунта — см. auth/keys.ts.
  */
-export function getHeaderKeys(request: Request): { gemini?: string; groq?: string } {
+export function getHeaderKeys(request: Request): {
+  gemini?: string;
+  groq?: string;
+  paidUrl?: string;
+  paidKey?: string;
+  paidModel?: string;
+} {
   const gemini = request.headers.get('x-user-gemini-key')?.trim();
   const groq = request.headers.get('x-user-groq-key')?.trim();
+  const paidUrl = request.headers.get('x-user-paid-url')?.trim();
+  const paidKey = request.headers.get('x-user-paid-key')?.trim();
+  const paidModel = request.headers.get('x-user-paid-model')?.trim();
   return {
     gemini: gemini && gemini.length <= 300 ? gemini : undefined,
     groq: groq && groq.length <= 300 ? groq : undefined,
+    paidUrl: paidUrl && paidUrl.length <= 200 ? paidUrl : undefined,
+    paidKey: paidKey && paidKey.length <= 200 ? paidKey : undefined,
+    paidModel: paidModel && paidModel.length <= 100 ? paidModel : undefined,
   };
 }
 

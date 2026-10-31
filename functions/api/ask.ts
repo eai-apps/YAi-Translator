@@ -18,7 +18,7 @@ import {
   readJsonBody,
 } from '../_lib/http';
 import { buildCacheKey, requireUiLanguage } from '../_lib/request';
-import { resolveUserKeys } from '../_lib/auth/keys';
+import { findRequestSession, resolveUserKeys } from '../_lib/auth/keys';
 import { createLimitGuard } from '../_lib/usage';
 import { buildAskPrompt } from '../_lib/prompts';
 import { runJsonTask } from '../_lib/router';
@@ -54,7 +54,8 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       return jsonResponse({ ...cached, cached: true });
     }
 
-    const limitGuard = createLimitGuard(env, getClientIp(context.request));
+    const session = await findRequestSession(env, context.request);
+    const limitGuard = createLimitGuard(env, getClientIp(context.request), session?.userId);
     const prompt = buildAskPrompt({ question, uiLang: answerLang });
     const { data, provider } = await runJsonTask<AskCore>({
       env,
@@ -63,6 +64,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       signal: context.request.signal,
       beforeShared: limitGuard,
       validate: validateAsk,
+      isRegistered: Boolean(session),
     });
 
     const result: AskResponse = { ...data, provider, cached: false };

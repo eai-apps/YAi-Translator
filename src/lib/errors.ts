@@ -1,6 +1,7 @@
 /** Понятные тексты ошибок: код API превращаем в ключ перевода интерфейса. */
 import { ApiClientError } from '../api/client';
 import type { ClientErrorCode } from '../api/client';
+import { getUserKeys } from './userKeys';
 
 export interface TranslatorError {
   code: ClientErrorCode;
@@ -43,7 +44,7 @@ export function errorMessageKey(code: ClientErrorCode): string {
 
 /** Ответил ли ИИ (а не обычный переводчик). */
 export function isAiProvider(provider: string): boolean {
-  return provider === 'gemini' || provider === 'groq' || provider === 'workersai';
+  return provider === 'gemini' || provider === 'groq' || provider === 'workersai' || provider === 'paid';
 }
 
 /** Названия провайдеров для бейджа «Перевод: …». */
@@ -53,6 +54,8 @@ export function providerLabel(provider: string): string {
       return 'Gemini';
     case 'groq':
       return 'Groq';
+    case 'paid':
+      return getUserKeys().paidModel || 'OpenAI';
     case 'deepl':
       return 'DeepL';
     case 'lara':

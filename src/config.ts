@@ -5,7 +5,7 @@
 export const API_BASE = (import.meta.env.VITE_API_BASE ?? '').replace(/\/+$/, '');
 
 /** Версия показывается в профиле; совпадает с package.json. */
-export const APP_VERSION = '0.8.3';
+export const APP_VERSION = '0.9.1';
 
 export const STORAGE_KEYS = {
   theme: 'yai.theme',
@@ -98,3 +98,12 @@ export const ARTICLE_COLORS = {
   die: 'text-die',
   das: 'text-das',
 } as const;
+
+/** Тип сборки: web, ios, android или rustore. */
+export function storeBuild(): 'web' | 'ios' | 'android' | 'rustore' {
+  const env = (import.meta.env.VITE_STORE_BUILD ?? '').toLowerCase();
+  if (env === 'ios') return 'ios';
+  if (env === 'android') return 'android';
+  if (env === 'rustore') return 'rustore';
+  return 'web';
+}

@@ -45,6 +45,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
       m2m100: Boolean(env.AI),
       microsoft: Boolean(classic.microsoft),
       google: Boolean(classic.google),
+      paid: false,
     };
 
     const body: HealthResponse = {

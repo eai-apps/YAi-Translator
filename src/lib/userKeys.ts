@@ -5,6 +5,9 @@ import { readStorage } from './storage';
 export interface UserKeys {
   gemini: string;
   groq: string;
+  paidUrl?: string;
+  paidKey?: string;
+  paidModel?: string;
 }
 
 export function getUserKeys(): UserKeys {
@@ -12,5 +15,8 @@ export function getUserKeys(): UserKeys {
   return {
     gemini: typeof stored.gemini === 'string' ? stored.gemini : '',
     groq: typeof stored.groq === 'string' ? stored.groq : '',
+    paidUrl: typeof stored.paidUrl === 'string' ? stored.paidUrl : undefined,
+    paidKey: typeof stored.paidKey === 'string' ? stored.paidKey : undefined,
+    paidModel: typeof stored.paidModel === 'string' ? stored.paidModel : undefined,
   };
 }

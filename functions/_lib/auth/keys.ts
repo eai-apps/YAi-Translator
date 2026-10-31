@@ -13,6 +13,10 @@ import { findSession, readSessionToken } from './session';
 export interface UserKeys {
   gemini?: string;
   groq?: string;
+  /** Платная нейросеть пользователя: передаётся через заголовки X-User-Paid-*. */
+  paidUrl?: string;
+  paidKey?: string;
+  paidModel?: string;
 }
 
 interface UserKeyRow {
@@ -46,6 +50,10 @@ export async function resolveUserKeys(
   return {
     gemini: headerKeys.gemini ?? stored.gemini,
     groq: headerKeys.groq ?? stored.groq,
+    // Платный ключ только из заголовков (не хранится в аккаунте через этот путь).
+    paidUrl: headerKeys.paidUrl,
+    paidKey: headerKeys.paidKey,
+    paidModel: headerKeys.paidModel,
   };
 }
 

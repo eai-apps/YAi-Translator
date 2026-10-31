@@ -25,7 +25,9 @@ export function ProviderSelect({ value, onChange }: ProviderSelectProps) {
   const options = useMemo<ProviderChoice[]>(() => {
     const classic = site ? CLASSIC_PROVIDERS.filter((id) => site[id]) : [];
     const personal = PERSONAL_AI_CHOICES.filter(
-      (id) => (site ? site[id] !== false : true) && keyStateFor(id, account?.keys[id] ?? null).mask !== null,
+      (id) =>
+        (site ? site[id] !== false : true) &&
+        keyStateFor(id, id === 'paid' ? null : (account?.keys[id] ?? null)).mask !== null,
     );
     return [...classic, ...personal];
   }, [site, account]);

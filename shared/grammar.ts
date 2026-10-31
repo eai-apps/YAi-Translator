@@ -103,6 +103,19 @@ export interface AskResponse {
   cached: boolean;
 }
 
+export interface WordAskHistoryItem {
+  role: 'user' | 'assistant';
+  content: string;
+}
+
+export interface WordAskRequest {
+  word: string;
+  wordContext?: string;
+  question: string;
+  history?: WordAskHistoryItem[];
+  uiLang?: UiLanguage;
+}
+
 /* ------------------------------ Админка ------------------------------ */
 
 export interface AdminGrammarTopic extends GrammarTopicSummary {

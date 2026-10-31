@@ -4,7 +4,7 @@ import type { Env } from '../_lib/env';
 import { buildCacheKey, requireText, requireUiLanguage } from '../_lib/request';
 import { readCache, writeCache } from '../_lib/cache';
 import { errorResponse, getClientIp, getHeaderKeys, getUiLanguage, jsonResponse, readJsonBody } from '../_lib/http';
-import { resolveUserKeys } from '../_lib/auth/keys';
+import { findRequestSession, resolveUserKeys } from '../_lib/auth/keys';
 import { createLimitGuard } from '../_lib/usage';
 import { buildCheckPrompt } from '../_lib/prompts';
 import { runJsonTask } from '../_lib/router';
@@ -29,8 +29,9 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       return jsonResponse({ ...cached, cached: true });
     }
 
+    const session = await findRequestSession(env, context.request);
     // Дневной лимит считается, только когда дело доходит до общих ключей сайта.
-    const limitGuard = createLimitGuard(env, getClientIp(context.request));
+    const limitGuard = createLimitGuard(env, getClientIp(context.request), session?.userId);
 
     const prompt = buildCheckPrompt({ text, uiLang: checkUiLang });
     const { data, provider } = await runJsonTask({
@@ -40,6 +41,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       signal: context.request.signal,
       beforeShared: limitGuard,
       validate: validateCheck,
+      isRegistered: Boolean(session),
     });
 
     const result: CheckResponse = { ...data, provider, cached: false };

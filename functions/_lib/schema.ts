@@ -203,6 +203,33 @@ const STATEMENTS = [
     PRIMARY KEY (user_id, list_id)
   )`,
   'CREATE INDEX IF NOT EXISTS idx_study_lists_user ON study_lists (user_id, updated_at)',
+
+  // --- Этап 7: платные нейросети (версия 0.9.1) ---
+  // Подключения к платным OpenAI-совместимым API (ключ шифруется).
+  `CREATE TABLE IF NOT EXISTS paid_connections (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    base_url TEXT NOT NULL,
+    ciphertext TEXT NOT NULL,
+    iv TEXT NOT NULL,
+    last4 TEXT NOT NULL,
+    default_model TEXT NOT NULL DEFAULT '',
+    enabled_models TEXT NOT NULL DEFAULT '[]',
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL
+  )`,
+  // Ссылки «Где купить ключ» — редактируются в админке.
+  `CREATE TABLE IF NOT EXISTS buy_links (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title TEXT NOT NULL,
+    url TEXT NOT NULL,
+    howto_ru TEXT NOT NULL DEFAULT '',
+    howto_de TEXT NOT NULL DEFAULT '',
+    howto_en TEXT NOT NULL DEFAULT '',
+    sort INTEGER NOT NULL DEFAULT 0,
+    hidden INTEGER NOT NULL DEFAULT 0
+  )`,
+  'CREATE INDEX IF NOT EXISTS idx_buy_links_sort ON buy_links (sort, hidden)',
 ];
 
 /**

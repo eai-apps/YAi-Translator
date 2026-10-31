@@ -14,6 +14,48 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.9.1',
+    date: '2026-10-31',
+    items: {
+      ru: [
+        'Платные нейросети: подключение любых OpenAI-совместимых сервисов (OpenRouter, DeepSeek, OpenAI) на сайте и в профиле.',
+        'Маршрутизация и лимиты токенов: дневные и месячные квоты, автоматическое переключение.',
+        'Раздел «Где купить ключ от 1$» с пошаговой инструкцией подключения.',
+        'Бонусы за регистрацию: 50 запросов к ИИ в день вместо 5, история до 1000 записей и доступ к общим сетям.',
+      ],
+      de: [
+        'Kostenpflichtige KI-Netzwerke: Anbindung beliebiger OpenAI-kompatibler Dienste (OpenRouter, DeepSeek, OpenAI).',
+        'Routing und Token-Limits: tägliche und monatliche Quoten mit automatischer Umschaltung.',
+        'Bereich „Wo Schlüssel ab 1$ kaufen“ mit Schritt-für-Schritt-Anleitung.',
+        'Registrierungsboni: 50 KI-Anfragen pro Tag statt 5, Verlauf bis zu 1000 Einträge.',
+      ],
+      en: [
+        'Paid AI networks: connect any OpenAI-compatible provider (OpenRouter, DeepSeek, OpenAI).',
+        'Routing and token limits: daily and monthly quotas with automatic fallback.',
+        '“Where to buy key from $1” section with step-by-step setup guide.',
+        'Registration benefits: 50 AI requests per day instead of 5, history up to 1000 entries.',
+      ],
+    },
+  },
+  {
+    version: '0.9.0',
+    date: '2026-10-31',
+    items: {
+      ru: [
+        'Голосовой ввод через Cloudflare Workers AI Whisper: диктовка с точной расстановкой знаков препинания и заглавных букв.',
+        'Словарь «в одном окне»: панель общения с ИИ прямо под карточкой слова с кликабельными подсказками.',
+      ],
+      de: [
+        'Spracheingabe über Cloudflare Workers AI Whisper: Diktat mit Satzzeichen und Großschreibung.',
+        'Wörterbuch im selben Fenster: KI-Chat direkt unter der Wortkarte mit klickbaren Wörtern.',
+      ],
+      en: [
+        'Voice input via Cloudflare Workers AI Whisper: dictation with punctuation and capitalization.',
+        'Dictionary in one window: interactive AI tutor chat directly below the word card.',
+      ],
+    },
+  },
+  {
     version: '0.8.3',
     date: '2026-10-31',
     items: {

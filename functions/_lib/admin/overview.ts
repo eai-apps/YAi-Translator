@@ -4,6 +4,8 @@ import { ADMIN } from '../config';
 import type { Env } from '../env';
 import { countActiveUsersSince, countUsers, countUsersSince } from '../auth/users';
 import { countVisitors, dayKey, dayKeyBefore, sumSince, valueOf, visitorsOnDay } from '../stats';
+import { getPaidTokensUsage } from '../paid/manager';
+import { readSetting, SETTINGS_KEYS } from '../settings';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -57,6 +59,12 @@ export async function buildOverview(env: Env): Promise<AdminOverview> {
     daily.push({ day, translations, visitors });
   }
 
+  const [paidUsage, dailyLimitSetting, monthlyLimitSetting] = await Promise.all([
+    getPaidTokensUsage(env),
+    readSetting<number>(env, SETTINGS_KEYS.paidDailyTokenLimit),
+    readSetting<number>(env, SETTINGS_KEYS.paidMonthlyTokenLimit),
+  ]);
+
   return {
     users: { total, today: todayUsers, week: weekUsers, month: monthUsers, activeWeek },
     visitors: { today: visitorsTodayUnique, week: visitorsWeek, month: visitorsMonth },
@@ -70,5 +78,11 @@ export async function buildOverview(env: Env): Promise<AdminOverview> {
     },
     popularPairs: popularPairs(todayTotals),
     daily,
+    paidTokens: {
+      today: paidUsage.today,
+      month: paidUsage.month,
+      dailyLimit: dailyLimitSetting ?? 50_000,
+      monthlyLimit: monthlyLimitSetting ?? 1_000_000,
+    },
   };
 }

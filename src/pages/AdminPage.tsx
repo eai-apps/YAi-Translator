@@ -20,9 +20,10 @@ import { AdminSettingsTab } from '../components/admin/AdminSettingsTab';
 import { AdminUsersTab } from '../components/admin/AdminUsersTab';
 import { AdminResourcesTab } from '../components/admin/AdminResourcesTab';
 import { AdminGrammarTab } from '../components/admin/AdminGrammarTab';
+import { AdminPaidTab } from '../components/admin/AdminPaidTab';
 import { AdminLog } from '../components/admin/AdminLog';
 
-type Tab = 'overview' | 'keys' | 'resources' | 'grammar' | 'settings' | 'users';
+type Tab = 'overview' | 'keys' | 'paid' | 'resources' | 'grammar' | 'settings' | 'users';
 
 export default function AdminPage() {
   const { t } = useTranslation();
@@ -101,6 +102,7 @@ export default function AdminPage() {
         options={[
           { value: 'overview', label: t('admin.tabOverview') },
           { value: 'keys', label: t('admin.tabKeys') },
+          { value: 'paid', label: t('admin.tabPaid') },
           { value: 'resources', label: t('admin.tabResources') },
           { value: 'grammar', label: t('admin.tabGrammar') },
           { value: 'settings', label: t('admin.tabSettings') },
@@ -128,6 +130,8 @@ export default function AdminPage() {
         ) : null}
 
         {tab === 'keys' ? <AdminKeysTab onError={setError} /> : null}
+
+        {tab === 'paid' ? <AdminPaidTab onError={setError} /> : null}
 
         {tab === 'resources' ? <AdminResourcesTab onError={setError} /> : null}
 

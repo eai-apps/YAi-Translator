@@ -5,7 +5,7 @@
  */
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { LanguageCode, SourceLanguage, WordResponse } from '../../../shared/types';
+import type { LanguageCode, SourceLanguage, UiLanguage, WordResponse } from '../../../shared/types';
 import { groupedLanguages } from '../../../shared/languages';
 import type { DictState } from '../../hooks/useDictLookup';
 import type { TranslatorError } from '../../lib/errors';
@@ -17,6 +17,8 @@ import { EmptyState } from '../ui/EmptyState';
 import { IconAlert, IconBook, IconSearch, IconSwap } from '../layout/icons';
 import { DictPanel } from '../word/DictPanel';
 import { WordCard } from '../word/WordCard';
+import { PickContext } from '../word/pick';
+import { WordChatPanel } from './WordChatPanel';
 
 interface DictionarySearchPanelProps {
   query: string;
@@ -28,6 +30,8 @@ interface DictionarySearchPanelProps {
   error: TranslatorError | null;
   speech: SpeechController;
   onOpenLimit: () => void;
+  uiLang: UiLanguage;
+  onPickWord?: (word: string) => void;
   /** Язык слова и язык перевода (этап 8Б). */
   sourceLang: SourceLanguage;
   targetLang: LanguageCode;
@@ -48,6 +52,8 @@ export function DictionarySearchPanel({
   error,
   speech,
   onOpenLimit,
+  uiLang,
+  onPickWord,
   sourceLang,
   targetLang,
   onSourceChange,
@@ -57,6 +63,7 @@ export function DictionarySearchPanel({
   const groups = useMemo(() => groupedLanguages(), []);
 
   return (
+    <PickContext.Provider value={onPickWord ?? null}>
     <section className="mt-4">
       <Card className="p-3">
         <form
@@ -156,19 +163,27 @@ export function DictionarySearchPanel({
       ) : null}
 
       {card ? (
-        <Card className="mt-3 p-4 sm:p-5">
-          <WordCard
-            card={card.card}
-            speech={speech}
-            dictExamples={dict.data?.entry.examples.filter((example) => example.source === 'tatoeba') ?? []}
-            dictLang={dict.data?.entry.sourceLang ?? null}
-            translationLang={targetLang}
+        <>
+          <Card className="mt-3 p-4 sm:p-5">
+            <WordCard
+              card={card.card}
+              speech={speech}
+              dictExamples={dict.data?.entry.examples.filter((example) => example.source === 'tatoeba') ?? []}
+              dictLang={dict.data?.entry.sourceLang ?? null}
+              translationLang={targetLang}
+            />
+            <p className="mt-4 border-t border-line pt-2 text-[11px] text-muted">
+              {t('translate.provider', { provider: providerLabel(card.provider) })}
+              {card.cached ? ` · ${t('translate.fromCache')}` : ''}
+            </p>
+          </Card>
+          <WordChatPanel
+            word={card.card.lemma || query}
+            wordSummary={card.card.meanings.map((m) => m.translations.join(', ')).join('; ')}
+            uiLang={uiLang}
+            onPickWord={onPickWord}
           />
-          <p className="mt-4 border-t border-line pt-2 text-[11px] text-muted">
-            {t('translate.provider', { provider: providerLabel(card.provider) })}
-            {card.cached ? ` · ${t('translate.fromCache')}` : ''}
-          </p>
-        </Card>
+        </>
       ) : null}
 
       {/* ИИ не ответил — карточка из настоящих словарей. */}
@@ -184,5 +199,6 @@ export function DictionarySearchPanel({
         </Card>
       ) : null}
     </section>
+    </PickContext.Provider>
   );
 }
