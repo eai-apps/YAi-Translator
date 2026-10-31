@@ -21,6 +21,7 @@ import { translateClassic } from '../_lib/classic';
 import { bump } from '../_lib/stats';
 import { validateTranslate } from '../_lib/validate';
 import { readSetting, SETTINGS_KEYS } from '../_lib/settings';
+import { resolveAiModel } from '../_lib/paid/pick';
 
 /** Языковая пара для статистики: «auto» заменяется языком, определённым при переводе. */
 async function recordTranslation(env: Env, response: TranslateResponse, sourceLang: SourceLanguage, targetLang: LanguageCode) {
@@ -110,10 +111,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     const mode = body.mode === 'ai' ? 'ai' : 'classic';
     const chosen = CLASSIC_PROVIDERS.find((id) => id === body.provider) ?? null;
     const personalAi = mode === 'ai' ? (PERSONAL_AI.find((id) => id === body.provider) ?? null) : null;
-    const aiModel =
-      mode === 'ai' && typeof body.aiModel === 'string' && body.aiModel.includes('|') && body.aiModel.length <= 200
-        ? body.aiModel
-        : undefined;
+    const aiModel = mode === 'ai' ? await resolveAiModel(context.env, body.aiModel) : undefined;
 
     if (sourceLang !== 'auto' && sourceLang === targetLang) {
       throw new ApiError('VALIDATION', 400);

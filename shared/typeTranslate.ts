@@ -48,6 +48,8 @@ export interface TranslateResponse {
   provider: ProviderId;
   /** Модель платной нейросети (provider 'paid'), например «deepseek-v4.1-flash». */
   model?: string;
+  /** Подпись в блоке перевода, которую ставит сам сайт (например, «ИИ Pro»), — вместо имени сервиса. */
+  label?: string;
   cached: boolean;
 }
 

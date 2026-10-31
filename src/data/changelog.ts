@@ -14,6 +14,15 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.10.1',
+    date: '2026-10-31',
+    items: {
+      ru: ['«Точный перевод (ИИ)» и «Суперточный перевод (ИИ Pro)» — теперь режимы: выбрали один раз, и все переводы и карточки слов идут через него.', 'Выбор нейросети в «Быстрый перевод ▾» больше не сбрасывается сам.', 'Платные нейросети сайта не тратят бесплатные попытки дня — у них свой бюджет токенов.'],
+      de: ['„Genaue Übersetzung (KI)“ und „Extra-genaue Übersetzung (KI Pro)“ sind jetzt Modi: einmal wählen, und alle Übersetzungen und Wortkarten laufen darüber.', 'Die KI-Auswahl springt nicht mehr von selbst zurück.', 'Bezahlte KI-Modelle der Website verbrauchen keine kostenlosen Tagesversuche.'],
+      en: ['“Accurate (AI)” and “Super-accurate (AI Pro)” are now modes: pick once and all translations and word cards use them.', 'The AI choice no longer resets by itself.', 'Paid site models no longer use up the free daily attempts.'],
+    },
+  },
+  {
     version: '0.10.0',
     date: '2026-10-31',
     items: {

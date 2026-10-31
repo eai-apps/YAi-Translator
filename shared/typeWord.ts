@@ -13,6 +13,8 @@ export interface WordRequest {
   word: string;
   sourceLang: SourceLanguage;
   targetLang: LanguageCode;
+  /** Нейросеть сайта: «id|модель» или «default» (ИИ Pro). */
+  aiModel?: string;
 }
 
 export interface WordMeaning {

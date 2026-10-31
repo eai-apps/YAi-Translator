@@ -12,6 +12,7 @@ import { runJsonTask } from '../_lib/router';
 import { bump } from '../_lib/stats';
 import { validateWordCard } from '../_lib/validate';
 import { buildDictEntry } from '../_lib/dict';
+import { paidRequiresLogin, resolveAiModel } from '../_lib/paid/pick';
 
 /** Карточка из словарей для дополнения ответа ИИ; ошибка любого источника не ломает ответ ИИ. */
 function lookupDict(
@@ -94,6 +95,9 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     }
 
     const session = await findRequestSession(env, context.request);
+    // Выбрана нейросеть сайта (✦ модель или «ИИ Pro») — карточку составляет она; гостю без права — обычная цепочка.
+    const pickedModel = await resolveAiModel(env, body.aiModel);
+    const aiModel = pickedModel && (session || !(await paidRequiresLogin(env))) ? pickedModel : undefined;
     // Дневной лимит считается, только когда дело доходит до общих ключей сайта.
     const limitGuard = createLimitGuard(env, getClientIp(context.request), session?.userId);
 
@@ -106,6 +110,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       beforeShared: limitGuard,
       validate: validateWordCard,
       isRegistered: Boolean(session),
+      ...(aiModel ? { only: ['paid' as const], sharedPaidPick: aiModel } : {}),
     });
 
     // Синонимы, примеры «из жизни», переводы и толкования из словарей.

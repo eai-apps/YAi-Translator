@@ -146,7 +146,8 @@ export async function runJsonTask<T>(options: RunJsonOptions<T>): Promise<{ data
     if (!provider || !provider.tasks.includes(options.prompt.task)) continue;
 
     // Ключи пользователя не сработали — дальше идут общие ключи, считаем лимит.
-    if (attempt.shared && options.beforeShared) await options.beforeShared();
+    // Платные нейросети сайта считаются по бюджету токенов (админка), а не по бесплатному дневному лимиту запросов.
+    if (attempt.shared && attempt.id !== 'paid' && options.beforeShared) await options.beforeShared();
 
     try {
       let usedTokens = 0;

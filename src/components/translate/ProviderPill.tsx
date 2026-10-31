@@ -45,12 +45,15 @@ export function ProviderPill({ value, onChange, aiLoading, onAskAi, hasText }: P
         keyStateFor(id, id === 'paid' ? null : (account?.keys[id] ?? null)).mask !== null,
     );
     const siteChoices = siteLocked ? [] : siteModels.map((item) => `site:${item.id}` as ProviderChoice);
-    return [...classic, ...personal, ...siteChoices];
-  }, [site, account, siteLocked, siteModels]);
+    const modes: ProviderChoice[] = ['ai', ...(defaultId && !siteLocked ? (['pro'] as ProviderChoice[]) : [])];
+    return [...modes, ...classic, ...personal, ...siteChoices];
+  }, [site, account, siteLocked, siteModels, defaultId]);
 
+  // Сбрасываем выбор только когда оба списка уже пришли с сервера — иначе выбранная ✦ модель или «ИИ Pro»
+  // слетала на «Быстрый перевод», пока грузился список нейросетей (ошибка «не с первого раза», 0.10.1).
   useEffect(() => {
-    if (value !== 'auto' && site && !options.includes(value)) onChange('auto');
-  }, [value, site, options, onChange]);
+    if (value !== 'auto' && site && siteAi && !options.includes(value)) onChange('auto');
+  }, [value, site, siteAi, options, onChange]);
 
   const personal = (id: ProviderChoice) =>
     PERSONAL_AI_CHOICES.includes(id as (typeof PERSONAL_AI_CHOICES)[number]);
@@ -62,12 +65,12 @@ export function ProviderPill({ value, onChange, aiLoading, onAskAi, hasText }: P
       checked: value === 'auto',
       onSelect: () => onChange('auto'),
     },
+    // «Точный» и «Суперточный» — такие же режимы, как сервисы: выбрал — и все переводы идут через них.
     {
       id: 'ai',
       label: t('translate.modeAccurate'),
-      hint: aiLoading ? t('common.loading') : undefined,
-      disabled: !hasText || aiLoading,
-      onSelect: () => onAskAi(),
+      checked: value === 'ai',
+      onSelect: () => onChange('ai'),
     },
   ];
 
@@ -75,15 +78,16 @@ export function ProviderPill({ value, onChange, aiLoading, onAskAi, hasText }: P
     items.push({
       id: 'ai-pro',
       label: t('translate.modeAccuratePro'),
-      hint: siteLocked ? t('translate.afterLogin') : aiLoading ? t('common.loading') : undefined,
-      disabled: siteLocked || !hasText || aiLoading,
-      onSelect: () => onAskAi(defaultId),
+      hint: siteLocked ? t('translate.afterLogin') : undefined,
+      checked: value === 'pro',
+      disabled: siteLocked,
+      onSelect: () => onChange('pro'),
     });
   }
 
   let firstClassic = true;
   for (const id of options) {
-    if (id.startsWith('site:')) continue;
+    if (id.startsWith('site:') || id === 'ai' || id === 'pro') continue;
     const isPers = personal(id);
     const isClassic = (CLASSIC_PROVIDERS as readonly string[]).includes(id);
     const dotStatus: 'green' | 'red' | undefined = isPers
@@ -132,7 +136,11 @@ export function ProviderPill({ value, onChange, aiLoading, onAskAi, hasText }: P
   const current =
     value === 'auto'
       ? t('translate.modeFast')
-      : value.startsWith('site:')
+      : value === 'ai'
+        ? t('translate.modeAccurate')
+        : value === 'pro'
+          ? t('translate.proBadge')
+          : value.startsWith('site:')
         ? shortModelName(value.split('|').pop() ?? value)
         : providerLabel(value);
 

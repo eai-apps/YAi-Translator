@@ -107,7 +107,8 @@
     "siteAi": "KI",
     "moreAiAfterLogin": "★ Anmelden oder registrieren — kostenlos",
     "taglineGuest": "Claude, ChatGPT, DeepSeek, Qwen und 10× mehr Anfragen — nach kostenloser Registrierung",
-    "modeAccuratePro": "Extra-genaue Übersetzung (KI Pro)"
+    "modeAccuratePro": "Extra-genaue Übersetzung (KI Pro)",
+    "proBadge": "KI Pro"
   },
   "others": {
     "title": "Wie andere übersetzen",

@@ -31,7 +31,7 @@ export const PERSONAL_AI_CHOICES = ['gemini', 'groq', 'paid'] as const;
 type PersonalAiChoice = (typeof PERSONAL_AI_CHOICES)[number];
 
 /** Выбор переводчика: «авто» — по очереди, конкретный сервис или свой ключ Gemini / Groq. */
-export type ProviderChoice = 'auto' | ClassicProviderId | PersonalAiChoice | `site:${string}`;
+export type ProviderChoice = 'auto' | 'ai' | 'pro' | ClassicProviderId | PersonalAiChoice | `site:${string}`;
 
 function isPersonalAi(choice: ProviderChoice): choice is PersonalAiChoice {
   return (PERSONAL_AI_CHOICES as readonly string[]).includes(choice);
@@ -40,6 +40,28 @@ function isPersonalAi(choice: ProviderChoice): choice is PersonalAiChoice {
 /** Нейросеть сайта из списка (0.9.3): «site:id подключения|модель». */
 export function isSiteAi(choice: ProviderChoice): choice is `site:${string}` {
   return choice.startsWith('site:');
+}
+
+/**
+ * Режимы в «Быстрый перевод ▾» (0.10.1): 'ai' — «Точный перевод (ИИ)» (бесплатные ключи),
+ * 'pro' — «Суперточный перевод (ИИ Pro)» (модель по умолчанию из админки, сервер берёт её по слову «default»).
+ */
+function aiModelFor(choice: ProviderChoice): string | undefined {
+  if (choice === 'pro') return 'default';
+  if (isSiteAi(choice)) return choice.slice(5);
+  return undefined;
+}
+
+/** Что отправить серверу: модель сайта, конкретный сервис / личный ключ или ничего (по очереди). */
+function requestTarget(choice: ProviderChoice): { aiModel?: string; provider?: ClassicProviderId | PersonalAiChoice } {
+  const aiModel = aiModelFor(choice);
+  if (aiModel) return { aiModel };
+  if (choice === 'auto' || choice === 'ai' || choice === 'pro' || isSiteAi(choice)) return {};
+  return { provider: choice };
+}
+
+function isAiChoice(choice: ProviderChoice): boolean {
+  return choice === 'ai' || choice === 'pro' || isPersonalAi(choice) || isSiteAi(choice);
 }
 
 /**
@@ -138,10 +160,17 @@ export function useTranslator(onLimitReached: () => void) {
 
   /** Карточка слова — отдельно, чтобы перевод не ждал ИИ. */
   const loadWord = useCallback(
-    async (value: string, source: SourceLanguage, target: LanguageCode, requestId: number, signal: AbortSignal) => {
+    async (
+      value: string,
+      source: SourceLanguage,
+      target: LanguageCode,
+      requestId: number,
+      signal: AbortSignal,
+      aiModel?: string,
+    ) => {
       setWord({ loading: true, data: null, error: null });
       try {
-        const data = await api.word({ word: value, sourceLang: source, targetLang: target }, signal);
+        const data = await api.word({ word: value, sourceLang: source, targetLang: target, ...(aiModel ? { aiModel } : {}) }, signal);
         if (requestId !== requestRef.current) return;
         setWord({ loading: false, data, error: null });
       } catch (caught) {
@@ -194,7 +223,7 @@ export function useTranslator(onLimitReached: () => void) {
 
       // Словари и карточка ИИ грузятся вместе, не дожидаясь друг друга.
       if (isWordQuery(trimmed)) {
-        void loadWord(trimmed, source, target, requestId, controller.signal);
+        void loadWord(trimmed, source, target, requestId, controller.signal, aiModelFor(choice));
         loadDictFor(trimmed, target, requestId, controller.signal);
       }
 
@@ -204,13 +233,14 @@ export function useTranslator(onLimitReached: () => void) {
             text: trimmed,
             sourceLang: source,
             targetLang: target,
-            mode: isPersonalAi(choice) || isSiteAi(choice) ? 'ai' : 'classic',
-            ...(isSiteAi(choice) ? { aiModel: choice.slice(5) } : choice !== 'auto' ? { provider: choice } : {}),
+            mode: isAiChoice(choice) ? 'ai' : 'classic',
+            ...requestTarget(choice),
           },
           controller.signal,
         );
         if (requestId !== requestRef.current) return;
-        setResult(response);
+        // «ИИ Pro»: имя модели не показываем — только название режима.
+        setResult(choice === 'pro' ? { ...response, label: t('translate.proBadge') } : response);
         setHistoryId(
           addItem({
             text: trimmed,
@@ -315,8 +345,8 @@ export function useTranslator(onLimitReached: () => void) {
     const trimmed = text.trim();
     if (!isWordQuery(trimmed)) return;
     const controller = new AbortController();
-    void loadWord(trimmed, sourceLang, targetLang, requestRef.current, controller.signal);
-  }, [text, sourceLang, targetLang, loadWord]);
+    void loadWord(trimmed, sourceLang, targetLang, requestRef.current, controller.signal, aiModelFor(providerChoice));
+  }, [text, sourceLang, targetLang, loadWord, providerChoice]);
 
   const { changeSourceLang, changeTargetLang, swapLanguages } = useLanguageSwitching({
     sourceLang,
