@@ -1,12 +1,13 @@
 /**
- * Хранение карточек, прогресса и дней учёбы в D1 (этап 6).
+ * Хранение карточек, прогресса и дней учёбы в D1 (этап 6), списков слов — этап 8Б.
  * Логика как у /api/sync: побеждает запись с большим updated_at.
  * Дни не удаляются: счётчики объединяются по максимуму — так два устройства
  * не затирают прогресс друг друга и не удваивают числа.
  */
-import type { StudyCard, StudyDay, StudyProgress, StudySyncResponse } from '../../../shared/types';
+import type { StudyCard, StudyDay, StudyList, StudyProgress, StudySyncResponse } from '../../../shared/types';
 import { STUDY } from '../config';
 import type { Env } from '../env';
+import { readLists, saveLists } from './listStore';
 import { readStudyState } from './read';
 import { ID_CHUNK, placeholders } from './rows';
 import { ensureSchema } from '../schema';
@@ -104,9 +105,11 @@ export async function syncStudy(
   cards: StudyCard[],
   progress: StudyProgress[],
   days: StudyDay[],
+  lists: StudyList[] = [],
 ): Promise<StudySyncResponse> {
   await ensureSchema(env);
   const removed = await saveIncoming(env, userId, cards, progress, days);
+  const removedLists = await saveLists(env, userId, lists);
   const state = await readStudyState(
     env,
     userId,
@@ -114,5 +117,11 @@ export async function syncStudy(
     cards.map((card) => card.id),
     progress.map((item) => item.cardId),
   );
-  return { ...state, serverTime: Date.now(), removed };
+  const savedLists = await readLists(
+    env,
+    userId,
+    since,
+    lists.map((list) => list.id),
+  );
+  return { ...state, lists: savedLists, removed, removedLists, serverTime: Date.now() };
 }

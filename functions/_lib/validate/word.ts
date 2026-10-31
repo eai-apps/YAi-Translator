@@ -1,8 +1,13 @@
-/** Проверка карточки слова: значения, артикль, склонение, спряжение, примеры (этап 8: формы и подсветка). */
+/**
+ * Проверка карточки слова: значения, артикль, склонение, спряжение, примеры (этап 8: формы и подсветка).
+ * Этап 8Б: glossary (переводы связанных слов), grammar (3–5 пунктов с примерами) и paraphrases.
+ */
 import type {
   Conjugation,
   DeclensionRow,
+  GrammarPoint,
   Imperative,
+  Paraphrase,
   VerbForm,
   WordCard,
   WordExample,
@@ -70,6 +75,54 @@ function toMatch(value: unknown, text: string, translation: string): WordExample
     source,
     target: target && translation.toLowerCase().includes(target.toLowerCase()) ? target : '',
   };
+}
+
+/** Переводы связанных слов: только строки, до 40 пунктов, ключ и значение не длиннее 80 знаков. */
+function toGlossary(value: unknown): Record<string, string> {
+  if (!isRecord(value)) return {};
+  const glossary: Record<string, string> = {};
+  for (const [key, translation] of Object.entries(value).slice(0, 40)) {
+    const word = asText(key, 80);
+    const meaning = asText(translation, 80);
+    if (word && meaning) glossary[word] = meaning;
+  }
+  return glossary;
+}
+
+/** Пункты грамматики: заголовок, объяснение и 2–4 примера с уровнем A1–B2. */
+function toGrammarPoints(value: unknown): GrammarPoint[] {
+  return asArray(value, 5)
+    .map((item): GrammarPoint | null => {
+      if (!isRecord(item)) return null;
+      const title = asText(item.title, 160);
+      const explanation = asText(item.explanation, 900);
+      if (!title || !explanation) return null;
+      const examples = asArray(item.examples, 4)
+        .map((example) => {
+          if (!isRecord(example)) return null;
+          const text = asText(example.text, 400);
+          if (!text) return null;
+          return {
+            level: asEnum(example.level, LEVELS, 'A2'),
+            text,
+            translation: asText(example.translation, 400),
+          };
+        })
+        .filter((example): example is GrammarPoint['examples'][number] => example !== null);
+      return { title, explanation, examples };
+    })
+    .filter((item): item is GrammarPoint => item !== null);
+}
+
+/** «Как ещё сказать»: 3–4 пары предложений с переводом. */
+function toParaphrases(value: unknown): Paraphrase[] {
+  return asArray(value, 4)
+    .map((item) => {
+      if (!isRecord(item)) return null;
+      const text = asText(item.text, 400);
+      return text ? { text, translation: asText(item.translation, 400) } : null;
+    })
+    .filter((item): item is Paraphrase => item !== null);
 }
 
 export function validateWordCard(raw: unknown): WordCore | null {
@@ -152,6 +205,10 @@ export function validateWordCard(raw: unknown): WordCore | null {
     // Однокоренные слова (этап 8: вкладка «Связанные слова»).
     family: asStringList(source.family, 10),
     phrases,
+    // Этап 8Б: переводы связанных слов, подробная грамматика и «как ещё сказать».
+    paraphrases: toParaphrases(source.paraphrases),
+    glossary: toGlossary(source.glossary),
+    grammar: toGrammarPoints(source.grammar),
     grammarNotes: asArray(source.grammarNotes, 6)
       .map((item) => asText(item, 400))
       .filter((item) => item.length > 0),

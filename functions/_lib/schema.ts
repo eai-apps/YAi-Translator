@@ -193,6 +193,16 @@ const STATEMENTS = [
     PRIMARY KEY (user_id, day)
   )`,
   'CREATE INDEX IF NOT EXISTS idx_study_days_user ON study_days (user_id, day)',
+  // --- Этап 8Б: свои списки слов «Мои списки» ---
+  // Список — название, значок и id карточек в payload; слово может быть в нескольких списках.
+  `CREATE TABLE IF NOT EXISTS study_lists (
+    user_id TEXT NOT NULL,
+    list_id TEXT NOT NULL,
+    payload TEXT NOT NULL,
+    updated_at INTEGER NOT NULL,
+    PRIMARY KEY (user_id, list_id)
+  )`,
+  'CREATE INDEX IF NOT EXISTS idx_study_lists_user ON study_lists (user_id, updated_at)',
 ];
 
 /**

@@ -14,6 +14,8 @@ interface ChipsProps {
   /** Сколько показывать сразу; остальные — под «…ещё». */
   limit?: number;
   className?: string;
+  /** Короткий перевод под словом (этап 8Б): «bringen» → «приносить». */
+  glossary?: Record<string, string>;
 }
 
 const TONES = {
@@ -22,7 +24,18 @@ const TONES = {
   danger: 'bg-soft text-danger hover:bg-accentSoft',
 } as const;
 
-export function Chips({ items, onPick, tone = 'neutral', limit, className }: ChipsProps) {
+/** Перевод связанного слова по ключу: точное совпадение, затем без регистра и артикля. */
+function glossaryValue(glossary: Record<string, string>, word: string): string | null {
+  const exact = glossary[word];
+  if (exact) return exact;
+  const normalized = word.trim().toLowerCase();
+  for (const [key, value] of Object.entries(glossary)) {
+    if (key.trim().toLowerCase() === normalized) return value;
+  }
+  return null;
+}
+
+export function Chips({ items, onPick, tone = 'neutral', limit, className, glossary }: ChipsProps) {
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
   const visible = limit && !expanded ? items.slice(0, limit) : items;
@@ -32,20 +45,26 @@ export function Chips({ items, onPick, tone = 'neutral', limit, className }: Chi
 
   return (
     <ul className={cn('flex flex-wrap gap-1.5', className)}>
-      {visible.map((item, index) => (
-        <li key={`${item}-${index}`}>
-          <button
-            type="button"
-            onClick={() => onPick(item)}
-            className={cn(
-              'rounded-full px-3 py-1 text-sm font-medium transition-colors active:scale-95',
-              TONES[tone],
-            )}
-          >
-            {item}
-          </button>
-        </li>
-      ))}
+      {visible.map((item, index) => {
+        const hint = glossary ? glossaryValue(glossary, item) : null;
+        return (
+          <li key={`${item}-${index}`}>
+            <button
+              type="button"
+              onClick={() => onPick(item)}
+              className={cn(
+                'rounded-full px-3 transition-colors active:scale-95',
+                hint ? 'py-1 text-left leading-tight' : 'py-1 text-sm font-medium',
+                TONES[tone],
+              )}
+            >
+              <span className="block text-sm font-medium">{item}</span>
+              {/* Перевод связанного слова — мелким серым, чтобы чипс оставался компактным. */}
+              {hint ? <span className="block text-[11px] font-normal opacity-70">{hint}</span> : null}
+            </button>
+          </li>
+        );
+      })}
       {hidden > 0 ? (
         <li>
           <button

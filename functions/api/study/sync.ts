@@ -27,6 +27,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       data.cards,
       data.progress,
       data.days,
+      data.lists,
     );
     return jsonResponse(response);
   } catch (error) {

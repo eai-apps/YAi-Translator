@@ -1,12 +1,14 @@
-/** Строка истории или избранного. */
+/** Строка истории или избранного. Этап 8Б: у каждого слова — то же меню «В карточки ▾». */
 import { useTranslation } from 'react-i18next';
 import { getLanguage } from '../../../shared/languages';
 import { ARTICLE_COLORS } from '../../config';
 import type { HistoryItem } from '../../hooks/useHistory';
 import { cn } from '../../lib/cn';
+import { cardFromTranslation, splitArticle } from '../../lib/studyCard';
 import { Card } from '../ui/Card';
 import { IconButton } from '../ui/IconButton';
 import { IconStar, IconTranslate, IconTrash } from '../layout/icons';
+import { AddToStudyMenu } from '../study/AddToStudyMenu';
 
 interface HistoryRowProps {
   item: HistoryItem;
@@ -23,6 +25,17 @@ export function HistoryRow({ item, onOpen, onToggleFavorite, onRemove }: History
       ? t('languages.auto')
       : getLanguage(item.sourceLang)?.nativeName ?? item.sourceLang;
   const targetName = getLanguage(item.targetLang)?.nativeName ?? item.targetLang;
+
+  // В карточки можно положить только немецкое слово из 1–3 слов (как на экране перевода).
+  const { lemma } = splitArticle(item.text);
+  const studyInput =
+    lemma.split(/\s+/).length <= 3
+      ? item.sourceLang === 'de'
+        ? cardFromTranslation(item.text, item.translation)
+        : item.targetLang === 'de'
+          ? cardFromTranslation(item.translation, item.text)
+          : null
+      : null;
 
   const date = new Intl.DateTimeFormat(i18n.language, {
     day: 'numeric',
@@ -52,7 +65,8 @@ export function HistoryRow({ item, onOpen, onToggleFavorite, onRemove }: History
         </p>
       </div>
 
-      <div className="flex shrink-0 flex-col gap-1 sm:flex-row">
+      <div className="flex shrink-0 flex-col items-end gap-1 sm:flex-row sm:items-center">
+        {studyInput ? <AddToStudyMenu input={studyInput} iconOnly /> : null}
         <IconButton
           label={item.favorite ? t('translate.favoriteRemove') : t('translate.favoriteAdd')}
           icon={<IconStar className="h-4 w-4" filled={item.favorite} />}

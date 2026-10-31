@@ -11,14 +11,13 @@ import type { SpeechController } from '../../hooks/useSpeech';
 import { cardFromWord } from '../../lib/studyCard';
 import { SectionTitle } from '../ui/SectionTitle';
 import { SpeakButton } from '../ui/SpeakButton';
-import { GrammarLinkedInline } from '../grammar/GrammarLinkedText';
-import { GrammarTopicLinks } from '../grammar/GrammarTopicLinks';
-import { AddToCardsButton } from '../study/AddToCardsButton';
+import { AddToStudyMenu } from '../study/AddToStudyMenu';
 import { CardTabs } from './CardTabs';
 import type { CardTab } from './CardTabs';
 import { Chips } from './Chips';
 import { ExamplesList } from './ExamplesList';
 import { FormsSection } from './FormsSection';
+import { GrammarSection } from './GrammarSection';
 import { MeaningList } from './MeaningList';
 import { RelatedSection } from './RelatedSection';
 import { SourcesLine } from './SourcesLine';
@@ -57,7 +56,8 @@ export function WordCard({
   const pick = usePick();
   const studyInput = useMemo(() => cardFromWord(card), [card]);
 
-  const hasGrammar = card.grammarNotes.length > 0 || (card.grammarTopics ?? []).length > 0;
+  const hasGrammar =
+    (card.grammar ?? []).length > 0 || card.grammarNotes.length > 0 || (card.grammarTopics ?? []).length > 0;
   const hasForms =
     Boolean(card.conjugation) || Boolean(card.declension) || Boolean(card.plural) || card.partOfSpeech === 'adjective';
   const hasRelated =
@@ -81,27 +81,8 @@ export function WordCard({
   const active = available.some((item) => item.id === tab) ? tab : available[0].id;
   const lang = translationLang ?? 'ru';
 
-  const grammarBlock = (
-    <section>
-    {card.grammarNotes.length > 0 ? (
-      <>
-        <SectionTitle>{t('word.grammarNotes')}</SectionTitle>
-        {/* Названия тем в пояснениях — ссылки на справочник грамматики (этап 5). */}
-        <ul className="mt-2 space-y-1.5">
-          {card.grammarNotes.map((note, index) => (
-            <li key={index} className="flex gap-2 text-sm leading-relaxed">
-              <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-accent" aria-hidden="true" />
-              <span>
-                <GrammarLinkedInline text={note} />
-              </span>
-            </li>
-          ))}
-        </ul>
-      </>
-    ) : null}
-    <GrammarTopicLinks topics={card.grammarTopics ?? []} />
-    </section>
-  );
+  // Грамматика (этап 8Б): подробные пункты с примерами; старые карточки — короткими пояснениями.
+  const grammarBlock = <GrammarSection card={card} speech={speech} translationLang={lang} />;
 
   return (
     <article className="animate-fade-in">
@@ -120,7 +101,7 @@ export function WordCard({
       />
 
       <div className="mt-2 flex flex-wrap items-center gap-2">
-        <AddToCardsButton input={studyInput} />
+        <AddToStudyMenu input={studyInput} />
       </div>
 
       <div className="mt-3">

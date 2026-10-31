@@ -25,6 +25,9 @@ const ReviewPage = lazy(() => import('./pages/learn/ReviewPage'));
 const CardsPage = lazy(() => import('./pages/learn/CardsPage'));
 const DecksPage = lazy(() => import('./pages/learn/DecksPage'));
 const PracticePage = lazy(() => import('./pages/learn/PracticePage'));
+// Свои списки слов (этап 8Б) — отдельными кусками.
+const ListsPage = lazy(() => import('./pages/learn/ListsPage'));
+const ListPage = lazy(() => import('./pages/learn/ListPage'));
 // Справка (этап 8) — тоже отдельным куском.
 const HelpPage = lazy(() => import('./pages/HelpPage'));
 
@@ -56,6 +59,8 @@ export default function App() {
                 <Route path="/learn" element={<LearnPage withGrammarLink />} />
                 <Route path="/learn/review" element={<ReviewPage />} />
                 <Route path="/learn/cards" element={<CardsPage />} />
+                <Route path="/learn/lists" element={<ListsPage />} />
+                <Route path="/learn/lists/:listId" element={<ListPage />} />
                 <Route path="/learn/decks" element={<DecksPage />} />
                 <Route path="/learn/practice" element={<Navigate to="/learn/practice/article" replace />} />
                 <Route path="/learn/practice/:type" element={<PracticePage />} />

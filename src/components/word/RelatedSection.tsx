@@ -1,6 +1,7 @@
 /**
  * Вкладка «Связанные слова» (этап 8): синонимы, антонимы, однокоренные слова (family),
  * управление и устойчивые выражения. Всё чипсами, всё нажимается; длинные списки — «…ещё».
+ * Этап 8Б: у каждого связанного слова — короткий перевод серым (из поля glossary).
  */
 import { useTranslation } from 'react-i18next';
 import type { Phrase, WordCard } from '../../../shared/types';
@@ -47,10 +48,10 @@ export function RelatedSection({
   const handlePick = pick ?? onPick;
 
   const groups = [
-    { title: t('word.synonyms'), items: card.synonyms, tone: 'neutral' as const },
-    { title: t('word.antonyms'), items: card.antonyms, tone: 'danger' as const },
-    { title: t('word.family'), items: card.family ?? [], tone: 'neutral' as const },
-    { title: t('word.governance'), items: card.governance, tone: 'neutral' as const },
+    { title: t('word.synonyms'), items: card.synonyms, tone: 'neutral' as const, withGlossary: true },
+    { title: t('word.antonyms'), items: card.antonyms, tone: 'danger' as const, withGlossary: true },
+    { title: t('word.family'), items: card.family ?? [], tone: 'neutral' as const, withGlossary: true },
+    { title: t('word.governance'), items: card.governance, tone: 'neutral' as const, withGlossary: false },
   ].filter((group) => group.items.length > 0);
 
   if (groups.length === 0 && card.phrases.length === 0) {
@@ -62,7 +63,15 @@ export function RelatedSection({
       {groups.map((group) => (
         <section key={group.title}>
           <SectionTitle>{group.title}</SectionTitle>
-          <Chips className="mt-2" items={group.items} tone={group.tone} limit={VISIBLE} onPick={handlePick ?? (() => undefined)} />
+          <Chips
+            className="mt-2"
+            items={group.items}
+            tone={group.tone}
+            limit={VISIBLE}
+            onPick={handlePick ?? (() => undefined)}
+            // Для синонимов из OpenThesaurus перевода нет — не выдумываем его.
+            glossary={group.withGlossary ? card.glossary ?? {} : undefined}
+          />
         </section>
       ))}
 

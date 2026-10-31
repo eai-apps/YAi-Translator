@@ -14,6 +14,39 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.8.1',
+    date: '2026-10-31',
+    items: {
+      ru: [
+        'Экран «Перевод» как в Яндексе: на широком экране слева поле ввода и сразу под ним перевод, справа «Как переводят другие» и перевод AI на всю высоту — пустых мест больше нет.',
+        'Связанные слова (синонимы, антонимы, однокоренные) теперь с коротким переводом: «bringen — приносить».',
+        'Вкладка «Грамматика» — как в хорошем учебнике: 3–5 пунктов про это слово и 2–4 примера уровней A1–B2 с подсветкой, озвучкой и переводом.',
+        'В примерах новый фильтр «Как ещё сказать»: то же самое другими словами.',
+        'Словарь ищет слово на любом из 12 языков; есть выбор языка слова и языка перевода.',
+        'Свои списки слов «Учёба → Мои списки»: как плейлисты, с учёбой и упражнениями только по списку. Меню «В карточки ▾» есть в карточке слова, под переводом, в избранном и истории.',
+        'Боковое меню на компьютере прокручивается, тема и язык — компактными кнопками, версия всегда видна.',
+      ],
+      de: [
+        'Übersetzer wie bei Yandex: Eingabe mit der Übersetzung direkt darunter, rechts „Wie andere übersetzen“ und die KI-Übersetzung über die ganze Höhe.',
+        'Verwandte Wörter mit kurzer Übersetzung: „bringen — bringen“.',
+        'Reiter „Grammatik“ wie im Lehrbuch: 3–5 Punkte zu diesem Wort und 2–4 Beispiele A1–B2 mit Markierung, Vorlesen und Übersetzung.',
+        'Neuer Filter bei den Beispielen: „Anders gesagt“.',
+        'Das Wörterbuch sucht Wörter in allen 12 Sprachen und erlaubt Sprachwahl.',
+        'Eigene Wortlisten unter „Lernen → Meine Listen“ mit Übungen nur für diese Liste.',
+        'Die Seitenleiste ist scrollbar, Thema und Sprache kompakt, die Version immer sichtbar.',
+      ],
+      en: [
+        'Translator like Yandex: input with the translation right below it, "How others translate" and the AI translation on the right.',
+        'Related words now show a short translation: "bringen — to bring".',
+        'The Grammar tab is textbook-style: 3–5 points about this word and 2–4 examples A1–B2 with highlighting, audio and translation.',
+        'New "Other ways to say" filter in the examples.',
+        'The dictionary searches words in all 12 languages and lets you pick the languages.',
+        'Your own word lists under "Learn → My lists", with review and practice for one list only.',
+        'The desktop sidebar scrolls, theme and language switches are compact, the version is always visible.',
+      ],
+    },
+  },
+  {
     version: '0.8.0',
     date: '2026-10-31',
     items: {

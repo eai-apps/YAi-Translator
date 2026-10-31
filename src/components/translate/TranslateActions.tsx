@@ -9,7 +9,7 @@ import { CopyButton } from '../ui/CopyButton';
 import { IconButton } from '../ui/IconButton';
 import { SpeakButton } from '../ui/SpeakButton';
 import { IconStar } from '../layout/icons';
-import { AddToCardsButton } from '../study/AddToCardsButton';
+import { AddToStudyMenu } from '../study/AddToStudyMenu';
 import { CardMenu } from './CardMenu';
 
 interface TranslateActionsProps {
@@ -42,7 +42,7 @@ export function TranslateActions(props: TranslateActionsProps) {
         label={t('translate.speakResult')}
       />
       <CopyButton text={result.translatedText} label={t('translate.copyResult')} />
-      <AddToCardsButton input={props.studyInput} iconOnly />
+      <AddToStudyMenu input={props.studyInput} iconOnly />
       <IconButton
         label={props.isFavorite ? t('translate.favoriteRemove') : t('translate.favoriteAdd')}
         icon={<IconStar className="h-[18px] w-[18px]" filled={props.isFavorite} />}

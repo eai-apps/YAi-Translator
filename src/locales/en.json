@@ -237,7 +237,9 @@
     "formHintKonjunktiv1": "Reporting other people’s words without “dass”.",
     "formHintKonjunktiv2": "Polite requests and unreal situations: hätte, würde, könnte.",
     "formHintImperativ": "Request and command: du, ihr, Sie.",
-    "tabAll": "All"
+    "tabAll": "All",
+    "filterParaphrase": "Other ways to say",
+    "paraphrasesTitle": "Other ways to say"
   },
   "explain": {
     "title": "Explanation",
@@ -283,7 +285,9 @@
     "remove": "Delete",
     "favorite": "Add to favorites",
     "historyTitle": "Recent translations",
-    "favoritesTitle": "Favorites"
+    "favoritesTitle": "Favorites",
+    "detect": "Detect",
+    "swap": "Swap languages"
   },
   "profile": {
     "title": "Profile",
@@ -988,7 +992,28 @@
     "wordOfDayQuestion": "Do you know this word?",
     "wordOfDayKnow": "I know it",
     "wordOfDayDontKnow": "Not sure",
-    "wordOfDayDone": "Counted — the word is in your cards for today"
+    "wordOfDayDone": "Counted — the word is in your cards for today",
+    "addToList": "To a list…",
+    "inStudy": "In learning",
+    "tileLists": "My lists ({{count}})",
+    "tileListsHint": "Your own word lists: study and practise only these",
+    "listsTitle": "My lists",
+    "listsSubtitle": "Collect words into lists like playlists and study each one on its own.",
+    "listsEmpty": "No lists yet",
+    "listsEmptyText": "Create your first list — for example “Food” or “For work”.",
+    "listNew": "New list",
+    "listNewName": "List name",
+    "listEmoji": "Icon",
+    "listCreate": "Create",
+    "listLimit": "At most {{n}} lists fit",
+    "listRename": "Rename",
+    "listDelete": "Delete list",
+    "listOpen": "Open list",
+    "listEmpty": "The list is empty",
+    "listEmptyText": "Add words with “To cards ▾” → “To a list…”.",
+    "listAddFromTranslate": "Go to the translator",
+    "listReview": "Study this list ({{count}})",
+    "listRemoveWord": "Remove from list"
   },
   "help": {
     "title": "Help",

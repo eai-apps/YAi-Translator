@@ -14,6 +14,7 @@ import type {
 import { STUDY_MAX_CARDS } from '../../../shared/study';
 import { STUDY } from '../config';
 import { ApiError } from '../http';
+import { parseLists } from './lists';
 
 const ARTICLES: Array<StudyArticle | null> = ['der', 'die', 'das', null];
 const PARTS: PartOfSpeech[] = [
@@ -48,7 +49,8 @@ function finite(value: unknown, min: number, max: number): number {
   return Math.round(value);
 }
 
-function list(value: unknown): unknown[] {
+/** Проверка массива: не массив или больше лимита запроса — ошибка (нужно и спискам слов). */
+export function list(value: unknown): unknown[] {
   if (!Array.isArray(value)) throw new ApiError('VALIDATION', 400);
   if (value.length > STUDY.maxItemsPerRequest) throw new ApiError('VALIDATION', 400);
   return value;
@@ -128,16 +130,20 @@ function parseDay(raw: unknown): StudyDay {
 }
 
 /** Разбирает тело POST /api/study/sync. Пустые списки допустимы. */
-export function parseSyncRequest(body: Record<string, unknown>): Required<StudySyncRequest> & { since: number } {
+export function parseSyncRequest(
+  body: Record<string, unknown>,
+): Required<StudySyncRequest> & { since: number } {
   const sinceRaw = body.since;
   const since = typeof sinceRaw === 'number' && Number.isFinite(sinceRaw) && sinceRaw >= 0 ? Math.floor(sinceRaw) : 0;
 
   const cards = body.cards === undefined ? [] : list(body.cards).map(parseCard);
   const progress = body.progress === undefined ? [] : list(body.progress).map(parseProgress);
   const days = body.days === undefined ? [] : list(body.days).map(parseDay);
+  // Свои списки слов (этап 8Б) — проверяются отдельным файлом.
+  const lists = body.lists === undefined ? [] : parseLists(body.lists);
 
   if (cards.length > STUDY_MAX_CARDS) throw new ApiError('VALIDATION', 400);
-  return { since, cards, progress, days };
+  return { since, cards, progress, days, lists };
 }
 
 /** Тело POST /api/study/ping: счётчики за сессию. */

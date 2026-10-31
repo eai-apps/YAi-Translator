@@ -3,8 +3,8 @@
  * Лицо — немецкое слово с артиклем, оборот — перевод, множественное число и пример.
  * «Не помню» возвращает карточку в конец сессии (один раз за сессию).
  */
-import { useEffect, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import type { StudyGrade } from '../../../shared/types';
 import { cn } from '../../lib/cn';
@@ -31,12 +31,22 @@ const GRADES: Array<{ grade: StudyGrade; key: string; className: string }> = [
 
 export default function ReviewPage() {
   const { t } = useTranslation();
-  const { cards, progress, newPerDay, grade, getProgress } = useStudy();
+  const { cards, progress, lists, newPerDay, grade, getProgress } = useStudy();
   const ping = useStudyPing();
   const speech = useSpeech();
 
+  // «Учить этот список» (этап 8Б): ?list=<id> — повторяем только слова своего списка.
+  const [params] = useSearchParams();
+  const listId = params.get('list');
+  const sessionCards = useMemo(() => {
+    const list = listId ? lists.find((item) => item.id === listId) : null;
+    if (!list) return cards;
+    const inside = new Set(list.cardIds);
+    return cards.filter((card) => inside.has(card.id));
+  }, [cards, lists, listId]);
+
   const [direction, setDirection] = useState<Direction>('de-ru');
-  const [queue, setQueue] = useState<SessionEntry[]>(() => pickSession(cards, progress, { newPerDay }));
+  const [queue, setQueue] = useState<SessionEntry[]>(() => pickSession(sessionCards, progress, { newPerDay }));
   const [flipped, setFlipped] = useState(false);
   const [done, setDone] = useState(0);
   const repeated = useRef<Set<string>>(new Set());
@@ -76,7 +86,7 @@ export default function ReviewPage() {
     repeated.current = new Set();
     setDone(0);
     setFlipped(false);
-    setQueue(pickSession(cards, progress, { newPerDay }));
+    setQueue(pickSession(sessionCards, progress, { newPerDay }));
   };
 
   const card = current?.card ?? null;

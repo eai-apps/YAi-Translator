@@ -15,7 +15,7 @@ import { WeekChart } from '../components/study/WeekChart';
 import { WordOfDayCard } from '../components/study/WordOfDayCard';
 import { useStudy } from '../hooks/useStudy';
 import { lastDays, pickSession } from '../lib/srs';
-import { IconBook, IconBookmark, IconGrammar, IconSparkles } from '../components/layout/icons';
+import { IconBook, IconBookmark, IconGrammar, IconSparkles, IconStar } from '../components/layout/icons';
 
 interface LearnPageProps {
   /** Показывает плитку справочника грамматики (этап 5). */
@@ -25,7 +25,7 @@ interface LearnPageProps {
 export default function LearnPage({ withGrammarLink = false }: LearnPageProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { cards, progress, days, goal, newPerDay, today, streak, setGoal } = useStudy();
+  const { cards, progress, days, lists, goal, newPerDay, today, streak, setGoal } = useStudy();
 
   // Сколько карточек попадёт в сессию: сначала просроченные, затем новые.
   const sessionSize = useMemo(
@@ -75,6 +75,12 @@ export default function LearnPage({ withGrammarLink = false }: LearnPageProps) {
             icon={<IconBook className="h-5 w-5" />}
             title={t('study.tileDecks')}
             hint={t('study.tileDecksHint')}
+          />
+          <StudyTile
+            to="/learn/lists"
+            icon={<IconStar className="h-5 w-5" />}
+            title={t('study.tileLists', { count: lists.length })}
+            hint={t('study.tileListsHint')}
           />
           {withGrammarLink ? (
             <StudyTile

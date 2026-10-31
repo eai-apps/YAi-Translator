@@ -1,19 +1,28 @@
 /**
  * Поиск слова на вкладке «Словарь»: карточка ИИ и карточка из настоящих словарей грузятся
  * одновременно. Если ИИ недоступен (лимит), показывается карточка словарей (этап 4).
+ * Этап 8Б: слово — на любом из 12 языков сайта, язык слова и язык перевода выбираются отдельно
+ * (как на экране перевода); «Определить» — язык ввода определяет сервер.
  */
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { FormEvent } from 'react';
-import type { LanguageCode, WordResponse } from '../../shared/types';
+import type { LanguageCode, SourceLanguage, WordResponse } from '../../shared/types';
 import { api } from '../api/client';
 import { toTranslatorError } from '../lib/errors';
 import type { TranslatorError } from '../lib/errors';
 import { useDictLookup } from './useDictLookup';
 import type { DictState } from './useDictLookup';
+
 export interface DictionarySearch {
   query: string;
   setQuery: (value: string) => void;
+  /** Язык слова: «auto» — определить самим. */
+  sourceLang: SourceLanguage;
+  setSourceLang: (value: SourceLanguage) => void;
+  /** Язык перевода. */
+  targetLang: LanguageCode;
+  setTargetLang: (value: LanguageCode) => void;
   card: WordResponse | null;
   dict: DictState;
   loading: boolean;
@@ -26,13 +35,15 @@ export interface DictionarySearch {
 }
 
 /** Язык, на который смотрим слово: для немецкого интерфейса — русский, иначе немецкий. */
-function targetFor(uiLanguage: string): LanguageCode {
+export function defaultTargetFor(uiLanguage: string): LanguageCode {
   return uiLanguage === 'de' ? 'ru' : 'de';
 }
 
 export function useDictionarySearch(uiLanguage: string): DictionarySearch {
   const { t } = useTranslation();
   const [query, setQuery] = useState('');
+  const [sourceLang, setSourceLang] = useState<SourceLanguage>('auto');
+  const [targetLang, setTargetLang] = useState<LanguageCode>(() => defaultTargetFor(uiLanguage));
   const [card, setCard] = useState<WordResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<TranslatorError | null>(null);
@@ -55,12 +66,14 @@ export function useDictionarySearch(uiLanguage: string): DictionarySearch {
       setLoading(true);
       setError(null);
 
-      const target = targetFor(uiLanguage);
       // Словари грузятся вместе с ИИ: если ИИ недоступен, карточка будет из словарей.
-      void loadDict(word, target, controller.signal);
+      // При «Определить» словари смотрят в обратную пару (ru → de при цели de), как на сервере.
+      const dictSource: LanguageCode =
+        sourceLang === 'auto' ? (targetLang === 'de' ? 'ru' : 'de') : sourceLang;
+      if (dictSource !== targetLang) void loadDict(word, targetLang, controller.signal, sourceLang);
 
       try {
-        const response = await api.word({ word, sourceLang: 'auto', targetLang: target }, controller.signal);
+        const response = await api.word({ word, sourceLang, targetLang }, controller.signal);
         if (controller.signal.aborted) return;
         setCard(response);
       } catch (caught) {
@@ -73,7 +86,7 @@ export function useDictionarySearch(uiLanguage: string): DictionarySearch {
         if (!controller.signal.aborted) setLoading(false);
       }
     },
-    [query, uiLanguage, t, loadDict],
+    [query, sourceLang, targetLang, t, loadDict],
   );
 
   /** Новый запрос — сбрасываем прошлые карточки. */
@@ -90,6 +103,10 @@ export function useDictionarySearch(uiLanguage: string): DictionarySearch {
   return {
     query,
     setQuery,
+    sourceLang,
+    setSourceLang,
+    targetLang,
+    setTargetLang,
     card,
     dict,
     loading,

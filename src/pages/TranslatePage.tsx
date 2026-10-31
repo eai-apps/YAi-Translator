@@ -1,9 +1,11 @@
 /**
- * Экран «Перевод» (этап 8, «как в Яндекс.Переводчике»): одна карточка с языками, полем ввода и пилюлей
- * режима, рядом карточка перевода; под ними — «Как переводят другие» и карточка слова с вкладками.
+ * Экран «Перевод» (этап 8Б): две независимые колонки на широком экране —
+ * слева поле ввода, сразу под ним перевод (без пустой дыры под полем);
+ * справа «Как переводят другие» и перевод ИИ на всю высоту.
+ * На телефоне порядок: поле ввода → перевод → «Как переводят другие» → карточка слова.
  * Связывает ввод, API, разбор, проверку и окно ключей.
  */
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import type { LanguageCode, ProviderId, SourceLanguage, TranslateResponse } from '../../shared/types';
@@ -16,6 +18,7 @@ import { useOthers } from '../hooks/useOthers';
 import { useSettings } from '../hooks/useSettings';
 import { useSpeech } from '../hooks/useSpeech';
 import { useTranslateSettings } from '../hooks/useTranslateSettings';
+import { useTranslationActions } from '../hooks/useTranslationActions';
 import { useTranslator } from '../hooks/useTranslator';
 import { PageHeader } from '../components/ui/PageHeader';
 import { SourcePanel } from '../components/translate/SourcePanel';
@@ -43,11 +46,11 @@ export default function TranslatePage() {
   /** Вариант другого переводчика, выбранный кнопкой «Использовать этот вариант». */
   const [chosen, setChosen] = useState<{ provider: ProviderId; text: string } | null>(null);
   const [searchParams, setSearchParams] = useSearchParams();
-  /** «Поделиться» без navigator.share — короткое подтверждение «Скопировано». */
-  const [shareCopied, setShareCopied] = useState(false);
-  const copiedTimer = useRef<number | null>(null);
 
   const { text, sourceLang, targetLang, applyIncoming, result } = translator;
+
+  // Нажатые слова и «Поделиться» — в useTranslationActions.ts.
+  const { pickText, pickTranslation, share, shareSupported, shareCopied } = useTranslationActions(translator);
 
   // «Разобрать» и «Проверить мой немецкий» — отдельный хук (useExplainAndCheck.ts).
   const { explain, check, runExplain, runCheck, closeExplain, closeCheck } = useExplainAndCheck({
@@ -122,21 +125,6 @@ export default function TranslatePage() {
         : null
     : null;
 
-  // Нажатое слово из карточки становится новым запросом; язык ввода определится сам.
-  const pickText = (value: string) => {
-    translator.setSourceLang('auto');
-    translator.setText(value);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  /** Нажатие на перевод значения («получать»): языки меняются местами, слово встаёт в поле. */
-  const pickTranslation = (value: string, lang: LanguageCode) => {
-    translator.setTargetLang(sourceLang === 'auto' ? wordLanguage ?? 'de' : sourceLang);
-    translator.setSourceLang(lang);
-    translator.setText(value);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
   // «Ещё варианты» под переводом: все переводы из карточки слова, кроме основного (до 8).
   const moreVariants = (() => {
     const card = translator.word.data?.card;
@@ -155,38 +143,42 @@ export default function TranslatePage() {
     return list.slice(0, 8);
   })();
 
-  // «Поделиться»: системное окно телефона, без него — перевод кладётся в буфер обмена.
-  const shareSupported = typeof navigator !== 'undefined' && typeof navigator.share === 'function';
-  const share = async () => {
-    const translation = shown?.translatedText ?? '';
-    if (!translation) return;
-    const combined = text.trim() ? `${text.trim()}\n→ ${translation}` : translation;
-    try {
-      if (shareSupported) {
-        await navigator.share({ title: t('common.appName'), text: combined });
-        return;
-      }
-      await navigator.clipboard.writeText(translation);
-      setShareCopied(true);
-      if (copiedTimer.current) window.clearTimeout(copiedTimer.current);
-      copiedTimer.current = window.setTimeout(() => setShareCopied(false), 2000);
-    } catch {
-      // Окно закрыли или браузер запретил — ничего не показываем.
-    }
-  };
-
   const tools = {
     onExplain: runExplain,
     onCheck: runCheck,
     canUseTools: translator.text.trim().length > 0,
   };
 
+  // «Как переводят другие»: только когда есть основной перевод (в правой колонке).
+  const othersBlock =
+    settings.showOthers && result && !translator.error ? (
+      <OthersPanel
+        data={others.data}
+        loading={others.loading}
+        failed={others.failed}
+        autoEnabled={settings.showOthers}
+        exclude={result.provider}
+        targetLang={targetLang}
+        speech={speech}
+        expanded={others.expanded}
+        onExpand={others.expand}
+        onCollapse={others.collapse}
+        onUseVariant={useVariant}
+        usedProvider={chosen?.provider ?? null}
+        sourceText={text}
+        sourceLang={sourceLang}
+        mainIsAi={isAiProvider(result.provider)}
+        onLimitReached={() => setLimitOpen(true)}
+      />
+    ) : null;
+
   return (
     <>
       <PageHeader title={t('translate.title')} subtitle={t('translate.subtitle')} />
 
-      <div className="grid items-start gap-3 lg:grid-cols-2 lg:gap-4">
-        <div className="flex flex-col gap-3">
+      {/* Две колонки идут сверху вниз независимо: под полем ввода нет пустой дыры (этап 8Б). */}
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:gap-4">
+        <div className="flex min-w-0 flex-1 flex-col gap-3">
           <SourcePanel
             text={translator.text}
             onChange={translator.setText}
@@ -205,53 +197,35 @@ export default function TranslatePage() {
             aiLoading={translator.aiLoading}
             onAskAi={() => void translator.askAi()}
           />
+
           {/* Под пустым полем — маленькое слово дня; крестик скрывает его до завтра. */}
           {translator.text.trim() === '' ? <WordOfDayCard compact /> : null}
+
+          <ResultPanel
+            moreVariants={moreVariants}
+            onPickVariant={(value) => pickTranslation(value, targetLang)}
+            result={shown}
+            loading={translator.loading}
+            error={translator.error}
+            sourceLang={translator.sourceLang}
+            targetLang={translator.targetLang}
+            detectedLang={translator.detectedLang}
+            isFavorite={currentFavorite}
+            canFavorite={Boolean(currentFavorite) || Boolean(translator.historyId && settings.saveHistory)}
+            speech={speech}
+            onRetry={translator.retry}
+            onOpenLimit={() => setLimitOpen(true)}
+            {...tools}
+            onToggleFavorite={() => {
+              if (translator.historyId) toggleFavorite(translator.historyId);
+            }}
+            studyInput={studyInput}
+            sourceText={text}
+          />
         </div>
 
-        <ResultPanel
-          moreVariants={moreVariants}
-          onPickVariant={(value) => pickTranslation(value, targetLang)}
-          result={shown}
-          loading={translator.loading}
-          error={translator.error}
-          sourceLang={translator.sourceLang}
-          targetLang={translator.targetLang}
-          detectedLang={translator.detectedLang}
-          isFavorite={currentFavorite}
-          canFavorite={Boolean(currentFavorite) || Boolean(translator.historyId && settings.saveHistory)}
-          speech={speech}
-          onRetry={translator.retry}
-          onOpenLimit={() => setLimitOpen(true)}
-          {...tools}
-          onToggleFavorite={() => {
-            if (translator.historyId) toggleFavorite(translator.historyId);
-          }}
-          studyInput={studyInput}
-          sourceText={text}
-          others={
-            settings.showOthers && result && !translator.error ? (
-              <OthersPanel
-                data={others.data}
-                loading={others.loading}
-                failed={others.failed}
-                autoEnabled={settings.showOthers}
-                exclude={result.provider}
-                targetLang={targetLang}
-                speech={speech}
-                expanded={others.expanded}
-                onExpand={others.expand}
-                onCollapse={others.collapse}
-                onUseVariant={useVariant}
-                usedProvider={chosen?.provider ?? null}
-                sourceText={text}
-                sourceLang={sourceLang}
-                mainIsAi={isAiProvider(result.provider)}
-                onLimitReached={() => setLimitOpen(true)}
-              />
-            ) : null
-          }
-        />
+        {/* Правая колонка: другие переводчики и ИИ, на всю высоту (на телефоне — ниже перевода). */}
+        {othersBlock ? <div className="flex min-w-0 flex-1 flex-col gap-3 lg:sticky lg:top-4">{othersBlock}</div> : null}
       </div>
 
       {shareCopied ? (
@@ -276,7 +250,7 @@ export default function TranslatePage() {
               <CardMenu
                 variant="dots"
                 {...tools}
-                onShare={() => void share()}
+                onShare={() => void share(text, shown.translatedText, t('common.appName'))}
                 shareSupported={shareSupported}
               />
             ) : undefined

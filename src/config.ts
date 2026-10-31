@@ -5,7 +5,7 @@
 export const API_BASE = (import.meta.env.VITE_API_BASE ?? '').replace(/\/+$/, '');
 
 /** Версия показывается в профиле; совпадает с package.json. */
-export const APP_VERSION = '0.8.0';
+export const APP_VERSION = '0.8.1';
 
 export const STORAGE_KEYS = {
   theme: 'yai.theme',
@@ -49,6 +49,10 @@ export const STORAGE_KEYS = {
   studyMarksCards: 'yai.study.marks.cards',
   studyMarksProgress: 'yai.study.marks.progress',
   studyMarksDays: 'yai.study.marks.days',
+  /** Свои списки слов «Мои списки» (этап 8Б). */
+  studyLists: 'yai.study.lists',
+  /** Уже отправленные на сервер списки (id → updatedAt). */
+  studyMarksLists: 'yai.study.marks.lists',
 } as const;
 
 /** Отметки отправленного для синхронизации: у истории переводов и у вопросов ИИ — свои. */

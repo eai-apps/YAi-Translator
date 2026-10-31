@@ -60,6 +60,10 @@ export default function DictionaryPage() {
           error={search.error}
           speech={speech}
           onOpenLimit={search.onLimit}
+          sourceLang={search.sourceLang}
+          targetLang={search.targetLang}
+          onSourceChange={search.setSourceLang}
+          onTargetChange={search.setTargetLang}
         />
       ) : null}
 

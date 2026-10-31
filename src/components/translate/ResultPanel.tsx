@@ -18,7 +18,7 @@ import { IconButton } from '../ui/IconButton';
 import { Spinner } from '../ui/Spinner';
 import { SpeakButton } from '../ui/SpeakButton';
 import { IconAlert, IconStar, IconTranslate } from '../layout/icons';
-import { AddToCardsButton } from '../study/AddToCardsButton';
+import { AddToStudyMenu } from '../study/AddToStudyMenu';
 import { AlternativesList } from './AlternativesList';
 import { CardMenu } from './CardMenu';
 
@@ -173,7 +173,7 @@ export function ResultPanel(props: ResultPanelProps) {
                 label={t('translate.speakResult')}
               />
               <CopyButton text={copyValue} label={t('translate.copyResult')} />
-              <AddToCardsButton input={props.studyInput ?? null} iconOnly />
+              <AddToStudyMenu input={props.studyInput ?? null} iconOnly />
               <IconButton
                 label={props.isFavorite ? t('translate.favoriteRemove') : t('translate.favoriteAdd')}
                 icon={<IconStar className="h-[18px] w-[18px]" filled={props.isFavorite} />}

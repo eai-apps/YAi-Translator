@@ -237,7 +237,9 @@
     "formHintKonjunktiv1": "Передача чужих слов без «dass».",
     "formHintKonjunktiv2": "Вежливые просьбы и нереальное: hätte, würde, könnte.",
     "formHintImperativ": "Просьба и команда: du, ihr, Sie.",
-    "tabAll": "Всё"
+    "tabAll": "Всё",
+    "filterParaphrase": "Как ещё сказать",
+    "paraphrasesTitle": "Как ещё сказать"
   },
   "explain": {
     "title": "Разбор",
@@ -283,7 +285,9 @@
     "remove": "Удалить",
     "favorite": "В избранное",
     "historyTitle": "Последние переводы",
-    "favoritesTitle": "Избранное"
+    "favoritesTitle": "Избранное",
+    "detect": "Определить",
+    "swap": "Поменять языки"
   },
   "profile": {
     "title": "Профиль",
@@ -988,7 +992,28 @@
     "wordOfDayQuestion": "Вы знаете это слово?",
     "wordOfDayKnow": "Знаю",
     "wordOfDayDontKnow": "Не знаю",
-    "wordOfDayDone": "Засчитано — слово в карточках на сегодня"
+    "wordOfDayDone": "Засчитано — слово в карточках на сегодня",
+    "addToList": "В список…",
+    "inStudy": "В учёбе",
+    "tileLists": "Мои списки ({{count}})",
+    "tileListsHint": "Свои списки слов: учёба и упражнения только по ним",
+    "listsTitle": "Мои списки",
+    "listsSubtitle": "Соберите слова в списки — как плейлисты — и учите каждый отдельно.",
+    "listsEmpty": "Списков пока нет",
+    "listsEmptyText": "Создайте первый список — например «Еда» или «Для работы».",
+    "listNew": "Новый список",
+    "listNewName": "Название списка",
+    "listEmoji": "Значок",
+    "listCreate": "Создать",
+    "listLimit": "Больше {{n}} списков не помещается",
+    "listRename": "Переименовать",
+    "listDelete": "Удалить список",
+    "listOpen": "Открыть список",
+    "listEmpty": "В списке пока нет слов",
+    "listEmptyText": "Добавьте слова из перевода кнопкой «В карточки ▾» → «В список…».",
+    "listAddFromTranslate": "К переводчику",
+    "listReview": "Учить этот список ({{count}})",
+    "listRemoveWord": "Убрать из списка"
   },
   "help": {
     "title": "Справка",

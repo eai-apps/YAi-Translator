@@ -31,24 +31,27 @@ export function useDictLookup() {
    * Ошибка словарей не показывается: если ИИ тоже не справится, пользователь увидит понятное сообщение.
    * «Словари не знают слова» — не ошибка: карточка просто будет от ИИ.
    */
-  const loadDict = useCallback(async (word: string, target: LanguageCode, signal: AbortSignal) => {
-    const requestId = requestRef.current + 1;
-    requestRef.current = requestId;
-    setDict({ loading: true, data: null, error: null });
-    try {
-      const data = await api.dict({ word, sourceLang: 'auto', targetLang: target }, signal);
-      if (requestId !== requestRef.current) return;
-      setDict({ loading: false, data, error: null });
-    } catch (caught) {
-      if (signal.aborted || requestId !== requestRef.current) return;
-      const code = caught instanceof Error && 'code' in caught ? String(caught.code) : '';
-      setDict({
-        loading: false,
-        data: null,
-        error: code === 'WORD_NOT_FOUND' ? null : toTranslatorError(caught, ''),
-      });
-    }
-  }, []);
+  const loadDict = useCallback(
+    async (word: string, target: LanguageCode, signal: AbortSignal, source: LanguageCode | 'auto' = 'auto') => {
+      const requestId = requestRef.current + 1;
+      requestRef.current = requestId;
+      setDict({ loading: true, data: null, error: null });
+      try {
+        const data = await api.dict({ word, sourceLang: source, targetLang: target }, signal);
+        if (requestId !== requestRef.current) return;
+        setDict({ loading: false, data, error: null });
+      } catch (caught) {
+        if (signal.aborted || requestId !== requestRef.current) return;
+        const code = caught instanceof Error && 'code' in caught ? String(caught.code) : '';
+        setDict({
+          loading: false,
+          data: null,
+          error: code === 'WORD_NOT_FOUND' ? null : toTranslatorError(caught, ''),
+        });
+      }
+    },
+    [],
+  );
 
   return { dict, loadDict, resetDict };
 }

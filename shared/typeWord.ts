@@ -77,6 +77,27 @@ export interface Phrase {
   translation: string;
 }
 
+/** «То же самое другими словами» (этап 8Б): пара предложений с переводом. */
+export interface Paraphrase {
+  text: string;
+  translation: string;
+}
+
+/** Пример внутри пункта грамматики (этап 8Б): уровень A1–B2, предложение и перевод. */
+export interface WordGrammarExample {
+  level: CefrLevel;
+  text: string;
+  translation: string;
+}
+
+/** Подробный пункт грамматики по этому слову (этап 8Б): тема, объяснение и примеры. */
+export interface GrammarPoint {
+  title: string;
+  /** Объяснение на языке интерфейса; названия тем вроде Akkusativ остаются текстом. */
+  explanation: string;
+  examples: WordGrammarExample[];
+}
+
 export interface WordCard {
   /** Слово в исходной форме (лемма). */
   lemma: string;
@@ -99,6 +120,15 @@ export interface WordCard {
   /** Однокоренные слова: abholen, nachholen, die Abholung (этап 8). */
   family?: string[];
   phrases: Phrase[];
+  /** «Как ещё сказать»: 3–4 пары «то же другими словами» (этап 8Б). */
+  paraphrases?: Paraphrase[];
+  /**
+   * Переводы связанных слов на язык цели: «bringen» → «приносить» (этап 8Б).
+   * Только для слов из synonyms / antonyms / family; для остальных перевода нет.
+   */
+  glossary?: Record<string, string>;
+  /** Подробная грамматика с примерами A1–B2 (этап 8Б). Без неё показывается grammarNotes. */
+  grammar?: GrammarPoint[];
   /**
    * Грамматические пояснения на языке интерфейса: возвратный ли глагол, отделяемая ли приставка,
    * почему слова пишутся/стоят вместе, какой союз или предлог требуется.

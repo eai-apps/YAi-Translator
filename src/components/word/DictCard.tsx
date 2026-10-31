@@ -13,7 +13,7 @@ import { partOfSpeechKey } from '../../lib/labels';
 import { cardFromDict } from '../../lib/studyCard';
 import { Badge } from '../ui/Badge';
 import { SectionTitle } from '../ui/SectionTitle';
-import { AddToCardsButton } from '../study/AddToCardsButton';
+import { AddToStudyMenu } from '../study/AddToStudyMenu';
 import { ChipList } from './ChipList';
 import { Chips } from './Chips';
 import { DictExamples } from './DictExamples';
@@ -52,7 +52,7 @@ export function DictCard({ entry, speech, withAi, onPick }: DictCardProps) {
       <div className="mt-2 flex flex-wrap items-center gap-2">
         <Badge tone={withAi ? 'success' : 'accent'}>{t('dict.badge')}</Badge>
         {!withAi ? <span className="text-xs text-muted">{t('dict.withoutAi')}</span> : null}
-        <AddToCardsButton input={studyInput} className="ml-auto" />
+        <AddToStudyMenu input={studyInput} className="ml-auto" />
       </div>
 
       {translations.length > 0 ? (

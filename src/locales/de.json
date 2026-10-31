@@ -237,7 +237,9 @@
     "formHintKonjunktiv1": "Fremde Worte wiedergeben, ohne „dass“.",
     "formHintKonjunktiv2": "Höfliche Bitten und Unrealistisches: hätte, würde, könnte.",
     "formHintImperativ": "Bitte und Befehl: du, ihr, Sie.",
-    "tabAll": "Alles"
+    "tabAll": "Alles",
+    "filterParaphrase": "Anders gesagt",
+    "paraphrasesTitle": "Anders gesagt"
   },
   "explain": {
     "title": "Analyse",
@@ -283,7 +285,9 @@
     "remove": "Löschen",
     "favorite": "Zu Favoriten",
     "historyTitle": "Letzte Übersetzungen",
-    "favoritesTitle": "Favoriten"
+    "favoritesTitle": "Favoriten",
+    "detect": "Erkennen",
+    "swap": "Sprachen tauschen"
   },
   "profile": {
     "title": "Profil",
@@ -988,7 +992,28 @@
     "wordOfDayQuestion": "Kennst du dieses Wort?",
     "wordOfDayKnow": "Kenne ich",
     "wordOfDayDontKnow": "Weiß nicht",
-    "wordOfDayDone": "Gezählt — das Wort ist bei deinen Karten für heute"
+    "wordOfDayDone": "Gezählt — das Wort ist bei deinen Karten für heute",
+    "addToList": "In eine Liste …",
+    "inStudy": "Im Lernen",
+    "tileLists": "Meine Listen ({{count}})",
+    "tileListsHint": "Eigene Wortlisten: lernen und üben nur damit",
+    "listsTitle": "Meine Listen",
+    "listsSubtitle": "Fassen Sie Wörter in Listen zusammen — wie Playlists — und lernen Sie jede einzeln.",
+    "listsEmpty": "Noch keine Listen",
+    "listsEmptyText": "Erstellen Sie die erste Liste — zum Beispiel „Essen“ oder „Für die Arbeit“.",
+    "listNew": "Neue Liste",
+    "listNewName": "Name der Liste",
+    "listEmoji": "Symbol",
+    "listCreate": "Erstellen",
+    "listLimit": "Mehr als {{n}} Listen passen nicht",
+    "listRename": "Umbenennen",
+    "listDelete": "Liste löschen",
+    "listOpen": "Liste öffnen",
+    "listEmpty": "Die Liste ist noch leer",
+    "listEmptyText": "Fügen Sie Wörter über „In die Karten ▾“ → „In eine Liste …“ hinzu.",
+    "listAddFromTranslate": "Zum Übersetzer",
+    "listReview": "Diese Liste lernen ({{count}})",
+    "listRemoveWord": "Aus der Liste entfernen"
   },
   "help": {
     "title": "Hilfe",

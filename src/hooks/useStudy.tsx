@@ -5,12 +5,13 @@
  */
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
-import type { StudyCard, StudyCardInput, StudyDay, StudyGrade, StudyProgress } from '../../shared/study';
-import { STUDY_GOALS, STUDY_NEW_PER_DAY_DEFAULT, studyCardId } from '../../shared/study';
+import type { StudyCard, StudyCardInput, StudyDay, StudyGrade, StudyList, StudyProgress } from '../../shared/study';
+import { STUDY_GOALS, STUDY_LIST_CARDS_MAX, STUDY_LIST_MAX, STUDY_NEW_PER_DAY_DEFAULT, studyCardId } from '../../shared/study';
 import { STORAGE_KEYS } from '../config';
 import { readStorage, writeStorage } from '../lib/storage';
 import { mergeStudyState, sanitizeState } from '../lib/studyMerge';
 import type { MergeInput, StudyState } from '../lib/studyMerge';
+import { mergeLists, readLists, writeLists, LIST_EMOJI_MAX, LIST_TITLE_MAX } from '../lib/studyLists';
 import { computeStreak, dueCount, introducedToday, localDayKey } from '../lib/srs';
 import { useAccount } from './useAccount';
 import { useStudyActions } from './useStudyActions';
@@ -20,6 +21,8 @@ interface StudyContextValue {
   cards: StudyCard[];
   progress: StudyProgress[];
   days: StudyDay[];
+  /** Свои списки слов (этап 8Б). */
+  lists: StudyList[];
   /** Цель дня в карточках: 10, 20 или 30. */
   goal: number;
   /** Сколько новых карточек показывать в день. */
@@ -39,6 +42,14 @@ interface StudyContextValue {
   getProgress: (cardId: string) => StudyProgress | null;
   setGoal: (goal: number) => void;
   setNewPerDay: (count: number) => void;
+  /** Списки: создать, переименовать, удалить, положить/убрать слово. */
+  createList: (list: StudyList) => boolean;
+  updateList: (listId: string, patch: { title?: string; emoji?: string }) => void;
+  deleteList: (listId: string) => void;
+  addToList: (cardIds: string[], listId: string) => void;
+  removeFromList: (listId: string, cardId: string) => void;
+  /** Id списков, в которых уже есть это слово. */
+  listsWithCard: (cardId: string) => string[];
 }
 
 const StudyContext = createContext<StudyContextValue | null>(null);
@@ -67,10 +78,15 @@ export function StudyProvider({ children }: { children: ReactNode }) {
       days: readStorage(STORAGE_KEYS.studyDays, []),
     }),
   );
+  // «Свои списки слов» (этап 8Б) живут в том же хранилище, что карточки: вход не нужен.
+  const [lists, setLists] = useState<StudyList[]>(readLists);
   const [goal, setGoalState] = useState(readGoal);
   const [newPerDay, setNewPerDayState] = useState(readNewPerDay);
   const stateRef = useRef(state);
   stateRef.current = state;
+  // Списки тоже нужны в слиянии и синхронизации без пересоздания функций.
+  const listsRef = useRef(lists);
+  listsRef.current = lists;
 
   /** Одна точка записи: состояние, localStorage и синхронизация видят одно и то же. */
   const commit = useCallback((next: StudyState) => {
@@ -110,19 +126,92 @@ export function StudyProvider({ children }: { children: ReactNode }) {
     writeStorage(STORAGE_KEYS.studyNewPerDay, next);
   }, []);
 
-  // Слияние с сервером: null означает «ничего нового», иначе был бы вечный цикл.
+  // Слияние локального и серверного состояния; списки слов — отдельная функция (studyLists.ts).
+  const commitLists = useCallback((next: StudyList[]) => {
+    listsRef.current = next;
+    setLists(next);
+    writeLists(next);
+  }, []);
+
   const onMerge = useCallback((payload: MergeInput) => {
     const merged = mergeStudyState(stateRef.current, payload);
     if (merged) commit(merged);
-  }, [commit]);
+    const mergedLists = mergeLists(listsRef.current, payload.lists, payload.removedLists);
+    if (mergedLists) commitLists(mergedLists);
+  }, [commit, commitLists]);
 
   useStudySync({
     signedIn,
     cards: state.cards,
     progress: state.progress,
     days: state.days,
+    lists,
     onMerge,
   });
+
+  /* ---------------------------- Свои списки слов ---------------------------- */
+
+  const createList = useCallback<StudyContextValue['createList']>(
+    (list) => {
+      if (listsRef.current.length >= STUDY_LIST_MAX) return false;
+      if (listsRef.current.some((item) => item.id === list.id)) return false;
+      commitLists([list, ...listsRef.current]);
+      return true;
+    },
+    [commitLists],
+  );
+
+  const updateList = useCallback<StudyContextValue['updateList']>(
+    (listId, patch) => {
+      const now = Date.now();
+      commitLists(
+        listsRef.current.map((list) => {
+          if (list.id !== listId) return list;
+          const title = patch.title === undefined ? list.title : patch.title.trim().slice(0, LIST_TITLE_MAX) || list.title;
+          const emoji = patch.emoji === undefined ? list.emoji : patch.emoji.trim().slice(0, LIST_EMOJI_MAX);
+          return { ...list, title, emoji, updatedAt: now };
+        }),
+      );
+    },
+    [commitLists],
+  );
+
+  const deleteList = useCallback<StudyContextValue['deleteList']>(
+    (listId) => commitLists(listsRef.current.filter((list) => list.id !== listId)),
+    [commitLists],
+  );
+
+  const addToList = useCallback<StudyContextValue['addToList']>(
+    (cardIds, listId) => {
+      const now = Date.now();
+      commitLists(
+        listsRef.current.map((list) => {
+          if (list.id !== listId) return list;
+          const merged = [...new Set([...list.cardIds, ...cardIds])].slice(0, STUDY_LIST_CARDS_MAX);
+          if (merged.length === list.cardIds.length) return list;
+          return { ...list, cardIds: merged, updatedAt: now };
+        }),
+      );
+    },
+    [commitLists],
+  );
+
+  const removeFromList = useCallback<StudyContextValue['removeFromList']>(
+    (listId, cardId) => {
+      const now = Date.now();
+      commitLists(
+        listsRef.current.map((list) =>
+          list.id === listId ? { ...list, cardIds: list.cardIds.filter((id) => id !== cardId), updatedAt: now } : list,
+        ),
+      );
+    },
+    [commitLists],
+  );
+
+  const listsWithCard = useCallback<StudyContextValue['listsWithCard']>(
+    (cardId) => lists.filter((list) => list.cardIds.includes(cardId)).map((list) => list.id),
+    [lists],
+  );
 
   // Сегодняшний день нужен и кольцу, и серии — считаем один раз на изменение.
   const today = useMemo(
@@ -144,6 +233,7 @@ export function StudyProvider({ children }: { children: ReactNode }) {
       cards: state.cards,
       progress: state.progress,
       days: state.days,
+      lists,
       goal,
       newPerDay,
       today,
@@ -159,11 +249,18 @@ export function StudyProvider({ children }: { children: ReactNode }) {
       getProgress,
       setGoal,
       setNewPerDay,
+      createList,
+      updateList,
+      deleteList,
+      addToList,
+      removeFromList,
+      listsWithCard,
     }),
     [
       state.cards,
       state.progress,
       state.days,
+      lists,
       goal,
       newPerDay,
       today,
@@ -179,6 +276,12 @@ export function StudyProvider({ children }: { children: ReactNode }) {
       getProgress,
       setGoal,
       setNewPerDay,
+      createList,
+      updateList,
+      deleteList,
+      addToList,
+      removeFromList,
+      listsWithCard,
     ],
   );
 

@@ -58,7 +58,8 @@ export function sanitizeState(raw: Partial<StudyState>): StudyState {
   };
 }
 
-export interface MergeInput extends Partial<Pick<StudySyncResponse, 'cards' | 'progress' | 'days' | 'removed'>> {}
+export interface MergeInput
+  extends Partial<Pick<StudySyncResponse, 'cards' | 'progress' | 'days' | 'removed' | 'lists' | 'removedLists'>> {}
 
 /**
  * Возвращает новое состояние или null, если менять нечего.

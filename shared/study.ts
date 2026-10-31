@@ -83,22 +83,48 @@ export interface StudyDay {
   updatedAt: number;
 }
 
+/* ------------------------------- Свои списки ------------------------------ */
+
+/**
+ * «Мои списки» (этап 8Б): человек сам собирает слова для учёбы, как плейлисты.
+ * Список хранит id карточек из «Мои карточки» — одно слово может быть в нескольких списках.
+ */
+export interface StudyList {
+  id: string;
+  title: string;
+  /** Необязательный значок-эмодзи. */
+  emoji: string;
+  cardIds: string[];
+  createdAt: number;
+  updatedAt: number;
+}
+
+/** Больше списков на аккаунт сервер не принимает. */
+export const STUDY_LIST_MAX = 100;
+/** Слов в одном списке. */
+export const STUDY_LIST_CARDS_MAX = 500;
+
 /* ------------------------- Синхронизация с аккаунтом ------------------------ */
 
 export interface StudySyncRequest {
   cards?: StudyCard[];
   progress?: StudyProgress[];
   days?: StudyDay[];
+  /** Свои списки слов (этап 8Б). */
+  lists?: StudyList[];
 }
 
 export interface StudySyncResponse {
   cards: StudyCard[];
   progress: StudyProgress[];
   days: StudyDay[];
+  lists: StudyList[];
   /** Время сервера — передайте его в следующий ?since=. */
   serverTime: number;
   /** Карточки, которые не поместились в лимит аккаунта и удалены сервером. */
   removed: string[];
+  /** Списки, которые не поместились в лимит аккаунта и удалены сервером. */
+  removedLists?: string[];
 }
 
 /** Счётчики для админки; отправляются один раз за сессию, а не на каждую карточку. */

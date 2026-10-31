@@ -10,15 +10,20 @@ import { Badge } from '../ui/Badge';
 import { IconButton } from '../ui/IconButton';
 import { SpeakButton } from '../ui/SpeakButton';
 import { IconTranslate, IconTrash } from '../layout/icons';
+import { AddToStudyMenu } from './AddToStudyMenu';
 
 interface StudyCardRowProps {
   card: StudyCard;
   progress: StudyProgress | null;
   speech: SpeechController;
   onRemove: () => void;
+  /** Подпись у красной кнопки: «Удалить из карточек» или «Убрать из списка» (этап 8Б). */
+  removeLabel?: string;
+  /** Меню «В карточки ▾ / В список…» справа — есть ли слово в карточках и в списках. */
+  menu?: boolean;
 }
 
-export function StudyCardRow({ card, progress, speech, onRemove }: StudyCardRowProps) {
+export function StudyCardRow({ card, progress, speech, onRemove, removeLabel, menu }: StudyCardRowProps) {
   const { t } = useTranslation();
   const spoken = card.article ? `${card.article} ${card.lemma}` : card.lemma;
   const status = !progress ? 'new' : isDue(progress) ? 'due' : progress.lapses > 0 ? 'hard' : 'ok';
@@ -55,11 +60,25 @@ export function StudyCardRow({ card, progress, speech, onRemove }: StudyCardRowP
           <IconTranslate className="h-[18px] w-[18px]" />
         </Link>
         <IconButton
-          label={t('study.cardDelete')}
-          title={t('study.cardDelete')}
+          label={removeLabel ?? t('study.cardDelete')}
+          title={removeLabel ?? t('study.cardDelete')}
           onClick={onRemove}
           icon={<IconTrash className="h-[18px] w-[18px]" />}
         />
+        {menu ? (
+          <AddToStudyMenu
+            input={{
+              lemma: card.lemma,
+              article: card.article,
+              plural: card.plural,
+              partOfSpeech: card.partOfSpeech,
+              translations: card.translations,
+              example: card.example,
+              perfekt: card.perfekt,
+            }}
+            iconOnly
+          />
+        ) : null}
       </div>
     </div>
   );

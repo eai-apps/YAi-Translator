@@ -5,7 +5,7 @@
  * упражнение попадает отдельным счётчиком — одним на сессию.
  */
 import { useEffect, useMemo, useState } from 'react';
-import { Link, Navigate, useParams } from 'react-router-dom';
+import { Link, Navigate, useParams, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { PRACTICE_TYPES, isPracticeType } from '../../../shared/study';
 import type { PracticeType } from '../../../shared/types';
@@ -37,9 +37,18 @@ export default function PracticePage() {
 
 function PracticeSession({ type }: { type: PracticeType }) {
   const { t } = useTranslation();
-  const { cards, recordExercise } = useStudy();
+  const { cards, lists, recordExercise } = useStudy();
   const speech = useSpeech();
   const ping = useStudyPing();
+  // Упражнения по своему списку (этап 8Б): ?list=<id> — вопросы только из слов списка.
+  const [searchParams] = useSearchParams();
+  const listId = searchParams.get('list');
+  const sessionCards = useMemo(() => {
+    const list = listId ? lists.find((item) => item.id === listId) : null;
+    if (!list) return cards;
+    const inside = new Set(list.cardIds);
+    return cards.filter((card) => inside.has(card.id));
+  }, [cards, lists, listId]);
 
   const [round, setRound] = useState(0);
   const [index, setIndex] = useState(0);
@@ -47,7 +56,7 @@ function PracticeSession({ type }: { type: PracticeType }) {
   const [answered, setAnswered] = useState(false);
 
   // Вопросы собираются заново при смене вида, карточек или по кнопке «Ещё раз».
-  const data = useMemo<PracticeData>(() => buildPractice(type, cards), [type, cards, round]);
+  const data = useMemo<PracticeData>(() => buildPractice(type, sessionCards), [type, sessionCards, round]);
   const total = data.questions.length;
   const question = data.questions[index] ?? null;
   const finished = total > 0 && index >= total;

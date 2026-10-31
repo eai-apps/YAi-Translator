@@ -1,4 +1,4 @@
-# HANDOFF — как продолжить работу над YAi Translator (для Claude, Codex, Google Antigravity и любого ИИ-помощника)
+# HANDOFF — как продолжить работу над YAi Translator (для Claude, Codex и любого ИИ-помощника)
 
 > **Прочитай этот файл первым.** Он нужен, чтобы любой помощник (Claude, Codex, DeepSeek) мог продолжить работу
 > с того места, где остановился другой. После своей работы **обязательно допиши запись в «Журнал работ» внизу.**
@@ -118,15 +118,44 @@
 
 Формат записи:
 ```
+### 2026-10-31 17:40 — Claude — 0.8.1
+- Проверил этап 8Б (DeepSeek): сборка, типы функций, 965 ключей локализации — в порядке. Выложил на GitHub.
+- Исправил чужую работу (DeepSeek): версия на сервере осталась 0.8.0 — поставил 0.8.1.
+- По просьбе владельца: номер версии рядом с «О приложении» в боковом меню (`Sidebar.tsx`).
+
 ### ГГГГ-ММ-ДД ЧЧ:ММ — кто (Claude / Codex / DeepSeek) — версия
 - Что сделано и зачем (причина).
 - Файлы: …
 - Исправил чужую работу? Укажи, чью (Claude / Codex / DeepSeek, дата записи), что было не так и почему поправил.
 - Что проверить / что не доделано.
 ```
-**Работаем как одна команда** (Claude, Codex, DeepSeek в OpenCode, Google Antigravity). Перед работой прочитай последние записи журнала. Нашёл ошибку другого помощника —
+**Работаем как одна команда.** Перед работой прочитай последние записи журнала. Нашёл ошибку другого помощника —
 исправь и **объясни в журнале причину** (не молча). Не откатывай чужие изменения без причины. Не уверен — оставь
 пометку «Внимание следующему помощнику: …». Каждый подстраховывает другого.
+
+### 2026-10-31 — DeepSeek — 0.8.1 (этап 8Б)
+- Сделал задание `tasks/STAGE8B.md` целиком: экран перевода в две независимые колонки (слева поле ввода → сразу перевод,
+  справа «Как переводят другие» и перевод AI на всю высоту); переводы у синонимов/антонимов/однокоренных слов (`glossary`);
+  вкладка «Грамматика» с 3–5 пунктами и примерами A1–B2 (`grammar`); фильтр «Как ещё сказать» (`paraphrases`); словарь
+  для любого из 12 языков с выбором языков; свои списки слов (`/learn/lists`, таблица `study_lists`, синхронизация);
+  меню «В карточки ▾» («В список…», «+ Новый список»); прокручиваемое компактное боковое меню. `PROMPT_VERSION` 5 → 6.
+- Зачем: это прямые замечания владельца после этапа 8 (см. «Решения владельца» от 2026-10-31).
+- Файлы: новые `src/components/word/{GrammarSection,ExampleRow}.tsx`, `src/components/study/AddToStudyMenu.tsx`,
+  `src/hooks/useTranslationActions.ts`, `src/lib/studyLists.ts`, `src/pages/learn/{ListsPage,ListPage}.tsx`,
+  `functions/_lib/study/{lists,listStore}.ts`, `migrations/0007_study_lists.sql`; изменены `shared/{typeWord,study}.ts`,
+  `functions/_lib/{prompts,config,schema}.ts`, `functions/_lib/{validate/word,study/validate,study/store}.ts`,
+  `functions/api/study/sync.ts`, `src/pages/{TranslatePage,DictionaryPage,LearnPage}.tsx`, `src/pages/learn/{Review,Practice}Page.tsx`,
+  `src/components/word/*`, `src/components/translate/{ResultPanel,TranslateActions}.tsx`, `src/components/study/StudyCardRow.tsx`,
+  `src/components/dictionary/*`, `src/pages/learn/CardsPage.tsx`, `src/components/layout/Sidebar.tsx`, `src/hooks/*`,
+  `src/App.tsx`, `src/config.ts`, `src/data/changelog.ts`, `src/locales/{ru,de,en}.json` (25 новых ключей, наборы одинаковые),
+  `CHANGELOG.md`, `REPORT.md`, `REPORT_STAGE8B.md`.
+- Проверки: `npx tsc` (app и functions) без ошибок, `npm run build` прошёл. В браузере НЕ проверял (так требует задание).
+- Внимание следующему помощнику: (1) старые карточки в кэше D1 отдают лишь прежний `grammarNotes` — новые поля появятся
+  при повторном запросе; (2) `src/hooks/useStudy.tsx` 266 строк — стоит вынести списки в `useStudyLists.ts`;
+  (3) `AddToCardsButton` остался только для слова дня (`WordOfDayCard`), остальное — `AddToStudyMenu`;
+  (4) `TranslateActions.tsx` / `useShareTranslation.ts` по-прежнему не подключены (замечание Claude от 16:00) — я их
+  не удалял, чтобы не трогать чужое сверх задания.
+- Чужую работу не откатывал; `TranslateActions.tsx` поправил только импорт (кнопку заменили общей на новую).
 
 ### 2026-10-31 16:30 — Claude — 0.8.1
 - По замечаниям владельца после этапа 8: карточка слова снова информативная. Новая первая вкладка «Всё» (по умолчанию) —
@@ -149,7 +178,7 @@
 ### 2026-10-31 — Claude — 0.7.0
 - На компьютере владельца создан файл-вход `G:\evvant\Projects\Projects\HANDOFF\YAi-Translator\HANDOFF.md`
   (схема, аккаунты, ключи — только названия, бэкапы, указания для Claude и Codex). Этот файл — живой журнал на GitHub.
-- Создан этот файл `HANDOFF.md`, `CLAUDE.md` и `GEMINI.md` (для Google Antigravity) — ссылки сюда, в `AGENTS.md` добавлено правило вести журнал.
+- Создан этот файл `HANDOFF.md` и `CLAUDE.md` (ссылка сюда), в `AGENTS.md` добавлено правило вести журнал.
 - Исправлена кодировка описания в `package.json`.
 - Перед этим за день: проверены и выложены этапы 4–6 (словари, ресурсы, грамматика, «Спросить у AI», учёба);
   исправлены зависание сайта (`schemaReady`), автообновление PWA, язык текстов грамматики, мобильный вид грамматики,
