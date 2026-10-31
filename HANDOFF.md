@@ -1,0 +1,105 @@
+# HANDOFF — как продолжить работу над YAi Translator (для Claude, Codex и любого ИИ-помощника)
+
+> **Прочитай этот файл первым.** Он нужен, чтобы любой помощник (Claude, Codex, DeepSeek) мог продолжить работу
+> с того места, где остановился другой. После своей работы **обязательно допиши запись в «Журнал работ» внизу.**
+> Владелец — не программист: объясняй ему по-русски, простыми словами, с полным путём кликов
+> (какой сайт открыть → что слева/сверху → какую кнопку нажать).
+
+---
+
+## 1. Что это за проект
+
+- **YAi Translator** — онлайн-переводчик, словарь и учебник немецкого (фокус DE↔RU, всего 12 языков), как
+  Яндекс Переводчик + Leo + Duolingo. Бюджет 0 €: только бесплатные сервисы.
+- **Сайт:** https://yai-translator.pages.dev (Cloudflare Pages). **Код:** GitHub `eai-apps/YAi-Translator`, ветка `main`.
+- **Аккаунты владельца:** GitHub `eai-apps` (не путать с его другими аккаунтами `tenyls`, `jeavnex` — их не трогать),
+  Cloudflare `yeas.apps@gmail.com`.
+- Текущая версия — в `package.json` и в `src/data/changelog.ts`. Планы этапов — `AGENTS.md` (раздел 6) и `tasks/STAGE*.md`.
+
+## 2. Как устроено (коротко)
+
+| Часть | Где | Что |
+|---|---|---|
+| Сайт | `src/` | Vite + React 18 + TypeScript (strict) + Tailwind, react-router, i18next (`src/locales/ru/de/en.json` — **ключи во всех трёх файлах одинаковые**) |
+| Сервер | `functions/` | Cloudflare Pages Functions: `functions/api/*` — адреса API, `functions/_lib/*` — общий код |
+| Общие типы | `shared/` | типы и данные для сайта и сервера (языки, наборы слов, темы грамматики) |
+| База | D1 `yai-translator-db`, binding `DB`, id `d6240c11-423a-4c33-b1a3-ea829b98e45c` | таблицы **создаются сами** (`functions/_lib/schema.ts`); `migrations/` — копия для справки |
+| ИИ Cloudflare | binding `AI` | Workers AI (запасной ИИ «Cloud AI» и переводчик «Cloud» = m2m100) |
+| PWA | `vite.config.ts`, `src/main.tsx` | офлайн-копия; **новая версия включается сама** (skipWaiting + registerSW) |
+
+**Цепочка перевода:** обычные переводчики (DeepL → Lara → Microsoft → Google → MyMemory → Cloud) — сразу;
+ИИ (личный ключ → общие ключи Gemini → Groq → Cloud AI) — только по кнопке и для карточки слова.
+
+## 3. Секреты Cloudflare (только названия! значения не писать никуда)
+
+Где: dash.cloudflare.com → слева **Compute (Workers) → Workers & Pages** → проект **yai-translator** → вкладка
+**Settings** → **Variables and Secrets**. Все — тип **Secret** (тип Text там не работает: переменными управляет `wrangler.toml`).
+
+`GEMINI_API_KEY`, `GROQ_API_KEY`, `DEEPL_API_KEY` (тариф DeepL API Developer, ключ без `:fx`), `KEY_ENCRYPTION_SECRET`
+(**никогда не менять** — иначе пропадут сохранённые ключи пользователей), `ADMIN_LOGINS` (логин админа сайта),
+`MYMEMORY_EMAIL`, по желанию `PONS_API_KEY`, `LARA_ACCESS_KEY_ID`/`LARA_ACCESS_KEY_SECRET`, `MICROSOFT_TRANSLATOR_*`
+(Microsoft добавлен через админку сайта, регион germanywestcentral). Дополнительные ключи можно добавлять в админке сайта
+(таблица `site_keys`, зашифрованы). Список для локальной работы — `.dev.vars.example`.
+
+## 4. Как выкладывать изменения
+
+- **Любой push в `main` → Cloudflare сам собирает и выкладывает сайт** (1–3 минуты). Отдельно деплоить не нужно.
+- Перед push: `npm ci` (один раз), затем **`npm run build`** — должен пройти без ошибок (там же проверка типов).
+- Пересобрать сайт без изменений: пустой коммит `git commit --allow-empty -m "Пересборка"` и push.
+- Проверка после выкладки: `https://yai-translator.pages.dev/api/health` — поле `version` должно стать новым.
+- Подпись коммитов от имени владельца: `user.name = eai-apps`, `user.email = yeas.apps@gmail.com`.
+- **Codex в облаке** обычно делает отдельную ветку и Pull Request. Тогда владельцу: github.com/eai-apps/YAi-Translator →
+  вверху вкладка **Pull requests** → открыть запрос → зелёная кнопка **Merge pull request** → **Confirm merge**.
+- Папка на компьютере владельца `G:\evvant\Projects\Projects\YAi-Translator` — **копия**. Главная версия — GitHub.
+  Если правил не Claude, при следующей сессии Claude обновляет папку на компьютере из GitHub.
+
+## 5. Правила, которые нельзя ломать
+
+1. Не менять `database_id` и не класть ключи в код или в git.
+2. `KEY_ENCRYPTION_SECRET` не менять и не пересоздавать.
+3. `functions/_lib/schema.ts`: флаг `schemaReady` (**не общий Promise!** — общий Promise в Workers зависает после
+   отменённого запроса, и весь сайт «висел» на «Переводим…»). Новые таблицы — только добавлять в конец.
+4. DeepL: адрес только через `deeplUrl()` в `functions/_lib/config.ts`, ключ в заголовке `Authorization`.
+5. Gemini: только модели 3.x (2.5 новым ключам не выдаются).
+6. Новые надписи — сразу в **три** файла `src/locales/*.json` с одинаковыми ключами.
+7. Не менять логотип (`public/logo.svg`, `src/components/layout/Logo.tsx`).
+8. Не трогать без нужды: снимок экрана перевода в `useTranslator.ts` (экран не сбрасывается при смене вкладок),
+   `components/word/pick.tsx` (слова-кнопки), `ProviderSelect.tsx` (в списке только подключённые переводчики).
+9. Файлы стараться держать до ~250 строк.
+10. Платные ключи и ссылки на покупку — не показывать в сборке для App Store (см. `tasks/STAGE7.md`, п. 7).
+
+## 6. Где что искать
+
+- Перевод: `src/hooks/useTranslator.ts`, `src/pages/TranslatePage.tsx`, `functions/api/translate.ts`, `functions/_lib/classic/*`
+- ИИ и ключи: `functions/_lib/router.ts`, `keypool.ts`, `keystate.ts`, `providers/*`, промпты — `prompts.ts`
+- Карточка слова: `functions/api/word.ts`, `src/components/word/*`; словари — `functions/_lib/dict/*`
+- Грамматика и «Спросить у AI»: `functions/_lib/grammar/*`, `functions/api/ask.ts`, `src/pages/GrammarPage.tsx`, `AskPage.tsx`
+- Учёба: `src/pages/learn/*`, `src/lib/srs.ts`, `practice.ts`, `shared/decks/*`, `functions/_lib/study/*`
+- Аккаунты: `functions/_lib/auth/*`, админка: `functions/api/admin/*`, `src/pages/AdminPage.tsx`, `src/components/admin/*`
+- Подробные отчёты по этапам — `REPORT.md` (разделы «Этап N» и «Проверка Claude»), история версий — `CHANGELOG.md`.
+
+## 7. Готовый запрос для Codex (владелец копирует и вставляет)
+
+```
+Ты продолжаешь работу над проектом YAi Translator в репозитории eai-apps/YAi-Translator.
+Сначала прочитай HANDOFF.md и AGENTS.md. Задача: <ОПИСАТЬ ЗДЕСЬ, ЧТО СЛОМАЛОСЬ ИЛИ ЧТО НУЖНО>.
+Правила: не ломай пункты раздела 5 в HANDOFF.md; после изменений выполни npm run build;
+в конце допиши запись в «Журнал работ» в HANDOFF.md (дата, кто, что сделал, какие файлы, что проверить).
+Объясняй мне по-русски и простыми словами, с полным путём кликов.
+```
+
+---
+
+## Журнал работ (новые записи — сверху)
+
+Формат: `### ГГГГ-ММ-ДД — кто (Claude / Codex / DeepSeek) — версия` → что сделано, файлы, что проверить, что не доделано.
+
+### 2026-10-31 — Claude — 0.7.0
+- Создан этот файл `HANDOFF.md` и `CLAUDE.md` (ссылка сюда), в `AGENTS.md` добавлено правило вести журнал.
+- Исправлена кодировка описания в `package.json`.
+- Перед этим за день: проверены и выложены этапы 4–6 (словари, ресурсы, грамматика, «Спросить у AI», учёба);
+  исправлены зависание сайта (`schemaReady`), автообновление PWA, язык текстов грамматики, мобильный вид грамматики,
+  список переводчиков (только подключённые, «Cloud», Gemini/Groq с личным ключом), слова-кнопки в карточке,
+  сохранение экрана перевода при смене вкладок, наборы слов (мн. число), перевод в карточках учёбы.
+- Сейчас в работе у DeepSeek: **этап 8** (`tasks/STAGE8.md`, экран и карточка слова как в Яндекс Переводчике).
+  Дальше: этап 7 (`tasks/STAGE7.md`, платные нейросети), потом приложения (`tasks/APPS-NOTES.md`).
