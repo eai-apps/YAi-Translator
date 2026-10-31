@@ -1,5 +1,19 @@
 # История версий
 
+## 0.11.0 — 31.10.2026
+
+Этап 10: Android-приложение (один APK для телефона, планшета и Android TV).
+- Capacitor (последние версии `@capacitor/core`, `@capacitor/cli`, `@capacitor/android`, `@capacitor/app`, `@capacitor/splash-screen`, `@capacitor/status-bar`), конфигурация `capacitor.config.ts`, нативный проект `android/`.
+- Манифест `AndroidManifest.xml`: категории `LAUNCHER` и `LEANBACK_LAUNCHER` у главной activity, фичи `android.software.leanback` и `android.hardware.touchscreen` с `required="false"`, разрешения `RECORD_AUDIO` и `INTERNET`, баннер `tv_banner` 320×180.
+- Ресурсы приложения: генерация ТВ-баннера `tv_banner.png` 320×180 и иконок всех плотностей (`mipmap-mdpi`, `hdpi`, `xhdpi`, `xxhdpi`, `xxxhdpi`, адаптивные foreground и round) из `public/logo.svg` скриптом `scripts/render-android-icons.mjs`.
+- Управление пультом (Android TV): заметный контрастный фокус `:focus-visible` с акцентной рамкой и тенью у кнопок, чипсов, вкладок, полей ввода и интерактивных элементов.
+- Нативная функциональность приложения (`AppPlatformBridge`): обработка кнопки «Назад» (закрытие модальных диалогов по Escape, возврат по истории маршрутов, сворачивание приложения на главной через `App.minimizeApp()`), синхронизация цвета и темы статус-бара (`StatusBar`), скрытие сплэш-экрана (`SplashScreen.hide()`).
+- PWA service worker в сборке приложения отключен (`storeBuild() === 'web'`).
+- Самообновление без магазина через `public/version.json` на сайте: сравнение `versionCode`, окно «Доступно обновление» (`AppUpdateModal`) с примечаниями к релизу на языке пользователя и кнопкой скачивания APK.
+- Скрипт сборки `npm run build:android`: компиляция веб-части с флагами `VITE_STORE_BUILD=android` и `VITE_API_BASE=https://yai-translator.pages.dev`, вызов `cap sync android`.
+- Автоматизация сборки в GitHub Actions (`.github/workflows/android.yml`): сборка APK по тегу `v*` и вручную, цифровая подпись из секретов и публикация в GitHub Releases, либо отладочный APK в артефакты при отсутствии секретов.
+Автор этапа — Antigravity (модель Gemini 3.8 Flash).
+
 ## 0.10.2 — 31.10.2026
 
 «ИИ Pro»: `promptsPro.ts` (примеры A1–A2 и совет), `validateTranslatePro`, поле `pro` в ответе, `ProExtras.tsx`. Автор — Claude.

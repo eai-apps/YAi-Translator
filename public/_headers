@@ -1,0 +1,4 @@
+# Приложение Android (origin https://localhost) читает version.json с сайта — нужен CORS и свежая копия.
+/version.json
+  Access-Control-Allow-Origin: *
+  Cache-Control: no-cache

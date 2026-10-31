@@ -1,3 +1,139 @@
+# Отчёт по этапу 10 — 31.10.2026 (версия 0.11.0)
+
+Дата: 31.10.2026 · Версия: **0.11.0** · Автор этапа: Antigravity (модель Gemini 3.8 Flash) · Задание: `tasks/STAGE10.md`.
+
+Сделано строго по инструкциям `tasks/STAGE10.md` и `tasks/APPS-NOTES.md`.
+Правила этапа соблюдены:
+- Логотип `public/logo.svg` и `Logo.tsx` не изменялись.
+- Сервер `functions/**` в этом этапе не менялся (только константа `APP_VERSION = '0.11.0'` в `config.ts`, код функций не тронут). Сайт и API работают как прежде.
+- Все файлы не превышают ~250 строк, промпты и чужой код не сокращались.
+- Локализация `ru.json`, `de.json`, `en.json` полностью синхронизирована (по 1079 ключей в каждом, 100% совпадение).
+- Сборка сайта `npm run build` и сборка веб-части для приложения `npm run build:android` завершились без единой ошибки.
+- На GitHub ничего не отправлялось.
+
+---
+
+## 1. Capacitor и нативный проект Android
+
+- Установлены актуальные стабильные версии библиотек Capacitor:
+  - `@capacitor/core`, `@capacitor/cli`, `@capacitor/android`, `@capacitor/app`, `@capacitor/splash-screen`, `@capacitor/status-bar`.
+- Создан конфигурационный файл `capacitor.config.ts`:
+  - `appId: "app.yai.translator"`
+  - `appName: "YAi Translator"`
+  - `webDir: "dist"`
+  - `androidScheme: "https"`
+  - Конфигурация плагинов `SplashScreen` и `StatusBar`.
+- Инициализирован нативный проект `android/` командой `npx cap add android` и помещен в репозиторий.
+- В `.gitignore` добавлены исключения для временных файлов Gradle и Android Studio (`android/app/build/`, `android/.gradle/`, `android/build/`, `android/.idea/`, `*.iml`).
+- Создан кроссплатформенный скрипт сборки `scripts/build-android.mjs` и npm-скрипт `npm run build:android`:
+  - Собирает веб-часть с `VITE_STORE_BUILD=android` и `VITE_API_BASE=https://yai-translator.pages.dev`.
+  - Запускает `npx cap sync android` для синхронизации сгенерированных ассетов и плагинов в папку `android/`.
+
+---
+
+## 2. Один APK для телефона, планшета и Android TV
+
+- Отредактирован `android/app/src/main/AndroidManifest.xml`:
+  - Добавлены обе категории запуска у главной activity: `android.intent.category.LAUNCHER` (телефоны/планшеты) и `android.intent.category.LEANBACK_LAUNCHER` (Android TV).
+  - Указаны фичи с `required="false"`: `android.software.leanback`, `android.hardware.touchscreen`, `android.hardware.microphone`.
+  - Добавлены разрешения: `android.permission.INTERNET` и `android.permission.RECORD_AUDIO` (для диктовки/голосового ввода).
+  - Добавлен баннер приложения для Android TV: `android:banner="@drawable/tv_banner"`.
+  - Отсутствуют специфичные для архитектур нативные библиотеки (NDK/jniLibs) — один универсальный APK на все устройства.
+- Сгенерированы ресурсы приложения:
+  - Создан скрипт `scripts/render-android-icons.mjs` (с fallback на PowerShell `.NET System.Drawing` `scripts/render-android-res.ps1`).
+  - Сгенерирован TV-баннер 320×180 px: `android/app/src/main/res/drawable/tv_banner.png` и `drawable-xhdpi/tv_banner.png` (логотип на фирменном глубоком фоне).
+  - Сгенерированы иконки приложения всех разрешений: `mipmap-mdpi` (48px), `hdpi` (72px), `xhdpi` (96px), `xxhdpi` (144px), `xxxhdpi` (192px), а также круглые иконки `ic_launcher_round.png` и адаптивные `ic_launcher_foreground.png`.
+
+---
+
+## 3. Управление пультом (Android TV) и поведение приложения
+
+- **Контрастный фокус для пульта D-pad**:
+  - В `src/styles/index.css` добавлены стили `:focus-visible` для кнопок, ссылок, инпутов, селектов, textarea и tabindex с двойным контрастным контуром (`outline: 2.5px solid var(--color-accent)` и `box-shadow: 0 0 0 3px var(--color-accent-soft)`).
+  - Все интерактивные элементы доступны со стрелок пульта без ловушек фокуса.
+- **Мост нативных возможностей** (`src/components/app/AppPlatformBridge.tsx`):
+  - Кнопка «Назад» Android / пульта:
+    1. Если открыто модальное окно (включая окно обновления или оверлей) — закрывает его (через Escape / стейт).
+    2. Если пользователь не на главной странице — переходит назад по истории маршрутов (`navigate(-1)`).
+    3. На главной странице (`/`) — вызывает `CapApp.minimizeApp()`, сворачивая приложение.
+  - Статус-бар и тема:
+    - Скрывает сплэш-экран через `SplashScreen.hide()`.
+    - Подстраивает стиль (`Style.Dark` / `Style.Light`) и цвет фона статус-бара под текущую тему оформления.
+- **PWA Service Worker**:
+  - В `src/main.tsx` вызов `registerSW()` обернут в условие `if (storeBuild() === 'web')`: в сборке приложения service worker не регистрируется (ассеты локальные).
+
+---
+
+## 4. Проверка обновлений без магазина (version.json)
+
+- Создан файл `public/version.json` на сайте:
+  - `{ "versionCode": 1, "versionName": "0.11.0", "apkUrl": "https://github.com/eai-apps/YAi-Translator/releases/latest", "notes_ru": "...", "notes_de": "...", "notes_en": "...", "required": false }`.
+- В `src/config.ts` добавлена константа `ANDROID_VERSION_CODE = 1`.
+- При старте приложение (`storeBuild() === 'android'`) запрашивает `https://yai-translator.pages.dev/version.json`.
+- Если `versionCode` на сервере больше установленного, показывается окно `AppUpdateModal`:
+  - Заголовок «Доступно обновление», номер версии.
+  - Список изменений на языке пользователя (`notes_ru`, `notes_de` или `notes_en`).
+  - Кнопка «Обновить» открывает ссылку на APK (`window.open(apkUrl, '_system')`).
+  - Кнопка «Позже» скрывает окно (если обновление не помечено как обязательное `required: true`).
+
+---
+
+## 5. Сборка APK в GitHub Actions
+
+- Создан рабочий процесс `.github/workflows/android.yml`:
+  - Запуск по тегу `v*` и вручную (`workflow_dispatch`).
+  - Шаги: Checkout → Node.js 20 (`npm ci`) → `npm run build:android` → Temurin JDK 21 → Setup Gradle.
+  - Если заданы секреты подписи (`ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD`):
+    - Собирает `./gradlew assembleRelease`.
+    - Подписывает APK через `r0adkll/sign-android-release@v1`.
+    - Публикует подписанный `YAi-Translator-<версия>.apk` в GitHub Releases (по тегу) и сохраняет в артефакты сборки.
+  - Если секреты подписи еще не добавлены:
+    - Собирает `./gradlew assembleDebug`.
+    - Выгружает отладочный APK `YAi-Translator-<версия>-debug.apk` в артефакты Actions.
+
+### Инструкция для Claude по созданию ключа подписи и секретов:
+Для создания релизного хранилища ключей Android (keystore) достаточно выполнить одну команду:
+```bash
+keytool -genkey -v -keystore yai-translator.keystore -alias yai-key -keyalg RSA -keysize 2048 -validity 10000
+```
+Затем перевести файл в base64:
+- На Linux/macOS: `base64 -w 0 yai-translator.keystore > keystore_base64.txt`
+- На Windows (PowerShell): `[Convert]::ToBase64String([System.IO.File]::ReadAllBytes("yai-translator.keystore")) | Out-File -Encoding utf8 keystore_base64.txt`
+
+В репозитории GitHub (Settings → Secrets and variables → Actions) добавить 4 секрета:
+1. `ANDROID_KEYSTORE_BASE64` — содержимое `keystore_base64.txt`
+2. `ANDROID_KEYSTORE_PASSWORD` — пароль хранилища
+3. `ANDROID_KEY_ALIAS` — `yai-key`
+4. `ANDROID_KEY_PASSWORD` — пароль ключа
+
+---
+
+## 6. Список созданных и измененных файлов
+
+- `.github/workflows/android.yml` — workflow для автоматической сборки и публикации релизного/отладочного APK в GitHub Actions.
+- `android/` — нативный Android-проект Capacitor (с Leanback для TV, разрешениями, ресурсами).
+- `capacitor.config.ts` — конфигурация Capacitor (appId: app.yai.translator, Splash Screen, Status Bar).
+- `public/version.json` — манифест версии приложения для проверки обновлений по воздуху.
+- `scripts/build-android.mjs` — кроссплатформенный скрипт сборки веб-части для Android и вызова `cap sync`.
+- `scripts/render-android-icons.mjs` — генератор ТВ-баннера 320×180 и иконок Android всех плотностей.
+- `scripts/render-android-res.ps1` — генератор ресурсов через PowerShell System.Drawing (без тяжелых внешних зависимостей).
+- `src/components/app/AppPlatformBridge.tsx` — мост нативных функций Android/TV (кнопка «Назад», статус-бар, сплэш-экран, проверка обновлений).
+- `src/components/app/AppUpdateModal.tsx` — модальное окно уведомления о новой версии приложения.
+- `.gitignore` — добавлены правила игнорирования сборочных файлов Android (`build/`, `.gradle/`).
+- `package.json` — версия 0.11.0, зависимости Capacitor, скрипты `build:android` и `icons:android`.
+- `functions/_lib/config.ts` — константа `APP_VERSION = '0.11.0'`.
+- `src/config.ts` — константа `APP_VERSION = '0.11.0'` и `ANDROID_VERSION_CODE = 1`.
+- `src/main.tsx` — ограничение запуска PWA service worker только для `storeBuild() === 'web'`.
+- `src/App.tsx` — подключение компонента `<AppPlatformBridge />`.
+- `src/styles/index.css` — улучшенные стили `:focus-visible` для пульта Android TV.
+- `src/data/changelog.ts` — запись о версии 0.11.0 на русском, немецком и английском языках.
+- `src/locales/ru.json`, `de.json`, `en.json` — ключи секции `appUpdate` (по 1079 ключей во всех трех файлах).
+- `CHANGELOG.md` — описание версии 0.11.0.
+- `REPORT.md` — этот подробный отчет.
+- `HANDOFF.md` — запись вверху «Журнала работ».
+
+---
+
 # Отчёт по этапу 9 — 31.10.2026 (версия 0.10.0)
 
 Дата: 31.10.2026 · Версия: **0.10.0** · Автор этапа: Antigravity (модель Gemini 3.8 Flash) · Задание: `tasks/STAGE9.md`.

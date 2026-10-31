@@ -14,6 +14,36 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.11.0',
+    date: '2026-10-31',
+    items: {
+      ru: [
+        'Универсальное Android-приложение (Capacitor): один APK для телефонов, планшетов и Android TV.',
+        'Поддержка Android TV и пульта (D-pad): видимый контрастный фокус у кнопок, вкладок и полей, Leanback-баннер 320×180.',
+        'Нативная кнопка «Назад»: закрытие открытых окон/диалогов, переход назад по истории и сворачивание на главной.',
+        'Стилизация статус-бара по теме оформления и плавное скрытие сплэш-экрана.',
+        'Проверка обновлений без магазина приложений через version.json.',
+        'Автоматическая сборка и релиз APK в GitHub Actions.',
+      ],
+      de: [
+        'Universelle Android-App (Capacitor): eine APK für Smartphones, Tablets und Android TV.',
+        'Unterstützung für Android TV und Fernbedienung (D-Pad): sichtbarer Fokus, Leanback-Banner 320×180.',
+        'Nativer Zurück-Button: Schließen von Dialogen, Zurücknavigieren und Minimieren auf der Startseite.',
+        'Statusleisten-Anpassung an das Theme und Splash-Screen-Integration.',
+        'Update-Prüfung ohne Store über version.json.',
+        'Automatische APK-Erstellung und Releases in GitHub Actions.',
+      ],
+      en: [
+        'Universal Android app (Capacitor): single APK for phones, tablets and Android TV.',
+        'Android TV & D-pad remote support: prominent focus outlines, Leanback 320×180 banner.',
+        'Native back button handling: closes dialogs, navigates back and minimizes on home.',
+        'Theme-matching status bar coloring and splash screen handling.',
+        'Store-less update checks via version.json.',
+        'Automated APK release workflow in GitHub Actions.',
+      ],
+    },
+  },
+  {
     version: '0.10.2',
     date: '2026-10-31',
     items: {

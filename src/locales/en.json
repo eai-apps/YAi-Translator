@@ -1160,5 +1160,11 @@
     "modelPlaceholder": "Press “Load models” first",
     "picked": "{{count}} selected",
     "keyHintMulti": "Paste the key, press “Load models” and tick the models you want (several are fine) — each appears on the home page in the “Fast translation ▾” list."
+  },
+  "appUpdate": {
+    "title": "Update available",
+    "version": "Version",
+    "update": "Update",
+    "later": "Later"
   }
 }

@@ -21,3 +21,13 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 test_*.html
+
+# Android (Capacitor)
+android/app/build/
+android/.gradle/
+android/build/
+android/captures/
+android/.idea/
+android/*.iml
+android/app/*.iml
+
