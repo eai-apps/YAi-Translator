@@ -9,7 +9,7 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         // versionCode = ANDROID_VERSION_CODE в src/config.ts и versionCode в public/version.json — менять вместе
         versionCode 2
-        versionName "0.12.0"
+        versionName "0.12.1"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
@@ -17,8 +17,24 @@ android {
             ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+    // Подпись релиза: ключ кладёт GitHub Actions из секретов (.github/workflows/android.yml).
+    // Ключа нет (локальная сборка) — release не подписывается.
+    def keystorePath = System.getenv("YAI_KEYSTORE_FILE")
+    signingConfigs {
+        release {
+            if (keystorePath != null && file(keystorePath).exists()) {
+                storeFile file(keystorePath)
+                storePassword System.getenv("YAI_KEYSTORE_PASSWORD")
+                keyAlias System.getenv("YAI_KEY_ALIAS")
+                keyPassword System.getenv("YAI_KEY_PASSWORD")
+            }
+        }
+    }
     buildTypes {
         release {
+            if (keystorePath != null && file(keystorePath).exists()) {
+                signingConfig signingConfigs.release
+            }
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }

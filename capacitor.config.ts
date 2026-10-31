@@ -9,7 +9,12 @@ const config: CapacitorConfig = {
   appName: 'YAi Translator',
   webDir: 'dist',
   server: {
+    // Экраны грузятся прямо с сайта: каждое обновление сайта сразу есть в приложении, без нового APK.
+    // Новый APK нужен только при изменении нативной части (плагины, манифест) — см. public/version.json.
+    url: 'https://yai-translator.pages.dev',
     androidScheme: 'https',
+    // Нет интернета — показываем встроенную страницу public/offline.html.
+    errorPath: 'offline.html',
   },
   plugins: {
     SplashScreen: {

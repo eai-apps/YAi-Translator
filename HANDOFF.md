@@ -116,6 +116,21 @@
 
 ## Журнал работ (новые записи — сверху)
 
+### 2026-10-31 23:30 — Claude — 0.12.1 (самообновление приложения, подпись APK)
+- Приложение грузит экраны прямо с сайта (`capacitor.config.ts` → `server.url: https://yai-translator.pages.dev`):
+  каждый push в `main` сразу виден в приложении, без нового APK. Нет сети — встроенная `public/offline.html`.
+- Поэтому сборка сайта должна сама узнавать приложение: `storeBuild()` в `src/config.ts` сначала смотрит
+  `Capacitor.isNativePlatform()`. Версию установленного APK брать **только** из `App.getInfo().build`
+  (`src/lib/appUpdate.ts`), а не из констант сайта.
+- **Новый APK нужен только при изменении нативной части** (плагины Capacitor, `AndroidManifest.xml`, `MainActivity.java`,
+  `capacitor.config.ts`, иконки). Тогда: поднять `versionCode`/`versionName` в `android/app/build.gradle`,
+  `ANDROID_VERSION_CODE` в `src/config.ts`, `public/version.json`; push; затем тег `vX.Y.Z` → GitHub Actions соберёт и
+  выложит `YAi-Translator.apk` в Releases; приложение само предложит обновиться.
+- Профиль → карточка с версией: «Приложение: версия X (сборка N)» и «Проверить обновления» → «У вас актуальная версия».
+- Подпись APK: `signingConfigs` в `android/app/build.gradle` (переменные `YAI_KEYSTORE_*`), секреты GitHub
+  `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD`.
+  Сам ключ — только у владельца: `G:\evvant\Projects\Projects\YAi-Translator\keystore\` (в `.gitignore`). Не терять!
+
 ### 2026-10-31 23:05 — Claude — 0.12.0 (проверка этапа 10Б от Antigravity / Gemini 3.8 Flash)
 - Проверил и выложил этап 10Б. Сборка сайта и `build:android` проходят, ключи ru/de/en совпадают, `npmmirror` нет.
 - Исправил: «Перевести в YAi» из меню Android не сработал бы, если приложение уже открыто (адрес менялся через

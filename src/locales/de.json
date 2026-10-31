@@ -1189,6 +1189,13 @@
     "title": "Update verfügbar",
     "version": "Version",
     "update": "Aktualisieren",
-    "later": "Später"
+    "later": "Später",
+    "installed": "App: Version {{version}} (Build {{build}})",
+    "check": "Nach Updates suchen",
+    "checking": "Wird geprüft…",
+    "latest": "Sie haben die aktuelle Version",
+    "available": "Version {{version}} verfügbar",
+    "offline": "Keine Verbindung zur Website — bitte später erneut versuchen",
+    "autoNote": "Bildschirme und Funktionen der App aktualisieren sich selbst. Eine neue APK-Datei ist nur manchmal nötig — die App bietet sie dann zum Download an."
   }
 }

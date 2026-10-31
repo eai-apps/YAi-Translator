@@ -2,10 +2,12 @@
  * Настройки клиента. Адрес API берётся из VITE_API_BASE:
  * пусто — тот же домен (обычный сайт), иначе — внешний сервер (приложения Capacitor).
  */
+import { Capacitor } from '@capacitor/core';
+
 export const API_BASE = (import.meta.env.VITE_API_BASE ?? '').replace(/\/+$/, '');
 
 /** Версия показывается в профиле; совпадает с package.json. */
-export const APP_VERSION = '0.12.0';
+export const APP_VERSION = '0.12.1';
 
 /** Код версии приложения Android (увеличивается при каждом обновлении APK). */
 export const ANDROID_VERSION_CODE = 2;
@@ -104,6 +106,12 @@ export const ARTICLE_COLORS = {
 
 /** Тип сборки: web, ios, android или rustore. */
 export function storeBuild(): 'web' | 'ios' | 'android' | 'rustore' {
+  // Приложение грузит экраны с сайта (server.url), поэтому сборка сайта узнаёт приложение по Capacitor.
+  if (Capacitor.isNativePlatform()) {
+    const platform = Capacitor.getPlatform();
+    if (platform === 'android') return 'android';
+    if (platform === 'ios') return 'ios';
+  }
   const env = (import.meta.env.VITE_STORE_BUILD ?? '').toLowerCase();
   if (env === 'ios') return 'ios';
   if (env === 'android') return 'android';

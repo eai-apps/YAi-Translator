@@ -31,3 +31,9 @@ android/.idea/
 android/*.iml
 android/app/*.iml
 
+
+# Ключ подписи Android — только на компьютере владельца, не в git
+keystore/
+*.keystore
+*.jks
+keystore_base64.txt

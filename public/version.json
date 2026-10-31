@@ -1,7 +1,7 @@
 {
   "versionCode": 2,
-  "versionName": "0.12.0",
-  "apkUrl": "https://github.com/eai-apps/YAi-Translator/releases/latest",
+  "versionName": "0.12.1",
+  "apkUrl": "https://github.com/eai-apps/YAi-Translator/releases/latest/download/YAi-Translator.apk",
   "notes_ru": "Свайп по истории переводов, кнопка «История», серия дней 🔥, озвучка в приложении, перевод текста из любого приложения и карточки для соцсетей.",
   "notes_de": "Wischen durch den Übersetzungsverlauf, Verlauf-Button, Tagesserie 🔥, Sprachausgabe in der App, Textübersetzung aus jeder App und Bild-Export.",
   "notes_en": "Swipe through translation history, history button, day streak 🔥, in-app speech synthesis, translate text from any app, and share as image.",

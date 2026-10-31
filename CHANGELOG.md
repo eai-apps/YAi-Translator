@@ -1,5 +1,12 @@
 # История версий
 
+## 0.12.1 — 31.10.2026
+
+Приложение Android грузит экраны с сайта (`capacitor.config.ts` → `server.url`, нет сети — `public/offline.html`),
+`storeBuild()` узнаёт приложение по `Capacitor.isNativePlatform()`, версия APK — из `App.getInfo().build`
+(`src/lib/appUpdate.ts`), «Проверить обновления» в профиле (`AppVersionRow.tsx`). Подпись APK — `signingConfigs`
+в `android/app/build.gradle` из секретов GitHub; в релизе постоянное имя `YAi-Translator.apk`. Автор — Claude.
+
 ## 0.12.0 — 31.10.2026
 
 Этап 10Б: листание истории переводов свайпом, «Назад/Вперёд», кнопка «История», озвучка в приложении и заманухи.

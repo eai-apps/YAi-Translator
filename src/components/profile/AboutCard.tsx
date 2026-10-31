@@ -7,6 +7,7 @@ import { Button } from '../ui/Button';
 import { Card } from '../ui/Card';
 import { SectionTitle } from '../ui/SectionTitle';
 import { IconSparkles } from '../layout/icons';
+import { AppVersionRow } from './AppVersionRow';
 
 export function AboutCard() {
   const { t } = useTranslation();
@@ -24,6 +25,9 @@ export function AboutCard() {
         <p>{t('profile.privacy')}</p>
         <p>{t('profile.privacyAccount')}</p>
       </div>
+
+      {/* Только в приложении Android: версия APK и «Проверить обновления». */}
+      <AppVersionRow />
 
       {/* Ссылки «О приложении» и (только админу) «Админка». */}
       <div className="mt-4 flex flex-wrap gap-2">

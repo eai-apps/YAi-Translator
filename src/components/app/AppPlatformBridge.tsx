@@ -3,7 +3,8 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { App as CapApp } from '@capacitor/app';
 import { SplashScreen } from '@capacitor/splash-screen';
 import { StatusBar, Style } from '@capacitor/status-bar';
-import { ANDROID_VERSION_CODE, storeBuild } from '../../config';
+import { storeBuild } from '../../config';
+import { APP_UPDATE_EVENT, checkAppUpdate } from '../../lib/appUpdate';
 import { useTheme } from '../../hooks/useTheme';
 import { AppUpdateModal, type AppUpdateInfo } from './AppUpdateModal';
 
@@ -92,24 +93,18 @@ export const AppPlatformBridge: React.FC = () => {
     };
   }, [isAndroid, navigate]);
 
-  // 4. Проверка обновлений APK через version.json на сервере
+  // 4. Проверка обновлений APK при запуске (src/lib/appUpdate.ts) и по кнопке в профиле (событие).
   useEffect(() => {
     if (!isAndroid) return;
-
-    const checkUpdate = async () => {
-      try {
-        const res = await fetch(`https://yai-translator.pages.dev/version.json?_t=${Date.now()}`);
-        if (!res.ok) return;
-        const data = (await res.json()) as AppUpdateInfo;
-        if (data && typeof data.versionCode === 'number' && data.versionCode > ANDROID_VERSION_CODE) {
-          setUpdateInfo(data);
-        }
-      } catch (_err) {
-        // При отсутствии интернета работаем тихо
-      }
+    void checkAppUpdate().then((check) => {
+      if (check?.hasUpdate && check.latest) setUpdateInfo(check.latest);
+    });
+    const onRequest = (event: Event) => {
+      const info = (event as CustomEvent<AppUpdateInfo>).detail;
+      if (info) setUpdateInfo(info);
     };
-
-    checkUpdate();
+    window.addEventListener(APP_UPDATE_EVENT, onRequest);
+    return () => window.removeEventListener(APP_UPDATE_EVENT, onRequest);
   }, [isAndroid]);
 
   // 5. Текст из меню выделения Android (PROCESS_TEXT) или «Поделиться» (SEND) — см. MainActivity.java.

@@ -14,6 +14,15 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.12.1',
+    date: '2026-10-31',
+    items: {
+      ru: ['Приложение Android обновляется само: экраны и функции берутся с сайта. В «Профиль → О приложении» — версия и «Проверить обновления».', 'Без интернета приложение показывает понятный экран «Нет интернета» с кнопкой «Повторить».'],
+      de: ['Die Android-App aktualisiert sich selbst: Bildschirme und Funktionen kommen von der Website. Unter „Profil“ — Version und „Nach Updates suchen“.', 'Ohne Internet zeigt die App einen klaren Bildschirm „Keine Verbindung“ mit „Erneut“.'],
+      en: ['The Android app updates itself: screens and features come from the website. In Profile — version and “Check for updates”.', 'Without internet the app shows a clear “No connection” screen with “Retry”.'],
+    },
+  },
+  {
     version: '0.12.0',
     date: '2026-10-31',
     items: {
