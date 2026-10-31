@@ -10,6 +10,7 @@ import type { SpeechController } from '../../hooks/useSpeech';
 import { CEFR_LEVELS } from '../../lib/labels';
 import { Segmented } from '../ui/Segmented';
 import { SectionTitle } from '../ui/SectionTitle';
+import { PickText } from './pick';
 import { SpeakButton } from '../ui/SpeakButton';
 
 interface ExamplesListProps {
@@ -65,7 +66,7 @@ export function ExamplesList({ examples, language, speech, dictExamples = [], di
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <p dir={textDirection(dictLang ?? language)} className="text-sm font-medium leading-relaxed">
-                    {example.text}
+                    <PickText text={example.text} />
                   </p>
                   {example.translation ? (
                     <p
@@ -102,7 +103,7 @@ export function ExamplesList({ examples, language, speech, dictExamples = [], di
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <p dir={textDirection(language)} className="text-sm font-medium leading-relaxed">
-                    {example.text}
+                    <PickText text={example.text} />
                   </p>
                   {example.translation ? (
                     <p dir="auto" className="mt-0.5 text-sm leading-relaxed text-muted">

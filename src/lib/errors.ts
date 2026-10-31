@@ -58,7 +58,7 @@ export function providerLabel(provider: string): string {
     case 'lara':
       return 'Lara Translate';
     case 'workersai':
-      return 'Cloudflare AI';
+      return 'Cloud AI';
     case 'microsoft':
       return 'Microsoft Translator';
     case 'google':
@@ -66,7 +66,7 @@ export function providerLabel(provider: string): string {
     case 'mymemory':
       return 'MyMemory';
     case 'm2m100':
-      return 'M2M100 (Cloudflare)';
+      return 'Cloud';
     default:
       return provider;
   }

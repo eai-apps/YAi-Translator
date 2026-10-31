@@ -7,6 +7,7 @@ import type { DictExample, LanguageCode } from '../../../shared/types';
 import { textDirection } from '../../../shared/languages';
 import type { SpeechController } from '../../hooks/useSpeech';
 import { SectionTitle } from '../ui/SectionTitle';
+import { PickText } from './pick';
 import { SpeakButton } from '../ui/SpeakButton';
 
 interface DictExamplesProps {
@@ -29,7 +30,7 @@ export function DictExamples({ examples, language, speech }: DictExamplesProps) 
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
                 <p dir={textDirection(language)} className="text-sm font-medium leading-relaxed">
-                  {example.text}
+                  <PickText text={example.text} />
                 </p>
                 {example.translation ? (
                   <p

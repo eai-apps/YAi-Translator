@@ -85,7 +85,8 @@
     "loadingTitle": "Переводим…",
     "askAi": "Спросить у AI",
     "engine": "Переводчик",
-    "engineAuto": "Авто"
+    "engineAuto": "Авто",
+    "enginePersonal": "{{name}} — мой ключ"
   },
   "others": {
     "title": "Как переводят другие",

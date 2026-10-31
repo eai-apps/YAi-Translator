@@ -66,8 +66,16 @@ async function runClassic(job: Job, only: ClassicProviderId | null): Promise<Tra
   };
 }
 
-/** ИИ с альтернативами. Ошибку LIMIT_REACHED пробрасываем — фронтенд покажет окно ключа. */
-async function runAi(job: Job): Promise<TranslateResponse> {
+/** ИИ, который можно выбрать в списке переводчиков: только с личным ключом пользователя. */
+const PERSONAL_AI = ['gemini', 'groq'] as const;
+type PersonalAi = (typeof PERSONAL_AI)[number];
+
+/**
+ * ИИ с альтернативами. Ошибку LIMIT_REACHED пробрасываем — фронтенд покажет окно ключа.
+ * personal — человек выбрал в списке «Gemini» или «Groq»: работает только его личный ключ.
+ */
+async function runAi(job: Job, personal: PersonalAi | null = null): Promise<TranslateResponse> {
+  if (personal && !job.userKeys[personal]) throw new ApiError('LIMIT_REACHED', 429);
   const { data, provider } = await runJsonTask({
     env: job.env,
     prompt: buildTranslatePrompt(job),
@@ -75,6 +83,7 @@ async function runAi(job: Job): Promise<TranslateResponse> {
     signal: job.signal,
     beforeShared: job.limitGuard,
     validate: validateTranslate,
+    ...(personal ? { only: [personal], personalOnly: true } : {}),
   });
   return { ...data, provider, cached: false };
 }
@@ -88,6 +97,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     const targetLang = requireLanguage(body.targetLang);
     const mode = body.mode === 'ai' ? 'ai' : 'classic';
     const chosen = CLASSIC_PROVIDERS.find((id) => id === body.provider) ?? null;
+    const personalAi = mode === 'ai' ? (PERSONAL_AI.find((id) => id === body.provider) ?? null) : null;
 
     if (sourceLang !== 'auto' && sourceLang === targetLang) {
       throw new ApiError('VALIDATION', 400);
@@ -110,7 +120,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     // Кэш отдельно для каждого режима и выбранного переводчика.
     const cacheKey = await buildCacheKey({
       kind: 'translate',
-      text: `${mode}|${chosen ?? 'any'}|${text}`,
+      text: `${mode}|${chosen ?? personalAi ?? 'any'}|${text}`,
       sourceLang,
       targetLang,
       uiLang,
@@ -123,7 +133,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
     let result: TranslateResponse | null;
     if (mode === 'ai') {
-      result = await runAi(job);
+      result = await runAi(job, personalAi);
     } else {
       result = await runClassic(job, chosen);
       // Выбранный переводчик не ответил — пробуем остальные, затем ИИ как последний шанс.

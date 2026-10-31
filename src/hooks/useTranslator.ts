@@ -25,8 +25,51 @@ import { useLocalStorage } from './useLocalStorage';
 
 export type { TranslatorError };
 
-/** Выбор переводчика: «авто» — по очереди, или конкретный сервис. */
-export type ProviderChoice = 'auto' | ClassicProviderId;
+/** ИИ, который можно выбрать в списке, — только с личным ключом пользователя. */
+export const PERSONAL_AI_CHOICES = ['gemini', 'groq'] as const;
+type PersonalAiChoice = (typeof PERSONAL_AI_CHOICES)[number];
+
+/** Выбор переводчика: «авто» — по очереди, конкретный сервис или свой ключ Gemini / Groq. */
+export type ProviderChoice = 'auto' | ClassicProviderId | PersonalAiChoice;
+
+function isPersonalAi(choice: ProviderChoice): choice is PersonalAiChoice {
+  return (PERSONAL_AI_CHOICES as readonly string[]).includes(choice);
+}
+
+/**
+ * Экран перевода переживает переход на другие вкладки («Словарь», «Учёба»…): последнее состояние
+ * хранится в памяти страницы и в sessionStorage (на телефоне браузер может выгрузить вкладку).
+ */
+interface Snapshot {
+  text: string;
+  sourceLang: SourceLanguage;
+  targetLang: LanguageCode;
+  provider: ProviderChoice;
+  result: TranslateResponse | null;
+  word: WordResponse | null;
+}
+const SNAPSHOT_KEY = 'yai.translate.snapshot';
+let memorySnapshot: Snapshot | null = null;
+
+function readSnapshot(): Snapshot | null {
+  if (memorySnapshot) return memorySnapshot;
+  try {
+    const raw = sessionStorage.getItem(SNAPSHOT_KEY);
+    memorySnapshot = raw ? (JSON.parse(raw) as Snapshot) : null;
+  } catch {
+    memorySnapshot = null;
+  }
+  return memorySnapshot;
+}
+
+function writeSnapshot(snapshot: Snapshot): void {
+  memorySnapshot = snapshot;
+  try {
+    sessionStorage.setItem(SNAPSHOT_KEY, JSON.stringify(snapshot));
+  } catch {
+    // Хранилище недоступно (приватный режим) — хватит памяти страницы.
+  }
+}
 
 export interface WordState {
   loading: boolean;
@@ -57,17 +100,20 @@ export function summarizeCard(card: WordResponse['card']): string {
 export function useTranslator(onLimitReached: () => void) {
   const { t, i18n } = useTranslation();
   const { addItem } = useHistory();
-  const [text, setText] = useState('');
+  const restored = useRef(readSnapshot()).current;
+  const [text, setText] = useState(restored?.text ?? '');
   const [sourceLang, setSourceLangState] = useLocalStorage<SourceLanguage>(STORAGE_KEYS.sourceLang, 'auto');
   // Немецкий интерфейс по умолчанию переводит на русский, остальные — на немецкий.
   const defaultTarget: LanguageCode = i18n.language === 'de' ? 'ru' : 'de';
   const [targetLang, setTargetLangState] = useLocalStorage<LanguageCode>(STORAGE_KEYS.targetLang, defaultTarget);
   const [providerChoice, setProviderChoice] = useLocalStorage<ProviderChoice>(STORAGE_KEYS.provider, 'auto');
 
-  const [result, setResult] = useState<TranslateResponse | null>(null);
+  const [result, setResult] = useState<TranslateResponse | null>(restored?.result ?? null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<TranslatorError | null>(null);
-  const [word, setWord] = useState<WordState>(EMPTY_WORD);
+  const [word, setWord] = useState<WordState>(
+    restored?.word ? { loading: false, data: restored.word, error: null } : EMPTY_WORD,
+  );
   // Словари грузятся параллельно с ИИ (этап 4).
   const { dict, loadDict, resetDict } = useDictLookup();
   const [aiLoading, setAiLoading] = useState(false);
@@ -148,7 +194,7 @@ export function useTranslator(onLimitReached: () => void) {
             text: trimmed,
             sourceLang: source,
             targetLang: target,
-            mode: 'classic',
+            mode: isPersonalAi(choice) ? 'ai' : 'classic',
             ...(choice !== 'auto' ? { provider: choice } : {}),
           },
           controller.signal,
@@ -178,8 +224,31 @@ export function useTranslator(onLimitReached: () => void) {
     [addItem, loadDictFor, loadWord, t],
   );
 
+  // Вернулись на вкладку «Перевод»: экран уже восстановлен, повторно ничего не запрашиваем.
+  const skipRestoredRef = useRef(
+    Boolean(
+      restored &&
+        restored.result &&
+        restored.text === text &&
+        restored.sourceLang === sourceLang &&
+        restored.targetLang === targetLang &&
+        restored.provider === providerChoice,
+    ),
+  );
+
+  // Запоминаем экран для возврата с других вкладок.
+  useEffect(() => {
+    writeSnapshot({ text, sourceLang, targetLang, provider: providerChoice, result, word: word.data });
+  }, [text, sourceLang, targetLang, providerChoice, result, word.data]);
+
   // Перевод с задержкой 600 мс; смена текста, языков или переводчика отменяет старый запрос.
   useEffect(() => {
+    if (skipRestoredRef.current) {
+      skipRestoredRef.current = false;
+      // Словари не хранятся в снимке — догружаем (ответ сервера из кэша, быстро).
+      if (isWordQuery(text.trim())) loadDictFor(text.trim(), targetLang, requestRef.current, new AbortController().signal);
+      return;
+    }
     if (!text.trim()) {
       setResult(null);
       setError(null);
@@ -198,7 +267,7 @@ export function useTranslator(onLimitReached: () => void) {
       window.clearTimeout(timer);
       abortRef.current?.abort();
     };
-  }, [resetDict, run, text, sourceLang, targetLang, providerChoice]);
+  }, [loadDictFor, resetDict, run, text, sourceLang, targetLang, providerChoice]);
 
   // «Guten Tag» при цели «Немецкий»: язык текста совпал с целью — сами переключаем цель (de → ru, иначе → de).
   useEffect(() => {

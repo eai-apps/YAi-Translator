@@ -85,7 +85,8 @@
     "loadingTitle": "Translating…",
     "askAi": "Ask AI",
     "engine": "Translator",
-    "engineAuto": "Auto"
+    "engineAuto": "Auto",
+    "enginePersonal": "{{name}} — my key"
   },
   "others": {
     "title": "How others translate it",

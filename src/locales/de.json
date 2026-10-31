@@ -85,7 +85,8 @@
     "loadingTitle": "Wird übersetzt…",
     "askAi": "KI fragen",
     "engine": "Übersetzer",
-    "engineAuto": "Auto"
+    "engineAuto": "Auto",
+    "enginePersonal": "{{name}} — mein Schlüssel"
   },
   "others": {
     "title": "Wie andere übersetzen",

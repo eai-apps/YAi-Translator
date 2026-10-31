@@ -21,6 +21,7 @@ import { OthersPanel } from '../components/translate/OthersPanel';
 import { ExplanationPanel } from '../components/translate/ExplanationPanel';
 import { CheckPanel } from '../components/translate/CheckPanel';
 import { WordPanel } from '../components/word/WordPanel';
+import { PickContext } from '../components/word/pick';
 import { LimitDialog } from '../components/limit/LimitDialog';
 
 export default function TranslatePage() {
@@ -102,6 +103,13 @@ export default function TranslatePage() {
       : result
     : null;
 
+  // Нажатое слово из карточки становится новым запросом; язык ввода определится сам.
+  const pickText = (value: string) => {
+    translator.setSourceLang('auto');
+    translator.setText(value);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
     <>
       <PageHeader title={t('translate.title')} subtitle={t('translate.subtitle')} />
@@ -168,6 +176,8 @@ export default function TranslatePage() {
         />
       </div>
 
+      {/* Синонимы, выражения и примеры в карточке можно нажать — они сразу переводятся. */}
+      <PickContext.Provider value={pickText}>
       <WordPanel
         word={translator.word}
         dict={translator.dict}
@@ -176,6 +186,7 @@ export default function TranslatePage() {
         onRetry={translator.retryWord}
         onOpenLimit={() => setLimitOpen(true)}
       />
+      </PickContext.Provider>
 
       {explain.open ? (
         <ExplanationPanel

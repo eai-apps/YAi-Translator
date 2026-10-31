@@ -33,6 +33,8 @@ export interface RunJsonOptions<T> {
   validate: (raw: unknown) => T | null;
   /** Ограничить список провайдеров (например, только Workers AI). */
   only?: ProviderId[];
+  /** true — только личные ключи пользователя, без общих ключей сайта (выбор «Gemini» / «Groq» в списке). */
+  personalOnly?: boolean;
   /** Вызывается перед первой попыткой на общих ключах сайта (дневной лимит). */
   beforeShared?: () => Promise<void>;
 }
@@ -85,7 +87,10 @@ export async function runJsonTask<T>(options: RunJsonOptions<T>): Promise<{ data
   const disabled = await readDisabledProviders(options.env);
   const attempts = (await buildAttempts(options.env, options.userKeys)).filter(
     // Выключенный в админке ИИ не используется даже с ключом пользователя.
-    (attempt) => (!options.only || options.only.includes(attempt.id)) && !disabled.has(attempt.id),
+    (attempt) =>
+      (!options.only || options.only.includes(attempt.id)) &&
+      !disabled.has(attempt.id) &&
+      (!options.personalOnly || !attempt.shared),
   );
 
   for (const attempt of attempts) {
