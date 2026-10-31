@@ -1,6 +1,8 @@
-/** Админка: статистика, ключи сайта, настройки, пользователи, журнал, ресурсы. */
+/** Админка: статистика, ключи сайта, настройки, пользователи, журнал, ресурсы, грамматика. */
 import type {
   AdminAddKeyRequest,
+  AdminGrammarAction,
+  AdminGrammarResponse,
   AdminLogResponse,
   AdminOverview,
   AdminResourcesResponse,
@@ -74,5 +76,15 @@ export const adminMethods = {
       | { action: 'showInApps'; value: boolean },
   ): Promise<AdminResourcesResponse> {
     return request<AdminResourcesResponse>('/api/admin/resources', { method: 'POST', body: payload });
+  },
+
+  /** Справочник грамматики: все темы с текстом и статусом. */
+  adminGrammar(signal?: AbortSignal): Promise<AdminGrammarResponse> {
+    return request<AdminGrammarResponse>('/api/admin/grammar', { method: 'GET' }, signal);
+  },
+
+  /** Грамматика: добавить, изменить, перегенерировать ИИ или удалить тему. */
+  adminGrammarAction(payload: AdminGrammarAction): Promise<AdminGrammarResponse> {
+    return request<AdminGrammarResponse>('/api/admin/grammar', { method: 'POST', body: payload });
   },
 };

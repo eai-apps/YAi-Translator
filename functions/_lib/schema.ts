@@ -140,6 +140,24 @@ const STATEMENTS = [
     hidden INTEGER NOT NULL DEFAULT 0
   )`,
   'CREATE INDEX IF NOT EXISTS idx_resources_lang ON resources (lang, category, sort)',
+
+  // --- Этап 5: справочник грамматики (начальный список тем — migrations/0005_grammar.sql) ---
+  // body_json — текст правила на языке интерфейса; заполняется один раз (ИИ или админкой).
+  `CREATE TABLE IF NOT EXISTS grammar_topics (
+    slug TEXT PRIMARY KEY,
+    lang TEXT NOT NULL DEFAULT 'de',
+    level TEXT NOT NULL DEFAULT 'A1',
+    category TEXT NOT NULL DEFAULT 'syntax',
+    title_ru TEXT NOT NULL DEFAULT '',
+    title_de TEXT NOT NULL DEFAULT '',
+    title_en TEXT NOT NULL DEFAULT '',
+    body_json TEXT NOT NULL DEFAULT '',
+    source TEXT NOT NULL DEFAULT 'none',
+    source_url TEXT,
+    updated_at INTEGER,
+    edited_by TEXT
+  )`,
+  'CREATE INDEX IF NOT EXISTS idx_grammar_topics_lang ON grammar_topics (lang, category, level)',
 ];
 
 /**

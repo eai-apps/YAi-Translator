@@ -14,6 +14,42 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.6.0',
+    date: '2026-10-31',
+    items: {
+      ru: [
+        'Новый справочник грамматики: 69 тем немецкого — от артиклей и падежей до Konjunktiv II и Wechselpräpositionen.',
+        'Названия тем в разборе, в карточке слова и в ответах учителя стали ссылками: нажмите «Konjunktiv II» — и правило откроется в окне, не уводя со страницы.',
+        'Каждое правило готовится ИИ один раз и сохраняется в базе — следующим посетителям оно показывается сразу.',
+        'У каждого правила — примеры, типичные ошибки и ссылки на Wikibooks, Deutsche Welle, Goethe-Institut и DWDS.',
+        'Поиск по темам и фильтр по уровню A1–C1.',
+        'Новая страница «Спросить у AI»: учитель отвечает на ваш вопрос на вашем языке, с примерами и ссылками на правила.',
+        'Ответ на одинаковый вопрос не тратит лимит: он хранится 90 дней и общий для всех.',
+        'В админке — вкладка «Грамматика»: список тем, статус, правка текста, «Перегенерировать» и «Добавить тему».',
+      ],
+      de: [
+        'Neues Grammatik-Nachschlagewerk: 69 deutsche Themen — von Artikeln und Fällen bis Konjunktiv II und Wechselpräpositionen.',
+        'Themennamen in der Analyse, in der Wortkarte und in den Antworten des Lehrers sind Links: Tippe auf „Konjunktiv II“ – die Regel öffnet sich im Fenster, ohne die Seite zu verlassen.',
+        'Jede Regel wird einmal von der KI erstellt und in der Datenbank gespeichert — die nächsten Besucher sehen sie sofort.',
+        'Zu jeder Regel: Beispiele, typische Fehler und Links zu Wikibooks, Deutsche Welle, Goethe-Institut und DWDS.',
+        'Suche nach Themen und Filter nach Niveau A1–C1.',
+        'Neue Seite „KI fragen“: Der Lehrer antwortet in deiner Sprache, mit Beispielen und Links zu den Regeln.',
+        'Eine gleiche Frage kostet kein Limit mehr: Die Antwort liegt 90 Tage und gilt für alle.',
+        'Im Adminbereich der Reiter „Grammatik“: Themenliste, Status, Text bearbeiten, „Neu erstellen“ und „Thema hinzufügen“.',
+      ],
+      en: [
+        'New grammar reference: 69 German topics — from articles and cases to Konjunktiv II and two-way prepositions.',
+        'Topic names in the analysis, the word card and the teacher’s answers are links: tap “Konjunktiv II” and the rule opens in a window without leaving the page.',
+        'Every rule is written by the AI once and stored in the database — the next visitors see it instantly.',
+        'Each rule comes with examples, typical mistakes and links to Wikibooks, Deutsche Welle, Goethe-Institut and DWDS.',
+        'Search across topics and a level filter A1–C1.',
+        'New “Ask AI” page: a teacher answers your question in your language, with examples and links to the rules.',
+        'Asking the same question costs no limit: the answer is kept for 90 days and shared by everyone.',
+        'A “Grammar” tab in the admin area: topic list, status, text editing, “Regenerate” and “Add a topic”.',
+      ],
+    },
+  },
+  {
     version: '0.5.0',
     date: '2026-10-30',
     items: {

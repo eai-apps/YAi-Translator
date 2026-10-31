@@ -7,6 +7,8 @@ import { cn } from '../../lib/cn';
 import { partOfSpeechKey } from '../../lib/labels';
 import { Badge } from '../ui/Badge';
 import { SectionTitle } from '../ui/SectionTitle';
+import { GrammarLinkedInline } from '../grammar/GrammarLinkedText';
+import { GrammarTopicLinks } from '../grammar/GrammarTopicLinks';
 import { ChipList } from './ChipList';
 import { ExamplesList } from './ExamplesList';
 import { MeaningList } from './MeaningList';
@@ -56,14 +58,18 @@ export function WordCard({ card, speech, dictExamples = [], dictLang = null }: W
       {card.grammarNotes.length > 0 ? (
         <section className="mt-5">
           <SectionTitle>{t('word.grammarNotes')}</SectionTitle>
+          {/* Названия тем в пояснениях — ссылки на справочник грамматики (этап 5). */}
           <ul className="mt-2 space-y-1.5">
             {card.grammarNotes.map((note, index) => (
               <li key={index} className="flex gap-2 text-sm leading-relaxed">
                 <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-accent" aria-hidden="true" />
-                <span>{note}</span>
+                <span>
+                  <GrammarLinkedInline text={note} />
+                </span>
               </li>
             ))}
           </ul>
+          <GrammarTopicLinks topics={card.grammarTopics ?? []} />
         </section>
       ) : null}
 

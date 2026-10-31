@@ -53,7 +53,7 @@ async function callModel(model: string, input: GenerateInput, apiKey: string): P
 
 export const geminiProvider: AiProvider = {
   id: 'gemini',
-  tasks: ['translate', 'word', 'explain', 'check'],
+  tasks: ['translate', 'word', 'explain', 'check', 'grammar', 'ask'],
 
   async generate(input) {
     if (!input.apiKey) throw new Error('Gemini API key is missing');

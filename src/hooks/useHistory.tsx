@@ -6,7 +6,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 import type { LanguageCode, SourceLanguage } from '../../shared/types';
-import { HISTORY_LIMIT, HISTORY_STORAGE_LIMIT, STORAGE_KEYS } from '../config';
+import { HISTORY_LIMIT, HISTORY_STORAGE_LIMIT, STORAGE_KEYS, SYNC_MARKS } from '../config';
 import { readStorage, writeStorage } from '../lib/storage';
 import type { Tombstones } from '../lib/syncTombstones';
 import { useAccount } from './useAccount';
@@ -54,6 +54,22 @@ function isHistoryItem(value: HistoryItem): boolean {
   return typeof value?.text === 'string' && typeof value?.translation === 'string';
 }
 
+/** Запись с сервера: история перевода (в ней есть текст и перевод). */
+function parseHistoryItem(payload: string): HistoryItem | null {
+  try {
+    // Запись «Спросить у AI» проверяем по полю question — её в историю не кладём.
+    if (typeof (JSON.parse(payload) as { question?: unknown }).question === 'string') return null;
+  } catch {
+    return null;
+  }
+  try {
+    const value = JSON.parse(payload) as HistoryItem;
+    return isHistoryItem(value) && typeof value.id === 'string' ? value : null;
+  } catch {
+    return null;
+  }
+}
+
 export function HistoryProvider({ children }: { children: ReactNode }) {
   const { status } = useAccount();
   const signedIn = status === 'signedIn';
@@ -81,7 +97,7 @@ export function HistoryProvider({ children }: { children: ReactNode }) {
   // Ошибку сети не показываем: следующая минута повторит обмен сама.
   const onError = useCallback(() => undefined, []);
 
-  useHistorySync({ signedIn, items, onMerge, onError });
+  useHistorySync({ signedIn, items, marksKey: SYNC_MARKS.history, parse: parseHistoryItem, onMerge, onError });
 
   const addItem = useCallback<HistoryContextValue['addItem']>((item) => {
     const id = createId();

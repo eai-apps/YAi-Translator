@@ -5,14 +5,14 @@ import { APP_VERSION } from '../../config';
 import { useAccount } from '../../hooks/useAccount';
 import { cn } from '../../lib/cn';
 import { IconCompass, IconInfo, IconSparkles } from './icons';
-import { useNavItems } from './navItems';
+import { useSidebarItems } from './navItems';
 import { Logo } from './Logo';
 import { ThemeSwitch } from './ThemeSwitch';
 import { LanguageSwitch } from './LanguageSwitch';
 
 export function Sidebar() {
   const { t } = useTranslation();
-  const items = useNavItems();
+  const items = useSidebarItems();
   const { account } = useAccount();
 
   return (

@@ -1,7 +1,7 @@
 {
   "name": "yai-translator",
   "private": true,
-  "version": "0.5.0",
+  "version": "0.6.0",
   "type": "module",
   "description": "YAi Translator вЂ” РѕРЅР»Р°Р№РЅ-РїРµСЂРµРІРѕРґС‡РёРє, СЃР»РѕРІР°СЂСЊ Рё СѓС‡РµР±РЅРёРє РЅРµРјРµС†РєРѕРіРѕ",
   "scripts": {

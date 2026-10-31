@@ -4,6 +4,8 @@ import type { ExplainResponse } from '../../../shared/types';
 import type { TranslatorError } from '../../hooks/useTranslator';
 import { AsyncPanel } from '../ui/AsyncPanel';
 import { SectionTitle } from '../ui/SectionTitle';
+import { GrammarLinkedInline, GrammarLinkedText } from '../grammar/GrammarLinkedText';
+import { GrammarTopicLinks } from '../grammar/GrammarTopicLinks';
 
 interface ExplanationPanelProps {
   data: ExplainResponse | null;
@@ -16,11 +18,14 @@ interface ExplanationPanelProps {
 function Bullets({ items }: { items: string[] }) {
   if (items.length === 0) return null;
   return (
-    <ul className="mt-2 space-y-1.5 text-sm leading-relaxed">
+    <ul className="mt-2 space-y-1.5">
       {items.map((item, index) => (
-        <li key={index} className="flex gap-2">
-          <span className="mt-[2px] text-accent">•</span>
-          <span>{item}</span>
+        <li key={index} className="flex gap-2 text-sm leading-relaxed">
+          <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-accent" aria-hidden="true" />
+          <span>
+            {/* Названия тем внутри пункта — ссылки на справочник (этап 5). */}
+            <GrammarLinkedInline text={item} />
+          </span>
         </li>
       ))}
     </ul>
@@ -43,7 +48,11 @@ export function ExplanationPanel({ data, loading, error, onClose, onRetry }: Exp
         <div className="space-y-5">
           <section>
             <SectionTitle>{t('explain.summary')}</SectionTitle>
-            <p className="mt-2 text-sm leading-relaxed">{data.summary}</p>
+            <div className="mt-2">
+              <GrammarLinkedText items={[data.summary]} />
+            </div>
+            {/* Темы, которые назвал сам ИИ: точные ссылки, даже если слово не встретилось в тексте. */}
+            <GrammarTopicLinks topics={data.topics} />
           </section>
 
           {data.wordOrder.length > 0 ? (
@@ -60,8 +69,13 @@ export function ExplanationPanel({ data, loading, error, onClose, onRetry }: Exp
                 {data.conjunctions.map((item, index) => (
                   <li key={index} className="rounded-xl bg-soft px-3 py-2">
                     <p className="text-sm font-medium">
-                      {item.conjunction}
-                      {item.meaning ? <span className="font-normal text-muted"> — {item.meaning}</span> : null}
+                      <GrammarLinkedInline text={item.conjunction} />
+                      {item.meaning ? (
+                        <span className="font-normal text-muted">
+                          {' — '}
+                          <GrammarLinkedInline text={item.meaning} />
+                        </span>
+                      ) : null}
                     </p>
                     {item.alternatives.length > 0 ? (
                       <p className="mt-1 text-xs text-muted">
@@ -80,8 +94,12 @@ export function ExplanationPanel({ data, loading, error, onClose, onRetry }: Exp
               <ul className="mt-2 space-y-2">
                 {data.cases.map((item, index) => (
                   <li key={index} className="border-l-2 border-accent pl-3">
-                    <p className="text-sm font-medium">{item.grammaticalCase}</p>
-                    <p className="text-sm text-muted">{item.usage}</p>
+                    <p className="text-sm font-medium">
+                      <GrammarLinkedInline text={item.grammaticalCase} />
+                    </p>
+                    <div className="text-muted">
+                      <GrammarLinkedText items={[item.usage]} />
+                    </div>
                     {item.example ? <p className="mt-0.5 text-sm italic">{item.example}</p> : null}
                   </li>
                 ))}
@@ -95,8 +113,12 @@ export function ExplanationPanel({ data, loading, error, onClose, onRetry }: Exp
               <ul className="mt-2 space-y-2">
                 {data.tenses.map((item, index) => (
                   <li key={index} className="border-l-2 border-accent pl-3">
-                    <p className="text-sm font-medium">{item.tense}</p>
-                    <p className="text-sm text-muted">{item.usage}</p>
+                    <p className="text-sm font-medium">
+                      <GrammarLinkedInline text={item.tense} />
+                    </p>
+                    <div className="text-muted">
+                      <GrammarLinkedText items={[item.usage]} />
+                    </div>
                     {item.example ? <p className="mt-0.5 text-sm italic">{item.example}</p> : null}
                   </li>
                 ))}
@@ -114,7 +136,9 @@ export function ExplanationPanel({ data, loading, error, onClose, onRetry }: Exp
                       <p className="text-sm text-danger line-through">{item.wrong}</p>
                     ) : null}
                     <p className="text-sm font-medium text-success">{item.right}</p>
-                    <p className="mt-1 text-sm leading-relaxed text-muted">{item.explanation}</p>
+                    <div className="mt-1 text-muted">
+                      <GrammarLinkedText items={[item.explanation]} />
+                    </div>
                   </li>
                 ))}
               </ul>

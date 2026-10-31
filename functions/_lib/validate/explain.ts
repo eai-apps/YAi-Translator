@@ -1,5 +1,6 @@
 /** Проверка разбора фразы: порядок слов, союзы, падежи, времена, ошибки. */
 import type { ExplainResponse } from '../../../shared/types';
+import { isGermanGrammarSlug } from '../../../shared/grammarTopics';
 import { asArray, asStringList, asText, isRecord } from './helpers';
 
 export type ExplainCore = Omit<ExplainResponse, 'provider' | 'cached'>;
@@ -78,5 +79,13 @@ export function validateExplain(raw: unknown): ExplainCore | null {
     tenses,
     commonMistakes,
     vocabulary,
+    // Темы справочника: только известные slug, иначе ссылка вела бы в пустоту.
+    topics: [
+      ...new Set(
+        asArray(raw.topics, 8)
+          .map((item) => asText(item, 80))
+          .filter((item) => isGermanGrammarSlug(item)),
+      ),
+    ],
   };
 }

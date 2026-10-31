@@ -243,6 +243,25 @@ export function IconArrowDown(props: IconProps) {
   );
 }
 
+export function IconGrammar({ className }: IconProps) {
+  return (
+    <Svg className={className}>
+      <path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H19v16H5.5A1.5 1.5 0 0 1 4 18.5v-13z" />
+      <path d="M9 8v8M7 16l2 2 2-2" />
+      <path d="M14 9h3M14 12h3" />
+    </Svg>
+  );
+}
+
+export function IconAsk({ className }: IconProps) {
+  return (
+    <Svg className={className}>
+      <path d="M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H9l-5 3V6z" />
+      <path d="M12 7.2l.9 2.4 2.4.9-2.4.9-.9 2.4-.9-2.4-2.4-.9 2.4-.9.9-2.4z" />
+    </Svg>
+  );
+}
+
 export function IconLock(props: IconProps) {
   return (
     <Svg {...props}>

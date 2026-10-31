@@ -9,7 +9,7 @@ interface WorkersAiResponse {
 
 export const workersAiProvider: AiProvider = {
   id: 'workersai',
-  tasks: ['translate', 'word', 'explain', 'check'],
+  tasks: ['translate', 'word', 'explain', 'check', 'grammar', 'ask'],
 
   async generate(input: GenerateInput) {
     if (!input.env.AI) throw new Error('Workers AI binding is not configured');

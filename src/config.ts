@@ -5,7 +5,7 @@
 export const API_BASE = (import.meta.env.VITE_API_BASE ?? '').replace(/\/+$/, '');
 
 /** Версия показывается в профиле; совпадает с package.json. */
-export const APP_VERSION = '0.5.0';
+export const APP_VERSION = '0.6.0';
 
 export const STORAGE_KEYS = {
   theme: 'yai.theme',
@@ -31,7 +31,26 @@ export const STORAGE_KEYS = {
   bannerClosed: 'yai.bannerClosed',
   /** Язык на странице «Ресурсы», выбранный посетителем (иначе — язык перевода). */
   resourcesLang: 'yai.resourcesLang',
+  /** История «Спросить у AI»: вопросы и сохранённые ответы (этап 5). */
+  askHistory: 'yai.askHistory',
 } as const;
+
+/** Отметки отправленного для синхронизации: у истории переводов и у вопросов ИИ — свои. */
+export const SYNC_MARKS = {
+  history: `${STORAGE_KEYS.syncTombstones}.history`,
+  ask: `${STORAGE_KEYS.syncTombstones}.ask`,
+} as const;
+
+/** Длина вопроса в «Спросить у AI» (совпадает с ASK.maxQuestionLength на сервере). */
+export const ASK_MAX_QUESTION_LENGTH = 500;
+
+/** Примеры вопросов на странице «Спросить у AI»: показывают, что можно спросить. */
+export const ASK_EXAMPLE_QUESTIONS = [
+  'ask.example1',
+  'ask.example2',
+  'ask.example3',
+  'ask.example4',
+] as const;
 
 /** До какой длины текста блок «Как переводят другие» загружается сам. */
 export const OTHERS_AUTO_MAX_CHARS = 300;

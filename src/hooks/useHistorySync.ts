@@ -3,6 +3,10 @@
  * Вошёл — обмен при входе, раз в минуту и после каждого изменения истории:
  * своё отправляем в PUT /api/sync, чужое забираем через GET /api/sync?since=.
  * Побеждает запись с большим updated_at. Без входа ничего не делаем.
+ *
+ * Этап 5: тем же путём синхронизируется история «Спросить у AI» (useAskHistory).
+ * Чтобы наборы не смешивались, у каждого вида записей свои отметки отправленного,
+ * а чужие записи отсекает проверка parse.
  */
 import { useCallback, useEffect, useRef } from 'react';
 import type { SyncItem } from '../../shared/types';
@@ -11,48 +15,56 @@ import { STORAGE_KEYS, SYNC_INTERVAL_MS } from '../config';
 import { readStorage, writeStorage } from '../lib/storage';
 import { readTombstones, writeTombstones } from '../lib/syncTombstones';
 import type { Tombstones } from '../lib/syncTombstones';
-import type { HistoryItem } from './useHistory';
 
-/** Отметки изменений записей (id → время): одно и то же на сервер не отправляем. */
-type Marks = Record<string, number>;
+/** Отметки отправленного (id → время): одно и то же на сервер не отправляем. */
+export type SyncMarks = Record<string, number>;
 
-interface MergePayload {
-  items: HistoryItem[] | null;
+/** Любая запись истории: id и время изменения. */
+export interface SyncableItem {
+  id: string;
+  createdAt: number;
+}
+
+export interface MergePayload<T> {
+  items: T[] | null;
   tombstones: Tombstones;
   since: number;
 }
 
-interface SyncOptions {
+export interface SyncOptions<T extends SyncableItem> {
   signedIn: boolean;
-  items: HistoryItem[];
-  onMerge: (payload: MergePayload) => void;
+  items: T[];
+  /** Ключ набора в localStorage: «yai.syncMarks.history» и «yai.syncMarks.ask». */
+  marksKey: string;
+  /** Проверяет, что запись из базы этого вида (например, у вопроса есть question). */
+  parse: (payload: string) => T | null;
+  onMerge: (payload: MergePayload<T>) => void;
   onError: () => void;
 }
 
-/** Запись могла прийти битой от другого клиента — такие пропускаем. */
-function parseItem(payload: string): HistoryItem | null {
-  try {
-    const value = JSON.parse(payload) as HistoryItem;
-    if (!value || typeof value.id !== 'string' || typeof value.text !== 'string') return null;
-    if (typeof value.translation !== 'string') return null;
-    return value;
-  } catch {
-    return null;
-  }
+function readMarks(key: string): SyncMarks {
+  return readStorage<SyncMarks>(key, {});
 }
 
-export function useHistorySync({ signedIn, items, onMerge, onError }: SyncOptions) {
-  const marks = useRef<Marks>({});
-  // Свежие колбэки и история для запросов, но без пересоздания функций синхронизации.
-  const latest = useRef({ onMerge, onError, items });
-  latest.current = { onMerge, onError, items };
+export function useHistorySync<T extends SyncableItem>({
+  signedIn,
+  items,
+  marksKey,
+  parse,
+  onMerge,
+  onError,
+}: SyncOptions<T>) {
+  const marks = useRef<SyncMarks>(readMarks(marksKey));
+  // Свежие данные для запросов, без пересоздания функций синхронизации.
+  const latest = useRef({ onMerge, onError, items, parse });
+  latest.current = { onMerge, onError, items, parse };
   const running = useRef(false);
 
   /** Отправляет на сервер только изменившееся с прошлого удачного обмена. */
   const push = useCallback(async (): Promise<void> => {
     const tombstones = readTombstones();
     const out: SyncItem[] = [];
-    const sent: Marks = {};
+    const sent: SyncMarks = {};
 
     for (const item of latest.current.items) {
       if (tombstones[item.id]) continue; // эта запись здесь удалена
@@ -77,49 +89,53 @@ export function useHistorySync({ signedIn, items, onMerge, onError }: SyncOption
     }
 
     marks.current = { ...marks.current, ...sent, ...sentDeletes };
+    writeStorage(marksKey, marks.current);
 
     // Список удалений нужен только до подтверждения сервером.
     const left = { ...tombstones };
     for (const id of Object.keys(sentDeletes)) delete left[id];
     writeTombstones(left);
-  }, []);
+  }, [marksKey]);
 
   /** Забирает чужие изменения и отдаёт список записей, которые нужно показать. */
-  const pull = useCallback(async (since: number): Promise<MergePayload> => {
-    const startedAt = Date.now();
-    const response = await api.syncPull(since);
-    const itemsById = new Map(latest.current.items.map((item) => [item.id, item] as const));
-    const tombstones = readTombstones();
-    let deleted = false;
-    let changed = false;
+  const pull = useCallback(
+    async (since: number): Promise<MergePayload<T>> => {
+      const startedAt = Date.now();
+      const response = await api.syncPull(since);
+      const itemsById = new Map(latest.current.items.map((item) => [item.id, item] as const));
+      const tombstones = readTombstones();
+      let deleted = false;
+      let changed = false;
 
-    for (const remote of response.items) {
-      if (remote.deleted) {
-        if (itemsById.has(remote.id) && !tombstones[remote.id]) {
-          tombstones[remote.id] = remote.updatedAt;
-          deleted = true;
+      for (const remote of response.items) {
+        // Запись другого вида (вопрос ИИ для истории переводов) не трогаем.
+        const parsed = remote.deleted ? null : latest.current.parse(remote.payload);
+        if (remote.deleted) {
+          if (itemsById.has(remote.id) && !tombstones[remote.id]) {
+            tombstones[remote.id] = remote.updatedAt;
+            deleted = true;
+          }
+          continue;
         }
-        continue;
-      }
-      // Здесь запись удалена — не воскрешаем её.
-      if (tombstones[remote.id]) continue;
-      const local = itemsById.get(remote.id);
-      if (local && local.createdAt >= remote.updatedAt) continue;
-      const parsed = parseItem(remote.payload);
-      if (parsed) {
+        if (!parsed) continue;
+        // Здесь запись удалена — не воскрешаем её.
+        if (tombstones[remote.id]) continue;
+        const local = itemsById.get(remote.id);
+        if (local && local.createdAt >= remote.updatedAt) continue;
         itemsById.set(parsed.id, parsed);
         changed = true;
       }
-    }
 
-    if (deleted) writeTombstones(tombstones);
+      if (deleted) writeTombstones(tombstones);
 
-    return {
-      items: changed ? Array.from(itemsById.values()) : null,
-      tombstones,
-      since: startedAt,
-    };
-  }, []);
+      return {
+        items: changed ? Array.from(itemsById.values()) : null,
+        tombstones,
+        since: startedAt,
+      };
+    },
+    [],
+  );
 
   const sync = useCallback(async () => {
     if (!signedIn || running.current) return;
@@ -140,14 +156,20 @@ export function useHistorySync({ signedIn, items, onMerge, onError }: SyncOption
     }
   }, [pull, push, signedIn]);
 
-  // После выхода отметки не нужны — новый вход начинает с чистого листа.
+  // После выхода отправленное забываем: новый вход начинает с чистого листа.
   useEffect(() => {
-    if (!signedIn) marks.current = {};
-  }, [signedIn]);
+    if (!signedIn) {
+      marks.current = {};
+      writeStorage(marksKey, {});
+    }
+  }, [signedIn, marksKey]);
 
   // Обмен при входе, раз в минуту и после каждого изменения истории.
   const signature = items
-    .map((item) => `${item.id}:${item.createdAt}:${item.favorite ? 1 : 0}`)
+    .map((item) => {
+      const favorite = (item as { favorite?: boolean }).favorite ? 1 : 0;
+      return `${item.id}:${item.createdAt}:${favorite}`;
+    })
     .join(',');
   useEffect(() => {
     if (!signedIn) return;

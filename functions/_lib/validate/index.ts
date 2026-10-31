@@ -7,3 +7,6 @@ export { validateExplain } from './explain';
 export type { ExplainCore } from './explain';
 export { validateCheck } from './check';
 export type { CheckCore } from './check';
+export { validateGrammar } from './grammar';
+export { validateAsk } from './ask';
+export type { AskCore } from './ask';

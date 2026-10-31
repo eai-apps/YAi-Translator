@@ -5,6 +5,7 @@ import type {
   WordExample,
 } from '../../../shared/types';
 import { isLanguageCode } from '../../../shared/languages';
+import { isGermanGrammarSlug } from '../../../shared/grammarTopics';
 import { asArray, asEnum, asStringList, asText, CASES, isRecord, LEVELS, POS } from './helpers';
 
 export type WordCore = WordCard;
@@ -104,5 +105,13 @@ export function validateWordCard(raw: unknown): WordCore | null {
     grammarNotes: asArray(source.grammarNotes, 6)
       .map((item) => asText(item, 400))
       .filter((item) => item.length > 0),
+    // Темы справочника для пояснений «Что важно знать» (этап 5).
+    grammarTopics: [
+      ...new Set(
+        asArray(source.grammarTopics, 8)
+          .map((item) => asText(item, 80))
+          .filter((item) => isGermanGrammarSlug(item)),
+      ),
+    ],
   };
 }

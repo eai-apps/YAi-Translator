@@ -98,6 +98,18 @@
   }
 }
 
+/* Параграфы с кликабельными терминами грамматики (этап 5): отступы и переносы внутри. */
+@layer components {
+  .linked-text p + p {
+    margin-top: 0.375rem;
+  }
+
+  .linked-text p {
+    font-size: 0.875rem;
+    line-height: 1.55;
+  }
+}
+
 /* Уважаем системную настройку «меньше движения». */
 @media (prefers-reduced-motion: reduce) {
   *,

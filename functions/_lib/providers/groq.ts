@@ -51,7 +51,7 @@ async function callModel(
 
 export const groqProvider: AiProvider = {
   id: 'groq',
-  tasks: ['translate', 'word', 'explain', 'check'],
+  tasks: ['translate', 'word', 'explain', 'check', 'grammar', 'ask'],
 
   async generate(input) {
     if (!input.apiKey) throw new Error('Groq API key is missing');

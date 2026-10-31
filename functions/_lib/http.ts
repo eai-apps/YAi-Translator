@@ -126,6 +126,11 @@ const ERROR_MESSAGES: Record<ApiErrorCode, Record<UiLanguage, string>> = {
     de: 'Dieses Konto wurde vom Administrator gesperrt.',
     en: 'This account has been blocked by the administrator.',
   },
+  GRAMMAR_NOT_READY: {
+    ru: 'Текст правила ещё готовится. Нажмите «Повторить позже» через минуту.',
+    de: 'Die Erklärung wird noch vorbereitet. Versuchen Sie es in einer Minute noch einmal.',
+    en: 'The explanation is still being prepared. Try again in a minute.',
+  },
 };
 
 export function messageForError(code: ApiErrorCode, uiLang: UiLanguage): string {

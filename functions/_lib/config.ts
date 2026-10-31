@@ -7,7 +7,7 @@ export { LANGUAGES, LANGUAGE_CODES, getLanguage, isLanguageCode, isUiLanguage } 
 
 import { CLASSIC_PROVIDERS } from '../../shared/types';
 
-export const APP_VERSION = '0.5.0';
+export const APP_VERSION = '0.6.0';
 
 export const LIMITS = {
   /** Максимальная длина текста для перевода и разбора. */
@@ -27,7 +27,7 @@ export const LIMITS = {
 } as const;
 
 /** Версия промптов: меняется вместе с prompts.ts и автоматически сбрасывает кэш. */
-export const PROMPT_VERSION = '2';
+export const PROMPT_VERSION = '3';
 
 /** Аккаунт, сессии и синхронизация избранного (этап 2). */
 export const AUTH = {
@@ -210,6 +210,31 @@ export const RESOURCES = {
   cacheKey: 'resources|list',
   /** Переключатель «Показывать в приложениях из магазинов» тоже живёт в settings. */
   showInAppsSetting: 'resources_show_in_apps',
+} as const;
+
+/** Справочник грамматики и «Спросить у AI» (версия 0.6.0). */
+export const GRAMMAR = {
+  /** Язык справочника: сначала немецкий, позже остальные. */
+  lang: 'de',
+  /** Сколько тем отдавать в списке. */
+  maxTopics: 400,
+  /** Сколько символов текста темы храним в body_json. */
+  maxBodyChars: 20_000,
+  /** Сколько связанных тем принимаем от ИИ (списки проверяются по известным slug). */
+  maxRelated: 6,
+} as const;
+
+/** «Спросить у AI» — учитель в чате. */
+export const ASK = {
+  /** Длина вопроса. */
+  maxQuestionLength: 500,
+  /**
+   * Ответ на одинаковый вопрос живёт в кэше 90 дней: каждый вопрос стоит ИИ
+   * один раз на всех — ровно как карточка слова.
+   */
+  cacheTtlSeconds: 60 * 60 * 24 * 90,
+  /** Сколько вопросов помнит история у пользователя (localStorage и аккаунт). */
+  historyLimit: 200,
 } as const;
 
 /** Адрес DeepL для конкретного ключа: path — 'translate' или 'usage'. */

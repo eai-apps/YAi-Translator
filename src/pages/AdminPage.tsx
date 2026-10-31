@@ -1,5 +1,5 @@
 /**
- * Страница /admin (ленивая загрузка): «Обзор», «Ключи сайта», «Настройки», «Пользователи».
+ * Страница /admin (ленивая загрузка): «Обзор», «Ключи сайта», «Ресурсы», «Грамматика», «Настройки», «Пользователи».
  * Открывается только администратору — сервер всё равно проверяет права на каждом запросе.
  */
 import { useCallback, useEffect, useState } from 'react';
@@ -19,9 +19,10 @@ import { AdminKeysTab } from '../components/admin/AdminKeysTab';
 import { AdminSettingsTab } from '../components/admin/AdminSettingsTab';
 import { AdminUsersTab } from '../components/admin/AdminUsersTab';
 import { AdminResourcesTab } from '../components/admin/AdminResourcesTab';
+import { AdminGrammarTab } from '../components/admin/AdminGrammarTab';
 import { AdminLog } from '../components/admin/AdminLog';
 
-type Tab = 'overview' | 'keys' | 'resources' | 'settings' | 'users';
+type Tab = 'overview' | 'keys' | 'resources' | 'grammar' | 'settings' | 'users';
 
 export default function AdminPage() {
   const { t } = useTranslation();
@@ -101,6 +102,7 @@ export default function AdminPage() {
           { value: 'overview', label: t('admin.tabOverview') },
           { value: 'keys', label: t('admin.tabKeys') },
           { value: 'resources', label: t('admin.tabResources') },
+          { value: 'grammar', label: t('admin.tabGrammar') },
           { value: 'settings', label: t('admin.tabSettings') },
           { value: 'users', label: t('admin.tabUsers') },
         ]}
@@ -129,6 +131,8 @@ export default function AdminPage() {
 
         {tab === 'resources' ? <AdminResourcesTab onError={setError} /> : null}
 
+        {tab === 'grammar' ? <AdminGrammarTab onError={setError} /> : null}
+
         {tab === 'settings' ? (
           <AdminSettingsTab
             onError={setError}
@@ -143,7 +147,7 @@ export default function AdminPage() {
         {tab === 'users' ? <AdminUsersTab onError={setError} /> : null}
       </div>
 
-      {tab === 'settings' || tab === 'users' || tab === 'resources' ? (
+      {tab === 'settings' || tab === 'users' || tab === 'resources' || tab === 'grammar' ? (
         <div className="mt-3">
           <AdminLog refreshKey={logKey + (tab === 'users' ? 1 : 0)} />
         </div>

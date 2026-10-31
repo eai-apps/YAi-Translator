@@ -30,6 +30,8 @@ export function errorMessageKey(code: ClientErrorCode): string {
       return 'errors.server';
     case 'WORD_NOT_FOUND':
       return 'dict.notFound';
+    case 'GRAMMAR_NOT_READY':
+      return 'grammar.notReady';
     case 'FORBIDDEN':
       return 'errors.forbidden';
     case 'ACCOUNT_BLOCKED':
