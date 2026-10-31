@@ -61,6 +61,8 @@ export interface AdminOverview {
   daily: Array<{ day: string; translations: number; visitors: number }>;
   /** Расход платных токенов нейросетей сайта (этап 7). */
   paidTokens?: { today: number; month: number; dailyLimit: number; monthlyLimit: number };
+  /** Готовые прогретые карточки слов (этап 11). */
+  warmedCards?: { ready: number; total: number };
 }
 
 export interface AdminSettings {

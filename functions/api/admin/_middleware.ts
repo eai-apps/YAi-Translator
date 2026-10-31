@@ -8,6 +8,11 @@ import { errorResponse, getUiLanguage } from '../../_lib/http';
 
 export const onRequest: PagesFunction<Env> = async (context) => {
   const uiLang = getUiLanguage(context.request);
+  const url = new URL(context.request.url);
+  // Эндпоинт прогрева /api/admin/warm вызывается cron-задачей с WARM_TOKEN
+  if (url.pathname === '/api/admin/warm') {
+    return await context.next();
+  }
   try {
     await requireAdmin(context.env, context.request);
     return await context.next();

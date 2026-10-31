@@ -30,6 +30,8 @@ export interface Env {
   ADMIN_LOGINS?: string;
   /** PONS API (этап 4): необязательный, 1000 запросов в месяц бесплатно. */
   PONS_API_KEY?: string;
+  /** Секрет для вызова прогрева карточек /api/admin/warm (этап 11). */
+  WARM_TOKEN?: string;
 }
 
 /** Минимальный тип binding'а Workers AI, чтобы не зависеть от версии workers-types. */

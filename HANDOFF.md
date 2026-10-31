@@ -117,6 +117,21 @@
 
 ## Журнал работ (новые записи — сверху)
 
+### 2026-11-01 00:40 — Claude — 0.13.0 (проверка этапа 11 от Antigravity / Gemini 3.8 Flash)
+- Antigravity сделал этап 11: база `public/lex/de/` (≈122 000 записей, 6 МБ, 361 файл), `scripts/build-lexicon.mjs` +
+  `scripts/lexicon/*`, `src/hooks/useLexicon.ts`, `src/components/word/InstantWordCard.tsx` (в `WordPanel`,
+  `DictionarySearchPanel`), прогрев `functions/api/admin/warm.ts` (WARM_TOKEN или админ; в `api/admin/_middleware.ts`
+  путь `/api/admin/warm` пропускается — проверка внутри), `functions/_lib/dict/merge.ts`, `shared/warmWords.ts`,
+  `.github/workflows/warm-cards.yml` (ночью), счётчик «Готовых карточек» в админке, кэш `/lex/` в `vite.config.ts`.
+- Внимание: пока Antigravity работал, Claude записал в папку 0.12.1/0.12.2 и затёр его надписи, версию и запись журнала.
+  Восстановлено: ключи `word.instantBadge`, `word.preparingDetails`, `admin.overview.warmedCards`, `about.license*`
+  (заодно отсутствовавшие `licenseWiktionary/OpenThesaurus/Tatoeba/Pons/Dwds`). **Правило: не писать в папку на ПК,
+  пока там работает помощник.**
+- Исправил свайп по переводу (`useSwipe.ts`): касания на кнопках/словах-кнопках игнорировались, а весь перевод — из них.
+- Нужно для ночного прогрева: секрет `WARM_TOKEN` в Cloudflare (Settings → Variables and Secrets) и тот же в GitHub
+  (Settings → Secrets and variables → Actions). Без него прогрев можно запускать из админки (вошедший админ).
+- Задание `tasks/STAGE12.md` переписано по скриншотам владельца (выбор языка, шрифты, все разделы, свайп).
+
 ### 2026-11-01 00:05 — Claude — задание этапа 12
 - Владелец: APK 0.12.1 выглядит как «браузер в рамке» (экраны грузятся с сайта через `server.url`) — переделать в
   полноценное приложение: экраны внутри APK + обновление по воздуху (`@capgo/capacitor-updater`, без облака),

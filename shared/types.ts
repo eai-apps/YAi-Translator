@@ -21,6 +21,7 @@ export * from './dict';
 export * from './grammar';
 export * from './study';
 export * from './suggest';
+export * from './lexicon';
 
 import type { LanguageCode, UiLanguage } from './languages';
 

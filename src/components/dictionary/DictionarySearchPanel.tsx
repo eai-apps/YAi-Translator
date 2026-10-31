@@ -17,6 +17,8 @@ import { EmptyState } from '../ui/EmptyState';
 import { IconAlert, IconBook, IconSearch, IconSwap } from '../layout/icons';
 import { DictPanel } from '../word/DictPanel';
 import { WordCard } from '../word/WordCard';
+import { InstantWordCard } from '../word/InstantWordCard';
+import { useLexicon } from '../../hooks/useLexicon';
 import { PickContext } from '../word/pick';
 import { WordChatPanel } from './WordChatPanel';
 
@@ -61,6 +63,8 @@ export function DictionarySearchPanel({
 }: DictionarySearchPanelProps) {
   const { t } = useTranslation();
   const groups = useMemo(() => groupedLanguages(), []);
+  const isGerman = sourceLang === 'de' || (sourceLang === 'auto' && /^[a-zäöüß\s]+$/i.test(query.trim()));
+  const { match: lexMatch } = useLexicon(query.trim(), isGerman && !card);
 
   return (
     <PickContext.Provider value={onPickWord ?? null}>
@@ -186,10 +190,23 @@ export function DictionarySearchPanel({
         </>
       ) : null}
 
-      {/* ИИ не ответил — карточка из настоящих словарей. */}
-      {!card && (dict.loading || dict.data) ? <DictPanel dict={dict} speech={speech} /> : null}
+      {/* Мгновенная карточка из базы лексикона (пока ИИ думает или если ИИ недоступен) */}
+      {!card && lexMatch ? (
+        <Card className="mt-3 p-4 sm:p-5">
+          <InstantWordCard
+            match={lexMatch}
+            speech={speech}
+            isPreparingAi={loading}
+            dictEntry={dict.data?.entry ?? null}
+            onPickTranslation={(val) => onPickWord?.(val)}
+          />
+        </Card>
+      ) : null}
 
-      {!card && !error && !loading && !dict.data ? (
+      {/* ИИ не ответил и слова нет в лексиконе — карточка из настоящих словарей */}
+      {!card && !lexMatch && (dict.loading || dict.data) ? <DictPanel dict={dict} speech={speech} /> : null}
+
+      {!card && !error && !loading && !dict.data && !lexMatch ? (
         <Card className="mt-3">
           <EmptyState
             icon={<IconBook className="h-6 w-6" />}

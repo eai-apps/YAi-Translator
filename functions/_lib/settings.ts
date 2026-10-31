@@ -30,6 +30,8 @@ export const SETTINGS_KEYS = {
   paidMonthlyTokenLimit: 'paid_monthly_token_limit',
   /** Модель нейросети по умолчанию для всего сайта («connId|model»). */
   paidDefaultModel: 'paid_default_model',
+  /** Номер строки прогрева карточек популярных слов (этап 11). */
+  warmCardsCursor: 'warm_cards_cursor',
 } as const;
 
 /** Простая проверка адреса: без @ или пробелов ничего не сохраняем. */

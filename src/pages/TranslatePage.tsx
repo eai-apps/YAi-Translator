@@ -261,6 +261,7 @@ export default function TranslatePage() {
         <WordPanel
           word={translator.word}
           dict={translator.dict}
+          queryWord={translator.text}
           sourceLang={wordLanguage}
           speech={speech}
           onRetry={translator.retryWord}

@@ -65,6 +65,18 @@ export async function buildOverview(env: Env): Promise<AdminOverview> {
     readSetting<number>(env, SETTINGS_KEYS.paidMonthlyTokenLimit),
   ]);
 
+  let warmedCards = { ready: 0, total: 3000 };
+  if (env.DB) {
+    try {
+      const row = await env.DB.prepare(
+        "SELECT count(*) as cnt FROM cache WHERE kind = 'word' AND expires_at > ?"
+      ).bind(now).first<{ cnt: number }>();
+      warmedCards = { ready: row?.cnt ?? 0, total: 3000 };
+    } catch {
+      // Игнорируем ошибку при отсутствии таблицы
+    }
+  }
+
   return {
     users: { total, today: todayUsers, week: weekUsers, month: monthUsers, activeWeek },
     visitors: { today: visitorsTodayUnique, week: visitorsWeek, month: visitorsMonth },
@@ -84,5 +96,6 @@ export async function buildOverview(env: Env): Promise<AdminOverview> {
       dailyLimit: dailyLimitSetting ?? 50_000,
       monthlyLimit: monthlyLimitSetting ?? 1_000_000,
     },
+    warmedCards,
   };
 }

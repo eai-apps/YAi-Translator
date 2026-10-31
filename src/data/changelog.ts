@@ -14,6 +14,15 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.13.0',
+    date: '2026-11-01',
+    items: {
+      ru: ['Карточка немецкого слова открывается мгновенно: артикль, мн. число, формы глагола и транскрипция — из своей базы (≈120 000 слов), пока ИИ готовит подробный разбор.', 'Самые частые слова (3000) готовятся заранее — их полная карточка открывается сразу.', 'Свайп по переводу снова листает историю (раньше мешали слова-кнопки).'],
+      de: ['Die Wortkarte öffnet sich sofort: Artikel, Plural, Verbformen und Aussprache aus der eigenen Datenbank (≈120 000 Wörter), während die KI die ausführliche Analyse vorbereitet.', 'Die 3000 häufigsten Wörter werden vorab vorbereitet — ihre volle Karte öffnet sich sofort.', 'Wischen über die Übersetzung blättert wieder durch den Verlauf.'],
+      en: ['German word cards open instantly: article, plural, verb forms and pronunciation from our own database (≈120,000 words) while AI prepares the full breakdown.', 'The 3,000 most frequent words are prepared in advance — their full card opens right away.', 'Swiping the translation browses history again.'],
+    },
+  },
+  {
     version: '0.12.2',
     date: '2026-10-31',
     items: {

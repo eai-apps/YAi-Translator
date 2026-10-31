@@ -59,6 +59,14 @@ export function AdminOverviewTab({ data }: { data: AdminOverview }) {
             <Stat label={t('admin.overview.studyReviews')} value={data.study.reviewsToday} />
             <Stat label={t('admin.overview.studyExercises')} value={data.study.exercisesToday} />
           </div>
+          {data.warmedCards ? (
+            <div className="mt-3">
+              <Stat
+                label={t('admin.overview.warmedCards')}
+                value={`${data.warmedCards.ready} / ${data.warmedCards.total}`}
+              />
+            </div>
+          ) : null}
           {data.paidTokens ? (
             <>
               <p className="mt-3 text-xs font-medium text-muted">{t('admin.overview.paidTokensTitle')}</p>

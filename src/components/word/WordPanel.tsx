@@ -1,37 +1,36 @@
 /**
  * Карточка слова на экране «Перевод».
- * Если ответил ИИ — карточка с вкладками (этап 8), к примерам добавлены настоящие предложения
- * из Tatoeba. Если ИИ недоступен — карточка только из словарей.
+ * Если ответил ИИ — карточка с вкладками (этап 8).
+ * Пока ИИ думает — мгновенный заголовок и формы из базы лексикона (этап 11).
+ * Если ИИ недоступен — полноценная карточка из базы и словарей.
  */
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { LanguageCode, WordCard } from '../../../shared/types';
 import type { DictState, WordState } from '../../hooks/useTranslator';
 import type { SpeechController } from '../../hooks/useSpeech';
+import { useLexicon } from '../../hooks/useLexicon';
 import { errorMessageKey } from '../../lib/errors';
 import { Button } from '../ui/Button';
 import { Card } from '../ui/Card';
 import { Spinner } from '../ui/Spinner';
 import { DictCard } from './DictCard';
+import { InstantWordCard } from './InstantWordCard';
 import { WordCard as AiWordCard } from './WordCard';
 
 interface WordPanelProps {
   word: WordState;
   dict: DictState;
-  /** Язык исходного слова — нужен карточке словарей. */
+  queryWord?: string;
   sourceLang: LanguageCode | null;
   speech: SpeechController;
   onRetry: () => void;
   onOpenLimit: () => void;
-  /** Язык переводов карточки (цель перевода) — для чипсов значений. */
   translationLang?: LanguageCode;
-  /** Нажатие на перевод значения: перевести обратно. */
   onPickTranslation?: (translation: string, lang: LanguageCode) => void;
-  /** «⋯» в заголовке карточки. */
   headerMenu?: ReactNode;
 }
 
-/** Скелет карточки на время загрузки: заголовок и несколько строк-заглушек. */
 function CardSkeleton({ label }: { label: string }) {
   return (
     <div className="space-y-3" aria-busy="true">
@@ -42,7 +41,6 @@ function CardSkeleton({ label }: { label: string }) {
       <div className="h-6 w-40 animate-pulse rounded-lg bg-soft" />
       <div className="h-4 w-3/4 animate-pulse rounded-lg bg-soft" />
       <div className="h-4 w-2/3 animate-pulse rounded-lg bg-soft" />
-      <div className="h-4 w-1/2 animate-pulse rounded-lg bg-soft" />
     </div>
   );
 }
@@ -50,6 +48,7 @@ function CardSkeleton({ label }: { label: string }) {
 export function WordPanel({
   word,
   dict,
+  queryWord,
   sourceLang,
   speech,
   onRetry,
@@ -63,12 +62,18 @@ export function WordPanel({
   const dictEntry = dict.data?.entry ?? null;
   const aiCard: WordCard | null = word.data?.card ?? null;
 
-  // Ничего нет и ничего не грузится — карточки на экране нет.
-  if (!word.loading && !word.data && !dict.loading && !dict.data && !word.error) return null;
+  const targetWord = (queryWord || dictEntry?.word || '').trim();
+  const isGerman = sourceLang === 'de' || (!sourceLang && /^[a-zäöüß\s]+$/i.test(targetWord));
+  const { match: lexMatch } = useLexicon(targetWord, isGerman && !aiCard);
 
+  // Ничего нет и ничего не грузится — карточки на экране нет
+  if (!word.loading && !word.data && !dict.loading && !dict.data && !word.error && !lexMatch) {
+    return null;
+  }
+
+  // 1. Полная карточка ИИ
   if (aiCard) {
-    // Карточка ИИ: все примеры ИИ + настоящие предложения из Tatoeba.
-    const life = dictEntry?.examples.filter((example) => example.source === 'tatoeba') ?? [];
+    const life = dictEntry?.examples.filter((e) => e.source === 'tatoeba') ?? [];
     return (
       <Card className="mt-4 p-4 sm:p-5">
         <AiWordCard
@@ -84,6 +89,38 @@ export function WordPanel({
     );
   }
 
+  // 2. Мгновенная карточка из базы лексикона (пока ИИ думает или если ИИ недоступен)
+  if (lexMatch) {
+    return (
+      <Card className="mt-4 p-4 sm:p-5">
+        <InstantWordCard
+          match={lexMatch}
+          speech={speech}
+          isPreparingAi={word.loading}
+          dictEntry={dictEntry}
+          onPickTranslation={onPickTranslation}
+        />
+        {word.error ? (
+          <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-line pt-3">
+            {word.error.code === 'LIMIT_REACHED' ? (
+              <>
+                <p className="text-xs leading-relaxed text-muted">{t('word.needAi')}</p>
+                <Button size="sm" variant="primary" onClick={onOpenLimit}>
+                  {t('limit.title')}
+                </Button>
+              </>
+            ) : (
+              <Button size="sm" variant="ghost" onClick={onRetry}>
+                {t('common.retry')}
+              </Button>
+            )}
+          </div>
+        ) : null}
+      </Card>
+    );
+  }
+
+  // 3. Карточка только из словарей (если слова нет в базе лексикона)
   if (hasDict && dictEntry) {
     return (
       <Card className="mt-4 p-4 sm:p-5">
@@ -108,7 +145,7 @@ export function WordPanel({
     );
   }
 
-  // ИИ ещё думает (или недоступен) — показываем, что готовим карточку, без пустого места.
+  // 4. Ожидание ответа
   if (word.loading || dict.loading) {
     return (
       <Card className="mt-4 p-4 sm:p-5">
@@ -119,7 +156,7 @@ export function WordPanel({
 
   if (!word.error) return null;
 
-  // ИИ не ответил и словари не помогли: понятное объяснение и кнопки.
+  // 5. Ошибка
   return (
     <Card className="mt-4 p-4 sm:p-5">
       <div className="flex flex-col items-start gap-2">

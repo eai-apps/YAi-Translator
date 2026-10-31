@@ -269,7 +269,9 @@
     "formHintImperativ": "Просьба и команда: du, ihr, Sie.",
     "tabAll": "Всё",
     "filterParaphrase": "Как ещё сказать",
-    "paraphrasesTitle": "Как ещё сказать"
+    "paraphrasesTitle": "Как ещё сказать",
+    "instantBadge": "мгновенно",
+    "preparingDetails": "Подробный разбор от ИИ готовится…"
   },
   "explain": {
     "title": "Разбор",
@@ -569,7 +571,15 @@
     "whatsNewDialogTitle": "Что нового в версии {{version}}",
     "openHistory": "Вся история версий",
     "sourcesTitle": "Словари и источники",
-    "sourcesText": "Карточка слова использует открытые словари. Спасибо их авторам:"
+    "sourcesText": "Карточка слова использует открытые словари. Спасибо их авторам:",
+    "licenseGermanNouns": "german-nouns (Викисловарь) — CC BY-SA 4.0: род, падежи и мн. число существительных",
+    "licenseKaikki": "kaikki.org (wiktextract, Викисловарь) — CC BY-SA 4.0: формы глаголов, степени сравнения, транскрипция",
+    "licenseFrequencyWords": "FrequencyWords (Hermit Dave) — MIT: частотность слов",
+    "licenseWiktionary": "Викисловарь — CC BY-SA: значения, формы, примеры",
+    "licenseOpenThesaurus": "OpenThesaurus — LGPL / CC BY-SA: синонимы",
+    "licenseTatoeba": "Tatoeba — CC BY 2.0 FR: примеры предложений с переводом",
+    "licensePons": "PONS — по ключу API, только для поиска",
+    "licenseDwds": "DWDS — данные о словах (Berlin-Brandenburgische Akademie)"
   },
   "admin": {
     "title": "Админка",
@@ -612,7 +622,8 @@
       "studyExercises": "Сделано упражнений",
       "paidTokensTitle": "Платные токены ИИ",
       "paidTokensToday": "Токены сегодня",
-      "paidTokensMonth": "Токены за месяц"
+      "paidTokensMonth": "Токены за месяц",
+      "warmedCards": "Готовых карточек (прогрев)"
     },
     "keys": {
       "title": "Ключи сайта",

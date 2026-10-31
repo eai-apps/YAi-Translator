@@ -1,0 +1,26 @@
+name: Warm Word Cards
+
+on:
+  schedule:
+    # Раз в сутки ночью (03:00 UTC)
+    - cron: '0 3 * * *'
+  workflow_dispatch:
+    inputs:
+      batchSize:
+        description: 'Количество слов для прогрева (по умолчанию 40)'
+        required: false
+        default: '40'
+
+jobs:
+  warm:
+    name: Warm popular cards
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger warming endpoint
+        run: |
+          BATCH_SIZE="${{ github.event.inputs.batchSize || '40' }}"
+          echo "Запускаем прогрев $BATCH_SIZE карточек..."
+          curl -f -s -S -X POST "https://yai-translator.pages.dev/api/admin/warm" \
+            -H "Authorization: Bearer ${{ secrets.WARM_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d "{\"batchSize\": $BATCH_SIZE}"

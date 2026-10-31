@@ -16,6 +16,24 @@ const SOURCES = [
   { id: 'tatoeba', name: 'Tatoeba', url: 'https://tatoeba.org/de', licenseKey: 'about.licenseTatoeba' },
   { id: 'pons', name: 'PONS', url: 'https://de.pons.com', licenseKey: 'about.licensePons' },
   { id: 'dwds', name: 'DWDS', url: 'https://www.dwds.de/', licenseKey: 'about.licenseDwds' },
+  {
+    id: 'german-nouns',
+    name: 'German Nouns (gambolputty)',
+    url: 'https://github.com/gambolputty/german-nouns',
+    licenseKey: 'about.licenseGermanNouns',
+  },
+  {
+    id: 'kaikki',
+    name: 'Wiktionary / Kaikki.org',
+    url: 'https://kaikki.org/dictionary/German/',
+    licenseKey: 'about.licenseKaikki',
+  },
+  {
+    id: 'frequency-words',
+    name: 'FrequencyWords (Hermit Dave)',
+    url: 'https://github.com/hermitdave/FrequencyWords',
+    licenseKey: 'about.licenseFrequencyWords',
+  },
 ];
 
 export function DictionarySources() {

@@ -269,7 +269,9 @@
     "formHintImperativ": "Bitte und Befehl: du, ihr, Sie.",
     "tabAll": "Alles",
     "filterParaphrase": "Anders gesagt",
-    "paraphrasesTitle": "Anders gesagt"
+    "paraphrasesTitle": "Anders gesagt",
+    "instantBadge": "sofort",
+    "preparingDetails": "Ausführliche KI-Analyse wird vorbereitet…"
   },
   "explain": {
     "title": "Analyse",
@@ -569,7 +571,15 @@
     "whatsNewDialogTitle": "Was ist neu in Version {{version}}",
     "openHistory": "Alle Versionen",
     "sourcesTitle": "Wörterbücher und Quellen",
-    "sourcesText": "Die Wortkarte nutzt offene Wörterbücher. Danke an ihre Autorinnen und Autoren:"
+    "sourcesText": "Die Wortkarte nutzt offene Wörterbücher. Danke an ihre Autorinnen und Autoren:",
+    "licenseGermanNouns": "german-nouns (Wiktionary) — CC BY-SA 4.0: Genus, Fälle und Plural der Nomen",
+    "licenseKaikki": "kaikki.org (wiktextract, Wiktionary) — CC BY-SA 4.0: Verbformen, Steigerung, Aussprache",
+    "licenseFrequencyWords": "FrequencyWords (Hermit Dave) — MIT: Worthäufigkeit",
+    "licenseWiktionary": "Wiktionary — CC BY-SA: Bedeutungen, Formen, Beispiele",
+    "licenseOpenThesaurus": "OpenThesaurus — LGPL / CC BY-SA: Synonyme",
+    "licenseTatoeba": "Tatoeba — CC BY 2.0 FR: Beispielsätze mit Übersetzung",
+    "licensePons": "PONS — per API-Schlüssel, nur zur Suche",
+    "licenseDwds": "DWDS — Wortinformationen (Berlin-Brandenburgische Akademie)"
   },
   "admin": {
     "title": "Admin",
@@ -612,7 +622,8 @@
       "studyExercises": "Übungen gemacht",
       "paidTokensTitle": "Kostenpflichtige KI-Tokens",
       "paidTokensToday": "Tokens heute",
-      "paidTokensMonth": "Tokens diesen Monat"
+      "paidTokensMonth": "Tokens diesen Monat",
+      "warmedCards": "Vorbereitete Karten (Warm-up)"
     },
     "keys": {
       "title": "Schlüssel der Seite",

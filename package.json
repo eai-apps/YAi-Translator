@@ -1,7 +1,7 @@
 {
   "name": "yai-translator",
   "private": true,
-  "version": "0.12.2",
+  "version": "0.13.0",
   "type": "module",
   "description": "YAi Translator — онлайн-переводчик, словарь и учебник немецкого",
   "scripts": {
@@ -13,7 +13,8 @@
     "build": "npm run typecheck && vite build",
     "build:android": "node scripts/build-android.mjs",
     "preview": "npm run build && wrangler pages dev dist --port 8788",
-    "deploy": "npm run build && wrangler pages deploy dist"
+    "deploy": "npm run build && wrangler pages deploy dist",
+    "build:lexicon": "node scripts/build-lexicon.mjs"
   },
   "dependencies": {
     "@capacitor-community/text-to-speech": "^8.0.2",

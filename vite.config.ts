@@ -58,6 +58,15 @@ export default defineConfig({
               expiration: { maxEntries: 20, maxAgeSeconds: 60 * 60 * 24 * 365 },
             },
           },
+          {
+            // Статическая база немецких слов /lex/de/: кэшируем на клиенте (CacheFirst)
+            urlPattern: /\/lex\/.*\.json$/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'lexicon-chunks',
+              expiration: { maxEntries: 400, maxAgeSeconds: 60 * 60 * 24 * 30 },
+            },
+          },
         ],
       },
       devOptions: { enabled: false },

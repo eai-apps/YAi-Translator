@@ -11,7 +11,9 @@ interface UseSwipeOptions {
   threshold?: number;
 }
 
-const IGNORE_SELECTOR = 'textarea, input, button, a, [data-swipe-ignore], [data-pick-text], [data-chips]';
+// Не игнорируем кнопки и слова-кнопки: весь текст перевода состоит из них (pick.tsx), и свайп по нему
+// не работал. Нажатие без сдвига пальца свайпом не считается, поэтому кнопки по-прежнему нажимаются.
+const IGNORE_SELECTOR = 'textarea, input, select, [data-swipe-ignore], [data-chips]';
 
 export function useSwipe<T extends HTMLElement>(
   elementRef: React.RefObject<T>,

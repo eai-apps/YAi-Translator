@@ -269,7 +269,9 @@
     "formHintImperativ": "Request and command: du, ihr, Sie.",
     "tabAll": "All",
     "filterParaphrase": "Other ways to say",
-    "paraphrasesTitle": "Other ways to say"
+    "paraphrasesTitle": "Other ways to say",
+    "instantBadge": "instant",
+    "preparingDetails": "Detailed AI breakdown is being prepared…"
   },
   "explain": {
     "title": "Explanation",
@@ -569,7 +571,15 @@
     "whatsNewDialogTitle": "What's new in version {{version}}",
     "openHistory": "Full version history",
     "sourcesTitle": "Dictionaries and sources",
-    "sourcesText": "The word card uses open dictionaries. Thanks to their authors:"
+    "sourcesText": "The word card uses open dictionaries. Thanks to their authors:",
+    "licenseGermanNouns": "german-nouns (Wiktionary) — CC BY-SA 4.0: noun gender, cases and plural",
+    "licenseKaikki": "kaikki.org (wiktextract, Wiktionary) — CC BY-SA 4.0: verb forms, comparison, pronunciation",
+    "licenseFrequencyWords": "FrequencyWords (Hermit Dave) — MIT: word frequency",
+    "licenseWiktionary": "Wiktionary — CC BY-SA: meanings, forms, examples",
+    "licenseOpenThesaurus": "OpenThesaurus — LGPL / CC BY-SA: synonyms",
+    "licenseTatoeba": "Tatoeba — CC BY 2.0 FR: example sentences with translations",
+    "licensePons": "PONS — via API key, lookup only",
+    "licenseDwds": "DWDS — word information (Berlin-Brandenburg Academy)"
   },
   "admin": {
     "title": "Admin",
@@ -612,7 +622,8 @@
       "studyExercises": "Exercises done",
       "paidTokensTitle": "Paid AI Tokens",
       "paidTokensToday": "Tokens today",
-      "paidTokensMonth": "Tokens this month"
+      "paidTokensMonth": "Tokens this month",
+      "warmedCards": "Ready cards (warm-up)"
     },
     "keys": {
       "title": "Site keys",

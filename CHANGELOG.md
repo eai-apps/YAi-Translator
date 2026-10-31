@@ -1,5 +1,12 @@
 # История версий
 
+## 0.13.0 — 01.11.2026
+
+Этап 11 (Antigravity / Gemini 3.8 Flash): своя база немецких слов `public/lex/de/*.json` (german-nouns, kaikki.org,
+FrequencyWords; `scripts/build-lexicon.mjs`), `useLexicon.ts` + `InstantWordCard.tsx` (мгновенная заготовка карточки),
+прогрев 3000 карточек `POST /api/admin/warm` (секрет `WARM_TOKEN`) + `.github/workflows/warm-cards.yml`, счётчик в админке.
+Проверка и слияние — Claude: восстановлены надписи (ru/de/en), лицензии источников, исправлен свайп (`useSwipe.ts`).
+
 ## 0.12.2 — 31.10.2026
 
 Страница «Приложения» `/apps` (`AppsPage.tsx`, `components/apps/*`, `useLatestRelease.ts` — версия, дата и размер APK из GitHub Releases API, запасной вариант — `/version.json`); ссылки в боковом меню и в Профиле. Автор — Claude.
