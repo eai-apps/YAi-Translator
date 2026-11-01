@@ -129,7 +129,10 @@ export function summarizeCard(card: WordResponse['card']): string {
   return first.translations.slice(0, 3).join(', ');
 }
 
-export function useTranslator(onLimitReached: () => void) {
+export function useTranslator(onLimitReached: () => void, autoWordCard = true) {
+  // ИИ-разбор слова сразу или только по кнопке (админка / профиль — src/lib/aiCardMode.ts).
+  const autoWordCardRef = useRef(autoWordCard);
+  autoWordCardRef.current = autoWordCard;
   const { t, i18n } = useTranslation();
   const { addItem } = useHistory();
   const restored = useRef(readSnapshot()).current;
@@ -171,11 +174,12 @@ export function useTranslator(onLimitReached: () => void) {
       requestId: number,
       signal: AbortSignal,
       aiModel?: string,
+      immediate = false,
     ) => {
       setWord({ loading: true, data: null, error: null });
       try {
         // Пауза: пока человек печатает («Ка» → «Кака» → «Какашка»), карточки ИИ на промежуточные куски не заказываем.
-        await new Promise((resolve) => window.setTimeout(resolve, WORD_CARD_DELAY_MS));
+        if (!immediate) await new Promise((resolve) => window.setTimeout(resolve, WORD_CARD_DELAY_MS));
         if (signal.aborted || requestId !== requestRef.current) return;
         const data = await api.word({ word: value, sourceLang: source, targetLang: target, ...(aiModel ? { aiModel } : {}) }, signal);
         if (requestId !== requestRef.current) return;
@@ -230,7 +234,10 @@ export function useTranslator(onLimitReached: () => void) {
 
       // Словари и карточка ИИ грузятся вместе, не дожидаясь друг друга.
       if (isWordQuery(trimmed)) {
-        void loadWord(trimmed, source, target, requestId, controller.signal, aiModelFor(choice));
+        // Явно выбранная нейросеть («ИИ Pro» и т.п.) — разбор сразу; иначе — по настройке.
+        if (autoWordCardRef.current || aiModelFor(choice)) {
+          void loadWord(trimmed, source, target, requestId, controller.signal, aiModelFor(choice));
+        }
         loadDictFor(trimmed, target, requestId, controller.signal);
       }
 
@@ -352,7 +359,7 @@ export function useTranslator(onLimitReached: () => void) {
     const trimmed = text.trim();
     if (!isWordQuery(trimmed)) return;
     const controller = new AbortController();
-    void loadWord(trimmed, sourceLang, targetLang, requestRef.current, controller.signal, aiModelFor(providerChoice));
+    void loadWord(trimmed, sourceLang, targetLang, requestRef.current, controller.signal, aiModelFor(providerChoice), true);
   }, [text, sourceLang, targetLang, loadWord, providerChoice]);
 
   const { changeSourceLang, changeTargetLang, swapLanguages } = useLanguageSwitching({
@@ -415,7 +422,9 @@ export function useTranslator(onLimitReached: () => void) {
         const reqId = requestRef.current;
         const ctrl = new AbortController();
         abortRef.current = ctrl;
-        void loadWord(item.text.trim(), item.sourceLang, item.targetLang, reqId, ctrl.signal, aiModelFor(providerChoice));
+        if (autoWordCardRef.current) {
+          void loadWord(item.text.trim(), item.sourceLang, item.targetLang, reqId, ctrl.signal, aiModelFor(providerChoice));
+        }
         loadDictFor(item.text.trim(), item.targetLang, reqId, ctrl.signal);
       } else {
         setWord(EMPTY_WORD);

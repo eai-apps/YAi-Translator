@@ -78,6 +78,8 @@ export interface AdminSettings {
   guestAiLimit?: number;
   registeredAiLimit?: number;
   aiRequiresLogin?: boolean;
+  /** ИИ-карточка слова: true — сразу, false — по кнопке. */
+  wordCardAuto?: boolean;
   paidAiOrder?: 'free_first' | 'paid_first' | 'paid_off';
   paidAiRegisteredOnly?: boolean;
   paidDailyTokenLimit?: number;
@@ -119,6 +121,8 @@ export interface SiteSettingsResponse {
   guestAiLimit?: number;
   registeredAiLimit?: number;
   aiRequiresLogin?: boolean;
+  /** ИИ-карточка слова: true — сразу, false — по кнопке. */
+  wordCardAuto?: boolean;
 }
 
 export interface PaidModelOption {

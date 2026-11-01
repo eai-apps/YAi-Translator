@@ -10,6 +10,9 @@ import { useSettings } from '../../hooks/useSettings';
 import { useTheme } from '../../hooks/useTheme';
 import type { ThemeMode } from '../../hooks/useTheme';
 import { useTranslateSettings } from '../../hooks/useTranslateSettings';
+import { useAccount } from '../../hooks/useAccount';
+import { hasOwnAiKey } from '../../lib/aiCardMode';
+import type { TranslateSettings } from '../../lib/translateSettings';
 import { isReminderSupported, readReminderSettings, writeReminderSettings, type ReminderSettings } from '../../lib/dailyReminder';
 import { Card } from '../ui/Card';
 import { SectionTitle } from '../ui/SectionTitle';
@@ -23,6 +26,7 @@ export function SettingsCard() {
   const { uiLanguage, setUiLanguage } = useSettings();
   const { theme, setTheme } = useTheme();
   const { settings, update } = useTranslateSettings();
+  const { account } = useAccount();
   const [reminder, setReminder] = useState<ReminderSettings>(readReminderSettings);
 
   const handleReminderToggle = async (val: boolean) => {
@@ -110,6 +114,23 @@ export function SettingsCard() {
             checked={settings.quizEnabled}
             onChange={(value) => update({ quizEnabled: value })}
           />
+          {hasOwnAiKey(account) ? (
+            <div className="py-2.5">
+              <p className="text-sm font-medium">{t('settings.aiCardMode')}</p>
+              <p className="text-xs text-muted">{t('settings.aiCardModeHint')}</p>
+              <Segmented<TranslateSettings['aiCardMode']>
+                className="mt-2"
+                ariaLabel={t('settings.aiCardMode')}
+                value={settings.aiCardMode}
+                onChange={(value) => update({ aiCardMode: value })}
+                options={[
+                  { value: 'site', label: t('settings.aiCardModeSite') },
+                  { value: 'auto', label: t('settings.aiCardModeAuto') },
+                  { value: 'button', label: t('settings.aiCardModeButton') },
+                ]}
+              />
+            </div>
+          ) : null}
           {isReminderSupported() ? (
             <div className="py-2.5">
               <Toggle

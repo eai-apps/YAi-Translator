@@ -279,7 +279,9 @@
     "filterParaphrase": "Anders gesagt",
     "paraphrasesTitle": "Anders gesagt",
     "instantBadge": "sofort",
-    "preparingDetails": "Ausführliche KI-Analyse wird vorbereitet…"
+    "preparingDetails": "Ausführliche KI-Analyse wird vorbereitet…",
+    "loadAi": "KI-Wortanalyse",
+    "loadAiHint": "Beispiele, Regeln, Synonyme und Formen – per Knopf, um das Limit zu sparen."
   },
   "explain": {
     "title": "Analyse",
@@ -690,7 +692,8 @@
       "tierLimitsTitle": "KI-Anfragelimits nach Status",
       "guestLimit": "Limit für Gäste (Anfragen pro Tag)",
       "regLimit": "Limit für Registrierte (Anfragen pro Tag)",
-      "aiRequiresLogin": "KI nur nach Anmeldung (für Gäste sperren)"
+      "aiRequiresLogin": "KI nur nach Anmeldung (für Gäste sperren)",
+      "wordCardAuto": "KI-Wortanalyse sofort laden (aus – nur per Knopf, spart das Limit)"
     },
     "users": {
       "title": "Benutzer",
@@ -1277,5 +1280,12 @@
     "androidTitle": "Android und Android TV",
     "tvHowTo": "So installieren Sie es auf dem Fernseher (Android TV)",
     "rustoreSubtitle": "YAi Translator im RuStore – bald verfügbar. Es ist dieselbe App, Updates kommen automatisch."
+  },
+  "settings": {
+    "aiCardMode": "KI-Wortanalyse",
+    "aiCardModeSite": "Wie auf der Website",
+    "aiCardModeAuto": "Sofort",
+    "aiCardModeButton": "Per Knopf",
+    "aiCardModeHint": "„Sofort“ funktioniert mit eigenem KI-Schlüssel (kostenlos oder bezahlt) – er verbraucht nicht das gemeinsame Limit."
   }
 }

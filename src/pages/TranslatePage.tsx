@@ -3,6 +3,9 @@
  * синхронизация адреса ?q=..., озвучка в приложении, кнопка «История», серия дней 🔥,
  * карточка повторения 5 слов и поделиться картинкой.
  */
+import { useAccount } from '../hooks/useAccount';
+import { useSiteSettings } from '../hooks/useSiteSettings';
+import { hasOwnAiKey, shouldAutoLoadAiCard } from '../lib/aiCardMode';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { LanguageCode, ProviderId, TranslateResponse } from '../../shared/types';
@@ -47,7 +50,10 @@ export default function TranslatePage() {
   const { settings } = useTranslateSettings();
   const { items, toggleFavorite } = useHistory();
   const speech = useSpeech();
-  const translator = useTranslator(() => setLimitOpen(true));
+  const { account } = useAccount();
+  const site = useSiteSettings();
+  const autoWordCard = shouldAutoLoadAiCard(settings, site?.wordCardAuto ?? false, hasOwnAiKey(account));
+  const translator = useTranslator(() => setLimitOpen(true), autoWordCard);
   const { streak, todayActive, markTodayActivity } = useStreak();
 
   // Скрытие экранной клавиатуры, когда человек сам ведёт пальцем по странице.
@@ -311,6 +317,7 @@ export default function TranslatePage() {
           dict={translator.dict}
           queryWord={translator.text}
           translatedText={translator.result?.translatedText}
+          aiOnButton={isWordQuery(translator.text.trim())}
           sourceLang={wordLanguage}
           speech={speech}
           onRetry={translator.retryWord}

@@ -14,6 +14,7 @@ import { errorMessageKey } from '../../lib/errors';
 import { Button } from '../ui/Button';
 import { Card } from '../ui/Card';
 import { Spinner } from '../ui/Spinner';
+import { IconSparkles } from '../layout/icons';
 import { DictCard } from './DictCard';
 import { InstantWordCard } from './InstantWordCard';
 import { WordCard as AiWordCard } from './WordCard';
@@ -31,6 +32,20 @@ interface WordPanelProps {
   headerMenu?: ReactNode;
   /** Готовый перевод: при переводе НА немецкий мгновенная карточка ищет немецкое слово перевода. */
   translatedText?: string;
+  /** Это слово/короткая фраза — можно попросить ИИ-разбор (кнопка, если он не загружается сам). */
+  aiOnButton?: boolean;
+}
+
+function AiLoadButton({ onLoad }: { onLoad: () => void }) {
+  const { t } = useTranslation();
+  return (
+    <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-line pt-3">
+      <Button size="sm" variant="primary" icon={<IconSparkles className="h-4 w-4" />} onClick={onLoad}>
+        {t('word.loadAi')}
+      </Button>
+      <p className="min-w-0 flex-1 text-xs leading-relaxed text-muted">{t('word.loadAiHint')}</p>
+    </div>
+  );
 }
 
 function CardSkeleton({ label }: { label: string }) {
@@ -59,6 +74,7 @@ export function WordPanel({
   onPickTranslation,
   headerMenu,
   translatedText,
+  aiOnButton = false,
 }: WordPanelProps) {
   const { t } = useTranslation();
   const hasDict = Boolean(dict.data);
@@ -75,9 +91,18 @@ export function WordPanel({
   const isGerman = sourceIsGerman || useTranslationWord;
   const { match: lexMatch } = useLexicon(targetWord, isGerman && !aiCard);
 
-  // Ничего нет и ничего не грузится — карточки на экране нет
+  // ИИ-разбор не загружался сам (режим «по кнопке») — показываем кнопку.
+  const showAiButton = aiOnButton && !aiCard && !word.loading && !word.data && !word.error;
+
+  // Ничего нет и ничего не грузится — карточки на экране нет (кроме кнопки ИИ-разбора)
   if (!word.loading && !word.data && !dict.loading && !dict.data && !word.error && !lexMatch) {
-    return null;
+    if (!showAiButton || !queryText) return null;
+    return (
+      <Card className="mt-4 p-4 sm:p-5">
+        <p className="text-lg font-semibold">{queryText}</p>
+        <AiLoadButton onLoad={onRetry} />
+      </Card>
+    );
   }
 
   // 1. Полная карточка ИИ
@@ -131,6 +156,7 @@ export function WordPanel({
             )}
           </div>
         ) : null}
+        {showAiButton ? <AiLoadButton onLoad={onRetry} /> : null}
       </Card>
     );
   }
@@ -156,6 +182,7 @@ export function WordPanel({
             )}
           </div>
         ) : null}
+        {showAiButton ? <AiLoadButton onLoad={onRetry} /> : null}
       </Card>
     );
   }

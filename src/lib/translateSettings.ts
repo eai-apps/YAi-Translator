@@ -20,6 +20,8 @@ export interface TranslateSettings {
   showOthers: boolean;
   /** Предлагать тест на 5 слов из истории после каждых 10 переводов (этап 10Б). */
   quizEnabled: boolean;
+  /** ИИ-разбор слова: 'site' — как в админке, 'auto' — сразу, 'button' — по кнопке (сразу — только со своим ключом). */
+  aiCardMode: 'site' | 'auto' | 'button';
 }
 
 export const DEFAULT_TRANSLATE_SETTINGS: TranslateSettings = {
@@ -30,6 +32,7 @@ export const DEFAULT_TRANSLATE_SETTINGS: TranslateSettings = {
   enterToTranslate: false,
   showOthers: true,
   quizEnabled: true,
+  aiCardMode: 'site',
 };
 
 /** Сохранённые настройки + старый отдельный ключ showOthers (совместимость). */
@@ -48,6 +51,10 @@ export function readTranslateSettings(): TranslateSettings {
         : DEFAULT_TRANSLATE_SETTINGS.enterToTranslate,
     showOthers: typeof stored.showOthers === 'boolean' ? stored.showOthers : legacyShowOthers,
     quizEnabled: typeof stored.quizEnabled === 'boolean' ? stored.quizEnabled : DEFAULT_TRANSLATE_SETTINGS.quizEnabled,
+    aiCardMode:
+      stored.aiCardMode === 'auto' || stored.aiCardMode === 'button' || stored.aiCardMode === 'site'
+        ? stored.aiCardMode
+        : DEFAULT_TRANSLATE_SETTINGS.aiCardMode,
   };
 }
 

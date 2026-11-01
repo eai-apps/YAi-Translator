@@ -279,7 +279,9 @@
     "filterParaphrase": "Other ways to say",
     "paraphrasesTitle": "Other ways to say",
     "instantBadge": "instant",
-    "preparingDetails": "Detailed AI breakdown is being prepared…"
+    "preparingDetails": "Detailed AI breakdown is being prepared…",
+    "loadAi": "AI word analysis",
+    "loadAiHint": "Examples, rules, synonyms and forms – on button, to save your limit."
   },
   "explain": {
     "title": "Explanation",
@@ -690,7 +692,8 @@
       "tierLimitsTitle": "AI request limits by status",
       "guestLimit": "Limit for guests (requests per day)",
       "regLimit": "Limit for registered users (requests per day)",
-      "aiRequiresLogin": "AI requires login (block guests)"
+      "aiRequiresLogin": "AI requires login (block guests)",
+      "wordCardAuto": "Load the AI word analysis right away (off – only on button, saves the limit)"
     },
     "users": {
       "title": "Users",
@@ -1277,5 +1280,12 @@
     "androidTitle": "Android and Android TV",
     "tvHowTo": "How to install on a TV (Android TV)",
     "rustoreSubtitle": "YAi Translator on RuStore — coming soon. Same app, updates arrive automatically."
+  },
+  "settings": {
+    "aiCardMode": "AI word analysis",
+    "aiCardModeSite": "Site default",
+    "aiCardModeAuto": "Right away",
+    "aiCardModeButton": "On button",
+    "aiCardModeHint": "\"Right away\" works with your own AI key (free or paid) – it does not use the shared limit."
   }
 }

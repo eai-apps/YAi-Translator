@@ -21,6 +21,7 @@ export function AdminSettingsTab({ onError, onSaved }: SettingsTabProps) {
   const [guestAiLimit, setGuestAiLimit] = useState(5);
   const [registeredAiLimit, setRegisteredAiLimit] = useState(50);
   const [aiRequiresLogin, setAiRequiresLogin] = useState(false);
+  const [wordCardAuto, setWordCardAuto] = useState(false);
   const [banner, setBanner] = useState({ enabled: false, ru: '', de: '', en: '' });
   const [feedbackEmail, setFeedbackEmail] = useState('');
   const [busy, setBusy] = useState(false);
@@ -35,6 +36,7 @@ export function AdminSettingsTab({ onError, onSaved }: SettingsTabProps) {
       setGuestAiLimit(data.guestAiLimit ?? 5);
       setRegisteredAiLimit(data.registeredAiLimit ?? 50);
       setAiRequiresLogin(data.aiRequiresLogin ?? false);
+      setWordCardAuto(data.wordCardAuto ?? false);
       setBanner(data.banner);
       setFeedbackEmail(data.feedbackEmail);
       onError(null);
@@ -63,6 +65,7 @@ export function AdminSettingsTab({ onError, onSaved }: SettingsTabProps) {
         guestAiLimit,
         registeredAiLimit,
         aiRequiresLogin,
+        wordCardAuto,
       });
       setSettings(saved);
       setNotice(t('admin.settings.saved'));
@@ -139,6 +142,15 @@ export function AdminSettingsTab({ onError, onSaved }: SettingsTabProps) {
               className="h-4 w-4 accent-[var(--color-accent)]"
             />
             {t('admin.settings.aiRequiresLogin')}
+          </label>
+          <label className="flex cursor-pointer items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              checked={wordCardAuto}
+              onChange={(e) => setWordCardAuto(e.target.checked)}
+              className="h-4 w-4 accent-[var(--color-accent)]"
+            />
+            {t('admin.settings.wordCardAuto')}
           </label>
         </div>
 

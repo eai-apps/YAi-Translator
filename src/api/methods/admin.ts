@@ -53,6 +53,7 @@ export const adminMethods = {
     guestAiLimit?: number;
     registeredAiLimit?: number;
     aiRequiresLogin?: boolean;
+    wordCardAuto?: boolean;
   }): Promise<AdminSettings> {
     return request<AdminSettings>('/api/admin/settings', { method: 'PUT', body: payload });
   },

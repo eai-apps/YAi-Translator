@@ -32,12 +32,13 @@ async function saveDailyLimit(env: Env, limit: number | null): Promise<void> {
 }
 
 async function currentSettings(env: Env): Promise<AdminSettings> {
-  const [stored, banner, guestLimit, regLimit, requiresLogin] = await Promise.all([
+  const [stored, banner, guestLimit, regLimit, requiresLogin, wordCardAuto] = await Promise.all([
     readSetting<number>(env, SETTINGS_KEYS.dailyLimit),
     readBanner(env),
     readSetting<number>(env, SETTINGS_KEYS.guestAiLimit),
     readSetting<number>(env, SETTINGS_KEYS.registeredAiLimit),
     readSetting<boolean>(env, SETTINGS_KEYS.aiRequiresLogin),
+    readSetting<boolean>(env, SETTINGS_KEYS.wordCardAuto),
   ]);
   return {
     dailyLimit: typeof stored === 'number' ? clampDailyLimit(stored) : null,
@@ -48,6 +49,7 @@ async function currentSettings(env: Env): Promise<AdminSettings> {
     guestAiLimit: guestLimit ?? 5,
     registeredAiLimit: regLimit ?? 50,
     aiRequiresLogin: requiresLogin ?? false,
+    wordCardAuto: wordCardAuto ?? false,
   };
 }
 
@@ -110,6 +112,9 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
     }
     if (body.aiRequiresLogin !== undefined) {
       await writeSetting(env, SETTINGS_KEYS.aiRequiresLogin, Boolean(body.aiRequiresLogin));
+    }
+    if (body.wordCardAuto !== undefined) {
+      await writeSetting(env, SETTINGS_KEYS.wordCardAuto, Boolean(body.wordCardAuto));
     }
 
     return jsonResponse(await currentSettings(env));

@@ -32,6 +32,8 @@ export const SETTINGS_KEYS = {
   paidDefaultModel: 'paid_default_model',
   /** Номер строки прогрева карточек популярных слов (этап 11). */
   warmCardsCursor: 'warm_cards_cursor',
+  /** true — ИИ-карточка слова загружается сразу; false (по умолчанию) — только по кнопке (экономит лимит). */
+  wordCardAuto: 'word_card_auto',
 } as const;
 
 /** Простая проверка адреса: без @ или пробелов ничего не сохраняем. */
