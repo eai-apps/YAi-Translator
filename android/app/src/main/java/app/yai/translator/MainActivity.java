@@ -2,7 +2,12 @@ package app.yai.translator;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.webkit.WebView;
+
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 
 import com.getcapacitor.BridgeActivity;
 import com.getcapacitor.WebViewListener;
@@ -21,6 +26,7 @@ public class MainActivity extends BridgeActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        applySystemBarInsets();
         pendingText = readSharedText(getIntent());
         bridge.addWebViewListener(new WebViewListener() {
             @Override
@@ -40,6 +46,24 @@ public class MainActivity extends BridgeActivity {
             pendingText = text;
             if (pageLoaded) deliverPending();
         }
+    }
+
+    /**
+     * Android 15+ рисует приложение под статус-баром и кнопками навигации («◀ ● ■»).
+     * Отодвигаем весь экран от системных панелей и выреза — кнопки приложения больше не попадают под них.
+     * Клавиатуру тоже учитываем здесь: экран сжимается над ней (Keyboard.resize = 'none',
+     * SystemBars.insetsHandling = 'disable' в capacitor.config.ts — чтобы не было двойных отступов).
+     */
+    private void applySystemBarInsets() {
+        View content = findViewById(android.R.id.content);
+        content.setBackgroundColor(0xFF0E1117);
+        ViewCompat.setOnApplyWindowInsetsListener(content, (view, insets) -> {
+            Insets bars = insets.getInsets(
+                    WindowInsetsCompat.Type.systemBars() | WindowInsetsCompat.Type.displayCutout());
+            Insets ime = insets.getInsets(WindowInsetsCompat.Type.ime());
+            view.setPadding(bars.left, bars.top, bars.right, Math.max(bars.bottom, ime.bottom));
+            return WindowInsetsCompat.CONSUMED;
+        });
     }
 
     private String readSharedText(Intent intent) {

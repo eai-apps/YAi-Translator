@@ -1245,6 +1245,9 @@
     "iosStep2": "Tap “Share” — the square with an up arrow.",
     "iosStep3": "Choose “Add to Home Screen”, then “Add”.",
     "iosStep4": "Launch YAi Translator from the icon — full screen, no address bar.",
-    "iosTitle": "iPhone and iPad"
+    "iosTitle": "iPhone and iPad",
+    "androidTitle": "Android and Android TV",
+    "tvHowTo": "How to install on a TV (Android TV)",
+    "rustoreSubtitle": "YAi Translator on RuStore — coming soon. Same app, updates arrive automatically."
   }
 }

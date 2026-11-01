@@ -1,5 +1,6 @@
 /**
- * Страница «Приложения»: карточки Android (телефон/планшет) и Android TV — один и тот же APK.
+ * Страница «Приложения»: одна карточка Android (телефон, планшет и Android TV — один APK)
+ * и карточка RuStore («скоро»).
  * Внутри приложения вместо кнопки скачивания — установленная версия и «Проверить обновления».
  */
 import { useTranslation } from 'react-i18next';
@@ -70,7 +71,7 @@ export function AndroidCard(props: CardsProps) {
           <IconPhone className="h-6 w-6" />
         </span>
         <div>
-          <h2 className="text-lg font-semibold">Android</h2>
+          <h2 className="text-lg font-semibold">{t('apps.androidTitle')}</h2>
           <p className="text-sm text-muted">{t('apps.androidSubtitle')}</p>
         </div>
       </div>
@@ -90,28 +91,39 @@ export function AndroidCard(props: CardsProps) {
       </div>
 
       {inApp ? <AppVersionRow /> : <AppSteps steps={[t('apps.androidStep1'), t('apps.androidStep2'), t('apps.androidStep3')]} />}
+
+      {!inApp && (
+        <details className="mt-4 rounded-xl border border-line px-3.5 py-3">
+          <summary className="flex cursor-pointer items-center gap-2 text-sm font-semibold">
+            <IconTv className="h-4 w-4 text-accent" />
+            {t('apps.tvHowTo')}
+          </summary>
+          <div className="mt-3 space-y-2">
+            <AppInfoRow label={t('apps.tvLink')} value={<span className="select-all break-all text-xs font-medium">{APK_URL}</span>} />
+          </div>
+          <AppSteps steps={[t('apps.tvStep1'), t('apps.tvStep2'), t('apps.tvStep3')]} />
+        </details>
+      )}
     </Card>
   );
 }
 
-export function TvCard(props: CardsProps) {
+export function RuStoreCard() {
   const { t } = useTranslation();
   return (
     <Card className="p-4 sm:p-5">
       <div className="flex items-start gap-3">
         <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-accentSoft text-accent">
-          <IconTv className="h-6 w-6" />
+          <IconDownload className="h-6 w-6" />
         </span>
-        <div>
-          <h2 className="text-lg font-semibold">Android TV</h2>
-          <p className="text-sm text-muted">{t('apps.tvSubtitle')}</p>
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <h2 className="text-lg font-semibold">RuStore</h2>
+            <span className="rounded-full bg-soft px-2.5 py-0.5 text-xs font-semibold text-muted">{t('apps.soon')}</span>
+          </div>
+          <p className="text-sm text-muted">{t('apps.rustoreSubtitle')}</p>
         </div>
       </div>
-      <div className="mt-3 space-y-2">
-        <ApkRow {...props} />
-        <AppInfoRow label={t('apps.tvLink')} value={<span className="select-all break-all text-xs font-medium">{APK_URL}</span>} />
-      </div>
-      <AppSteps steps={[t('apps.tvStep1'), t('apps.tvStep2'), t('apps.tvStep3')]} />
     </Card>
   );
 }

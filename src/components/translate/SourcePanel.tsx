@@ -117,7 +117,9 @@ export function SourcePanel(props: SourcePanelProps) {
       void hideKeyboard();
       return;
     }
-    if (props.enterToTranslate) {
+    // На телефоне и в приложении Enter всегда = «Перевести» (новая строка — Shift+Enter не нужна на телефоне).
+    const touch = typeof window !== 'undefined' && window.matchMedia?.('(pointer: coarse)').matches;
+    if (props.enterToTranslate || touch) {
       event.preventDefault();
       props.onSubmit();
       void hideKeyboard();
@@ -145,6 +147,16 @@ export function SourcePanel(props: SourcePanelProps) {
               value={text}
               onChange={(event) => onChange(event.target.value)}
               onKeyDown={handleKeyDown}
+              onBeforeInput={(event) => {
+                // Клавиатуры Android (Gboard) часто шлют Enter не как keydown, а как ввод переноса строки.
+                const native = event.nativeEvent as InputEvent;
+                const touch = window.matchMedia?.('(pointer: coarse)').matches;
+                if (touch && (native.inputType === 'insertLineBreak' || native.inputType === 'insertParagraph' || native.data === '\n')) {
+                  event.preventDefault();
+                  props.onSubmit();
+                  void hideKeyboard();
+                }
+              }}
               onFocus={() => setFocused(true)}
               onBlur={() => window.setTimeout(() => setFocused(false), 150)}
               maxLength={props.maxLength}

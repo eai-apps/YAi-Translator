@@ -117,6 +117,25 @@
 
 ## Журнал работ (новые записи — сверху)
 
+### 2026-11-01 01:40 — Claude — 0.14.1 (срочные исправления APK 0.14.0) + задание этапа 13
+- **«Нет связи с сервером» в приложении:** `src/api/request.ts` слал запросы на сайт с `credentials: 'include'`, а
+  сервер отвечает `Access-Control-Allow-Origin: *` — WebView блокировал все ответы. Теперь при `API_BASE`
+  (приложение) — `credentials: 'omit'`; вход в приложении — только заголовком `Authorization: Bearer`.
+- **Нижнее меню под кнопками Android «◀ ● ■»:** `MainActivity.applySystemBarInsets()` — padding контейнера
+  `android.R.id.content` от статус-бара, навигации, выреза и клавиатуры. В `capacitor.config.ts`:
+  `SystemBars.insetsHandling = 'disable'`, `Keyboard.resize = 'none'` (чтобы не было двойных отступов).
+  В приложении `env(safe-area-inset-*)` теперь = 0 — это нормально.
+- **Enter:** на сенсорных устройствах (`pointer: coarse`) Enter всегда = «Перевести» + скрыть клавиатуру
+  (`SourcePanel.tsx`: keydown + `beforeinput insertLineBreak` для Gboard).
+- **Страница «Приложения»:** одна карточка «Android и Android TV» (инструкция для TV — раскрывающийся блок),
+  вместо карточки TV — «RuStore — скоро» (`AndroidCards.tsx` → `RuStoreCard`, ключи `apps.androidTitle`,
+  `apps.tvHowTo`, `apps.rustoreSubtitle`).
+- Задание этапа 13 для Antigravity: `tasks/STAGE13.md` (каждое слово перевода связано со словарём lex,
+  понятные «Учёба» и «Словарь»). Android-код в этапе 13 не трогать.
+- Версия 0.14.1, versionCode 4. APK собирается: GitHub → Actions → Build Android APK → Run workflow.
+- **Если работа оборвалась (лимит Claude):** проверить, что релиз v0.14.1 с APK есть на GitHub; если нет —
+  запустить workflow вручную. Владелец проверяет на телефоне: перевод работает, нижнее меню нажимается, Enter переводит.
+
 ### 2026-11-01 01:05 — Claude — 0.14.0 (проверка этапа 12: Antigravity, Claude Sonnet 4.6 → Gemini)
 - Проверил и выложил этап 12: приложение снова со встроенной сборкой (без `server.url`), обновление по воздуху
   `@capgo/capacitor-updater` (`src/lib/liveUpdate.ts`, архив `dist/app/bundle-<версия>.zip` + `bundle.json` из

@@ -1,5 +1,14 @@
 # История версий
 
+## 0.14.1 — 01.11.2026
+
+Claude: срочные исправления Android-приложения 0.14.0.
+- «Нет связи с сервером» в APK: запросы с другого домена шли с `credentials: 'include'`, а сервер отвечает `Access-Control-Allow-Origin: *` — WebView блокировал ответы. Теперь при `API_BASE` (приложение) — `credentials: 'omit'`, вход по заголовку `Authorization`.
+- Нижнее меню под кнопками Android: `MainActivity.applySystemBarInsets()` отодвигает экран от статус-бара, навигации и клавиатуры; `SystemBars.insetsHandling = 'disable'`, `Keyboard.resize = 'none'`.
+- Enter на телефоне (pointer: coarse) всегда переводит и прячет клавиатуру.
+- Страница «Приложения»: одна карточка «Android и Android TV», вместо карточки TV — «RuStore — скоро».
+- Задание этапа 13 для Antigravity: `tasks/STAGE13.md`.
+
 ## 0.14.0 — 01.11.2026
 
 Этап 12 (Claude Sonnet 4.6 + Gemini 3.8 Flash): полноценное Android-приложение и мобильная оболочка без браузерной рамки.

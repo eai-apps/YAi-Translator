@@ -1,9 +1,9 @@
 {
-  "versionCode": 3,
-  "versionName": "0.14.0",
+  "versionCode": 4,
+  "versionName": "0.14.1",
   "apkUrl": "https://github.com/eai-apps/YAi-Translator/releases/latest/download/YAi-Translator.apk",
-  "notes_ru": "Полноценное Android-приложение без браузерной рамки, поддержка Android 15 edge-to-edge, шторка выбора языка, карусель карточки слова, нативные буфер и шаринг, обновление содержимого по воздуху.",
-  "notes_de": "Vollwertige Android-App ohne Browser-Rahmen, Android 15 Edge-to-Edge-Unterstützung, Sprachauswahl-Sheet, Wortkarten-Karussell, native Zwischenablage und Teilen, Over-the-Air-Inhaltsaktualisierung.",
-  "notes_en": "Native Android app without browser frame, Android 15 edge-to-edge support, language bottom sheet, word card carousel, native clipboard and share, over-the-air bundle updates.",
+  "notes_ru": "Исправлено: перевод в приложении снова работает («Нет связи с сервером»), нижнее меню больше не уходит под кнопки Android, Enter = «Перевести».",
+  "notes_de": "Behoben: Übersetzen in der App funktioniert wieder („Keine Verbindung zum Server“), das untere Menü liegt nicht mehr unter den Android-Tasten, Enter = „Übersetzen“.",
+  "notes_en": "Fixed: translation works in the app again (\"No connection to server\"), the bottom menu no longer sits under the Android buttons, Enter = Translate.",
   "required": false
 }

@@ -1245,6 +1245,9 @@
     "iosStep2": "Tippen Sie auf „Teilen“ — Quadrat mit Pfeil nach oben.",
     "iosStep3": "Wählen Sie „Zum Home-Bildschirm“ und dann „Hinzufügen“.",
     "iosStep4": "Starten Sie YAi Translator über das Symbol — im Vollbild, ohne Adressleiste.",
-    "iosTitle": "iPhone und iPad"
+    "iosTitle": "iPhone und iPad",
+    "androidTitle": "Android und Android TV",
+    "tvHowTo": "So installieren Sie es auf dem Fernseher (Android TV)",
+    "rustoreSubtitle": "YAi Translator im RuStore – bald verfügbar. Es ist dieselbe App, Updates kommen automatisch."
   }
 }

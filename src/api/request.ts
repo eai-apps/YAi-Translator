@@ -83,8 +83,10 @@ export async function request<T>(path: string, init: RequestInit_, signal?: Abor
       method: init.method,
       headers,
       body: init.body === undefined ? undefined : isBlob ? (init.body as Blob) : JSON.stringify(init.body),
-      // Cookie сессии отправляется и на другой домен (Capacitor); сервер разрешает это в CORS.
-      credentials: withAuth ? 'include' : 'same-origin',
+      // Приложение (Capacitor) ходит на другой домен: вход — только заголовком Authorization, без cookie.
+      // С credentials: 'include' браузер блокирует ответ (сервер отвечает Access-Control-Allow-Origin: *) —
+      // из-за этого в APK 0.14.0 было «Нет связи с сервером».
+      credentials: API_BASE ? 'omit' : withAuth ? 'include' : 'same-origin',
       signal: timeout.signal,
     });
   } catch (error) {

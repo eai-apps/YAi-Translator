@@ -14,6 +14,30 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.14.1',
+    date: '2026-11-01',
+    items: {
+      ru: [
+        'Приложение: перевод снова работает — больше нет «Нет связи с сервером».',
+        'Приложение: нижнее меню и кнопки больше не прячутся под кнопками Android «◀ ● ■».',
+        'На телефоне Enter на клавиатуре сразу переводит и прячет клавиатуру.',
+        'Страница «Приложения»: Android и Android TV — одна карточка (один APK), добавлен RuStore — скоро.',
+      ],
+      de: [
+        'App: Übersetzen funktioniert wieder – kein „Keine Verbindung zum Server“ mehr.',
+        'App: Das untere Menü liegt nicht mehr unter den Android-Tasten „◀ ● ■“.',
+        'Auf dem Handy übersetzt Enter sofort und blendet die Tastatur aus.',
+        'Seite „Apps“: Android und Android TV in einer Karte (eine APK), RuStore – bald.',
+      ],
+      en: [
+        'App: translation works again — no more "No connection to server".',
+        'App: the bottom menu no longer hides under the Android "◀ ● ■" buttons.',
+        'On phones, Enter on the keyboard translates right away and hides the keyboard.',
+        'Apps page: Android and Android TV merged into one card (one APK), RuStore — coming soon.',
+      ],
+    },
+  },
+  {
     version: '0.14.0',
     date: '2026-11-01',
     items: {

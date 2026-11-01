@@ -1245,6 +1245,9 @@
     "iosStep2": "Нажмите «Поделиться» — квадрат со стрелкой вверх (внизу на iPhone, вверху на iPad).",
     "iosStep3": "Прокрутите и выберите «На экран „Домой“», затем «Добавить».",
     "iosStep4": "Запускайте YAi Translator с иконки — на весь экран, без адресной строки.",
-    "iosTitle": "iPhone и iPad"
+    "iosTitle": "iPhone и iPad",
+    "androidTitle": "Android и Android TV",
+    "tvHowTo": "Как поставить на телевизор (Android TV)",
+    "rustoreSubtitle": "YAi Translator в магазине RuStore — скоро. Это будет то же приложение, обновления придут сами."
   }
 }

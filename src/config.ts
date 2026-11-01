@@ -11,10 +11,10 @@ export const API_BASE = (
 ).replace(/\/+$/, '');
 
 /** Версия показывается в профиле; совпадает с package.json. */
-export const APP_VERSION = '0.14.0';
+export const APP_VERSION = '0.14.1';
 
 /** Код версии приложения Android (увеличивается при каждом обновлении APK). */
-export const ANDROID_VERSION_CODE = 3;
+export const ANDROID_VERSION_CODE = 4;
 
 export const STORAGE_KEYS = {
   theme: 'yai.theme',

@@ -1,11 +1,11 @@
 /**
- * Страница «Приложения» (/apps), как в SlyNet Radio: Android (APK с GitHub Releases), Android TV
- * (тот же APK), iPhone/iPad (через Safari). Версия APK — из GitHub, версия содержимого — версия сайта:
+ * Страница «Приложения» (/apps), как в SlyNet Radio: Android — телефон, планшет и Android TV одним APK
+ * (GitHub Releases), RuStore — скоро, iPhone/iPad (через Safari). Версия APK — из GitHub, версия содержимого — версия сайта:
  * приложение берёт экраны с сайта и обновляется само (см. HANDOFF, запись 0.12.1).
  */
 import { useTranslation } from 'react-i18next';
 import { useLatestRelease } from '../hooks/useLatestRelease';
-import { AndroidCard, TvCard } from '../components/apps/AndroidCards';
+import { AndroidCard, RuStoreCard } from '../components/apps/AndroidCards';
 import { IosCard } from '../components/apps/IosCard';
 import { IconPhone } from '../components/layout/icons';
 
@@ -25,7 +25,7 @@ export default function AppsPage() {
       </section>
 
       <AndroidCard release={release} loading={loading} />
-      <TvCard release={release} loading={loading} />
+      <RuStoreCard />
       <IosCard />
     </div>
   );

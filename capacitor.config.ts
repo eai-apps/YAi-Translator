@@ -5,9 +5,8 @@ import type { CapacitorConfig } from '@capacitor/cli';
  * Поддерживает Android (включая Android TV) и iOS.
  *
  * Edge-to-edge (Android 15+ / targetSdk 36):
- *   StatusBar.overlaysWebView = true → WebView рисуется под статус-баром и навигацией.
- *   Компенсация отступов — через CSS env(safe-area-inset-*) во всех панелях.
- *   WindowCompat.setDecorFitsSystemWindows(false) в MainActivity.java.
+ *   MainActivity.applySystemBarInsets() отодвигает весь экран от статус-бара, кнопок навигации
+ *   и клавиатуры (padding). CSS env(safe-area-inset-*) в приложении при этом = 0.
  */
 const config: CapacitorConfig = {
   appId: 'app.yai.translator',
@@ -29,6 +28,11 @@ const config: CapacitorConfig = {
       // Стиль иконок статус-бара устанавливается в AppPlatformBridge.tsx по теме.
       style: 'DEFAULT',
     },
+    SystemBars: {
+      // Отступы от статус-бара и кнопок навигации делает MainActivity (padding контейнера),
+      // иначе в 0.14.0 нижнее меню оказывалось под кнопками «◀ ● ■».
+      insetsHandling: 'disable',
+    },
     CapacitorUpdater: {
       // Только ручной режим (src/lib/liveUpdate.ts): без облака Capgo и без автоматических запросов к нему.
       autoUpdate: false,
@@ -37,10 +41,10 @@ const config: CapacitorConfig = {
       updateUrl: '',
     },
     Keyboard: {
-      // Экран сжимается при появлении клавиатуры (не перекрывает поле ввода).
-      resize: 'body',
+      // Отступ под клавиатуру делает MainActivity.applySystemBarInsets() (нативно, надёжно).
+      resize: 'none',
       style: 'DEFAULT',
-      resizeOnFullScreen: true,
+      resizeOnFullScreen: false,
     },
   },
 };
