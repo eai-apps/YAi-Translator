@@ -117,6 +117,11 @@
 
 ## Журнал работ (новые записи — сверху)
 
+### 2026-11-01 02:35 — Claude — 0.15.0 (исправление: iPhone, немецкий — не открывалась клавиатура)
+- `TranslatePage.tsx`: клавиатура пряталась по событию `scroll`, а iPhone сам прокручивает страницу к полю при
+  нажатии — клавиатура закрывалась сразу (с немецким панель выше из-за ä ö ü ß, поэтому всегда). Теперь прячется
+  только при движении пальца по странице (touchmove > 24px не по полю ввода). Не возвращать скрытие по `scroll`.
+
 ### 2026-11-01 02:30 — Claude — 0.15.0 (проверка этапа 13 от Antigravity)
 - Принял этап 13: слова перевода связаны со словарём lex (`useConnectedWords.ts`, `InteractiveGermanText.tsx`,
   `ConnectedWordsChips.tsx`, `WordDetailModal.tsx`, `AddToStudyQuickButton.tsx`, `commonTranslationsDeRu.ts`),

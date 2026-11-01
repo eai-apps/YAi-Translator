@@ -50,13 +50,30 @@ export default function TranslatePage() {
   const translator = useTranslator(() => setLimitOpen(true));
   const { streak, todayActive, markTodayActivity } = useStreak();
 
-  // Скрытие экранной клавиатуры при скролле страницы
+  // Скрытие экранной клавиатуры, когда человек сам ведёт пальцем по странице.
+  // Не по событию scroll: iPhone сам прокручивает страницу к полю при нажатии на него —
+  // из-за этого клавиатура сразу закрывалась (особенно с немецким, где панель выше из-за ä ö ü ß).
   useEffect(() => {
-    const onScroll = () => {
-      void hideKeyboard();
+    let startY: number | null = null;
+    const onStart = (event: TouchEvent) => {
+      const target = event.target as HTMLElement | null;
+      startY = target?.closest('textarea, input') ? null : event.touches[0]?.clientY ?? null;
     };
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
+    const onMove = (event: TouchEvent) => {
+      if (startY === null) return;
+      const y = event.touches[0]?.clientY ?? startY;
+      if (Math.abs(y - startY) > 24) {
+        startY = null;
+        const active = document.activeElement;
+        if (active instanceof HTMLTextAreaElement || active instanceof HTMLInputElement) void hideKeyboard();
+      }
+    };
+    window.addEventListener('touchstart', onStart, { passive: true });
+    window.addEventListener('touchmove', onMove, { passive: true });
+    return () => {
+      window.removeEventListener('touchstart', onStart);
+      window.removeEventListener('touchmove', onMove);
+    };
   }, []);
 
   const [limitOpen, setLimitOpen] = useState(false);
