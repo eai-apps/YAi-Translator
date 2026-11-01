@@ -9,7 +9,7 @@ import type { Env } from '../../_lib/env';
 import { LIMITS } from '../../_lib/config';
 import { readSetting, writeSetting, SETTINGS_KEYS } from '../../_lib/settings';
 import { requireAdmin } from '../../_lib/admin/require';
-import { ApiError, errorResponse, getClientIp, jsonResponse, readJsonBody } from '../../_lib/http';
+import { ApiError, errorResponse, jsonResponse, readJsonBody } from '../../_lib/http';
 import { buildCacheKey } from '../../_lib/request';
 import { readCache, writeCache } from '../../_lib/cache';
 import { buildWordPrompt } from '../../_lib/prompts';
@@ -17,7 +17,6 @@ import { runJsonTask } from '../../_lib/router';
 import { validateWordCard } from '../../_lib/validate';
 import { buildDictEntry } from '../../_lib/dict';
 import { mergeDictionaryData } from '../../_lib/dict/merge';
-import { createLimitGuard } from '../../_lib/usage';
 
 async function checkWarmAuth(env: Env, request: Request): Promise<void> {
   const auth = request.headers.get('Authorization') ?? '';
@@ -49,7 +48,8 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     let skipped = 0;
     let errors = 0;
 
-    const limitGuard = createLimitGuard(env, getClientIp(context.request));
+    // Прогрев запускает только админ или cron с WARM_TOKEN — дневной лимит гостя (5 в день по IP сервера GitHub)
+    // к нему не применяем, иначе прогревалось бы не больше 5 карточек в сутки.
 
     for (const word of slice) {
       if (context.request.signal.aborted) break;
@@ -76,7 +76,6 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
           prompt,
           userKeys: {},
           signal: context.request.signal,
-          beforeShared: limitGuard,
           validate: validateWordCard,
           isRegistered: true,
           only: ['gemini', 'groq', 'workersai'],
