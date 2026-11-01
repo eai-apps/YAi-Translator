@@ -29,6 +29,8 @@ interface WordPanelProps {
   translationLang?: LanguageCode;
   onPickTranslation?: (translation: string, lang: LanguageCode) => void;
   headerMenu?: ReactNode;
+  /** Готовый перевод: при переводе НА немецкий мгновенная карточка ищет немецкое слово перевода. */
+  translatedText?: string;
 }
 
 function CardSkeleton({ label }: { label: string }) {
@@ -56,14 +58,21 @@ export function WordPanel({
   translationLang,
   onPickTranslation,
   headerMenu,
+  translatedText,
 }: WordPanelProps) {
   const { t } = useTranslation();
   const hasDict = Boolean(dict.data);
   const dictEntry = dict.data?.entry ?? null;
   const aiCard: WordCard | null = word.data?.card ?? null;
 
-  const targetWord = (queryWord || dictEntry?.word || '').trim();
-  const isGerman = sourceLang === 'de' || (!sourceLang && /^[a-zäöüß\s]+$/i.test(targetWord));
+  const queryText = (queryWord || dictEntry?.word || '').trim();
+  const sourceIsGerman = sourceLang === 'de' || (!sourceLang && /^[a-zäöüß\s]+$/i.test(queryText));
+  // Русский → Немецкий: в немецкой базе ищем перевод («Какашка» → «Kacke»), а не русское слово.
+  const germanTranslation = (translatedText ?? '').trim().replace(/[.,!?;:…]+$/u, '');
+  const useTranslationWord =
+    !sourceIsGerman && translationLang === 'de' && germanTranslation.length > 0 && germanTranslation.split(/\s+/).length <= 3;
+  const targetWord = useTranslationWord ? germanTranslation : queryText;
+  const isGerman = sourceIsGerman || useTranslationWord;
   const { match: lexMatch } = useLexicon(targetWord, isGerman && !aiCard);
 
   // Ничего нет и ничего не грузится — карточки на экране нет
@@ -97,9 +106,15 @@ export function WordPanel({
           match={lexMatch}
           speech={speech}
           isPreparingAi={word.loading}
-          dictEntry={dictEntry}
+          dictEntry={useTranslationWord ? null : dictEntry}
+          meaning={useTranslationWord ? queryText.toLowerCase() : undefined}
           onPickTranslation={onPickTranslation}
         />
+        {useTranslationWord && dictEntry ? (
+          <div className="mt-4 border-t border-line pt-4">
+            <DictCard entry={dictEntry} speech={speech} withAi={false} onPick={onPickTranslation} />
+          </div>
+        ) : null}
         {word.error ? (
           <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-line pt-3">
             {word.error.code === 'LIMIT_REACHED' ? (

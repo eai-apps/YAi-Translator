@@ -310,6 +310,7 @@ export default function TranslatePage() {
           word={translator.word}
           dict={translator.dict}
           queryWord={translator.text}
+          translatedText={translator.result?.translatedText}
           sourceLang={wordLanguage}
           speech={speech}
           onRetry={translator.retryWord}

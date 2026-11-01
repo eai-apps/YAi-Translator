@@ -22,6 +22,8 @@ interface InstantWordCardProps {
   speech?: SpeechController;
   isPreparingAi?: boolean;
   dictEntry?: DictEntry | null;
+  /** Значение на языке пользователя, если оно уже известно (например, исходное слово при переводе ru → de). */
+  meaning?: string;
   onPickTranslation?: (translation: string, lang: LanguageCode) => void;
 }
 
@@ -53,6 +55,7 @@ export function InstantWordCard({
   isPreparingAi,
   dictEntry,
   onPickTranslation,
+  meaning,
 }: InstantWordCardProps) {
   const { t } = useTranslation();
   const entry = match.entry;
@@ -77,6 +80,7 @@ export function InstantWordCard({
             <Badge tone="neutral">{t(getPosKey(entry.pos))}</Badge>
             <Badge tone="success">{t('word.instantBadge')}</Badge>
           </div>
+          {meaning ? <p className="mt-1 text-lg font-medium text-ink">{meaning}</p> : null}
           {forms ? (
             <p className="mt-1 break-words text-sm italic leading-relaxed text-muted">{forms}</p>
           ) : null}
@@ -85,7 +89,9 @@ export function InstantWordCard({
           <AddToStudyQuickButton
             lemma={match.lemma}
             article={article}
-            translations={translations.map((s) => s.translation).filter((s): s is string => Boolean(s))}
+            translations={
+              meaning ? [meaning] : translations.map((s) => s.translation).filter((s): s is string => Boolean(s))
+            }
           />
           {speech ? (
             <SpeakButton
