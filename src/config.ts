@@ -11,10 +11,10 @@ export const API_BASE = (
 ).replace(/\/+$/, '');
 
 /** Версия показывается в профиле; совпадает с package.json. */
-export const APP_VERSION = '0.15.0';
+export const APP_VERSION = '1.0.0';
 
 /** Код версии приложения Android (увеличивается при каждом обновлении APK). */
-export const ANDROID_VERSION_CODE = 4;
+export const ANDROID_VERSION_CODE = 5;
 
 export const STORAGE_KEYS = {
   theme: 'yai.theme',
@@ -62,6 +62,10 @@ export const STORAGE_KEYS = {
   studyLists: 'yai.study.lists',
   /** Уже отправленные на сервер списки (id → updatedAt). */
   studyMarksLists: 'yai.study.marks.lists',
+  /** Время последней успешной синхронизации (мс). */
+  lastSyncTime: 'yai.lastSyncTime',
+  /** Время последнего изменения локальных настроек (мс). */
+  settingsUpdatedAt: 'yai.settingsUpdatedAt',
 } as const;
 
 /** Отметки отправленного для синхронизации: у истории переводов и у вопросов ИИ — свои. */
@@ -108,17 +112,19 @@ export const ARTICLE_COLORS = {
   das: 'text-das',
 } as const;
 
-/** Тип сборки: web, ios, android или rustore. */
-export function storeBuild(): 'web' | 'ios' | 'android' | 'rustore' {
+/** Тип сборки: web, ios, android, rustore или play (Google Play). */
+export function storeBuild(): 'web' | 'ios' | 'android' | 'rustore' | 'play' {
+  const storeFlag = (import.meta.env.VITE_STORE ?? import.meta.env.VITE_STORE_BUILD ?? '').toLowerCase();
+  if (storeFlag === 'play') return 'play';
+  if (storeFlag === 'rustore') return 'rustore';
+
   // Приложение грузит экраны с сайта (server.url), поэтому сборка сайта узнаёт приложение по Capacitor.
   if (Capacitor.isNativePlatform()) {
     const platform = Capacitor.getPlatform();
     if (platform === 'android') return 'android';
     if (platform === 'ios') return 'ios';
   }
-  const env = (import.meta.env.VITE_STORE_BUILD ?? '').toLowerCase();
-  if (env === 'ios') return 'ios';
-  if (env === 'android') return 'android';
-  if (env === 'rustore') return 'rustore';
+  if (storeFlag === 'ios') return 'ios';
+  if (storeFlag === 'android') return 'android';
   return 'web';
 }

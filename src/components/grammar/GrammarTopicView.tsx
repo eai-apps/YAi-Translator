@@ -9,6 +9,8 @@ import { Badge } from '../ui/Badge';
 import { SectionTitle } from '../ui/SectionTitle';
 import { grammarCategoryKey } from './grammarLabels';
 import { GrammarLinkedText } from './GrammarLinkedText';
+import { GrammarQuiz } from './GrammarQuiz';
+import { GrammarTableSection } from './GrammarTableSection';
 
 interface GrammarTopicViewProps {
   topic: GrammarTopicResponse;
@@ -157,6 +159,10 @@ export function GrammarTopicView({ topic, onOpenTopic, compact = false }: Gramma
               </ul>
             </section>
           ) : null}
+
+          {body.table ? <GrammarTableSection table={body.table} /> : null}
+
+          {body.quiz && body.quiz.length > 0 ? <GrammarQuiz quiz={body.quiz} /> : null}
 
           {body.related.length > 0 ? (
             <section>

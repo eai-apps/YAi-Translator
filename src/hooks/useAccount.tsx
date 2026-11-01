@@ -19,6 +19,7 @@ export interface AccountContextValue {
   logout: () => Promise<void>;
   logoutAll: () => Promise<void>;
   changePassword: (oldPassword: string, newPassword: string) => Promise<void>;
+  deleteAccount: (password: string) => Promise<void>;
   /** Обновляет данные профиля с сервера (после сохранения ключа и т.п.). */
   refresh: () => Promise<void>;
 }
@@ -109,6 +110,13 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     [adoptSession],
   );
 
+  const deleteAccount = useCallback(async (password: string) => {
+    await api.deleteAccount(password);
+    clearSessionToken();
+    setAccount(null);
+    setStatus('anonymous');
+  }, []);
+
   const refresh = useCallback(async () => {
     try {
       adoptSession(await api.me());
@@ -118,8 +126,8 @@ export function AccountProvider({ children }: { children: ReactNode }) {
   }, [adoptSession]);
 
   const value = useMemo(
-    () => ({ status, account, login, register, logout, logoutAll, changePassword, refresh }),
-    [status, account, login, register, logout, logoutAll, changePassword, refresh],
+    () => ({ status, account, login, register, logout, logoutAll, changePassword, deleteAccount, refresh }),
+    [status, account, login, register, logout, logoutAll, changePassword, deleteAccount, refresh],
   );
 
   return <AccountContext.Provider value={value}>{children}</AccountContext.Provider>;

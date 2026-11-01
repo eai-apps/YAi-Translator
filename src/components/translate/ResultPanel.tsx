@@ -212,7 +212,7 @@ export function ResultPanel(props: ResultPanelProps) {
                   targetDir === 'rtl' ? 'text-right' : ''
                 }`}
               >
-                {targetLang === 'de' && props.matchedWordsMap && props.onSelectConnectedWord ? (
+                {props.matchedWordsMap && props.matchedWordsMap.size > 0 && props.onSelectConnectedWord ? (
                   <InteractiveGermanText
                     text={result.translatedText}
                     matchedWordsMap={props.matchedWordsMap}

@@ -22,6 +22,7 @@ interface CheckPanelProps {
 
 export function CheckPanel({ data, loading, error, speech, onClose, onRetry }: CheckPanelProps) {
   const { t } = useTranslation();
+  if (data?.available === false && !loading) return null;
 
   return (
     <AsyncPanel
@@ -86,6 +87,10 @@ export function CheckPanel({ data, loading, error, speech, onClose, onRetry }: C
           {data.encouragement ? (
             <p className="text-sm italic text-muted">{data.encouragement}</p>
           ) : null}
+
+          <p className="pt-2 text-right text-[11px] text-muted">
+            {t('check.sourceAttribution', 'Проверка: LanguageTool (LGPL)')}
+          </p>
         </div>
       ) : null}
     </AsyncPanel>

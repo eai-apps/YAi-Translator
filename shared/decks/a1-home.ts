@@ -1,170 +1,379 @@
-/** Набор A1 «Дом». Артикли и множественное число сверены по de.wiktionary 31.10.2026. */
+/** Набор «a1-home» (уровень A1, язык de). Автоматическая сборка. */
 import type { StudyDeck } from '../study';
 
 export const A1_HOME: StudyDeck = {
-  id: 'a1-home',
-  level: 'A1',
-  titleKey: 'study.deckA1Home',
-  words: [
+  "id": "a1-home",
+  "level": "A1",
+  "lang": "de",
+  "titleKey": "study.deckA1Home",
+  "words": [
     {
-      lemma: 'Haus',
-      article: 'das',
-      plural: 'Häuser',
-      partOfSpeech: 'noun',
-      translations: { ru: 'дом', uk: 'будинок', en: 'house' },
-      example: { text: 'Das Haus hat einen großen Garten.', translation: 'У дома большой сад.' },
+      "lemma": "Haus",
+      "article": "das",
+      "plural": "Häuser",
+      "partOfSpeech": "noun",
+      "translations": {
+        "ru": "дом",
+        "uk": "дом",
+        "en": "Haus"
+      },
+      "example": {
+        "text": "Ich bin im Haus.",
+        "translation": "Я в доме."
+      },
+      "lang": "de"
     },
     {
-      lemma: 'Wohnung',
-      article: 'die',
-      plural: 'Wohnungen',
-      partOfSpeech: 'noun',
-      translations: { ru: 'квартира', uk: 'квартира', en: 'apartment' },
-      example: { text: 'Die Wohnung ist klein, aber gemütlich.', translation: 'Квартира маленькая, но уютная.' },
+      "lemma": "Wohnung",
+      "article": "die",
+      "plural": "Wohnungen",
+      "partOfSpeech": "noun",
+      "translations": {
+        "ru": "квартира",
+        "uk": "квартира",
+        "en": "Wohnung"
+      },
+      "example": {
+        "text": "Meine Wohnung ist nahe.",
+        "translation": "Моя квартира близко."
+      },
+      "lang": "de"
     },
     {
-      lemma: 'Zimmer',
-      article: 'das',
-      plural: 'Zimmer',
-      partOfSpeech: 'noun',
-      translations: { ru: 'комната', uk: 'кімната', en: 'room' },
-      example: { text: 'Mein Zimmer ist im zweiten Stock.', translation: 'Моя комната на втором этаже.' },
+      "lemma": "Zimmer",
+      "article": "das",
+      "plural": "Zimmer",
+      "partOfSpeech": "noun",
+      "translations": {
+        "ru": "комната",
+        "uk": "комната",
+        "en": "Zimmer"
+      },
+      "example": {
+        "text": "Tom ist im Zimmer.",
+        "translation": "Том в комнате."
+      },
+      "lang": "de"
     },
     {
-      lemma: 'Küche',
-      article: 'die',
-      plural: 'Küchen',
-      partOfSpeech: 'noun',
-      translations: { ru: 'кухня', uk: 'кухня', en: 'kitchen' },
-      example: { text: 'Die Küche ist hell und warm.', translation: 'Кухня светлая и тёплая.' },
+      "lemma": "Küche",
+      "article": "die",
+      "plural": "Küchen",
+      "partOfSpeech": "noun",
+      "translations": {
+        "ru": "кухня",
+        "uk": "кухня",
+        "en": "Küche"
+      },
+      "example": {
+        "text": "Hier ist die Küche.",
+        "translation": "Вот кухня."
+      },
+      "lang": "de"
     },
     {
-      lemma: 'Bad',
-      article: 'das',
-      plural: 'Bäder',
-      partOfSpeech: 'noun',
-      translations: { ru: 'ванная', uk: 'ванна кімната', en: 'bathroom' },
-      example: { text: 'Das Bad ist neben dem Schlafzimmer.', translation: 'Ванная рядом со спальней.' },
+      "lemma": "Bad",
+      "article": "das",
+      "plural": "Bäder",
+      "partOfSpeech": "noun",
+      "translations": {
+        "ru": "ванная",
+        "uk": "ванная",
+        "en": "Bad"
+      },
+      "example": {
+        "text": "Tom nahm ein Bad.",
+        "translation": "Том принял ванну."
+      },
+      "lang": "de"
     },
     {
-      lemma: 'Schlafzimmer',
-      article: 'das',
-      plural: 'Schlafzimmer',
-      partOfSpeech: 'noun',
-      translations: { ru: 'спальня', uk: 'спальня', en: 'bedroom' },
-      example: { text: 'Im Schlafzimmer steht ein großes Bett.', translation: 'В спальне стоит большая кровать.' },
+      "lemma": "Balkon",
+      "article": "der",
+      "plural": "Balkons",
+      "partOfSpeech": "noun",
+      "translations": {
+        "ru": "балкон",
+        "uk": "балкон",
+        "en": "Balkon"
+      },
+      "example": {
+        "text": "Ich bin auf dem Balkon.",
+        "translation": "Я на балконе."
+      },
+      "lang": "de"
     },
     {
-      lemma: 'Tisch',
-      article: 'der',
-      plural: 'Tische',
-      partOfSpeech: 'noun',
-      translations: { ru: 'стол', uk: 'стіл', en: 'table' },
-      example: { text: 'Der Tisch steht in der Küche.', translation: 'Стол стоит на кухне.' },
+      "lemma": "Garten",
+      "article": "der",
+      "plural": "Gärten",
+      "partOfSpeech": "noun",
+      "translations": {
+        "ru": "сад",
+        "uk": "сад",
+        "en": "Garten"
+      },
+      "example": {
+        "text": "Tom ist im Garten.",
+        "translation": "Том в саду."
+      },
+      "lang": "de"
     },
     {
-      lemma: 'Stuhl',
-      article: 'der',
-      plural: 'Stühle',
-      partOfSpeech: 'noun',
-      translations: { ru: 'стул', uk: 'стілець', en: 'chair' },
-      example: { text: 'Der Stuhl ist bequem.', translation: 'Стул удобный.' },
+      "lemma": "Tür",
+      "article": "die",
+      "plural": "Türen",
+      "partOfSpeech": "noun",
+      "translations": {
+        "ru": "дверь",
+        "uk": "дверь",
+        "en": "Tür"
+      },
+      "example": {
+        "text": "Halte die Tür!",
+        "translation": "Придерживай дверь."
+      },
+      "lang": "de"
     },
     {
-      lemma: 'Bett',
-      article: 'das',
-      plural: 'Betten',
-      partOfSpeech: 'noun',
-      translations: { ru: 'кровать', uk: 'ліжко', en: 'bed' },
-      example: { text: 'Das Bett ist sehr weich.', translation: 'Кровать очень мягкая.' },
+      "lemma": "Fenster",
+      "article": "das",
+      "plural": "Fenster",
+      "partOfSpeech": "noun",
+      "translations": {
+        "ru": "окно",
+        "uk": "окно",
+        "en": "Fenster"
+      },
+      "example": {
+        "text": "Öffne die Fenster!",
+        "translation": "Открой окна."
+      },
+      "lang": "de"
     },
     {
-      lemma: 'Schrank',
-      article: 'der',
-      plural: 'Schränke',
-      partOfSpeech: 'noun',
-      translations: { ru: 'шкаф', uk: 'шафа', en: 'wardrobe' },
-      example: { text: 'Die Kleidung ist im Schrank.', translation: 'Одежда в шкафу.' },
+      "lemma": "Wand",
+      "article": "die",
+      "plural": "Wände",
+      "partOfSpeech": "noun",
+      "translations": {
+        "ru": "стена",
+        "uk": "стена",
+        "en": "Wand"
+      },
+      "example": {
+        "text": "Eine Uhr hängt an der Wand.",
+        "translation": "На стене висят часы."
+      },
+      "lang": "de"
     },
     {
-      lemma: 'Tür',
-      article: 'die',
-      plural: 'Türen',
-      partOfSpeech: 'noun',
-      translations: { ru: 'дверь', uk: 'двері', en: 'door' },
-      example: { text: 'Bitte mach die Tür zu.', translation: 'Закрой, пожалуйста, дверь.' },
+      "lemma": "Boden",
+      "article": "der",
+      "plural": "Böden",
+      "partOfSpeech": "noun",
+      "translations": {
+        "ru": "пол, земля",
+        "uk": "пол, земля",
+        "en": "Boden"
+      },
+      "example": {
+        "text": "Tom blickte zu Boden.",
+        "translation": "Том посмотрел на пол."
+      },
+      "lang": "de"
     },
     {
-      lemma: 'Fenster',
-      article: 'das',
-      plural: 'Fenster',
-      partOfSpeech: 'noun',
-      translations: { ru: 'окно', uk: 'вікно', en: 'window' },
-      example: { text: 'Das Fenster ist offen.', translation: 'Окно открыто.' },
+      "lemma": "Tisch",
+      "article": "der",
+      "plural": "Tische",
+      "partOfSpeech": "noun",
+      "translations": {
+        "ru": "стол",
+        "uk": "стол",
+        "en": "Tisch"
+      },
+      "example": {
+        "text": "Da ist ein Tisch.",
+        "translation": "Есть стол."
+      },
+      "lang": "de"
     },
     {
-      lemma: 'Teppich',
-      article: 'der',
-      plural: 'Teppiche',
-      partOfSpeech: 'noun',
-      translations: { ru: 'ковёр', uk: 'килим', en: 'carpet' },
-      example: { text: 'Der Teppich ist grau.', translation: 'Ковёр серый.' },
+      "lemma": "Stuhl",
+      "article": "der",
+      "plural": "Stühle",
+      "partOfSpeech": "noun",
+      "translations": {
+        "ru": "стул",
+        "uk": "стул",
+        "en": "Stuhl"
+      },
+      "example": {
+        "text": "Ich fiel vom Stuhl.",
+        "translation": "Я упал со стула."
+      },
+      "lang": "de"
     },
     {
-      lemma: 'Lampe',
-      article: 'die',
-      plural: 'Lampen',
-      partOfSpeech: 'noun',
-      translations: { ru: 'лампа', uk: 'лампа', en: 'lamp' },
-      example: { text: 'Die Lampe steht auf dem Tisch.', translation: 'Лампа стоит на столе.' },
+      "lemma": "Sofa",
+      "article": "das",
+      "plural": "Sofas",
+      "partOfSpeech": "noun",
+      "translations": {
+        "ru": "диван",
+        "uk": "диван",
+        "en": "Sofa"
+      },
+      "example": {
+        "text": "Es liegt auf dem Sofa.",
+        "translation": "Он на диване."
+      },
+      "lang": "de"
     },
     {
-      lemma: 'Sofa',
-      article: 'das',
-      plural: 'Sofas',
-      partOfSpeech: 'noun',
-      translations: { ru: 'диван', uk: 'диван', en: 'sofa' },
-      example: { text: 'Auf dem Sofa liegt eine Katze.', translation: 'На диване лежит кошка.' },
+      "lemma": "Bett",
+      "article": "das",
+      "plural": "Betten",
+      "partOfSpeech": "noun",
+      "translations": {
+        "ru": "кровать",
+        "uk": "кровать",
+        "en": "Bett"
+      },
+      "example": {
+        "text": "Mach dein Bett!",
+        "translation": "Застели свою постель."
+      },
+      "lang": "de"
     },
     {
-      lemma: 'Kühlschrank',
-      article: 'der',
-      plural: 'Kühlschränke',
-      partOfSpeech: 'noun',
-      translations: { ru: 'холодильник', uk: 'холодильник', en: 'fridge' },
-      example: { text: 'Der Kühlschrank ist fast leer.', translation: 'Холодильник почти пустой.' },
+      "lemma": "Schrank",
+      "article": "der",
+      "plural": "Schränke",
+      "partOfSpeech": "noun",
+      "translations": {
+        "ru": "шкаф",
+        "uk": "шкаф",
+        "en": "Schrank"
+      },
+      "example": {
+        "text": "Tom öffnete den Schrank.",
+        "translation": "Том открыл шкаф."
+      },
+      "lang": "de"
     },
     {
-      lemma: 'Wand',
-      article: 'die',
-      plural: 'Wände',
-      partOfSpeech: 'noun',
-      translations: { ru: 'стена', uk: 'стіна', en: 'wall' },
-      example: { text: 'An der Wand hängt ein Bild.', translation: 'На стене висит картина.' },
+      "lemma": "Lampe",
+      "article": "die",
+      "plural": "Lampen",
+      "partOfSpeech": "noun",
+      "translations": {
+        "ru": "лампа",
+        "uk": "лампа",
+        "en": "Lampe"
+      },
+      "example": {
+        "text": "Ich brauche eine Lampe.",
+        "translation": "Мне нужна лампа."
+      },
+      "lang": "de"
     },
     {
-      lemma: 'Boden',
-      article: 'der',
-      plural: 'Böden',
-      partOfSpeech: 'noun',
-      translations: { ru: 'пол', uk: 'підлога', en: 'floor' },
-      example: { text: 'Der Boden ist aus Holz.', translation: 'Пол деревянный.' },
+      "lemma": "Teppich",
+      "article": "der",
+      "plural": "Teppiche",
+      "partOfSpeech": "noun",
+      "translations": {
+        "ru": "ковёр",
+        "uk": "ковёр",
+        "en": "Teppich"
+      },
+      "example": {
+        "text": "Ich möchte diesen Teppich nicht kaufen.",
+        "translation": "Я не хочу покупать этот ковёр."
+      },
+      "lang": "de"
     },
     {
-      lemma: 'Garten',
-      article: 'der',
-      plural: 'Gärten',
-      partOfSpeech: 'noun',
-      translations: { ru: 'сад', uk: 'сад', en: 'garden' },
-      example: { text: 'Im Garten wachsen Blumen.', translation: 'В саду растут цветы.' },
+      "lemma": "Fernseher",
+      "article": "der",
+      "plural": "Fernseher",
+      "partOfSpeech": "noun",
+      "translations": {
+        "ru": "телевизор",
+        "uk": "телевизор",
+        "en": "Fernseher"
+      },
+      "example": {
+        "text": "Der Fernseher ist an.",
+        "translation": "Телевизор включён."
+      },
+      "lang": "de"
     },
     {
-      lemma: 'Schlüssel',
-      article: 'der',
-      plural: 'Schlüssel',
-      partOfSpeech: 'noun',
-      translations: { ru: 'ключ', uk: 'ключ', en: 'key' },
-      example: { text: 'Wo ist mein Schlüssel?', translation: 'Где мой ключ?' },
+      "lemma": "Schlüssel",
+      "article": "der",
+      "plural": "Schlüssel",
+      "partOfSpeech": "noun",
+      "translations": {
+        "ru": "ключ",
+        "uk": "ключ",
+        "en": "Schlüssel"
+      },
+      "example": {
+        "text": "Gib mir den Schlüssel.",
+        "translation": "Дайте мне ключ."
+      },
+      "lang": "de"
     },
-  ],
+    {
+      "lemma": "Dusche",
+      "article": "die",
+      "plural": "Duschen",
+      "partOfSpeech": "noun",
+      "translations": {
+        "ru": "душ",
+        "uk": "душ",
+        "en": "Dusche"
+      },
+      "example": {
+        "text": "Ich war in der Dusche.",
+        "translation": "Я был в душе."
+      },
+      "lang": "de"
+    },
+    {
+      "lemma": "sauber",
+      "article": null,
+      "plural": null,
+      "partOfSpeech": "adjective",
+      "translations": {
+        "ru": "чистый",
+        "uk": "чистый",
+        "en": "sauber"
+      },
+      "example": {
+        "text": "Es ist sauber.",
+        "translation": "Оно чистое."
+      },
+      "lang": "de"
+    },
+    {
+      "lemma": "gemütlich",
+      "article": null,
+      "plural": null,
+      "partOfSpeech": "adjective",
+      "translations": {
+        "ru": "уютный",
+        "uk": "уютный",
+        "en": "gemütlich"
+      },
+      "example": {
+        "text": "Dieses Café ist gemütlich.",
+        "translation": "Это уютное кафе."
+      },
+      "lang": "de"
+    }
+  ]
 };

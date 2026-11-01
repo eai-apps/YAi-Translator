@@ -63,6 +63,23 @@ export default function AboutPage() {
         </Card>
 
         <Card className="p-4 sm:p-5">
+          <SectionTitle>{t('legal.title')}</SectionTitle>
+          <p className="mt-2 text-xs leading-relaxed text-muted">{t('legal.desc')}</p>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <Link to="/privacy">
+              <Button size="sm" variant="secondary">
+                {t('legal.privacy')}
+              </Button>
+            </Link>
+            <Link to="/terms">
+              <Button size="sm" variant="secondary">
+                {t('legal.terms')}
+              </Button>
+            </Link>
+          </div>
+        </Card>
+
+        <Card className="p-4 sm:p-5">
           <ChangelogList uiLang={uiLanguage} />
         </Card>
       </div>

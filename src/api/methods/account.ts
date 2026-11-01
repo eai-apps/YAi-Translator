@@ -39,6 +39,10 @@ export const accountMethods = {
     return request<AccountInfo>('/api/auth/password', { method: 'POST', body: payload });
   },
 
+  deleteAccount(password: string): Promise<{ ok: boolean }> {
+    return request<{ ok: boolean }>('/api/auth/delete', { method: 'POST', body: { password } });
+  },
+
   saveAccountKey(provider: KeyProvider, payload: SaveKeyRequest): Promise<SaveKeyResponse> {
     return request<SaveKeyResponse>(`/api/keys/${provider}`, { method: 'PUT', body: payload });
   },

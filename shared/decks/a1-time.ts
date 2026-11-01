@@ -1,170 +1,475 @@
-/** Набор A1 «Время и дни». Артикли и множественное число сверены по de.wiktionary 31.10.2026. */
+/** Набор «a1-time» (уровень A1, язык de). Автоматическая сборка. */
 import type { StudyDeck } from '../study';
 
 export const A1_TIME: StudyDeck = {
-  id: 'a1-time',
-  level: 'A1',
-  titleKey: 'study.deckA1Time',
-  words: [
+  "id": "a1-time",
+  "level": "A1",
+  "lang": "de",
+  "titleKey": "study.deckA1Time",
+  "words": [
     {
-      lemma: 'Zeit',
-      article: 'die',
-      plural: 'Zeiten',
-      partOfSpeech: 'noun',
-      translations: { ru: 'время', uk: 'час', en: 'time' },
-      example: { text: 'Ich habe heute keine Zeit.', translation: 'У меня сегодня нет времени.' },
+      "lemma": "Zeit",
+      "article": "die",
+      "plural": "Zeiten",
+      "partOfSpeech": "noun",
+      "translations": {
+        "ru": "время",
+        "uk": "время",
+        "en": "Zeit"
+      },
+      "example": {
+        "text": "Ist es Zeit?",
+        "translation": "Ну что, пора?"
+      },
+      "lang": "de"
     },
     {
-      lemma: 'Tag',
-      article: 'der',
-      plural: 'Tage',
-      partOfSpeech: 'noun',
-      translations: { ru: 'день', uk: 'день', en: 'day' },
-      example: { text: 'Der Tag war lang.', translation: 'День был долгим.' },
+      "lemma": "Uhr",
+      "article": "die",
+      "plural": "Uhren",
+      "partOfSpeech": "noun",
+      "translations": {
+        "ru": "часы",
+        "uk": "часы",
+        "en": "Uhr"
+      },
+      "example": {
+        "text": "Es ist 20 Uhr.",
+        "translation": "Восемь часов вечера."
+      },
+      "lang": "de"
     },
     {
-      lemma: 'Woche',
-      article: 'die',
-      plural: 'Wochen',
-      partOfSpeech: 'noun',
-      translations: { ru: 'неделя', uk: 'тиждень', en: 'week' },
-      example: { text: 'Nächste Woche fahre ich nach Köln.', translation: 'На следующей неделе я еду в Кёльн.' },
+      "lemma": "Stunde",
+      "article": "die",
+      "plural": "Stunden",
+      "partOfSpeech": "noun",
+      "translations": {
+        "ru": "час",
+        "uk": "час",
+        "en": "Stunde"
+      },
+      "example": {
+        "text": "Du hast eine Stunde.",
+        "translation": "У вас есть час."
+      },
+      "lang": "de"
     },
     {
-      lemma: 'Monat',
-      article: 'der',
-      plural: 'Monate',
-      partOfSpeech: 'noun',
-      translations: { ru: 'месяц', uk: 'місяць', en: 'month' },
-      example: { text: 'Der Monat hat 30 Tage.', translation: 'В месяце 30 дней.' },
+      "lemma": "Minute",
+      "article": "die",
+      "plural": "Minuten",
+      "partOfSpeech": "noun",
+      "translations": {
+        "ru": "минута",
+        "uk": "минута",
+        "en": "Minute"
+      },
+      "example": {
+        "text": "Nur eine Minute.",
+        "translation": "Минуточку."
+      },
+      "lang": "de"
     },
     {
-      lemma: 'Jahr',
-      article: 'das',
-      plural: 'Jahre',
-      partOfSpeech: 'noun',
-      translations: { ru: 'год', uk: 'рік', en: 'year' },
-      example: { text: 'Ich lerne seit einem Jahr Deutsch.', translation: 'Я учу немецкий уже год.' },
+      "lemma": "Sekunde",
+      "article": "die",
+      "plural": "Sekunden",
+      "partOfSpeech": "noun",
+      "translations": {
+        "ru": "секунда",
+        "uk": "секунда",
+        "en": "Sekunde"
+      },
+      "example": {
+        "text": "Entspann dich eine Sekunde.",
+        "translation": "Расслабься на секунду."
+      },
+      "lang": "de"
     },
     {
-      lemma: 'Stunde',
-      article: 'die',
-      plural: 'Stunden',
-      partOfSpeech: 'noun',
-      translations: { ru: 'час', uk: 'година', en: 'hour' },
-      example: { text: 'Der Kurs dauert zwei Stunden.', translation: 'Курс длится два часа.' },
+      "lemma": "Tag",
+      "article": "der",
+      "plural": "Tags",
+      "partOfSpeech": "noun",
+      "translations": {
+        "ru": "день",
+        "uk": "день",
+        "en": "Tag"
+      },
+      "example": {
+        "text": "Guten Tag!",
+        "translation": "Добрый день."
+      },
+      "lang": "de"
     },
     {
-      lemma: 'Minute',
-      article: 'die',
-      plural: 'Minuten',
-      partOfSpeech: 'noun',
-      translations: { ru: 'минута', uk: 'хвилина', en: 'minute' },
-      example: { text: 'Warte eine Minute, bitte.', translation: 'Подожди минуту, пожалуйста.' },
+      "lemma": "Woche",
+      "article": "die",
+      "plural": "Wochen",
+      "partOfSpeech": "noun",
+      "translations": {
+        "ru": "неделя",
+        "uk": "неделя",
+        "en": "Woche"
+      },
+      "example": {
+        "text": "Bis nächste Woche!",
+        "translation": "Увидимся на следующей неделе."
+      },
+      "lang": "de"
     },
     {
-      lemma: 'Morgen',
-      article: 'der',
-      plural: 'Morgen',
-      partOfSpeech: 'noun',
-      translations: { ru: 'утро', uk: 'ранок', en: 'morning' },
-      example: { text: 'Am Morgen trinke ich Kaffee.', translation: 'Утром я пью кофе.' },
+      "lemma": "Monat",
+      "article": null,
+      "plural": null,
+      "partOfSpeech": "other",
+      "translations": {
+        "ru": "месяц",
+        "uk": "месяц",
+        "en": "Monat"
+      },
+      "example": {
+        "text": "Wir ziehen nächsten Monat um.",
+        "translation": "Мы переезжаем в следующем месяце."
+      },
+      "lang": "de"
     },
     {
-      lemma: 'Mittag',
-      article: 'der',
-      plural: 'Mittage',
-      partOfSpeech: 'noun',
-      translations: { ru: 'полдень', uk: 'полудень', en: 'noon' },
-      example: { text: 'Am Mittag essen wir zusammen.', translation: 'В полдень мы едим вместе.' },
+      "lemma": "Jahr",
+      "article": "das",
+      "plural": "Jahre",
+      "partOfSpeech": "noun",
+      "translations": {
+        "ru": "год",
+        "uk": "год",
+        "en": "Jahr"
+      },
+      "example": {
+        "text": "Frohes neues Jahr!",
+        "translation": "С Новым годом!"
+      },
+      "lang": "de"
     },
     {
-      lemma: 'Abend',
-      article: 'der',
-      plural: 'Abende',
-      partOfSpeech: 'noun',
-      translations: { ru: 'вечер', uk: 'вечір', en: 'evening' },
-      example: { text: 'Am Abend sehe ich fern.', translation: 'Вечером я смотрю телевизор.' },
+      "lemma": "Morgen",
+      "article": "das",
+      "plural": null,
+      "partOfSpeech": "noun",
+      "translations": {
+        "ru": "утро",
+        "uk": "утро",
+        "en": "Morgen"
+      },
+      "example": {
+        "text": "Es ist Morgen.",
+        "translation": "Сейчас утро."
+      },
+      "lang": "de"
     },
     {
-      lemma: 'Nacht',
-      article: 'die',
-      plural: 'Nächte',
-      partOfSpeech: 'noun',
-      translations: { ru: 'ночь', uk: 'ніч', en: 'night' },
-      example: { text: 'Die Nacht war kalt.', translation: 'Ночь была холодной.' },
+      "lemma": "Vormittag",
+      "article": "der",
+      "plural": "Vormittage",
+      "partOfSpeech": "noun",
+      "translations": {
+        "ru": "время до полудня",
+        "uk": "время до полудня",
+        "en": "Vormittag"
+      },
+      "example": {
+        "text": "Ich arbeite am Vormittag.",
+        "translation": "Я работаю утром."
+      },
+      "lang": "de"
     },
     {
-      lemma: 'Montag',
-      article: 'der',
-      plural: 'Montage',
-      partOfSpeech: 'noun',
-      translations: { ru: 'понедельник', uk: 'понеділок', en: 'Monday' },
-      example: { text: 'Am Montag beginnt die Arbeit.', translation: 'В понедельник начинается работа.' },
+      "lemma": "Mittag",
+      "article": "das",
+      "plural": null,
+      "partOfSpeech": "noun",
+      "translations": {
+        "ru": "полдень",
+        "uk": "полдень",
+        "en": "Mittag"
+      },
+      "example": {
+        "text": "Ich esse Mittag.",
+        "translation": "Я обедаю."
+      },
+      "lang": "de"
     },
     {
-      lemma: 'Dienstag',
-      article: 'der',
-      plural: 'Dienstage',
-      partOfSpeech: 'noun',
-      translations: { ru: 'вторник', uk: 'вівторок', en: 'Tuesday' },
-      example: { text: 'Am Dienstag habe ich Deutsch.', translation: 'По вторникам у меня немецкий.' },
+      "lemma": "Nachmittag",
+      "article": "der",
+      "plural": "Nachmittage",
+      "partOfSpeech": "noun",
+      "translations": {
+        "ru": "время после полудня",
+        "uk": "время после полудня",
+        "en": "Nachmittag"
+      },
+      "example": {
+        "text": "Regnet es heute Nachmittag?",
+        "translation": "Будет ли дождь сегодня днем?"
+      },
+      "lang": "de"
     },
     {
-      lemma: 'Mittwoch',
-      article: 'der',
-      plural: 'Mittwoche',
-      partOfSpeech: 'noun',
-      translations: { ru: 'среда', uk: 'середа', en: 'Wednesday' },
-      example: { text: 'Am Mittwoch ist das Meeting.', translation: 'В среду совещание.' },
+      "lemma": "Abend",
+      "article": "der",
+      "plural": "Abende",
+      "partOfSpeech": "noun",
+      "translations": {
+        "ru": "вечер",
+        "uk": "вечер",
+        "en": "Abend"
+      },
+      "example": {
+        "text": "Guten Abend!",
+        "translation": "Добрый вечер!"
+      },
+      "lang": "de"
     },
     {
-      lemma: 'Donnerstag',
-      article: 'der',
-      plural: 'Donnerstage',
-      partOfSpeech: 'noun',
-      translations: { ru: 'четверг', uk: 'четвер', en: 'Thursday' },
-      example: { text: 'Am Donnerstag kommt der Arzt.', translation: 'В четверг придёт врач.' },
+      "lemma": "Nacht",
+      "article": "die",
+      "plural": "Nächte",
+      "partOfSpeech": "noun",
+      "translations": {
+        "ru": "ночь",
+        "uk": "ночь",
+        "en": "Nacht"
+      },
+      "example": {
+        "text": "Gute Nacht!",
+        "translation": "Спокойной ночи."
+      },
+      "lang": "de"
     },
     {
-      lemma: 'Freitag',
-      article: 'der',
-      plural: 'Freitage',
-      partOfSpeech: 'noun',
-      translations: { ru: 'пятница', uk: 'пʼятниця', en: 'Friday' },
-      example: { text: 'Am Freitag arbeite ich nicht.', translation: 'В пятницу я не работаю.' },
+      "lemma": "heute",
+      "article": "das",
+      "plural": null,
+      "partOfSpeech": "noun",
+      "translations": {
+        "ru": "сегодня",
+        "uk": "сегодня",
+        "en": "heute"
+      },
+      "example": {
+        "text": "Er kommt heute.",
+        "translation": "Он будет сегодня здесь."
+      },
+      "lang": "de"
     },
     {
-      lemma: 'Samstag',
-      article: 'der',
-      plural: 'Samstage',
-      partOfSpeech: 'noun',
-      translations: { ru: 'суббота', uk: 'субота', en: 'Saturday' },
-      example: { text: 'Am Samstag gehen wir einkaufen.', translation: 'В субботу мы идём за покупками.' },
+      "lemma": "Montag",
+      "article": "der",
+      "plural": "Montage",
+      "partOfSpeech": "noun",
+      "translations": {
+        "ru": "понедельник",
+        "uk": "понедельник",
+        "en": "Montag"
+      },
+      "example": {
+        "text": "Bis Montag!",
+        "translation": "Увидимся в понедельник."
+      },
+      "lang": "de"
     },
     {
-      lemma: 'Sonntag',
-      article: 'der',
-      plural: 'Sonntage',
-      partOfSpeech: 'noun',
-      translations: { ru: 'воскресенье', uk: 'неділя', en: 'Sunday' },
-      example: { text: 'Am Sonntag schlafe ich lange.', translation: 'В воскресенье я долго сплю.' },
+      "lemma": "Dienstag",
+      "article": "der",
+      "plural": "Dienstage",
+      "partOfSpeech": "noun",
+      "translations": {
+        "ru": "вторник",
+        "uk": "вторник",
+        "en": "Dienstag"
+      },
+      "example": {
+        "text": "Hast du am Dienstag frei?",
+        "translation": "Ты свободен во вторник?"
+      },
+      "lang": "de"
     },
     {
-      lemma: 'Wochenende',
-      article: 'das',
-      plural: 'Wochenenden',
-      partOfSpeech: 'noun',
-      translations: { ru: 'выходные', uk: 'вихідні', en: 'weekend' },
-      example: { text: 'Das Wochenende war schön.', translation: 'Выходные были хорошие.' },
+      "lemma": "Mittwoch",
+      "article": "der",
+      "plural": "Mittwoche",
+      "partOfSpeech": "noun",
+      "translations": {
+        "ru": "среда",
+        "uk": "среда",
+        "en": "Mittwoch"
+      },
+      "example": {
+        "text": "Heute ist Mittwoch.",
+        "translation": "Сегодня среда."
+      },
+      "lang": "de"
     },
     {
-      lemma: 'Feiertag',
-      article: 'der',
-      plural: 'Feiertage',
-      partOfSpeech: 'noun',
-      translations: { ru: 'праздник', uk: 'свято', en: 'public holiday' },
-      example: { text: 'Morgen ist ein Feiertag.', translation: 'Завтра праздник.' },
+      "lemma": "Donnerstag",
+      "article": "der",
+      "plural": "Donnerstage",
+      "partOfSpeech": "noun",
+      "translations": {
+        "ru": "четверг",
+        "uk": "четверг",
+        "en": "Donnerstag"
+      },
+      "example": {
+        "text": "Heute ist Donnerstag.",
+        "translation": "Сегодня четверг."
+      },
+      "lang": "de"
     },
-  ],
+    {
+      "lemma": "Freitag",
+      "article": "der",
+      "plural": "Freitage",
+      "partOfSpeech": "noun",
+      "translations": {
+        "ru": "пятница",
+        "uk": "пятница",
+        "en": "Freitag"
+      },
+      "example": {
+        "text": "Ist heute Freitag?",
+        "translation": "Сегодня пятница?"
+      },
+      "lang": "de"
+    },
+    {
+      "lemma": "Samstag",
+      "article": "der",
+      "plural": "Samstage",
+      "partOfSpeech": "noun",
+      "translations": {
+        "ru": "суббота",
+        "uk": "суббота",
+        "en": "Samstag"
+      },
+      "example": {
+        "text": "Es ist Samstag.",
+        "translation": "Суббота."
+      },
+      "lang": "de"
+    },
+    {
+      "lemma": "Sonntag",
+      "article": "der",
+      "plural": "Sonntage",
+      "partOfSpeech": "noun",
+      "translations": {
+        "ru": "воскресенье",
+        "uk": "воскресенье",
+        "en": "Sonntag"
+      },
+      "example": {
+        "text": "Es regnet seit Sonntag.",
+        "translation": "Дождь идет с воскресенья."
+      },
+      "lang": "de"
+    },
+    {
+      "lemma": "Wochenende",
+      "article": "das",
+      "plural": "Wochenenden",
+      "partOfSpeech": "noun",
+      "translations": {
+        "ru": "выходные",
+        "uk": "выходные",
+        "en": "Wochenende"
+      },
+      "example": {
+        "text": "Schönes Wochenende!",
+        "translation": "Хороших выходных!"
+      },
+      "lang": "de"
+    },
+    {
+      "lemma": "Kalender",
+      "article": "der",
+      "plural": "Kalender",
+      "partOfSpeech": "noun",
+      "translations": {
+        "ru": "календарь",
+        "uk": "календарь",
+        "en": "Kalender"
+      },
+      "example": {
+        "text": "Ich brauche einen Kalender.",
+        "translation": "Мне нужен календарь."
+      },
+      "lang": "de"
+    },
+    {
+      "lemma": "Datum",
+      "article": "das",
+      "plural": "Daten",
+      "partOfSpeech": "noun",
+      "translations": {
+        "ru": "дата",
+        "uk": "дата",
+        "en": "Datum"
+      },
+      "example": {
+        "text": "Welches Datum haben wir heute?",
+        "translation": "Яка сьогодні дата?"
+      },
+      "lang": "de"
+    },
+    {
+      "lemma": "früh",
+      "article": null,
+      "plural": null,
+      "partOfSpeech": "adjective",
+      "translations": {
+        "ru": "ранний",
+        "uk": "ранний",
+        "en": "früh"
+      },
+      "example": {
+        "text": "Es ist früh.",
+        "translation": "Рано."
+      },
+      "lang": "de"
+    },
+    {
+      "lemma": "spät",
+      "article": null,
+      "plural": null,
+      "partOfSpeech": "adjective",
+      "translations": {
+        "ru": "поздний",
+        "uk": "поздний",
+        "en": "spät"
+      },
+      "example": {
+        "text": "Zu spät.",
+        "translation": "Слишком поздно."
+      },
+      "lang": "de"
+    },
+    {
+      "lemma": "pünktlich",
+      "article": null,
+      "plural": null,
+      "partOfSpeech": "adjective",
+      "translations": {
+        "ru": "пунктуальный",
+        "uk": "пунктуальный",
+        "en": "pünktlich"
+      },
+      "example": {
+        "text": "Sei pünktlich.",
+        "translation": "Будь вовремя."
+      },
+      "lang": "de"
+    }
+  ]
 };

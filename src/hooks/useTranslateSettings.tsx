@@ -3,10 +3,11 @@
  * экран перевода читает их, профиль — меняет, история спрашивает «сохранять или нет».
  * У вошедших настройки дополнительно лежат в аккаунте (см. SyncSettingsCard).
  */
-import { createContext, useCallback, useContext, useMemo, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 import type { TranslateSettings } from '../lib/translateSettings';
 import { readTranslateSettings, writeTranslateSettings } from '../lib/translateSettings';
+import { markSettingsChanged, type SyncedSettingsPayload } from '../lib/settingsSync';
 
 interface TranslateSettingsContextValue {
   settings: TranslateSettings;
@@ -24,8 +25,21 @@ export function TranslateSettingsProvider({ children }: { children: ReactNode })
     setSettings((previous) => {
       const next = { ...previous, ...patch };
       writeTranslateSettings(next);
+      markSettingsChanged();
       return next;
     });
+  }, []);
+
+  useEffect(() => {
+    const onRemote = (event: Event) => {
+      const custom = event as CustomEvent<Partial<SyncedSettingsPayload>>;
+      if (custom.detail?.translateSettings) {
+        const next = { ...readTranslateSettings(), ...custom.detail.translateSettings };
+        setSettings(next);
+      }
+    };
+    window.addEventListener('yai:remote-settings-applied', onRemote);
+    return () => window.removeEventListener('yai:remote-settings-applied', onRemote);
   }, []);
 
   const replace = useCallback((next: TranslateSettings) => {

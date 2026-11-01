@@ -123,6 +123,13 @@ const days = [
 ];
 check('7. серия = 2 дня', srs.computeStreak(days, now) === 2, String(srs.computeStreak(days, now)));
 
+// 7б. Серия с целью 5 карточек: день с 5 повторениями засчитывается.
+const daysGoal5 = [
+  { day: day(0), reviews: 5, exercises: 0, updatedAt: now },
+  { day: day(1), reviews: 5, exercises: 0, updatedAt: now },
+];
+check('7б. серия с целью 5 = 2 дня', srs.computeStreak(daysGoal5, now, 5) === 2, String(srs.computeStreak(daysGoal5, now, 5)));
+
 // 8. График за 7 дней: старые → новые, пропуски заполнены нулями.
 const chart = srs.lastDays(days, 7, now);
 check(

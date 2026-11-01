@@ -98,7 +98,7 @@ export async function setUserBlocked(env: Env, userId: string, blocked: boolean)
   await env.DB.prepare('UPDATE users SET blocked = ? WHERE id = ?').bind(blocked ? 1 : 0, userId).run();
 }
 
-/** Удаляет аккаунт вместе с сессиями, ключами и синхронизированными записями. */
+/** Удаляет аккаунт вместе с сессиями, ключами, карточками учёбы и синхронизированными записями. */
 export async function deleteUser(env: Env, userId: string): Promise<void> {
   if (!env.DB) throw new ApiError('INTERNAL', 500);
   await ensureSchema(env);
@@ -106,6 +106,10 @@ export async function deleteUser(env: Env, userId: string): Promise<void> {
     env.DB.prepare('DELETE FROM sessions WHERE user_id = ?').bind(userId),
     env.DB.prepare('DELETE FROM user_keys WHERE user_id = ?').bind(userId),
     env.DB.prepare('DELETE FROM user_items WHERE user_id = ?').bind(userId),
+    env.DB.prepare('DELETE FROM study_cards WHERE user_id = ?').bind(userId),
+    env.DB.prepare('DELETE FROM study_progress WHERE user_id = ?').bind(userId),
+    env.DB.prepare('DELETE FROM study_days WHERE user_id = ?').bind(userId),
+    env.DB.prepare('DELETE FROM study_lists WHERE user_id = ?').bind(userId),
     env.DB.prepare('DELETE FROM users WHERE id = ?').bind(userId),
   ]);
 }

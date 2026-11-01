@@ -30,6 +30,27 @@ export interface GrammarMistake {
   why: string;
 }
 
+/** Вопрос мини-теста по теме грамматики (этап 18). */
+export interface GrammarQuizQuestion {
+  question: string;
+  options: string[];
+  answerIndex: number;
+  explanation: string;
+}
+
+/** Строка таблицы (например, формы неправильных глаголов или фразовые глаголы). */
+export interface GrammarTableRow {
+  col1: string;
+  col2: string;
+  col3?: string;
+  col4?: string;
+}
+
+export interface GrammarTable {
+  headers: string[];
+  rows: GrammarTableRow[];
+}
+
 /**
  * Содержание темы — тексты на языке интерфейса. Хранится в D1 (грамматика) или в кэше
  * (ответ «Спросить у AI»), поэтому общий тип подходит обоим.
@@ -44,6 +65,10 @@ export interface GrammarBody {
   /** Slug связанных тем — ссылки «Смотрите также». */
   related: string[];
   links: GrammarTopicLink[];
+  /** Мини-тест из 5 вопросов (этап 18). */
+  quiz?: GrammarQuizQuestion[];
+  /** Таблица форм или выражений (этап 18). */
+  table?: GrammarTable;
 }
 
 /** Тема в списке: без текста, только заголовок и служебные поля. */

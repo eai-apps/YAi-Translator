@@ -42,7 +42,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     if (!Number.isFinite(since) || since < 0) throw new ApiError('VALIDATION', 400);
 
     const result = await env.DB.prepare(
-      'SELECT item_id, payload, updated_at, deleted FROM user_items WHERE user_id = ? AND updated_at > ? ORDER BY updated_at ASC LIMIT 1000',
+      'SELECT item_id, payload, updated_at, deleted FROM user_items WHERE user_id = ? AND updated_at > ? ORDER BY updated_at ASC LIMIT 3000',
     )
       .bind(session.userId, Math.floor(since))
       .all<ItemRow>();
@@ -79,6 +79,20 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
       )
         .bind(session.userId, session.userId, items.length)
         .run();
+    }
+    // Повторное обновление существующей записи не занимает место; новые id сверх лимита отклоняем.
+    const uniqueIds = [...new Set(items.map(item => item.id))];
+    const existingIds = new Set<string>();
+    for (let start = 0; start < uniqueIds.length; start += 90) {
+      const chunk = uniqueIds.slice(start, start + 90);
+      const found = await env.DB.prepare(`SELECT item_id FROM user_items WHERE user_id = ? AND item_id IN (${chunk.map(() => '?').join(',')})`)
+        .bind(session.userId, ...chunk).all<{ item_id: string }>();
+      for (const item of found.results ?? []) existingIds.add(item.item_id);
+    }
+    const currentCount = await env.DB.prepare('SELECT COUNT(*) AS total FROM user_items WHERE user_id = ?')
+      .bind(session.userId).first<{ total: number }>();
+    if ((currentCount?.total ?? 0) + uniqueIds.filter(id => !existingIds.has(id)).length > AUTH.maxSyncItemsPerUser) {
+      throw new ApiError('VALIDATION', 400);
     }
     const now = Date.now();
 

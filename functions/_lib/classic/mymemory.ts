@@ -5,6 +5,7 @@
  */
 import { CLASSIC } from '../config';
 import { readCache, writeCache } from '../cache';
+import { readSetting, SETTINGS_KEYS } from '../settings';
 import type { Env } from '../env';
 import { withTimeoutSignal } from '../utils';
 import type { ClassicTranslator } from './types';
@@ -84,14 +85,17 @@ export const myMemoryTranslator: ClassicTranslator = {
     const chunks = splitIntoChunks(text, CLASSIC.myMemoryMaxBytes);
     if (chunks.length > CLASSIC.myMemoryMaxChunks) return null;
 
+    const email = (await readSetting<string>(env, SETTINGS_KEYS.mymemoryEmail)) || env.MYMEMORY_EMAIL;
+
     const parts: string[] = [];
     for (const chunk of chunks) {
       const url = new URL(CLASSIC.myMemoryUrl);
       url.searchParams.set('q', chunk);
       url.searchParams.set('langpair', `${sourceLang}|${targetLang}`);
-      if (env.MYMEMORY_EMAIL) url.searchParams.set('de', env.MYMEMORY_EMAIL);
+      if (email) url.searchParams.set('de', email);
 
-      const { signal: timeoutSignal, clear } = withTimeoutSignal(signal, CLASSIC.timeoutMs);
+      // Таймаут 4 секунды (этап 18)
+      const { signal: timeoutSignal, clear } = withTimeoutSignal(signal, 4_000);
       try {
         const response = await fetch(url.toString(), {
           signal: timeoutSignal,

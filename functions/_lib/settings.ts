@@ -14,6 +14,8 @@ export const SETTINGS_KEYS = {
   disabledProviders: 'disabled_providers',
   /** Почта для пункта «Обратная связь» в настройках (этап 8). */
   feedbackEmail: 'feedback_email',
+  /** Почта для MyMemory API (до 50 000 символов/день) (этап 18). */
+  mymemoryEmail: 'mymemory_email',
   /** Лимит ИИ для гостей (без аккаунта), по умолчанию 5. */
   guestAiLimit: 'guest_ai_limit',
   /** Лимит ИИ для зарегистрированных, по умолчанию 50. */
@@ -32,7 +34,8 @@ export const SETTINGS_KEYS = {
   paidDefaultModel: 'paid_default_model',
   /** Номер строки прогрева карточек популярных слов (этап 11). */
   warmCardsCursor: 'warm_cards_cursor',
-  /** true — ИИ-карточка слова загружается сразу; false (по умолчанию) — только по кнопке (экономит лимит). */
+  /** Тексты «Что нового» (этап 20). */
+  whatsNew: 'whats_new',
   wordCardAuto: 'word_card_auto',
 } as const;
 
@@ -55,7 +58,7 @@ export async function readFeedbackEmail(env: Env): Promise<string> {
 export const DEFAULT_DISABLED_PROVIDERS: ProviderId[] = ['mymemory'];
 
 const ALL_PROVIDERS: ProviderId[] = [
-  'gemini', 'groq', 'workersai', 'deepl', 'lara', 'microsoft', 'google', 'mymemory', 'm2m100',
+  'gemini', 'groq', 'workersai', 'deepl', 'lara', 'microsoft', 'google', 'mymemory', 'lingva', 'apertium', 'm2m100',
 ];
 
 let disabledMemo: { at: number; value: Set<ProviderId> } | null = null;
@@ -161,4 +164,47 @@ export function normalizeBanner(value: unknown): BannerSettings {
   // Включённый баннер без текста никому не нужен.
   if (!banner.ru && !banner.de && !banner.en) banner.enabled = false;
   return banner;
+}
+
+/** Настройки «Что нового» (этап 20): заголовок/версия + текст на трёх языках. */
+export interface WhatsNewSettings {
+  enabled: boolean;
+  version: string;
+  ru: string;
+  de: string;
+  en: string;
+}
+
+export const EMPTY_WHATS_NEW: WhatsNewSettings = {
+  enabled: false,
+  version: '',
+  ru: '',
+  de: '',
+  en: '',
+};
+
+export async function readWhatsNew(env: Env): Promise<WhatsNewSettings> {
+  const stored = await readSetting<Partial<WhatsNewSettings>>(env, SETTINGS_KEYS.whatsNew);
+  if (!stored) return EMPTY_WHATS_NEW;
+  return {
+    enabled: Boolean(stored.enabled),
+    version: typeof stored.version === 'string' ? stored.version.trim() : '',
+    ru: typeof stored.ru === 'string' ? stored.ru : '',
+    de: typeof stored.de === 'string' ? stored.de : '',
+    en: typeof stored.en === 'string' ? stored.en : '',
+  };
+}
+
+export function normalizeWhatsNew(value: unknown): WhatsNewSettings {
+  const source = (value ?? {}) as Record<string, unknown>;
+  const text = (raw: unknown): string => (typeof raw === 'string' ? raw.trim().slice(0, 4000) : '');
+  const whatsNew: WhatsNewSettings = {
+    enabled: Boolean(source.enabled),
+    version: typeof source.version === 'string' ? source.version.trim().slice(0, 30) : '',
+    ru: text(source.ru),
+    de: text(source.de),
+    en: text(source.en),
+  };
+  if (!whatsNew.ru && !whatsNew.de && !whatsNew.en) whatsNew.enabled = false;
+  return whatsNew;
 }

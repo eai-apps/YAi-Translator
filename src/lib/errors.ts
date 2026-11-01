@@ -70,6 +70,12 @@ export function providerLabel(provider: string, model?: string): string {
       return 'Google Translate';
     case 'mymemory':
       return 'MyMemory';
+    case 'lingva':
+      return 'Lingva Translate';
+    case 'apertium':
+      return 'Apertium';
+    case 'languagetool':
+      return 'LanguageTool';
     case 'm2m100':
       return 'Cloud';
     default:

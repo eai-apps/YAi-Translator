@@ -8,8 +8,8 @@ import type { LanguageCode } from './languages';
 /** Язык ввода: конкретный язык или автоопределение. */
 export type SourceLanguage = LanguageCode | 'auto';
 
-/** Уровень CEFR для примеров из карточки слова (C1 бывает только у тем грамматики). */
-export type CefrLevel = 'A1' | 'A2' | 'B1' | 'B2';
+/** Уровень CEFR для примеров и карточек слова (этапы 8, 15). */
+export type CefrLevel = 'A1' | 'A2' | 'B1' | 'B2' | 'C1+';
 
 export type GrammaticalCase = 'nominative' | 'accusative' | 'dative' | 'genitive';
 

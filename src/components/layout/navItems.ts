@@ -1,7 +1,7 @@
 /** Пункты меню: одни и те же для боковой панели и нижней навигации. */
 import type { ComponentType } from 'react';
 import { useTranslation } from 'react-i18next';
-import { IconAsk, IconBook, IconChat, IconGrammar, IconLearn, IconTranslate, IconUser } from './icons';
+import { IconAsk, IconBook, IconChat, IconFileText, IconGrammar, IconLearn, IconTranslate, IconUser } from './icons';
 
 export interface NavItem {
   to: string;
@@ -21,15 +21,19 @@ export function useNavItems(): NavItem[] {
   ];
 }
 
-/** Основные пункты бокового меню: между «Словарём» и «Учёбой» — «Грамматика». */
+/** Пункты бокового меню для больших экранов. */
 export function useSidebarItems(): NavItem[] {
   const { t } = useTranslation();
-  const [translate, dictionary, ...rest] = useNavItems();
+  const [translate, dictionary, learn, conversation, profile] = useNavItems();
   return [
     translate,
     dictionary,
+    { to: '/phrasebook', label: t('nav.phrasebook'), icon: IconBook },
     { to: '/grammar', label: t('nav.grammar'), icon: IconGrammar },
     { to: '/ask', label: t('nav.ask'), icon: IconAsk },
-    ...rest,
+    { to: '/letter', label: t('nav.letter'), icon: IconFileText },
+    learn,
+    conversation,
+    profile,
   ];
 }

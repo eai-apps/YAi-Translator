@@ -1,0 +1,100 @@
+[
+  {
+    "id": "kaikki",
+    "name": "Wiktionary / Kaikki.org (Wiktextract)",
+    "url": "https://kaikki.org/",
+    "license": "CC-BY-SA 4.0, GFDL",
+    "author": "Tatu Ylonen / Wiktionary community"
+  },
+  {
+    "id": "frequency-words",
+    "name": "FrequencyWords",
+    "url": "https://github.com/hermitdave/FrequencyWords",
+    "license": "MIT / CC-BY-SA",
+    "author": "Hermit Dave"
+  },
+  {
+    "id": "german-nouns",
+    "name": "german-nouns",
+    "url": "https://github.com/gambolputty/german-nouns",
+    "license": "CC-BY-SA 4.0",
+    "author": "gambolputty"
+  },
+  {
+    "id": "stopwords-iso",
+    "name": "stopwords-iso",
+    "url": "https://github.com/stopwords-iso",
+    "license": "MIT",
+    "author": "Gene Diaz & stopwords-iso contributors"
+  },
+  {
+    "id": "tatoeba",
+    "name": "Tatoeba",
+    "url": "https://tatoeba.org/",
+    "license": "CC-BY 2.0 FR",
+    "author": "Tatoeba community"
+  },
+  {
+    "id": "openthesaurus",
+    "name": "OpenThesaurus",
+    "url": "https://www.openthesaurus.de/",
+    "license": "LGPL 2.1",
+    "author": "Daniel Naber & OpenThesaurus contributors"
+  },
+  {
+    "id": "wordnet",
+    "name": "WordNet / Open English WordNet",
+    "url": "https://github.com/globalwordnet/english-wordnet",
+    "license": "CC-BY 4.0",
+    "author": "Princeton University & Global WordNet Association"
+  },
+  {
+    "id": "wikimedia-commons",
+    "name": "Wikimedia Commons / Lingua Libre",
+    "url": "https://commons.wikimedia.org/",
+    "license": "CC-BY-SA 4.0",
+    "author": "Wikimedia contributors & Lingua Libre"
+  },
+  {
+    "id": "tesseract-js",
+    "name": "Tesseract.js OCR",
+    "url": "https://github.com/naptha/tesseract.js",
+    "license": "Apache-2.0",
+    "author": "Naptha & Tesseract OCR contributors"
+  },
+  {
+    "id": "languagetool",
+    "name": "LanguageTool Spell & Grammar Checker",
+    "url": "https://languagetool.org/",
+    "license": "LGPL 2.1+",
+    "author": "Daniel Naber & LanguageTool Community"
+  },
+  {
+    "id": "lingva",
+    "name": "Lingva Translate",
+    "url": "https://github.com/TheDavidDelta/lingva-translate",
+    "license": "AGPL 3.0",
+    "author": "David Delta & contributors"
+  },
+  {
+    "id": "apertium",
+    "name": "Apertium Rule-based Machine Translation",
+    "url": "https://www.apertium.org/",
+    "license": "GPL 2.0+",
+    "author": "Apertium project contributors"
+  },
+  {
+    "id": "mymemory",
+    "name": "MyMemory Translated",
+    "url": "https://mymemory.translated.net/",
+    "license": "Free Translation API Terms",
+    "author": "Translated.net"
+  },
+  {
+    "id": "vitest",
+    "name": "Vitest Next Generation Testing Framework",
+    "url": "https://vitest.dev/",
+    "license": "MIT",
+    "author": "Anthony Fu, Matias Capeletto & Vitest team"
+  }
+]

@@ -1,6 +1,9 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
+import { readFileSync } from 'node:fs';
+
+const dataVersion = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8')).version;
 
 // Сборка фронтенда + PWA. Запросы /api проксируются на локальный wrangler pages dev.
 export default defineConfig({
@@ -36,6 +39,7 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,ico,woff2}'],
+        globIgnores: ['word/**', 'app/**'],
         navigateFallback: 'index.html',
         // Запросы к API никогда не подменяем офлайн-страницей.
         navigateFallbackDenylist: [/^\/api\//],
@@ -59,12 +63,39 @@ export default defineConfig({
             },
           },
           {
-            // Статическая база немецких слов /lex/de/: кэшируем на клиенте (CacheFirst)
+            // Статическая база слов /lex/<lang>/: кэшируем на клиенте (CacheFirst)
             urlPattern: /\/lex\/.*\.json$/i,
             handler: 'CacheFirst',
             options: {
-              cacheName: 'lexicon-chunks',
-              expiration: { maxEntries: 400, maxAgeSeconds: 60 * 60 * 24 * 30 },
+              cacheName: `lexicon-chunks-${dataVersion}`,
+              expiration: { maxEntries: 600, maxAgeSeconds: 60 * 60 * 24 * 60 },
+            },
+          },
+          {
+            // Примеры предложений Tatoeba /ex/<lang>/: кэшируем на клиенте
+            urlPattern: /\/ex\/.*\.json$/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: `examples-chunks-${dataVersion}`,
+              expiration: { maxEntries: 600, maxAgeSeconds: 60 * 60 * 24 * 60 },
+            },
+          },
+          {
+            // Офлайн-карточки слов /cards/
+            urlPattern: /\/cards\/.*\.json$/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: `offline-cards-${dataVersion}`,
+              expiration: { maxEntries: 600, maxAgeSeconds: 60 * 60 * 24 * 60 },
+            },
+          },
+          {
+            // Темы грамматики и ресурсы: доступны офлайн
+            urlPattern: /\/api\/(grammar|resources).*/i,
+            handler: 'StaleWhileRevalidate',
+            options: {
+              cacheName: 'api-content',
+              expiration: { maxEntries: 100, maxAgeSeconds: 60 * 60 * 24 * 14 },
             },
           },
         ],
@@ -84,5 +115,22 @@ export default defineConfig({
   build: {
     target: 'es2020',
     sourcemap: false,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router')) {
+              return 'vendor-react';
+            }
+            if (id.includes('i18next')) {
+              return 'vendor-i18n';
+            }
+            if (id.includes('@capacitor') || id.includes('@capgo')) {
+              return 'vendor-capacitor';
+            }
+          }
+        },
+      },
+    },
   },
 });

@@ -34,6 +34,54 @@ const SOURCES = [
     url: 'https://github.com/hermitdave/FrequencyWords',
     licenseKey: 'about.licenseFrequencyWords',
   },
+  {
+    "id": "stopwords-iso",
+    name: "Stopwords ISO",
+    url: "https://github.com/stopwords-iso",
+    licenseKey: "about.licenseStopwordsIso",
+  },
+  {
+    id: "wordnet",
+    name: "WordNet / Open English WordNet",
+    url: "https://github.com/globalwordnet/english-wordnet",
+    licenseKey: "about.licenseWordNet",
+  },
+  {
+    id: "wikimedia-commons",
+    name: "Wikimedia Commons / Lingua Libre",
+    url: "https://commons.wikimedia.org/",
+    licenseKey: "about.licenseWikimediaCommons",
+  },
+  {
+    id: "tesseract-js",
+    name: "Tesseract.js OCR",
+    url: "https://github.com/naptha/tesseract.js",
+    licenseKey: "about.licenseTesseractJs",
+  },
+  {
+    id: "languagetool",
+    name: "LanguageTool",
+    url: "https://languagetool.org/",
+    licenseKey: "about.licenseLanguageTool",
+  },
+  {
+    id: "lingva",
+    name: "Lingva Translate",
+    url: "https://github.com/TheDavidDelta/lingva-translate",
+    licenseKey: "about.licenseLingva",
+  },
+  {
+    id: "apertium",
+    name: "Apertium",
+    url: "https://www.apertium.org/",
+    licenseKey: "about.licenseApertium",
+  },
+  {
+    id: "mymemory",
+    name: "MyMemory Translated",
+    url: "https://mymemory.translated.net/",
+    licenseKey: "about.licenseMyMemory",
+  },
 ];
 
 export function DictionarySources() {

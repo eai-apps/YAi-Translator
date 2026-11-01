@@ -183,19 +183,19 @@ export function dueCount(cards: StudyCard[], progress: StudyProgress[], now = Da
   return progress.filter((item) => ids.has(item.cardId) && isDue(item, now)).length;
 }
 
-/** День засчитан: повторено не меньше 10 карточек или сделано упражнение. */
-export function isDayComplete(day: StudyDay | undefined): boolean {
+/** День засчитан: повторено не меньше цели (по умолчанию 10) карточек или сделано упражнение. */
+export function isDayComplete(day: StudyDay | undefined, goal = STUDY_STREAK_REVIEWS): boolean {
   if (!day) return false;
-  return day.reviews >= STUDY_STREAK_REVIEWS || day.exercises > 0;
+  return day.reviews >= goal || day.exercises > 0;
 }
 
 /**
  * Серия подряд идущих дней. Сегодняшний незаконченный день серию не рвёт:
  * отсчёт начинается со вчера, пока сегодня не выполнена цель.
  */
-export function computeStreak(days: StudyDay[], now = Date.now()): number {
+export function computeStreak(days: StudyDay[], now = Date.now(), goal = STUDY_STREAK_REVIEWS): number {
   const byDay = new Map(days.map((item) => [item.day, item] as const));
-  const complete = (date: Date) => isDayComplete(byDay.get(localDayKey(date)));
+  const complete = (date: Date) => isDayComplete(byDay.get(localDayKey(date)), goal);
 
   const cursor = new Date(now);
   if (!complete(cursor)) cursor.setDate(cursor.getDate() - 1);

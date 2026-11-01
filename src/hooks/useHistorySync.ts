@@ -23,6 +23,7 @@ export type SyncMarks = Record<string, number>;
 export interface SyncableItem {
   id: string;
   createdAt: number;
+  updatedAt?: number;
 }
 
 export interface MergePayload<T> {
@@ -68,9 +69,9 @@ export function useHistorySync<T extends SyncableItem>({
 
     for (const item of latest.current.items) {
       if (tombstones[item.id]) continue; // эта запись здесь удалена
-      if (marks.current[item.id] === item.createdAt) continue;
-      out.push({ id: item.id, payload: JSON.stringify(item), updatedAt: item.createdAt, deleted: false });
-      sent[item.id] = item.createdAt;
+      if (marks.current[item.id] === (item.updatedAt ?? item.createdAt)) continue;
+      out.push({ id: item.id, payload: JSON.stringify(item), updatedAt: item.updatedAt ?? item.createdAt, deleted: false });
+      sent[item.id] = item.updatedAt ?? item.createdAt;
     }
 
     // Удаления отправляются один раз.
@@ -111,7 +112,7 @@ export function useHistorySync<T extends SyncableItem>({
         // Запись другого вида (вопрос ИИ для истории переводов) не трогаем.
         const parsed = remote.deleted ? null : latest.current.parse(remote.payload);
         if (remote.deleted) {
-          if (itemsById.has(remote.id) && !tombstones[remote.id]) {
+          if (itemsById.has(remote.id) && remote.updatedAt >= (itemsById.get(remote.id)?.updatedAt ?? itemsById.get(remote.id)?.createdAt ?? 0) && !tombstones[remote.id]) {
             tombstones[remote.id] = remote.updatedAt;
             deleted = true;
           }
@@ -121,7 +122,7 @@ export function useHistorySync<T extends SyncableItem>({
         // Здесь запись удалена — не воскрешаем её.
         if (tombstones[remote.id]) continue;
         const local = itemsById.get(remote.id);
-        if (local && local.createdAt >= remote.updatedAt) continue;
+        if (local && (local.updatedAt ?? local.createdAt) >= remote.updatedAt) continue;
         itemsById.set(parsed.id, parsed);
         changed = true;
       }
@@ -142,33 +143,41 @@ export function useHistorySync<T extends SyncableItem>({
     running.current = true;
     try {
       await push();
-      // Первый обмен начинается с текущего момента: своё уже отправлено, тянуть историю
-      // целиком с сервера не нужно (записи, которых тут нет, пришли бы как «новые»).
-      const stored = Number(readStorage<number>(STORAGE_KEYS.syncSince, 0)) || 0;
-      const since = stored || Date.now();
+      // Полный обмен включает старые записи нового устройства и поздние офлайн-правки.
+      const since = 0;
       const result = await pull(since);
-      writeStorage(STORAGE_KEYS.syncSince, result.since);
+      writeStorage(`${marksKey}.since`, result.since);
+      writeStorage(STORAGE_KEYS.lastSyncTime, Date.now());
+      window.dispatchEvent(new CustomEvent('yai:sync-success', { detail: { time: Date.now() } }));
       latest.current.onMerge(result);
     } catch {
       latest.current.onError();
     } finally {
       running.current = false;
     }
-  }, [pull, push, signedIn]);
+  }, [pull, push, signedIn, marksKey]);
 
   // После выхода отправленное забываем: новый вход начинает с чистого листа.
   useEffect(() => {
     if (!signedIn) {
       marks.current = {};
       writeStorage(marksKey, {});
+      writeStorage(`${marksKey}.since`, 0);
     }
   }, [signedIn, marksKey]);
+
+  useEffect(() => {
+    if (!signedIn) return;
+    const onSyncNow = () => void sync();
+    window.addEventListener('yai:sync-now', onSyncNow);
+    return () => window.removeEventListener('yai:sync-now', onSyncNow);
+  }, [signedIn, sync]);
 
   // Обмен при входе, раз в минуту и после каждого изменения истории.
   const signature = items
     .map((item) => {
       const favorite = (item as { favorite?: boolean }).favorite ? 1 : 0;
-      return `${item.id}:${item.createdAt}:${favorite}`;
+      return `${item.id}:${item.updatedAt ?? item.createdAt}:${favorite}`;
     })
     .join(',');
   useEffect(() => {

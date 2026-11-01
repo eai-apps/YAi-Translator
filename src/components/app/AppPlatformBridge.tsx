@@ -8,6 +8,7 @@ import { APP_UPDATE_EVENT, checkAppUpdate } from '../../lib/appUpdate';
 import { checkAndDownloadLiveUpdate } from '../../lib/liveUpdate';
 import { useTheme } from '../../hooks/useTheme';
 import { AppUpdateModal, type AppUpdateInfo } from './AppUpdateModal';
+import { useSpatialNavigation } from '../../hooks/useSpatialNavigation';
 
 /**
  * Мост между нативной платформой (Capacitor Android / TV) и React-приложением:
@@ -22,6 +23,9 @@ export const AppPlatformBridge: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [updateInfo, setUpdateInfo] = useState<AppUpdateInfo | null>(null);
+
+  // Навигация стрелками клавиатуры и пульта Android TV (D-pad)
+  useSpatialNavigation();
 
   // Актуальные ссылки для обработчика кнопки «Назад»
   const locationRef = useRef(location);

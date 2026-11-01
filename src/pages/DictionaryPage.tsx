@@ -54,6 +54,7 @@ export default function DictionaryPage() {
           query={search.query}
           onQueryChange={search.setQuery}
           onSearch={() => void search.search()}
+          onAskAi={() => void search.search(undefined, true)}
           loading={search.loading}
           card={search.card}
           dict={search.dict}

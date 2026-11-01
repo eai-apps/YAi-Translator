@@ -16,7 +16,8 @@ export function PaidKeySection() {
   const { t, i18n } = useTranslation();
   const build = storeBuild();
   const isIos = build === 'ios';
-  const hideBuyLinks = isIos || build === 'android';
+  const isPlay = build === 'play';
+  const hideBuyLinks = isIos || isPlay || build === 'android';
 
   const [keys, setKeys] = useState(getUserKeys);
   const [baseUrl, setBaseUrl] = useState(keys.paidUrl || 'https://openrouter.ai/api/v1');
@@ -104,7 +105,7 @@ export function PaidKeySection() {
     <div className="rounded-2xl border border-line p-3 sm:p-4 space-y-3">
       <div className="flex items-center justify-between">
         <h4 className="text-sm font-semibold">
-          {isIos ? t('keys.paid.iosTitle') : t('keys.paid.title')}
+          {isIos || isPlay ? t('keys.paid.iosTitle') : t('keys.paid.title')}
         </h4>
         {hasKey && (
           <span className="rounded-full bg-accentSoft px-2 py-0.5 text-[11px] font-medium text-accent">

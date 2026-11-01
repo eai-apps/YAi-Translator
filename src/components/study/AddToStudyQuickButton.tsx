@@ -4,7 +4,8 @@
  * персональную колоду «Из переводов».
  */
 import { useTranslation } from 'react-i18next';
-import type { PartOfSpeech, StudyArticle, StudyCardInput, StudyExample } from '../../../shared/types';
+import type { LanguageCode, PartOfSpeech, StudyArticle, StudyCardInput, StudyExample } from '../../../shared/types';
+import { getLanguage } from '../../../shared/languages';
 import { studyCardId } from '../../../shared/study';
 import { cn } from '../../lib/cn';
 import { useStudy } from '../../hooks/useStudy';
@@ -13,6 +14,7 @@ import { IconBookmark } from '../layout/icons';
 
 interface AddToStudyQuickButtonProps {
   lemma: string;
+  lang?: LanguageCode;
   article?: StudyArticle | null;
   translations?: string[];
   partOfSpeech?: PartOfSpeech;
@@ -26,6 +28,7 @@ interface AddToStudyQuickButtonProps {
 
 export function AddToStudyQuickButton({
   lemma,
+  lang = 'de',
   article = null,
   translations,
   partOfSpeech = 'noun',
@@ -40,8 +43,8 @@ export function AddToStudyQuickButton({
   const { hasCard, addCard, removeCard, lists, createList, addToList } = useStudy();
 
   const cleanLemma = lemma.trim();
-  const cardId = studyCardId(cleanLemma);
-  const inCards = hasCard(cleanLemma);
+  const cardId = studyCardId(cleanLemma, lang);
+  const inCards = hasCard(cleanLemma, lang);
 
   const handleClick = (e: React.MouseEvent) => {
     if (stopPropagation) {
@@ -55,7 +58,7 @@ export function AddToStudyQuickButton({
     }
 
     // Собираем данные карточки
-    const ruTr = getGermanTranslation(cleanLemma);
+    const ruTr = lang === 'de' ? getGermanTranslation(cleanLemma) : undefined;
     const resolvedTranslations =
       translations && translations.length > 0
         ? translations
@@ -65,6 +68,7 @@ export function AddToStudyQuickButton({
 
     const input: StudyCardInput = {
       lemma: cleanLemma,
+      lang,
       article,
       plural,
       partOfSpeech,
@@ -75,17 +79,25 @@ export function AddToStudyQuickButton({
 
     addCard(input);
 
-    // Автоматически создаём колоду «Из переводов» или добавляем в существующую
-    const targetTitle = t('study.listFromTranslations');
+    // Автоматически создаём колоду «Из переводов» для нужного языка или добавляем в существующую
+    const langObj = getLanguage(lang);
+    const langSuffix = lang === 'de' ? '' : ` · ${langObj?.nativeName || lang.toUpperCase()}`;
+    const targetTitle = `${t('study.listFromTranslations')}${langSuffix}`;
+    const listId = `from_translations_${lang}`;
+
     const existingList = lists.find(
-      (l) => l.id === 'from_translations' || l.title === targetTitle || l.title === 'Из переводов',
+      (l) =>
+        l.id === listId ||
+        (lang === 'de' && l.id === 'from_translations') ||
+        l.title === targetTitle ||
+        (lang === 'de' && l.title === 'Из переводов'),
     );
 
     if (existingList) {
       addToList([cardId], existingList.id);
     } else {
       createList({
-        id: 'from_translations',
+        id: listId,
         title: targetTitle,
         emoji: '📖',
         cardIds: [cardId],

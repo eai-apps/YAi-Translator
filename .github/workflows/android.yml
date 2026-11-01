@@ -27,6 +27,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Run regression and API tests
+        run: npm test
+
       - name: Build web assets for Android & sync Capacitor
         run: npm run build:android
 

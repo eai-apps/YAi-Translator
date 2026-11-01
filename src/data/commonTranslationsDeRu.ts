@@ -3,7 +3,7 @@
  * Используется для мгновенной привязки слов к переводу и обратного поиска
  * (поиск немецкого слова по русскому запросу в словаре).
  */
-import { DECK_WORDS } from '../../shared/decks';
+import { DECK_TRANSLATIONS_DE_RU } from './deckTranslationsDeRu';
 
 export const COMMON_DE_RU: Record<string, string> = {
   // Существительные (A1-B1)
@@ -227,6 +227,7 @@ export const COMMON_DE_RU: Record<string, string> = {
   Karte: 'карта, билет',
   Kartoffel: 'картофель',
   Käse: 'сыр',
+  Kacke: 'какашка, дерьмо',
   Kasse: 'касса',
   Katze: 'кошка',
   Kaufhaus: 'универмаг',
@@ -838,11 +839,8 @@ export const COMMON_DE_RU: Record<string, string> = {
   zufrieden: 'довольный',
 };
 
-// Интегрируем слова из DECK_WORDS для гарантированного совпадения
-for (const item of DECK_WORDS) {
-  if (!COMMON_DE_RU[item.word.lemma] && item.word.translations?.ru) {
-    COMMON_DE_RU[item.word.lemma] = item.word.translations.ru;
-  }
+for (const [lemma, translation] of Object.entries(DECK_TRANSLATIONS_DE_RU)) {
+  if (!COMMON_DE_RU[lemma]) COMMON_DE_RU[lemma] = translation;
 }
 
 /** Быстрый поиск русского перевода немецкого слова или леммы. */

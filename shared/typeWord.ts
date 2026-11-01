@@ -11,6 +11,8 @@ import type { PartOfSpeech, ProviderId } from './typeTasks';
 
 export interface WordRequest {
   word: string;
+  /** Уже полученный обычный перевод для поиска единой карточки обратного направления. */
+  translation?: string;
   sourceLang: SourceLanguage;
   targetLang: LanguageCode;
   /** Нейросеть сайта: «id|модель» или «default» (ИИ Pro). */
@@ -143,6 +145,12 @@ export interface WordCard {
   dictSources?: DictSourceRef[];
   /** Slug тем справочника грамматики для пояснений (этап 5). */
   grammarTopics?: string[];
+  /** Человеческое произношение Wikimedia Commons (этап 15). */
+  audioUrl?: string | null;
+  /** Примерный уровень владения по частоте (этап 15): A1, A2, B1, B2, C1+. */
+  cefrLevel?: CefrLevel | null;
+  /** Ранг частотности слова (этап 15). */
+  frequencyRank?: number | null;
 }
 
 export interface WordResponse {
@@ -207,11 +215,13 @@ export interface ExplainResponse {
   cached: boolean;
 }
 
-/* ------------------------- Проверка немецкого текста ------------------------ */
+/* ------------------------- Проверка текста (LanguageTool) ------------------------ */
 
 export interface CheckRequest {
   text: string;
   uiLang: UiLanguage;
+  lang?: string;
+  sourceLang?: SourceLanguage;
 }
 
 export type CorrectionType =
@@ -227,9 +237,14 @@ export interface Correction {
   corrected: string;
   explanation: string;
   type: CorrectionType;
+  offset?: number;
+  length?: number;
+  replacements?: string[];
 }
 
 export interface CheckResponse {
+  /** false — сервис не ответил; отсутствие исправлений не означает успешную проверку. */
+  available?: boolean;
   correctedText: string;
   isCorrect: boolean;
   corrections: Correction[];

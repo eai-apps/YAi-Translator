@@ -45,7 +45,11 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
       m2m100: Boolean(env.AI),
       microsoft: Boolean(classic.microsoft),
       google: Boolean(classic.google),
+      lingva: !disabled.has('lingva'),
+      apertium: !disabled.has('apertium'),
+      languagetool: true,
       paid: false,
+      dict: true,
     };
 
     const body: HealthResponse = {

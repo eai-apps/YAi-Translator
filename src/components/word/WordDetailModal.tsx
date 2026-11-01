@@ -34,12 +34,15 @@ export function WordDetailModal({
 
   if (!match) return null;
 
-  const article = match.entry.pos === 'n' ? match.entry.g : null;
+  const wordLang = match.lang || 'de';
+  const nounGender = match.entry.pos === 'n' ? match.entry.g : undefined;
+  const isGermanArticle = nounGender && ['der', 'die', 'das'].includes(nounGender);
+  const article = isGermanArticle ? (nounGender as 'der' | 'die' | 'das') : null;
   const translations = translation ? [translation] : undefined;
 
   const handleOpenInDictionary = () => {
     onClose();
-    navigate(`/dictionary?q=${encodeURIComponent(match.lemma)}`);
+    navigate(`/dictionary?q=${encodeURIComponent(match.lemma)}&lang=${wordLang}`);
   };
 
   const pos =
@@ -54,7 +57,7 @@ export function WordDetailModal({
   const mockDictEntry: DictEntry | null = translation
     ? {
         word: match.lemma,
-        sourceLang: 'de',
+        sourceLang: wordLang,
         targetLang: 'ru',
         gender: article,
         plural: match.entry.pos === 'n' ? match.entry.pl ?? null : null,
@@ -87,6 +90,7 @@ export function WordDetailModal({
         <div className="flex flex-wrap items-center justify-between gap-2 border-t border-line p-4 bg-soft">
           <AddToStudyQuickButton
             lemma={match.lemma}
+            lang={wordLang}
             article={article}
             translations={translations}
           />
@@ -106,6 +110,10 @@ export function WordDetailModal({
           match={match}
           speech={speech}
           dictEntry={mockDictEntry}
+          onPickWord={(w) => {
+            onClose();
+            navigate(`/dictionary?q=${encodeURIComponent(w)}&lang=${wordLang}`);
+          }}
         />
       </div>
     </Modal>

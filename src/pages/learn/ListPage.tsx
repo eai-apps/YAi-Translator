@@ -17,7 +17,8 @@ import { Card } from '../../components/ui/Card';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { StudyCardRow } from '../../components/study/StudyCardRow';
 import { listPracticeLink, listReviewLink } from './ListsPage';
-import { IconBookmark } from '../../components/layout/icons';
+import { IconBookmark, IconDownload } from '../../components/layout/icons';
+import { exportListToAnkiCsv } from '../../lib/studyExport';
 
 export default function ListPage() {
   const { t } = useTranslation();
@@ -71,6 +72,15 @@ export default function ListPage() {
           >
             {t('study.listsTitle')}
           </Link>
+          <Button
+            size="sm"
+            variant="ghost"
+            icon={<IconDownload className="h-4 w-4" />}
+            disabled={available.length === 0}
+            onClick={() => exportListToAnkiCsv(list, cards)}
+          >
+            {t('study.exportAnki')}
+          </Button>
         </div>
 
         {/* Упражнения берут только слова этого списка. */}

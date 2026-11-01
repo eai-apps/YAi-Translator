@@ -1,9 +1,9 @@
 {
-  "versionCode": 4,
-  "versionName": "0.15.0",
+  "versionCode": 5,
+  "versionName": "1.0.0",
   "apkUrl": "https://github.com/eai-apps/YAi-Translator/releases/latest/download/YAi-Translator.apk",
-  "notes_ru": "Этап 13: каждое слово перевода связано со словарём public/lex/de (чипы и подчёркивание), понятные разделы «Учёба» и «Словарь», кнопка «+ В учёбу».",
-  "notes_de": "Stufe 13: Jedes Übersetzungswort ist mit dem Lexikon verknüpft, verständliche Bereiche „Lernen“ und „Wörterbuch“, „+ Zum Lernen“-Button.",
-  "notes_en": "Stage 13: Every translated word connected to the lexicon, clear “Study” and “Dictionary” sections, “+ To study” button.",
+  "notes_ru": "Исправлены карточки без ИИ, формы слов и обратное направление перевода. Автоматический расход ИИ снова управляется настройками сайта и личного ключа. Открытые словари сохраняются для офлайна уже при первом посещении; кнопки наборов помещаются на телефоне.",
+  "notes_de": "Wörterbuchkarten ohne KI, Wortformen und umgekehrte Übersetzungsrichtung wurden korrigiert. Automatische KI-Anfragen folgen wieder den Einstellungen. Geöffnete Wörterbücher werden schon beim ersten Besuch offline gespeichert. Schaltflächen passen auf den Handybildschirm.",
+  "notes_en": "Fixed dictionary cards without AI, word forms and reverse translation. Automatic AI requests follow the site and personal-key settings again. Opened dictionaries are cached for offline use from the first visit; deck buttons fit on a phone screen.",
   "required": false
 }

@@ -42,6 +42,23 @@ export default function GrammarPage({ topics }: GrammarPageProps) {
   const [failed, setFailed] = useState(false);
   const [attempt, setAttempt] = useState(0);
 
+  // Язык справочника (этап 18): Немецкий или English
+  const paramLang = params.get('lang');
+  const activeLang = paramLang === 'en' || (slug && slug.startsWith('en-')) ? 'en' : 'de';
+
+  const handleSwitchLang = (newLang: 'de' | 'en') => {
+    const nextParams = new URLSearchParams(params);
+    nextParams.set('lang', newLang);
+    if (slug && ((newLang === 'en' && !slug.startsWith('en-')) || (newLang === 'de' && slug.startsWith('en-')))) {
+      navigate(`/grammar?${nextParams.toString()}`);
+    } else {
+      navigate(`/grammar${slug ? `/${slug}` : ''}?${nextParams.toString()}`);
+    }
+  };
+
+  const allTopics = topics.data?.items ?? [];
+  const filteredTopics = allTopics.filter((t) => (activeLang === 'en' ? t.lang === 'en' : t.lang !== 'en'));
+
   // Текст темы запрашивается только когда тема выбрана в адресе.
   useEffect(() => {
     if (!slug) {
@@ -90,6 +107,32 @@ export default function GrammarPage({ topics }: GrammarPageProps) {
       <div className="grid items-start gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] lg:gap-4">
         {/* На телефоне — либо список, либо тема (иначе тема оказывалась под списком из 69 строк). */}
         <Card className={`p-4 sm:p-5 ${slug ? 'hidden lg:block' : ''}`}>
+          {/* Переключатель языка грамматики: Немецкий / English (этап 18) */}
+          <div className="mb-3 flex items-center gap-1 rounded-xl bg-soft p-1 w-fit" role="tablist" aria-label={t('grammar.langSelect', 'Язык грамматики')}>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={activeLang === 'de'}
+              onClick={() => handleSwitchLang('de')}
+              className={`rounded-lg px-3 py-1.5 text-xs sm:text-sm font-medium transition-colors ${
+                activeLang === 'de' ? 'bg-card text-ink shadow-sm' : 'text-muted hover:text-ink'
+              }`}
+            >
+              🇩🇪 {t('grammar.langDe', 'Немецкий')}
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={activeLang === 'en'}
+              onClick={() => handleSwitchLang('en')}
+              className={`rounded-lg px-3 py-1.5 text-xs sm:text-sm font-medium transition-colors ${
+                activeLang === 'en' ? 'bg-card text-ink shadow-sm' : 'text-muted hover:text-ink'
+              }`}
+            >
+              🇬🇧 {t('grammar.langEn', 'English')}
+            </button>
+          </div>
+
           {topics.loading && !topics.data ? (
             <div className="flex items-center gap-2 py-6 text-sm text-muted">
               <Spinner />
@@ -104,7 +147,7 @@ export default function GrammarPage({ topics }: GrammarPageProps) {
             </div>
           ) : (
             <GrammarTopicList
-              items={topics.data?.items ?? []}
+              items={filteredTopics}
               uiLanguage={uiLanguage}
               activeSlug={slug ?? null}
               onSelect={select}

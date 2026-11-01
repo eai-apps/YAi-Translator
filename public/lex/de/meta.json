@@ -1,23 +1,23 @@
 {
-  "version": "1.0.0",
+  "version": "1.1.0",
   "lang": "de",
-  "date": "2026-10-31",
+  "date": "2026-11-01",
   "entries": 122533,
   "sources": [
     {
-      "name": "german-nouns",
-      "url": "https://github.com/gambolputty/german-nouns",
-      "license": "CC BY-SA 4.0"
-    },
-    {
-      "name": "kaikki.org (wiktextract)",
-      "url": "https://kaikki.org/dictionary/German/",
+      "name": "Wiktionary / Kaikki.org",
+      "url": "https://kaikki.org/dictionary/de/",
       "license": "CC BY-SA 4.0"
     },
     {
       "name": "FrequencyWords",
       "url": "https://github.com/hermitdave/FrequencyWords",
       "license": "MIT"
+    },
+    {
+      "name": "Wikimedia Commons / Lingua Libre",
+      "url": "https://commons.wikimedia.org/",
+      "license": "CC BY-SA 4.0"
     }
   ]
 }

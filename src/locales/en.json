@@ -22,7 +22,8 @@
     "no": "No",
     "on": "On",
     "off": "Off",
-    "noResults": "No results found"
+    "noResults": "No results found",
+    "offlineDetailed": "No network — dictionary, study, phrasebook, and history work offline"
   },
   "nav": {
     "translate": "Translate",
@@ -37,7 +38,11 @@
     "resources": "Useful resources",
     "guestSignIn": "Guest · Sign in",
     "apps": "Apps",
-    "more": "More"
+    "more": "More",
+    "phrasebook": "Phrasebook",
+    "letter": "Official Letter",
+    "privacy": "Privacy",
+    "terms": "Terms"
   },
   "languages": {
     "auto": "Detect language",
@@ -137,7 +142,11 @@
     "pasteChip": "Paste",
     "pasteFromClipboard": "Paste from clipboard",
     "fromHistory": "From history",
-    "dictionaryWords": "Dictionary words"
+    "dictionaryWords": "Dictionary words",
+    "photo": "Translate from photo",
+    "ocrProgress": "Recognizing text...",
+    "offlineHistoryBadge": "Offline (history)",
+    "offlineDictBadge": "Offline (dictionary)"
   },
   "others": {
     "title": "How others translate it",
@@ -174,6 +183,8 @@
     "antonyms": "Antonyms",
     "phrases": "Fixed expressions",
     "level": "Level",
+    "approxLevelTitle": "Approximate level",
+    "approxLevelDesc": "approximate level by frequency",
     "caseNom": "Nominative",
     "caseAcc": "Accusative",
     "caseDat": "Dative",
@@ -280,8 +291,12 @@
     "paraphrasesTitle": "Other ways to say",
     "instantBadge": "instant",
     "preparingDetails": "Detailed AI breakdown is being prepared…",
-    "loadAi": "AI word analysis",
-    "loadAiHint": "Examples, rules, synonyms and forms – on button, to save your limit."
+    "recreate": "Recreate card",
+    "recreating": "Updating card…",
+    "recreateSuccess": "Card updated",
+    "askAiCard": "AI word analysis",
+    "assembledFromDicts": "Assembled from open dictionaries",
+    "falseFriend": "False friend"
   },
   "explain": {
     "title": "Explanation",
@@ -310,7 +325,11 @@
     "typeWordOrder": "Word order",
     "typeVocabulary": "Word choice",
     "typePunctuation": "Punctuation",
-    "typeStyle": "Style"
+    "typeStyle": "Style",
+    "sourceAttribution": "Check: LanguageTool (LGPL)",
+    "fixAll": "Fix all",
+    "foundErrors": "{{count}} spelling / grammar errors",
+    "replacementsTitle": "Replacement suggestions:"
   },
   "dictionary": {
     "title": "Dictionary",
@@ -452,7 +471,25 @@
     "benefitAiLimit": "50 AI requests per day (instead of 5 for guests)",
     "benefitHistory": "Translation history up to 1000 entries (instead of 50)",
     "benefitPaidAi": "Access to the site's shared paid AI networks",
-    "benefitSync": "Sync favorites across all devices"
+    "benefitSync": "Sync favorites across all devices",
+    "syncTitle": "Synchronization",
+    "lastSyncTime": "Synced: {{time}}",
+    "neverSynced": "Not synced yet",
+    "syncJustNow": "just now",
+    "syncNow": "Sync now",
+    "deleteAccount": "Delete account",
+    "deleteTitle": "Delete account",
+    "deleteWarning": "All your data (translation history, flashcards, API keys) will be permanently deleted from the database. This action cannot be undone.",
+    "deleteConfirmPassword": "Enter your password to confirm:",
+    "deleteConfirmBtn": "Delete account permanently",
+    "backupTitle": "Backup & Data Transfer",
+    "backupHint": "Download a full backup of your data (history, flashcards, lists, and settings) in JSON format or transfer them from another device without a server.",
+    "exportBtn": "Download my data (JSON)",
+    "importBtn": "Import from file",
+    "exportSuccess": "Backup file downloaded successfully.",
+    "exportError": "Failed to generate backup file.",
+    "importSuccess": "Data successfully imported: {{history}} translations, {{cards}} cards.",
+    "importError": "Invalid backup file format."
   },
   "keys": {
     "getFreeKey": "Get a free key",
@@ -593,7 +630,15 @@
     "licenseOpenThesaurus": "OpenThesaurus — LGPL / CC BY-SA: synonyms",
     "licenseTatoeba": "Tatoeba — CC BY 2.0 FR: example sentences with translations",
     "licensePons": "PONS — via API key, lookup only",
-    "licenseDwds": "DWDS — word information (Berlin-Brandenburg Academy)"
+    "licenseDwds": "DWDS — word information (Berlin-Brandenburg Academy)",
+    "licenseStopwordsIso": "stopwords-iso — MIT: stopword lists for all languages",
+    "licenseWordNet": "WordNet / Open English WordNet — English synonym database, CC-BY 4.0 license (Princeton University & Global WordNet Association)",
+    "licenseWikimediaCommons": "Wikimedia Commons and Lingua Libre — native speaker audio recordings, CC-BY-SA 4.0 license",
+    "licenseTesseractJs": "Optical Character Recognition (OCR) — Apache-2.0 license, Tesseract.js library.",
+    "licenseLanguageTool": "LGPL 2.1+. Spelling and grammar checking for German, English, Russian and other languages",
+    "licenseLingva": "AGPL 3.0. Free open-source translation proxy without tracking",
+    "licenseApertium": "GPL 2.0+. Free open-source rule-based machine translation platform",
+    "licenseMyMemory": "Free Translation Memory API by Translated.net"
   },
   "admin": {
     "title": "Admin",
@@ -637,7 +682,20 @@
       "paidTokensTitle": "Paid AI Tokens",
       "paidTokensToday": "Tokens today",
       "paidTokensMonth": "Tokens this month",
-      "warmedCards": "Ready cards (warm-up)"
+      "warmedCards": "Ready cards (warm-up)",
+      "warmProgress": "Card warehouse progress",
+      "recreateCard": "Recreate card in warehouse",
+      "recreateDesc": "Delete old card from warehouse and re-request from AI",
+      "runWarm": "Run warming",
+      "warmingRunning": "Warming…",
+      "dailyTableTitle": "Daily Statistics",
+      "dailyTableHint": "History of translations, visitors, new users, errors, and responding services by day.",
+      "colDate": "Date",
+      "colTranslations": "Translations",
+      "colVisitors": "Visitors",
+      "colNewUsers": "New Users",
+      "colErrors": "Errors",
+      "colTranslators": "Responding Services"
     },
     "keys": {
       "title": "Site keys",
@@ -693,7 +751,15 @@
       "guestLimit": "Limit for guests (requests per day)",
       "regLimit": "Limit for registered users (requests per day)",
       "aiRequiresLogin": "AI requires login (block guests)",
-      "wordCardAuto": "Load the AI word analysis right away (off – only on button, saves the limit)"
+      "myMemoryTitle": "MyMemory API E-mail",
+      "myMemoryHint": "Provide a contact email to extend free MyMemory limit to 50,000 chars/day",
+      "whatsNewTitle": "«What's New» Window",
+      "whatsNewHint": "Release notes text shown to users in a popup after an update.",
+      "whatsNewEnabled": "Show window after update",
+      "whatsNewVersion": "Version",
+      "whatsNewRu": "Russian text",
+      "whatsNewDe": "German text",
+      "whatsNewEn": "English text"
     },
     "users": {
       "title": "Users",
@@ -848,6 +914,20 @@
       "urlPlaceholder": "https://...",
       "howtoRuPlaceholder": "Instructions: 1. Purchase... 2. Activate...",
       "noItems": "No purchase links"
+    },
+    "tabErrors": "Errors",
+    "errors": {
+      "title": "Client Error Log",
+      "subtitle": "User browser errors and issue reports",
+      "clear": "Clear log",
+      "confirmClear": "Are you sure you want to clear all error log entries?",
+      "noErrors": "No errors recorded",
+      "noErrorsDesc": "All app systems are operating reliably.",
+      "userReport": "User report",
+      "codeError": "Code error",
+      "showStack": "Show stack",
+      "hideStack": "Hide stack",
+      "noteLabel": "User comment"
     }
   },
   "dict": {
@@ -1005,7 +1085,18 @@
       "telling-time": "Telling the time and dates",
       "polite-forms": "Polite forms: Sie and du",
       "academic-language": "Written and academic German"
-    }
+    },
+    "langDe": "🇩🇪 German",
+    "langEn": "🇬🇧 English",
+    "langSelect": "Grammar language",
+    "quizTitle": "Practice Quiz (5 questions)",
+    "quizSubtitle": "Test your understanding of the topic",
+    "quizReset": "Retry quiz",
+    "quizCorrect": "Correct!",
+    "quizIncorrect": "Incorrect. Correct answer: {{answer}}",
+    "tableTitle": "Reference Table",
+    "tableFilter": "Search table…",
+    "tableCount": "Showing {{count}} of {{total}}"
   },
   "ask": {
     "title": "Ask AI",
@@ -1104,7 +1195,7 @@
     "exportCsv": "Export CSV",
     "exportAnki": "Export Anki",
     "decksTitle": "Ready-made sets",
-    "decksSubtitle": "Eight starter topics. Articles and plurals checked against Wiktionary.",
+    "decksSubtitle": "German and English word sets. Choose a language and level, then add a set to your study cards.",
     "deckWordsCount": "Words: {{n}}",
     "deckPreview": "Show words",
     "deckHide": "Hide words",
@@ -1193,7 +1284,64 @@
     "listFromTranslations": "From translations",
     "showAnswer": "Show",
     "swipeHint": "Swipe left: “Forgot”, right: “Easy”",
-    "onboardingTitle": "How to learn words — 3 steps"
+    "onboardingTitle": "How to learn words — 3 steps",
+    "deckA2Amt": "Government Office & Documents",
+    "deckA2Arzt": "Doctor & Pharmacy",
+    "deckA2Wohnung": "Apartment & Rent",
+    "deckA2Bank": "Bank & Finance",
+    "deckA2Schule": "School & Kindergarten",
+    "deckA2Kleidung": "Clothes & Fashion",
+    "deckB1Jobcenter": "Jobcenter & Job Search",
+    "deckB1Verkehr": "Transport & Travel",
+    "deckB1Wetter": "Weather & Nature",
+    "deckB1Freizeit": "Free Time & Hobbies",
+    "deckDeTop500": "Top 500 German Words",
+    "deckEnA1Family": "Family & People",
+    "deckEnA1Food": "Food & Drinks",
+    "deckEnA1Home": "Home & Daily Life",
+    "deckEnA1City": "City & Transport",
+    "deckEnA1Work": "Work & Office",
+    "deckEnA1Time": "Time & Calendar",
+    "deckEnA2Health": "Health & Body",
+    "deckEnA2Shopping": "Shopping & Stores",
+    "deckEnA2Travel": "Travel & Vacations",
+    "deckEnA2Airport": "Airport & Flights",
+    "deckEnA2Hotel": "Hotel & Stay",
+    "deckEnB1It": "IT & Technology",
+    "deckEnTop500": "Top 500 English Words",
+    "filterAllLangs": "All languages",
+    "filterAllLevels": "All",
+    "deckLearn": "Learn",
+    "inMyDecks": "In my decks",
+    "deckLearnedProgress": "{{learned}} of {{total}} learned ({{percent}}%)",
+    "practiceWrite": "Write word",
+    "practicePairs": "Pairs",
+    "practiceFirstLetterHint": "First letter: {{letter}}",
+    "practicePairsHint": "Match the word with its translation",
+    "progressTitle": "My Progress",
+    "progressSubtitle": "Study statistics, daily streak, and difficult words",
+    "progressTotalCards": "Words in study",
+    "progressLearnedCards": "Learned",
+    "streakDays": "{{count}} days streak",
+    "progressTodayGoal": "Today / Goal",
+    "progressByLanguage": "Progress by Language",
+    "words": "words",
+    "progressChart30": "30-Day Activity",
+    "progressChartTotal": "Total actions this month: {{count}}",
+    "days": "days",
+    "difficultWordsTitle": "Most Difficult Words",
+    "noDifficultWords": "No difficult words yet 🎉 Great memory!",
+    "lapsesCount": "{{count}} mistakes",
+    "settingsTitle": "Study Settings",
+    "settingDailyGoal": "Daily Goal",
+    "goalOption": "{{count}} words / day",
+    "settingNewPerDay": "New words per day",
+    "newWordsOption": "{{count}} new",
+    "reminderTitle": "Review reminder",
+    "reminderSubtitle": "Daily notification in the app",
+    "reminderTime": "Reminder time",
+    "reminderBody": "Time to review words! Your streak is waiting 🔥",
+    "viewFullProgress": "Details"
   },
   "help": {
     "title": "Help",
@@ -1281,11 +1429,126 @@
     "tvHowTo": "How to install on a TV (Android TV)",
     "rustoreSubtitle": "YAi Translator on RuStore — coming soon. Same app, updates arrive automatically."
   },
-  "settings": {
-    "aiCardMode": "AI word analysis",
-    "aiCardModeSite": "Site default",
-    "aiCardModeAuto": "Right away",
-    "aiCardModeButton": "On button",
-    "aiCardModeHint": "\"Right away\" works with your own AI key (free or paid) – it does not use the shared limit."
+  "phrasebook": {
+    "title": "Phrasebook",
+    "subtitle": "Essential everyday phrases across 12 practical topics with audio",
+    "searchPlaceholder": "Search phrase in any language...",
+    "allTopics": "All topics",
+    "learningLang": "Learning language",
+    "translationLang": "Translation language",
+    "notFound": "No phrases found matching your search.",
+    "topics": {
+      "greetings": "Greetings",
+      "behoerde": "Public Office",
+      "doctor": "Doctor & Pharmacy",
+      "housing": "Housing & Rent",
+      "shopping": "Shopping",
+      "restaurant": "Restaurant & Cafe",
+      "transport": "Transport & Train",
+      "emergency": "Emergency & Help",
+      "work": "Work & Job Search",
+      "school": "School & Daycare",
+      "phone": "Phone Calls",
+      "bank": "Bank & Post"
+    }
+  },
+  "letter": {
+    "title": "Official Letter Assistant",
+    "subtitle": "Quick analysis of official German letters: sender, deadline, action steps, and reply template",
+    "headerLink": "Official letter",
+    "inputTitle": "Letter text or photo",
+    "placeholder": "Paste the letter text from Jobcenter, Finanzamt, Krankenkasse, or take a photo...",
+    "photoBtn": "From photo / scan",
+    "samplesTitle": "Sample letters",
+    "samples": {
+      "jobcenter": "Jobcenter invitation",
+      "mahnung": "Payment reminder"
+    },
+    "privacyNotice": "Letter text is not stored on the server",
+    "analyzeBtn": "Analyze letter",
+    "analyzing": "Analyzing letter...",
+    "analyzingSub": "Checking sender, deadline, requirements, and reply draft",
+    "disclaimerTitle": "Not legal advice",
+    "disclaimerText": "This analysis is AI-generated for general understanding. For critical legal or financial matters, please consult official advisory services or legal counsel.",
+    "sender": "Sender",
+    "deadline": "Deadline",
+    "noDeadline": "No strict deadline / Informational",
+    "summaryTitle": "Summary",
+    "stepsTitle": "Action steps",
+    "replyTemplateTitle": "German reply template",
+    "emptyPrompt": "Letter analysis will appear here",
+    "emptyPromptSub": "Paste the text or upload a photo on the left",
+    "ocrError": "Failed to recognize text from photo. Please try a clearer image.",
+    "error": "Failed to analyze letter. Please try again."
+  },
+  "conversation": {
+    "partnerLabel": "Partner",
+    "youLabel": "You",
+    "rotateOpposite": "Rotate 180°",
+    "autoSpeak": "Auto-speak",
+    "speakPartner": "Listen to partner",
+    "speakYou": "Listen to you",
+    "partnerHint": "Tap the top microphone for your partner to speak",
+    "youHint": "Tap the bottom microphone to speak in your language"
+  },
+  "feedback": {
+    "reportButton": "Report an issue",
+    "modalTitle": "Report an issue",
+    "prompt": "Describe what went wrong or what is missing in the app:",
+    "placeholder": "For example: An error occurred when translating this word...",
+    "privacyTitle": "Privacy",
+    "privacyNote": "Your translation text and personal data are never sent. Only technical device parameters and app version will be included.",
+    "submit": "Send message",
+    "sentTitle": "Report sent",
+    "sentSubtitle": "Thank you for helping improve YAi Translator! We will look into the issue."
+  },
+  "whatsNew": {
+    "title": "What's new in version {{version}}",
+    "dismiss": "Got it"
+  },
+  "privacy": {
+    "title": "Privacy Policy",
+    "subtitle": "How YAi Translator protects your data and respects your privacy",
+    "back": "Back",
+    "generalTitle": "1. General Principles",
+    "generalText": "YAi Translator is an independent, free (0 €) open-source project. We do not sell user data, include no advertising trackers, and never share personal information with third parties.",
+    "storageTitle": "2. What Data We Store",
+    "storageGuest": "Without signing in, history, favorites, study data and settings stay on your device. Text is sent to the server for translation or checking; results may be stored in a shared cache.",
+    "storageUser": "For signed-in users, Cloudflare D1 stores the login, password hash, sessions, synchronized history, favorites, study data and settings. Your password is transmitted over HTTPS for verification; the database stores its hash. Account API keys are encrypted.",
+    "servicesTitle": "3. Text Processing and Translation Services",
+    "servicesText": "Text is sent over HTTPS to enabled services: DeepL, Lara, Microsoft, MyMemory, Lingva, Apertium, Cloudflare Workers AI, Gemini, Groq, LanguageTool and your chosen AI connections. Only available, enabled services are used. Translation and check results are cached in D1; dictionary cards may be kept indefinitely for all users. The Explain a Letter feature does not write letter text to the app server cache. External providers set their own processing terms. Avoid confidential information in the shared translator.",
+    "deletionTitle": "4. Account and Data Deletion",
+    "deletionText": "Delete your account at Profile → Delete account by confirming your password, or contact yeas.apps@gmail.com. This removes the account, sessions, keys and linked D1 records. Shared cache entries and dictionary cards are not linked to accounts. Clear local history separately in your browser or app settings. Backups may remain until Cloudflare retention expires.",
+    "contactTitle": "5. Contact",
+    "contactText": "For any questions regarding privacy and data protection, please contact us at: yeas.apps@gmail.com."
+  },
+  "terms": {
+    "title": "Terms of Service",
+    "subtitle": "Rules and conditions for using YAi Translator",
+    "back": "Back",
+    "serviceTitle": "1. Service Description",
+    "serviceText": "YAi Translator provides free access to machine translation tools, electronic dictionaries, study flashcards, and grammar reference materials.",
+    "disclaimerTitle": "2. Legal and Medical Disclaimer",
+    "disclaimerText": "Machine translations and explanations of official documents (including Behörde letters and medical terms) are provided for informational and educational purposes only. They do not constitute legal advice or medical prescriptions. Always consult qualified professionals for important legal or health matters.",
+    "rulesTitle": "3. Acceptable Use",
+    "rulesText": "Users agree not to use the service for spam, automated attacks (DDoS), attempts to compromise infrastructure, or bypassing established rate limits.",
+    "ipTitle": "4. Intellectual Property and Open Licenses",
+    "ipText": "Dictionary entries, example sentences, and open datasets are provided under their original open licenses (Creative Commons CC-BY, CC-BY-SA, LGPL, MIT). A detailed list of sources is available under 'About' → 'Data sources'.",
+    "changesTitle": "5. Changes to Terms and Contact",
+    "changesText": "We reserve the right to update these terms. For any inquiries, please contact: yeas.apps@gmail.com."
+  },
+  "legal": {
+    "title": "Legal Information",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service",
+    "links": "Legal Information",
+    "desc": "Learn about data processing and service terms."
+  },
+  "audit": {
+    "warmResult": "Processed {{processed}}: added {{warmed}}, skipped {{skipped}}, errors {{errors}}.",
+    "recreated": "Card “{{word}}” was recreated.",
+    "cardStoreHint": "Stored cards are available without another AI request.",
+    "cardCount": "{{ready}} / {{total}} cards",
+    "wordPlaceholder": "Word, e.g. Haus or go"
   }
 }

@@ -126,4 +126,18 @@ export const coreMethods = {
   ): Promise<{ ok: boolean; latencyMs: number; message?: string }> {
     return request('/api/paid-test', { method: 'POST', body: { baseUrl, apiKey, model } }, signal);
   },
+
+  reportError(payload: {
+    message?: string;
+    stack?: string;
+    url?: string;
+    source?: string;
+    lineno?: number;
+    colno?: number;
+    appVersion?: string;
+    userAgent?: string;
+    userNote?: string;
+  }): Promise<{ ok: boolean }> {
+    return request('/api/error', { method: 'POST', body: payload });
+  },
 };

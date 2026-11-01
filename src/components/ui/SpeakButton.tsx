@@ -10,11 +10,12 @@ interface SpeakButtonProps {
   language: LanguageCode;
   id: string;
   speech: SpeechController;
+  audioUrl?: string;
   label?: string;
   className?: string;
 }
 
-export function SpeakButton({ text, language, id, speech, label, className }: SpeakButtonProps) {
+export function SpeakButton({ text, language, id, speech, audioUrl, label, className }: SpeakButtonProps) {
   const { t } = useTranslation();
   const active = speech.speakingId === id;
   const title = active ? t('common.stop') : label ?? t('common.listen');
@@ -26,7 +27,7 @@ export function SpeakButton({ text, language, id, speech, label, className }: Sp
       title={title}
       aria-pressed={active}
       disabled={!text.trim()}
-      onClick={() => speech.speak(text, language, id)}
+      onClick={() => speech.speak(text, language, id, audioUrl)}
       className={cn(
         'inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border transition-colors',
         active

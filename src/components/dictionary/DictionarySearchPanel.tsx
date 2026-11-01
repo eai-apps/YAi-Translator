@@ -5,7 +5,9 @@
  * 3. Результат — та же карточка слова, что и в переводе.
  * 4. В каждой строке результата — «+ В учёбу».
  */
-import { useEffect, useMemo, useState } from 'react';
+import { guessLanguage } from '../../../shared/detect';
+import { useExamples } from '../../hooks/useExamples';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { LanguageCode, SourceLanguage, UiLanguage, WordResponse } from '../../../shared/types';
 import { STUDY_DECKS } from '../../../shared/decks';
@@ -18,8 +20,10 @@ import { cn } from '../../lib/cn';
 import { Button } from '../ui/Button';
 import { Card } from '../ui/Card';
 import { IconAlert, IconBook, IconClock, IconSearch } from '../layout/icons';
+import { LanguageBar } from '../translate/LanguageBar';
+import { DictCard } from '../word/DictCard';
 import { WordCard } from '../word/WordCard';
-import { InstantWordCard } from '../word/InstantWordCard';
+import { assembleClientCard } from '../../lib/offlineCards';
 import { useLexicon } from '../../hooks/useLexicon';
 import { useHistory } from '../../hooks/useHistory';
 import { PickContext } from '../word/pick';
@@ -35,6 +39,7 @@ interface DictionarySearchPanelProps {
   query: string;
   onQueryChange: (value: string) => void;
   onSearch: () => void;
+  onAskAi: () => void;
   loading: boolean;
   card: WordResponse | null;
   dict: DictState;
@@ -55,6 +60,10 @@ export function DictionarySearchPanel({
   query,
   onQueryChange,
   onSearch,
+  onAskAi,
+  sourceLang,
+  onSourceChange,
+  onTargetChange,
   loading,
   card,
   dict,
@@ -72,10 +81,11 @@ export function DictionarySearchPanel({
 
   const cleanQuery = query.trim();
   const isCyrillic = /[а-яёА-ЯЁ]/i.test(cleanQuery);
-  const isGerman = !isCyrillic && cleanQuery.length >= 2;
 
   // 1. Мгновенный поиск по базе lex (для немецкого ввода)
-  const { match: lexMatch } = useLexicon(cleanQuery, isGerman && !card);
+  const lookupLang = sourceLang === 'auto' ? guessLanguage(cleanQuery) ?? 'de' : sourceLang;
+  const { match: lexMatch } = useLexicon(cleanQuery, lookupLang, !card);
+  const { examples: localExamples } = useExamples(lexMatch?.lemma ?? cleanQuery, lookupLang);
 
   // 2. Обратный поиск немецких слов по русскому запросу
   const russianMatches = useMemo(() => {
@@ -83,14 +93,16 @@ export function DictionarySearchPanel({
     return searchGermanByRussian(cleanQuery, 10);
   }, [cleanQuery, isCyrillic]);
 
+  const searchRef = useRef(onSearch);
+  searchRef.current = onSearch;
   // 3. Автоматический запуск подробного поиска (debounce 400ms)
   useEffect(() => {
     if (!cleanQuery || cleanQuery.length < 2) return;
     const timer = setTimeout(() => {
-      onSearch();
+      searchRef.current();
     }, 400);
     return () => clearTimeout(timer);
-  }, [cleanQuery, onSearch]);
+  }, [cleanQuery, sourceLang, targetLang]);
 
   // Недавно просмотренные слова (из истории)
   const recentWords = useMemo(() => {
@@ -136,6 +148,7 @@ export function DictionarySearchPanel({
   return (
     <PickContext.Provider value={onPickWord ?? null}>
       <section className="mt-4 space-y-4">
+        <LanguageBar sourceLang={sourceLang} targetLang={targetLang} onSourceChange={onSourceChange} onTargetChange={onTargetChange} onSwap={() => { onSourceChange(targetLang); onTargetChange(sourceLang === 'auto' ? 'ru' : sourceLang); }} />
         {/* Поле поиска: мгновенный поиск без обязательного нажатия кнопки */}
         <Card className="p-3">
           <form
@@ -174,6 +187,7 @@ export function DictionarySearchPanel({
                   setSelectedLetter(null);
                   setSelectedTopicId(null);
                 }}
+                aria-label={t('common.clear')}
               >
                 ✕
               </Button>
@@ -181,6 +195,8 @@ export function DictionarySearchPanel({
           </form>
         </Card>
 
+        {cleanQuery ? <Button loading={loading} onClick={onAskAi}>{t('word.askAiCard')}</Button> : null}
+        {!card && !lexMatch && dict.data?.entry ? <Card className="p-4"><DictCard entry={dict.data.entry} speech={speech} withAi={false} /></Card> : null}
         {/* Результаты поиска по русскому запросу (список найденных немецких слов с «+ В учёбу») */}
         {isCyrillic && russianMatches.length > 0 && !card ? (
           <Card className="p-4">
@@ -229,32 +245,35 @@ export function DictionarySearchPanel({
         ) : null}
 
         {/* 3. Результат: единая карточка слова (та же, что на экране перевода) */}
-        {card ? (
+        {card || lexMatch ? (
           <Card className="p-4 sm:p-5">
             <WordCard
-              card={card.card}
+              card={
+                card?.card ||
+                assembleClientCard(
+                  lexMatch!.lemma,
+                  (lexMatch!.lang || targetLang) as LanguageCode,
+                  targetLang === lookupLang ? 'ru' : targetLang,
+                  lexMatch!.entry,
+                  localExamples,
+                  dict.data?.entry.senses.map((s) => s.translation).filter((s): s is string => Boolean(s)) ?? [],
+                )
+              }
               speech={speech}
               dictExamples={dict.data?.entry.examples.filter((example) => example.source === 'tatoeba') ?? []}
               dictLang={dict.data?.entry.sourceLang ?? null}
               translationLang={targetLang}
             />
             <p className="mt-4 border-t border-line pt-2 text-[11px] text-muted">
-              {t('translate.provider', { provider: providerLabel(card.provider) })}
-              {card.cached ? ` · ${t('translate.fromCache')}` : ''}
+              {card ? (
+                <>
+                  {t('translate.provider', { provider: providerLabel(card.provider) })}
+                  {card.cached ? ` · ${t('translate.fromCache')}` : ''}
+                </>
+              ) : (
+                t('word.assembledFromDicts')
+              )}
             </p>
-          </Card>
-        ) : null}
-
-        {/* Мгновенная карточка из базы лексикона (пока сервер готовит или офлайн) */}
-        {!card && lexMatch ? (
-          <Card className="p-4 sm:p-5">
-            <InstantWordCard
-              match={lexMatch}
-              speech={speech}
-              isPreparingAi={loading}
-              dictEntry={dict.data?.entry ?? null}
-              onPickTranslation={(val) => handlePick(val)}
-            />
           </Card>
         ) : null}
 

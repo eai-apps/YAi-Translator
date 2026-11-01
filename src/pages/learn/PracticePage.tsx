@@ -9,7 +9,7 @@ import { Link, Navigate, useParams, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { PRACTICE_TYPES, isPracticeType } from '../../../shared/study';
 import type { PracticeType } from '../../../shared/types';
-import { buildPractice, PRACTICE_QUESTION_COUNT } from '../../lib/practice';
+import { buildPractice } from '../../lib/practice';
 import type { PracticeData } from '../../lib/practice';
 import { useSpeech } from '../../hooks/useSpeech';
 import { useStudy } from '../../hooks/useStudy';
@@ -160,7 +160,7 @@ function PracticeSession({ type }: { type: PracticeType }) {
             ))}
           </div>
           <span className="text-xs tabular-nums text-muted">
-            {t('study.practiceProgress', { done: index + 1, total: PRACTICE_QUESTION_COUNT })}
+            {t('study.practiceProgress', { done: index + 1, total })}
           </span>
         </div>
 

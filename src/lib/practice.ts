@@ -1,7 +1,7 @@
 /**
- * Упражнения (этап 6) без React и без ИИ: вопросы строятся из сохранённых карточек.
- * Один файл — одна логика: артикль, множественное число, перевод, аудирование,
- * сборка предложения. Компоненты только показывают готовые вопросы.
+ * Упражнения (этап 6, часть 16) без React и без ИИ: вопросы строятся из сохранённых карточек.
+ * Поддержка любого языка: выбор перевода, написание слова, аудирование, артикль (de),
+ * сборка предложения и сопоставление пар.
  */
 import type { StudyArticle, StudyCard, PracticeType } from '../../shared/types';
 import { hashCode } from '../../shared/study';
@@ -14,8 +14,10 @@ export type PracticeQuestion =
   | { type: 'article'; card: StudyCard; options: StudyArticle[]; answer: StudyArticle }
   | { type: 'plural'; card: StudyCard; options: string[]; answer: string }
   | { type: 'translation'; card: StudyCard; options: string[]; answer: string }
+  | { type: 'write'; card: StudyCard; hint: string; prompt: string; answer: string }
   | { type: 'listening'; card: StudyCard; answer: string }
-  | { type: 'sentence'; card: StudyCard; tokens: string[]; answer: string[] };
+  | { type: 'sentence'; card: StudyCard; tokens: string[]; answer: string[] }
+  | { type: 'pairs'; card: StudyCard; pairs: Array<{ id: string; word: string; translation: string }> };
 
 export interface PracticeData {
   questions: PracticeQuestion[];
@@ -24,7 +26,7 @@ export interface PracticeData {
 }
 
 /** Простая перемешивалка с зерном: одинаковый seed — одинаковый порядок. */
-function shuffle<T>(items: T[], seed: number): T[] {
+export function shuffle<T>(items: T[], seed: number): T[] {
   const result = [...items];
   let state = seed || 1;
   const random = () => {
@@ -60,14 +62,19 @@ function pluralOptions(card: StudyCard): string[] {
     if (unique.length === 3) break;
     unique.push(form);
   }
-  // Совсем короткое слово — добавляем формы с запасом, чтобы всегда было 4 варианта.
   while (unique.length < 3) unique.push(`${card.lemma}${'e'.repeat(unique.length + 1)}`);
   return shuffle([correct, ...unique], hashCode(card.id));
 }
 
-/** Склонение только для существительных с артиклем. */
+/** Склонение только для существительных с артиклем (немецкий). */
 function nouns(cards: StudyCard[]): StudyCard[] {
-  return cards.filter((card) => card.partOfSpeech === 'noun' && card.article);
+  return cards.filter(
+    (card) =>
+      (!card.lang || card.lang === 'de') &&
+      card.partOfSpeech === 'noun' &&
+      card.article &&
+      ['der', 'die', 'das'].includes(card.article),
+  );
 }
 
 function makeQuestion(type: PracticeType, card: StudyCard, pool: StudyCard[]): PracticeQuestion | null {
@@ -91,14 +98,32 @@ function makeQuestion(type: PracticeType, card: StudyCard, pool: StudyCard[]): P
       if (options.length < 4) return null;
       return { type, card, options, answer };
     }
+    case 'write': {
+      const prompt = card.translations[0];
+      if (!prompt) return null;
+      const hint = card.lemma.charAt(0);
+      return { type, card, hint, prompt, answer: card.lemma };
+    }
     case 'listening':
       return { type, card, answer: card.lemma };
     case 'sentence': {
       if (!card.example) return null;
-      // Предложение целиком: слова с пунктуацией остаются как в примере.
       const answer = card.example.text.trim().split(/\s+/);
       if (answer.length < 2) return null;
       return { type, card, tokens: shuffle(answer, hashCode(card.example.text)), answer };
+    }
+    case 'pairs': {
+      const candidates = pool.filter((c) => c.lemma && c.translations.length > 0);
+      if (candidates.length < 4) return null;
+      const count = Math.min(5, candidates.length);
+      const otherCards = pool.filter((c) => c.id !== card.id);
+      const selected = [card, ...shuffle(otherCards, hashCode(`${card.id}:pairs`)).slice(0, count - 1)];
+      const pairs = selected.map((item) => ({
+        id: item.id,
+        word: item.article ? `${item.article} ${item.lemma}` : item.lemma,
+        translation: item.translations[0],
+      }));
+      return { type, card, pairs };
     }
   }
 }
@@ -112,34 +137,39 @@ function candidatesFor(type: PracticeType, cards: StudyCard[]): StudyCard[] {
       return nouns(cards).filter((card) => Boolean(card.plural));
     case 'translation':
       return cards.filter((card) => card.translations.length > 0);
+    case 'write':
+      return cards.filter((card) => card.lemma.length > 0 && card.translations.length > 0);
     case 'listening':
       return cards.filter((card) => card.lemma.length > 0);
     case 'sentence':
-      return cards.filter((card) => Boolean(card.example));
+      return cards.filter((card) => Boolean(card.example?.text));
+    case 'pairs':
+      return cards.filter((card) => card.lemma.length > 0 && card.translations.length > 0);
   }
 }
 
-/** Собирает 10 вопросов; если карточек меньше 4 — сообщает, сколько не хватает. */
+/** Собирает вопросы упражнения; если карточек меньше 4 — сообщает, сколько не хватает. */
 export function buildPractice(type: PracticeType, cards: StudyCard[]): PracticeData {
   const candidates = candidatesFor(type, cards);
-  const missing = Math.max(0, PRACTICE_MIN_CARDS - candidates.length);
+  const minRequired = type === 'pairs' ? Math.min(PRACTICE_MIN_CARDS, 4) : PRACTICE_MIN_CARDS;
+  const missing = Math.max(0, minRequired - candidates.length);
   if (missing > 0) return { questions: [], missing };
 
+  const targetCount = type === 'pairs' ? 5 : PRACTICE_QUESTION_COUNT;
   const order = shuffle(candidates, hashCode(`${type}:${Date.now()}`));
   const questions: PracticeQuestion[] = [];
-  for (let index = 0; index < PRACTICE_QUESTION_COUNT; index += 1) {
+  for (let index = 0; index < targetCount; index += 1) {
     const card = order[index % order.length];
     const question = makeQuestion(type, card, candidates);
     if (question) questions.push(question);
   }
-  // Редкий случай (например, одинаковые переводы): добираем вопросами из уже собранных.
-  while (questions.length > 0 && questions.length < PRACTICE_QUESTION_COUNT) {
+  while (questions.length > 0 && questions.length < targetCount) {
     questions.push(questions[0]);
   }
-  return { questions, missing: 0 };
+  return { questions, missing: questions.length ? 0 : PRACTICE_MIN_CARDS };
 }
 
-/** Сравнение ответа аудирования: умлауты можно писать ae/oe/ue, ß — ss. */
+/** Сравнение ответа: умлауты можно писать ae/oe/ue, ß — ss. */
 export function normalizeAnswer(value: string): string {
   return value
     .trim()
@@ -152,10 +182,19 @@ export function normalizeAnswer(value: string): string {
     .replace(/\s+/g, ' ');
 }
 
-/** 'exact' — написание совпало, 'umlaut' — верно, но умлаут записан иначе, null — ошибка. */
+/** 'exact' — совпало, 'umlaut' — верно, но умлаут записан ae/oe/ue, null — ошибка. */
 export function checkListening(input: string, answer: string): 'exact' | 'umlaut' | null {
   const clean = input.trim().replace(/\s+/g, ' ').toLowerCase();
-  if (clean === answer.trim().toLowerCase()) return 'exact';
-  if (normalizeAnswer(input) === normalizeAnswer(answer)) return 'umlaut';
+  const cleanAnswer = answer.trim().replace(/\s+/g, ' ').toLowerCase();
+  if (clean === cleanAnswer) return 'exact';
+
+  // Разрешаем ввод с артиклем или без
+  const withoutArt = clean.replace(/^(der|die|das|a|an|the)\s+/, '');
+  const answerWithoutArt = cleanAnswer.replace(/^(der|die|das|a|an|the)\s+/, '');
+  if (withoutArt === answerWithoutArt) return 'exact';
+
+  if (normalizeAnswer(clean) === normalizeAnswer(cleanAnswer) || normalizeAnswer(withoutArt) === normalizeAnswer(answerWithoutArt)) {
+    return 'umlaut';
+  }
   return null;
 }

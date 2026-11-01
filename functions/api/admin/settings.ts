@@ -11,10 +11,12 @@ import { ApiError, errorResponse, getUiLanguage, jsonResponse, readJsonBody } fr
 import {
   clampDailyLimit,
   normalizeBanner,
+  normalizeWhatsNew,
   readBanner,
   readDisabledProviders,
   readFeedbackEmail,
   readSetting,
+  readWhatsNew,
   writeDisabledProviders,
   SETTINGS_KEYS,
   normalizeFeedbackEmail,
@@ -32,20 +34,24 @@ async function saveDailyLimit(env: Env, limit: number | null): Promise<void> {
 }
 
 async function currentSettings(env: Env): Promise<AdminSettings> {
-  const [stored, banner, guestLimit, regLimit, requiresLogin, wordCardAuto] = await Promise.all([
+  const [stored, banner, whatsNew, guestLimit, regLimit, requiresLogin, mmEmail, wordCardAuto] = await Promise.all([
     readSetting<number>(env, SETTINGS_KEYS.dailyLimit),
     readBanner(env),
+    readWhatsNew(env),
     readSetting<number>(env, SETTINGS_KEYS.guestAiLimit),
     readSetting<number>(env, SETTINGS_KEYS.registeredAiLimit),
     readSetting<boolean>(env, SETTINGS_KEYS.aiRequiresLogin),
+    readSetting<string>(env, SETTINGS_KEYS.mymemoryEmail),
     readSetting<boolean>(env, SETTINGS_KEYS.wordCardAuto),
   ]);
   return {
     dailyLimit: typeof stored === 'number' ? clampDailyLimit(stored) : null,
     defaultDailyLimit: LIMITS.freeRequestsPerDay,
     banner,
+    whatsNew,
     disabledProviders: [...(await readDisabledProviders(env))],
     feedbackEmail: await readFeedbackEmail(env),
+    myMemoryEmail: normalizeFeedbackEmail(mmEmail ?? ''),
     guestAiLimit: guestLimit ?? 5,
     registeredAiLimit: regLimit ?? 50,
     aiRequiresLogin: requiresLogin ?? false,
@@ -96,12 +102,27 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
       await logAdminAction(env, admin, 'settings.banner', banner.enabled ? 'on' : 'off');
     }
 
+    // Тексты «Что нового» (этап 20).
+    if (body.whatsNew !== undefined) {
+      const whatsNew = normalizeWhatsNew(body.whatsNew);
+      await writeSetting(env, SETTINGS_KEYS.whatsNew, whatsNew);
+      await logAdminAction(env, admin, 'settings.whatsNew', whatsNew.enabled ? (whatsNew.version || 'on') : 'off');
+    }
+
     // Почта для «Обратной связи»: пустая строка — пункт в настройках скрыт.
     if (body.feedbackEmail !== undefined) {
       const email = normalizeFeedbackEmail(body.feedbackEmail);
       if (email) await writeSetting(env, SETTINGS_KEYS.feedbackEmail, email);
       else if (env.DB) await env.DB.prepare('DELETE FROM settings WHERE key = ?').bind(SETTINGS_KEYS.feedbackEmail).run();
       await logAdminAction(env, admin, 'settings.feedback', email ? 'set' : 'off');
+    }
+
+    // Почта для MyMemory API (этап 18): до 50 000 символов/день
+    if (body.myMemoryEmail !== undefined) {
+      const email = normalizeFeedbackEmail(body.myMemoryEmail);
+      if (email) await writeSetting(env, SETTINGS_KEYS.mymemoryEmail, email);
+      else if (env.DB) await env.DB.prepare('DELETE FROM settings WHERE key = ?').bind(SETTINGS_KEYS.mymemoryEmail).run();
+      await logAdminAction(env, admin, 'settings.mymemory', email ? 'set' : 'off');
     }
 
     if (body.guestAiLimit !== undefined) {
@@ -113,10 +134,10 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
     if (body.aiRequiresLogin !== undefined) {
       await writeSetting(env, SETTINGS_KEYS.aiRequiresLogin, Boolean(body.aiRequiresLogin));
     }
+
     if (body.wordCardAuto !== undefined) {
       await writeSetting(env, SETTINGS_KEYS.wordCardAuto, Boolean(body.wordCardAuto));
     }
-
     return jsonResponse(await currentSettings(env));
   } catch (error) {
     return errorResponse(error, uiLang);

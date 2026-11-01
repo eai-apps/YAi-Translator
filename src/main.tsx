@@ -11,6 +11,11 @@ import { HistoryProvider } from './hooks/useHistory';
 import { TranslateSettingsProvider } from './hooks/useTranslateSettings';
 import { registerSW } from 'virtual:pwa-register';
 import { storeBuild } from './config';
+import { initGlobalErrorHandling } from './lib/errorReporter';
+import { ErrorBoundary } from './components/layout/ErrorBoundary';
+
+// Инициализация глобального перехвата ошибок (Часть 19)
+initGlobalErrorHandling();
 
 // Новая версия сайта применяется сама: офлайн-копия обновляется и страница перезагружается.
 // В нативном приложении (Capacitor) service worker не используется: ассеты встроены в APK.
@@ -41,7 +46,9 @@ ReactDOM.createRoot(container).render(
           {/* Настройки перевода (этап 8): история спрашивает их при записи, экран перевода — при вводе. */}
           <TranslateSettingsProvider>
             <HistoryProvider>
-              <App />
+              <ErrorBoundary>
+                <App />
+              </ErrorBoundary>
             </HistoryProvider>
           </TranslateSettingsProvider>
         </AccountProvider>

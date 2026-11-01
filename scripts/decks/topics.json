@@ -1,0 +1,337 @@
+{
+  "de": [
+    {
+      "id": "a1-family",
+      "level": "A1",
+      "titleKey": "study.deckA1Family",
+      "lemmas": [
+        "Familie", "Vater", "Mutter", "Eltern", "Sohn", "Tochter", "Bruder", "Schwester",
+        "Geschwister", "Großvater", "Großmutter", "Großeltern", "Opa", "Oma", "Kind", "Kinder",
+        "Baby", "Onkel", "Tante", "Cousin", "Cousine", "Neffe", "Nichte", "Mann", "Frau",
+        "Ehemann", "Ehefrau", "Partner", "Partnerin", "Freund", "Freundin", "Verwandte", "verheiratet", "ledig"
+      ]
+    },
+    {
+      "id": "a1-food",
+      "level": "A1",
+      "titleKey": "study.deckA1Food",
+      "lemmas": [
+        "Essen", "Trinken", "Wasser", "Brot", "Brötchen", "Butter", "Käse", "Wurst",
+        "Fleisch", "Fisch", "Hähnchen", "Ei", "Milch", "Kaffee", "Tee", "Saft",
+        "Bier", "Wein", "Zucker", "Salz", "Pfeffer", "Öl", "Reis", "Nudeln",
+        "Kartoffel", "Gemüse", "Obst", "Apfel", "Banane", "Suppe", "Salat", "Kuchen",
+        "Schokolade", "Frühstück", "Mittagessen", "Abendessen", "Restaurant", "Café", "lecker"
+      ]
+    },
+    {
+      "id": "a1-home",
+      "level": "A1",
+      "titleKey": "study.deckA1Home",
+      "lemmas": [
+        "Haus", "Wohnung", "Zimmer", "Küche", "Bad", "Schlafzimmer", "Wohnzimmer", "Kinderzimmer",
+        "Flur", "Balkon", "Garten", "Tür", "Haustür", "Fenster", "Wand", "Boden",
+        "Tisch", "Stuhl", "Sofa", "Bett", "Schrank", "Kühlschrank", "Herd", "Lampe",
+        "Teppich", "Fernseher", "Schlüssel", "Dusche", "Badewanne", "Spiegel", "sauber", "gemütlich"
+      ]
+    },
+    {
+      "id": "a1-city",
+      "level": "A1",
+      "titleKey": "study.deckA1City",
+      "lemmas": [
+        "Stadt", "Dorf", "Straße", "Platz", "Zentrum", "Bahnhof", "Hauptbahnhof", "Haltestelle",
+        "Bus", "Zug", "Bahn", "Straßenbahn", "U-Bahn", "S-Bahn", "Auto", "Fahrrad",
+        "Taxi", "Flughafen", "Park", "Geschäft", "Supermarkt", "Markt", "Apotheke", "Bank",
+        "Post", "Hotel", "Krankenhaus", "Schule", "Kirche", "Museum", "Kino", "Brücke", "Weg"
+      ]
+    },
+    {
+      "id": "a1-work",
+      "level": "A1",
+      "titleKey": "study.deckA1Work",
+      "lemmas": [
+        "Arbeit", "Beruf", "Büro", "Firma", "Chef", "Chefin", "Kollege", "Kollegin",
+        "Mitarbeiter", "Kunde", "Computer", "Telefon", "E-Mail", "Brief", "Termin", "Pause",
+        "Gehalt", "Geld", "Vertrag", "Aufgabe", "Projekt", "Bericht", "arbeiten", "verdienen",
+        "telefonieren", "schreiben", "lesen", "besprechen", "Feierabend", "Urlaub", "fleißig"
+      ]
+    },
+    {
+      "id": "a1-time",
+      "level": "A1",
+      "titleKey": "study.deckA1Time",
+      "lemmas": [
+        "Zeit", "Uhr", "Stunde", "Minute", "Sekunde", "Tag", "Woche", "Monat",
+        "Jahr", "Morgen", "Vormittag", "Mittag", "Nachmittag", "Abend", "Nacht", "heute",
+        "gestern", "morgen", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag",
+        "Sonntag", "Wochenende", "Kalender", "Datum", "früh", "spät", "pünktlich", "immer", "nie"
+      ]
+    },
+    {
+      "id": "a2-health",
+      "level": "A2",
+      "titleKey": "study.deckA2Health",
+      "lemmas": [
+        "Gesundheit", "Körper", "Kopf", "Auge", "Ohr", "Nase", "Mund", "Zahn",
+        "Hals", "Bauch", "Rücken", "Herz", "Hand", "Arm", "Bein", "Fuß",
+        "Schmerz", "Kopfschmerz", "Bauchschmerz", "Fieber", "Husten", "Schnupfen", "Erkältung", "Grippe",
+        "Wunde", "Blut", "Krankheit", "krank", "gesund", "schwach", "müde", "wehtun"
+      ]
+    },
+    {
+      "id": "a2-shopping",
+      "level": "A2",
+      "titleKey": "study.deckA2Shopping",
+      "lemmas": [
+        "Einkauf", "Einkaufen", "Laden", "Geschäft", "Supermarkt", "Bäckerei", "Metzgerei", "Kasse",
+        "Kassierer", "Kunde", "Einkaufswagen", "Tüte", "Tasche", "Preis", "Angebot", "Rabatt",
+        "Geld", "Bargeld", "Karte", "Kreditkarte", "Quittung", "Rechnung", "kaufen", "verkaufen",
+        "bezahlen", "kosten", "wählen", "umtauschen", "teuer", "billig", "günstig"
+      ]
+    },
+    {
+      "id": "a2-amt",
+      "level": "A2",
+      "titleKey": "study.deckA2Amt",
+      "lemmas": [
+        "Amt", "Behörde", "Bürgeramt", "Ausländerbehörde", "Rathaus", "Formular", "Antrag", "Pass",
+        "Reisepass", "Ausweis", "Personalausweis", "Aufenthaltstitel", "Meldebescheinigung", "Dokument", "Bescheid", "Bescheinigung",
+        "Termin", "Wartenummer", "Gebühr", "Unterschrift", "Stempel", "Frist", "Brief", "Aktenzeichen",
+        "Vollmacht", "Beglaubigung", "Passfoto", "beantragen", "ausfüllen", "unterschreiben", "abholen", "vorlegen", "verlängern", "gültig"
+      ]
+    },
+    {
+      "id": "a2-arzt",
+      "level": "A2",
+      "titleKey": "study.deckA2Arzt",
+      "lemmas": [
+        "Arzt", "Ärztin", "Hausarzt", "Zahnarzt", "Facharzt", "Praxis", "Arztpraxis", "Wartezimmer",
+        "Patient", "Rezept", "Apotheke", "Medikament", "Tablette", "Salbe", "Tropfen", "Pflaster",
+        "Verband", "Spritze", "Impfung", "Untersuchung", "Diagnose", "Behandlung", "Krankenversicherung", "Versichertenkarte",
+        "Notaufnahme", "Krankenwagen", "untersuchen", "behandeln", "verschreiben", "einnehmen", "krankschreiben", "genesen", "dringend"
+      ]
+    },
+    {
+      "id": "a2-wohnung",
+      "level": "A2",
+      "titleKey": "study.deckA2Wohnung",
+      "lemmas": [
+        "Wohnung", "Miete", "Kaltmiete", "Warmmiete", "Nebenkosten", "Kaution", "Mietvertrag", "Vermieter",
+        "Mieter", "Nachbar", "Schlüssel", "Übergabe", "Protokoll", "Heizung", "Strom", "Wasser",
+        "Müll", "Hausordnung", "Keller", "Dachboden", "Aufzug", "Treppe", "Quadratmeter", "Umzug",
+        "Möbel", "renovieren", "streichen", "einziehen", "ausziehen", "umziehen", "kündigen", "besichtigen", "hell", "ruhig"
+      ]
+    },
+    {
+      "id": "a2-bank",
+      "level": "A2",
+      "titleKey": "study.deckA2Bank",
+      "lemmas": [
+        "Bank", "Filiale", "Konto", "Girokonto", "Sparkonto", "Bankkarte", "Kreditkarte", "PIN",
+        "Geldautomat", "Überweisung", "Dauerauftrag", "Lastschrift", "Kontoauszug", "Kontonummer", "IBAN", "BIC",
+        "Bargeld", "Geldschein", "Münze", "Betrag", "Zinsen", "Kredit", "Schulden", "Gebühr",
+        "überweisen", "abheben", "einzahlen", "eröffnen", "sperren", "kündigen", "sparen", "bezahlen", "kostenlos"
+      ]
+    },
+    {
+      "id": "a2-schule",
+      "level": "A2",
+      "titleKey": "study.deckA2Schule",
+      "lemmas": [
+        "Schule", "Grundschule", "Gymnasium", "Kita", "Kindergarten", "Erzieher", "Lehrer", "Lehrerin",
+        "Schüler", "Schülerin", "Klasse", "Klassenzimmer", "Unterricht", "Fach", "Pause", "Schulhof",
+        "Hausaufgabe", "Note", "Zeugnis", "Ferien", "Schultasche", "Mäppchen", "Heft", "Buch",
+        "Stift", "Bleistift", "Kugelschreiber", "Lineal", "Tafel", "Stundenplan", "Elternabend", "lernen", "unterrichten", "anmelden"
+      ]
+    },
+    {
+      "id": "a2-kleidung",
+      "level": "A2",
+      "titleKey": "study.deckA2Kleidung",
+      "lemmas": [
+        "Kleidung", "Hose", "Jeans", "Hemd", "T-Shirt", "Pullover", "Jacke", "Mantel",
+        "Kleid", "Rock", "Anzug", "Schuh", "Schuhe", "Stiefel", "Turnschuhe", "Socke",
+        "Strumpfhose", "Mütze", "Hut", "Schal", "Handschuh", "Gürtel", "Tasche", "Krawatte",
+        "Größe", "Farbe", "Baumwolle", "Wolle", "anziehen", "ausziehen", "umziehen", "passen", "tragen", "anprobieren"
+      ]
+    },
+    {
+      "id": "b1-jobcenter",
+      "level": "B1",
+      "titleKey": "study.deckB1Jobcenter",
+      "lemmas": [
+        "Jobcenter", "Agentur", "Sachbearbeiter", "Arbeitslosengeld", "Bürgergeld", "Leistung", "Eingliederungsvereinbarung", "Vermittlung",
+        "Vermittlungsvorschlag", "Weiterbildung", "Umschulung", "Fortbildung", "Sprachkurs", "Integrationskurs", "Bewerbung", "Bewerbungsunterlagen",
+        "Lebenslauf", "Anschreiben", "Vorstellungsgespräch", "Arbeitgeber", "Stellenangebot", "Jobangebot", "Qualifikation", "Berufserfahrung",
+        "Zeugnisanerkennung", "Bescheid", "Bewilligung", "Widerspruch", "Mitwirkungspflicht", "Regelsatz", "bewerben", "einreichen", "nachweisen", "bewilligen"
+      ]
+    },
+    {
+      "id": "b1-verkehr",
+      "level": "B1",
+      "titleKey": "study.deckB1Verkehr",
+      "lemmas": [
+        "Verkehr", "Straßenverkehr", "Stau", "Autobahn", "Bundesstraße", "Kreuzung", "Ampel", "Zebrastreifen",
+        "Fußgänger", "Radweg", "Fahrrad", "Fahrradweg", "Fahrkarte", "Fahrplan", "Fahrkarte", "Bahnsteig",
+        "Gleis", "Verspätung", "Zugausfall", "Umleitung", "Baustelle", "Führerschein", "Fahrprüfung", "Tankstelle",
+        "Treibstoff", "Benzin", "Diesel", "Panne", "Unfall", "Versicherung", "einsteigen", "aussteigen", "umsteigen", "überholen", "bremsen"
+      ]
+    },
+    {
+      "id": "b1-wetter",
+      "level": "B1",
+      "titleKey": "study.deckB1Wetter",
+      "lemmas": [
+        "Wetter", "Wetterbericht", "Vorhersage", "Sonne", "Sonnenschein", "Regen", "Regenschauer", "Gewitter",
+        "Blitz", "Donner", "Wolke", "Nebel", "Wind", "Sturm", "Orkan", "Schnee",
+        "Hagel", "Frost", "Eis", "Kälte", "Hitze", "Temperatur", "Grad", "Luft",
+        "Klima", "Klimawandel", "Jahreszeit", "Frühling", "Sommer", "Herbst", "Winter", "scheinen", "regnen", "schneien", "sonnig", "bewölkt"
+      ]
+    },
+    {
+      "id": "b1-freizeit",
+      "level": "B1",
+      "titleKey": "study.deckB1Freizeit",
+      "lemmas": [
+        "Freizeit", "Hobby", "Interesse", "Sport", "Sportart", "Verein", "Sportverein", "Fitnessstudio",
+        "Training", "Wettkampf", "Spiel", "Mannschaft", "Schwimmbad", "Park", "Wald", "Natur",
+        "Museum", "Ausstellung", "Theater", "Oper", "Kino", "Konzert", "Veranstaltung", "Fest",
+        "Ausflug", "Reise", "Urlaub", "Fotografie", "Musik", "Instrument", "wandern", "spazieren", "schwimmen", "joggen", "entspannen"
+      ]
+    }
+  ],
+  "en": [
+    {
+      "id": "en-a1-family",
+      "level": "A1",
+      "titleKey": "study.deckEnA1Family",
+      "lemmas": [
+        "family", "father", "mother", "parents", "son", "daughter", "brother", "sister",
+        "children", "child", "grandfather", "grandmother", "grandparents", "uncle", "aunt", "cousin",
+        "baby", "man", "woman", "husband", "wife", "boy", "girl", "friend",
+        "person", "people", "name", "live", "love", "meet", "visit", "young", "old"
+      ]
+    },
+    {
+      "id": "en-a1-food",
+      "level": "A1",
+      "titleKey": "study.deckEnA1Food",
+      "lemmas": [
+        "food", "water", "bread", "butter", "cheese", "meat", "chicken", "fish",
+        "egg", "milk", "tea", "coffee", "sugar", "salt", "pepper", "oil",
+        "rice", "soup", "salad", "apple", "banana", "fruit", "vegetable", "potato",
+        "breakfast", "lunch", "dinner", "restaurant", "cafe", "eat", "drink", "cook", "hungry", "delicious"
+      ]
+    },
+    {
+      "id": "en-a1-home",
+      "level": "A1",
+      "titleKey": "study.deckEnA1Home",
+      "lemmas": [
+        "home", "house", "flat", "apartment", "room", "kitchen", "bedroom", "bathroom",
+        "living room", "door", "window", "wall", "floor", "table", "chair", "bed",
+        "sofa", "closet", "lamp", "fridge", "shower", "bath", "key", "garden",
+        "balcony", "clean", "open", "close", "sleep", "sit", "live", "stay", "comfortable"
+      ]
+    },
+    {
+      "id": "en-a1-city",
+      "level": "A1",
+      "titleKey": "study.deckEnA1City",
+      "lemmas": [
+        "city", "town", "village", "street", "road", "square", "center", "station",
+        "bus", "train", "car", "taxi", "bicycle", "airport", "park", "shop",
+        "market", "supermarket", "bank", "post office", "hotel", "hospital", "pharmacy", "school",
+        "museum", "cinema", "bridge", "stop", "walk", "drive", "near", "far", "left", "right"
+      ]
+    },
+    {
+      "id": "en-a1-work",
+      "level": "A1",
+      "titleKey": "study.deckEnA1Work",
+      "lemmas": [
+        "work", "job", "office", "company", "boss", "colleague", "worker", "client",
+        "customer", "computer", "phone", "email", "letter", "meeting", "desk", "salary",
+        "money", "contract", "project", "task", "report", "start", "finish", "call",
+        "write", "read", "speak", "earn", "busy", "free", "tired", "vacation"
+      ]
+    },
+    {
+      "id": "en-a1-time",
+      "level": "A1",
+      "titleKey": "study.deckEnA1Time",
+      "lemmas": [
+        "time", "hour", "minute", "second", "day", "week", "month", "year",
+        "morning", "afternoon", "evening", "night", "today", "yesterday", "tomorrow", "calendar",
+        "date", "weekend", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday",
+        "Sunday", "early", "late", "now", "soon", "always", "never", "sometimes", "often"
+      ]
+    },
+    {
+      "id": "en-a2-health",
+      "level": "A2",
+      "titleKey": "study.deckEnA2Health",
+      "lemmas": [
+        "health", "body", "head", "eye", "ear", "nose", "mouth", "tooth",
+        "throat", "neck", "arm", "hand", "finger", "leg", "foot", "back",
+        "heart", "stomach", "pain", "fever", "cough", "cold", "flu", "blood",
+        "doctor", "nurse", "patient", "hospital", "clinic", "pharmacy", "medicine", "pill", "sick", "healthy"
+      ]
+    },
+    {
+      "id": "en-a2-shopping",
+      "level": "A2",
+      "titleKey": "study.deckEnA2Shopping",
+      "lemmas": [
+        "shopping", "shop", "store", "mall", "market", "cashier", "customer", "bag",
+        "cart", "price", "cost", "money", "cash", "coin", "card", "credit card",
+        "receipt", "bill", "discount", "sale", "size", "color", "buy", "sell",
+        "pay", "spend", "choose", "change", "return", "expensive", "cheap", "affordable"
+      ]
+    },
+    {
+      "id": "en-a2-travel",
+      "level": "A2",
+      "titleKey": "study.deckEnA2Travel",
+      "lemmas": [
+        "travel", "trip", "journey", "tourist", "tourism", "guide", "map", "ticket",
+        "passport", "visa", "border", "customs", "luggage", "suitcase", "backpack", "camera",
+        "photo", "sea", "beach", "mountain", "island", "lake", "forest", "visit",
+        "explore", "arrive", "depart", "pack", "book", "foreign", "international", "famous"
+      ]
+    },
+    {
+      "id": "en-a2-airport",
+      "level": "A2",
+      "titleKey": "study.deckEnA2Airport",
+      "lemmas": [
+        "airport", "flight", "plane", "airplane", "airline", "terminal", "gate", "runway",
+        "ticket", "boarding pass", "seat", "window seat", "aisle", "pilot", "crew", "passenger",
+        "baggage", "luggage", "check-in", "security", "control", "customs", "delay", "cancellation",
+        "take off", "land", "fly", "board", "arrive", "depart", "wait", "direct", "international"
+      ]
+    },
+    {
+      "id": "en-a2-hotel",
+      "level": "A2",
+      "titleKey": "study.deckEnA2Hotel",
+      "lemmas": [
+        "hotel", "hostel", "reception", "desk", "staff", "guest", "room", "single room",
+        "double room", "key", "card key", "reservation", "booking", "breakfast", "buffet", "wifi",
+        "internet", "elevator", "lift", "floor", "towel", "soap", "shower", "balcony",
+        "view", "pool", "bill", "service", "book", "reserve", "check in", "check out", "clean", "quiet"
+      ]
+    },
+    {
+      "id": "en-b1-it",
+      "level": "B1",
+      "titleKey": "study.deckEnB1It",
+      "lemmas": [
+        "computer", "laptop", "server", "screen", "monitor", "keyboard", "mouse", "hardware",
+        "software", "program", "code", "developer", "engineer", "bug", "error", "database",
+        "network", "internet", "website", "application", "file", "folder", "password", "security",
+        "backup", "cloud", "data", "system", "download", "upload", "install", "update", "delete", "connect"
+      ]
+    }
+  ]
+}

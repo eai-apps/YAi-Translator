@@ -6,6 +6,8 @@ import { api } from '../../api/client';
 import { Button } from '../ui/Button';
 import { Card } from '../ui/Card';
 import { SectionTitle } from '../ui/SectionTitle';
+import { ProviderSwitches } from './ProviderSwitches';
+import { AdminWhatsNewSection } from './AdminWhatsNewSection';
 
 interface SettingsTabProps {
   onError: (message: string | null) => void;
@@ -24,6 +26,7 @@ export function AdminSettingsTab({ onError, onSaved }: SettingsTabProps) {
   const [wordCardAuto, setWordCardAuto] = useState(false);
   const [banner, setBanner] = useState({ enabled: false, ru: '', de: '', en: '' });
   const [feedbackEmail, setFeedbackEmail] = useState('');
+  const [myMemoryEmail, setMyMemoryEmail] = useState('');
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
 
@@ -39,6 +42,7 @@ export function AdminSettingsTab({ onError, onSaved }: SettingsTabProps) {
       setWordCardAuto(data.wordCardAuto ?? false);
       setBanner(data.banner);
       setFeedbackEmail(data.feedbackEmail);
+      setMyMemoryEmail(data.myMemoryEmail ?? '');
       onError(null);
     } catch {
       onError(t('admin.loadError'));
@@ -62,6 +66,7 @@ export function AdminSettingsTab({ onError, onSaved }: SettingsTabProps) {
         dailyLimit: useDefault ? null : parsed,
         banner,
         feedbackEmail: feedbackEmail.trim(),
+        myMemoryEmail: myMemoryEmail.trim(),
         guestAiLimit,
         registeredAiLimit,
         aiRequiresLogin,
@@ -144,12 +149,7 @@ export function AdminSettingsTab({ onError, onSaved }: SettingsTabProps) {
             {t('admin.settings.aiRequiresLogin')}
           </label>
           <label className="flex cursor-pointer items-center gap-2 text-sm">
-            <input
-              type="checkbox"
-              checked={wordCardAuto}
-              onChange={(e) => setWordCardAuto(e.target.checked)}
-              className="h-4 w-4 accent-[var(--color-accent)]"
-            />
+            <input type="checkbox" checked={wordCardAuto} onChange={e => setWordCardAuto(e.target.checked)} />
             {t('admin.settings.wordCardAuto')}
           </label>
         </div>
@@ -223,6 +223,34 @@ export function AdminSettingsTab({ onError, onSaved }: SettingsTabProps) {
           {notice ? <span className="text-sm text-ink">{notice}</span> : null}
         </div>
       </Card>
+
+      {/* Почта для MyMemory API (этап 18): бесплатный лимит увеличивается до 50 000 символов в день */}
+      <Card className="p-4">
+        <SectionTitle>{t('admin.settings.myMemoryTitle', 'MyMemory API (e-mail для лимита 50 000 симв/день)')}</SectionTitle>
+        <p className="mt-1 text-xs leading-relaxed text-muted">
+          {t('admin.settings.myMemoryHint', 'Без указания e-mail лимит MyMemory составляет 5 000 символов в день. Указав e-mail, сервис расширяет дневной лимит до 50 000 символов бесплатно.')}
+        </p>
+        <input
+          type="email"
+          value={myMemoryEmail}
+          onChange={(event) => setMyMemoryEmail(event.target.value.slice(0, 120))}
+          placeholder="mymemory-contact@example.com"
+          dir="ltr"
+          className="mt-2 h-11 w-full max-w-sm rounded-xl border border-line bg-card px-3 text-sm text-ink"
+        />
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          <Button variant="primary" loading={busy} onClick={() => void save()}>
+            {t('admin.settings.save')}
+          </Button>
+          {notice ? <span className="text-sm text-ink">{notice}</span> : null}
+        </div>
+      </Card>
+
+      {/* Управление источниками (вкл/выкл) (этап 20) */}
+      <ProviderSwitches onError={onError} />
+
+      {/* Тексты Что нового (этап 20) */}
+      <AdminWhatsNewSection onError={onError} onSaved={onSaved} />
     </div>
   );
 }

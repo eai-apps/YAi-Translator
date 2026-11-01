@@ -8,6 +8,9 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { FormEvent } from 'react';
 import type { LanguageCode, SourceLanguage, WordResponse } from '../../shared/types';
+import { guessLanguage } from '../../shared/detect';
+import { lookupLexicon } from './useLexicon';
+import { assembleClientCard, getOfflineCard } from '../lib/offlineCards';
 import { api } from '../api/client';
 import { toTranslatorError } from '../lib/errors';
 import type { TranslatorError } from '../lib/errors';
@@ -29,7 +32,7 @@ export interface DictionarySearch {
   error: TranslatorError | null;
   /** Лимит ИИ исчерпан — страница открывает окно подключения ключа. */
   onLimit: () => void;
-  search: (eventOrWord?: FormEvent | string) => Promise<void>;
+  search: (eventOrWord?: FormEvent | string, forceAi?: boolean) => Promise<void>;
   limitOpen: boolean;
   closeLimit: () => void;
 }
@@ -55,7 +58,7 @@ export function useDictionarySearch(uiLanguage: string): DictionarySearch {
   useEffect(() => () => abortRef.current?.abort(), []);
 
   const search = useCallback(
-    async (eventOrWord?: FormEvent | string) => {
+    async (eventOrWord?: FormEvent | string, forceAi = false) => {
       if (typeof eventOrWord === 'object' && eventOrWord && 'preventDefault' in eventOrWord) {
         eventOrWord.preventDefault();
       }
@@ -76,6 +79,16 @@ export function useDictionarySearch(uiLanguage: string): DictionarySearch {
       if (dictSource !== targetLang) void loadDict(word, targetLang, controller.signal, sourceLang);
 
       try {
+        const lang = sourceLang === 'auto' ? guessLanguage(word) ?? 'de' : sourceLang;
+        const local = await lookupLexicon(word, lang);
+        if (controller.signal.aborted) return;
+        if (local && !forceAi) {
+          const explanation = lang === targetLang ? 'ru' : targetLang;
+          const localCard = await getOfflineCard(local.lemma, lang, explanation) ?? assembleClientCard(local.lemma, lang, explanation, local.entry);
+          if (!controller.signal.aborted) setCard({ card: localCard, provider: 'dict', cached: true });
+          return;
+        }
+        if (!forceAi) return;
         const response = await api.word({ word, sourceLang, targetLang }, controller.signal);
         if (controller.signal.aborted) return;
         setCard(response);
@@ -94,11 +107,11 @@ export function useDictionarySearch(uiLanguage: string): DictionarySearch {
 
   /** Новый запрос — сбрасываем прошлые карточки. */
   const searchFresh = useCallback(
-    async (eventOrWord?: FormEvent | string) => {
+    async (eventOrWord?: FormEvent | string, forceAi = false) => {
       resetDict();
       setCard(null);
       setError(null);
-      await search(eventOrWord);
+      await search(eventOrWord, forceAi);
     },
     [resetDict, search],
   );

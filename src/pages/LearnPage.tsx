@@ -7,7 +7,7 @@
  * 4. Первый вход (пустая учёба): пошаговая подсказка в 3 шага с иконками.
  */
 import { useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { PageHeader } from '../components/ui/PageHeader';
 import { Button } from '../components/ui/Button';
@@ -33,7 +33,7 @@ interface LearnPageProps {
 export default function LearnPage({ withGrammarLink = false }: LearnPageProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { cards, progress, days, lists, newPerDay, streak } = useStudy();
+  const { cards, progress, days, newPerDay, streak, today, goal } = useStudy();
 
   // Карточки сессии на сегодня
   const sessionSize = useMemo(
@@ -180,7 +180,13 @@ export default function LearnPage({ withGrammarLink = false }: LearnPageProps) {
                   {t('study.myWordsProgress', { total: totalCards, learned: learnedCount })}
                 </span>
               </div>
-              <span className="text-xs font-semibold text-accent">{learnedPercent}%</span>
+              <Link
+                to="/learn/progress"
+                className="flex items-center gap-1 text-xs font-semibold text-accent hover:underline"
+              >
+                <span>{learnedPercent}%</span>
+                <span>→</span>
+              </Link>
             </div>
 
             <div className="h-2.5 w-full overflow-hidden rounded-full bg-soft">
@@ -207,7 +213,7 @@ export default function LearnPage({ withGrammarLink = false }: LearnPageProps) {
             hint={t('study.tileReadySetsHint')}
           />
           <StudyTile
-            to="/learn/practice/article"
+            to="/learn/practice/translation"
             icon={<IconSparkles className="h-5 w-5" />}
             title={t('study.tileTraining')}
             hint={t('study.tileTrainingHint')}
@@ -220,10 +226,18 @@ export default function LearnPage({ withGrammarLink = false }: LearnPageProps) {
         {!isEmpty ? (
           <Card className="p-4 sm:p-5">
             <div className="mb-3 flex items-center justify-between gap-2">
-              <h2 className="text-sm font-semibold">{t('study.weekTitle')}</h2>
-              <span className="text-xs text-muted">
-                {t('study.tileLists', { count: lists.length })}
-              </span>
+              <div className="flex items-center gap-2">
+                <h2 className="text-sm font-semibold">{t('study.weekTitle')}</h2>
+                <span className="text-xs text-muted">
+                  ({today.reviews + today.exercises} / {goal})
+                </span>
+              </div>
+              <Link
+                to="/learn/progress"
+                className="text-xs font-medium text-accent hover:underline"
+              >
+                {t('study.viewFullProgress')} →
+              </Link>
             </div>
             <WeekChart days={week} />
           </Card>

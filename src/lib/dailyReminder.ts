@@ -4,7 +4,7 @@
  * По умолчанию выключено, время 19:00. Разрешение спрашивается ТОЛЬКО при включении.
  */
 import { LocalNotifications } from '@capacitor/local-notifications';
-import { storeBuild } from '../config';
+import { Capacitor } from '@capacitor/core';
 import { readStorage, writeStorage } from './storage';
 
 export interface ReminderSettings {
@@ -21,7 +21,7 @@ export const DEFAULT_REMINDER_SETTINGS: ReminderSettings = {
 };
 
 export function isReminderSupported(): boolean {
-  return storeBuild() === 'android';
+  return Capacitor.isNativePlatform() && Capacitor.isPluginAvailable('LocalNotifications');
 }
 
 export function readReminderSettings(): ReminderSettings {
@@ -51,7 +51,7 @@ export async function writeReminderSettings(settings: ReminderSettings, bodyText
     }
 
     const [hourStr, minuteStr] = settings.time.split(':');
-    const hour = parseInt(hourStr, 10) || 19;
+    const hour = Number.isFinite(Number(hourStr)) ? Number(hourStr) : 19;
     const minute = parseInt(minuteStr, 10) || 0;
 
     await LocalNotifications.cancel({ notifications: [{ id: NOTIFICATION_ID }] });

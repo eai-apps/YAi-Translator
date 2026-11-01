@@ -3,18 +3,23 @@
  * Открывается из нижней панели навигации вместо 6-й+ вкладки.
  * На мобильном: плитки с иконками. Администратору — плитка «Админка».
  */
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useAccount } from '../../hooks/useAccount';
 import { cn } from '../../lib/cn';
+import { ReportIssueModal } from './ReportIssueModal';
 import {
   IconGrammar,
   IconAsk,
+  IconBook,
+  IconFileText,
   IconCompass,
   IconInfo,
   IconPhone,
   IconSparkles,
   IconClose,
+  IconAlert,
 } from '../layout/icons';
 
 interface MoreScreenProps {
@@ -30,6 +35,8 @@ interface MoreItem {
 }
 
 const MORE_ITEMS: MoreItem[] = [
+  { to: '/phrasebook', labelKey: 'nav.phrasebook', icon: IconBook },
+  { to: '/letter', labelKey: 'nav.letter', icon: IconFileText },
   { to: '/grammar', labelKey: 'nav.grammar', icon: IconGrammar },
   { to: '/ask', labelKey: 'nav.ask', icon: IconAsk },
   { to: '/resources', labelKey: 'nav.resources', icon: IconCompass },
@@ -42,6 +49,7 @@ export function MoreScreen({ open, onClose }: MoreScreenProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { account } = useAccount();
+  const [reportOpen, setReportOpen] = useState(false);
 
   const items = MORE_ITEMS.filter((item) => !item.adminOnly || account?.isAdmin);
 
@@ -50,7 +58,7 @@ export function MoreScreen({ open, onClose }: MoreScreenProps) {
     navigate(to);
   };
 
-  if (!open) return null;
+  if (!open && !reportOpen) return null;
 
   return (
     <>
@@ -88,7 +96,7 @@ export function MoreScreen({ open, onClose }: MoreScreenProps) {
         </div>
 
         {/* Плитки */}
-        <div className="grid grid-cols-3 gap-3 px-4 pb-4">
+        <div className="grid grid-cols-3 gap-3 px-4 pb-3">
           {items.map((item) => {
             const Icon = item.icon;
             return (
@@ -109,7 +117,46 @@ export function MoreScreen({ open, onClose }: MoreScreenProps) {
             );
           })}
         </div>
+
+        {/* Кнопка «Сообщить о проблеме» */}
+        <div className="px-4 pb-2">
+          <button
+            type="button"
+            onClick={() => setReportOpen(true)}
+            className="flex w-full items-center justify-center gap-2 rounded-xl border border-line py-2.5 text-xs font-medium text-muted hover:bg-soft hover:text-ink transition-colors"
+          >
+            <IconAlert className="h-4 w-4 text-warning" />
+            <span>{t('feedback.reportButton')}</span>
+          </button>
+        </div>
+
+        {/* Ссылки на Политику конфиденциальности и Условия */}
+        <div className="flex items-center justify-center gap-3 px-4 pb-2 text-[11px] text-muted">
+          <button
+            type="button"
+            onClick={() => handleNav('/privacy')}
+            className="hover:text-ink hover:underline"
+          >
+            {t('legal.privacy')}
+          </button>
+          <span>·</span>
+          <button
+            type="button"
+            onClick={() => handleNav('/terms')}
+            className="hover:text-ink hover:underline"
+          >
+            {t('legal.terms')}
+          </button>
+        </div>
       </div>
+
+      <ReportIssueModal
+        open={reportOpen}
+        onClose={() => {
+          setReportOpen(false);
+          onClose();
+        }}
+      />
     </>
   );
 }

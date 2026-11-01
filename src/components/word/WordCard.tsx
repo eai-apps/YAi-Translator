@@ -8,7 +8,9 @@ import { useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { ReactNode } from 'react';
 import type { DictExample, LanguageCode, WordCard as WordCardData } from '../../../shared/types';
+import { getCefrLevel } from '../../../shared/lexicon';
 import type { SpeechController } from '../../hooks/useSpeech';
+import { useLexicon } from '../../hooks/useLexicon';
 import { cardFromWord } from '../../lib/studyCard';
 import { SectionTitle } from '../ui/SectionTitle';
 import { SpeakButton } from '../ui/SpeakButton';
@@ -52,24 +54,42 @@ export function WordCard({
   const [tab, setTab] = useState<TabId>('all');
   const carouselRef = useRef<HTMLDivElement>(null);
   const pick = usePick();
-  const studyInput = useMemo(() => cardFromWord(card), [card]);
+  const { match: lexMatch } = useLexicon(card.lemma, card.language);
+
+  const cefrLevel = card.cefrLevel || (lexMatch ? getCefrLevel(lexMatch.entry.fr) : null);
+  const audioUrl = card.audioUrl || lexMatch?.entry.audio || undefined;
+
+  const currentCard = useMemo(() => {
+    let syns = card.synonyms;
+    if (syns.length === 0 && lexMatch?.entry.syn?.length) {
+      syns = lexMatch.entry.syn;
+    }
+    return {
+      ...card,
+      cefrLevel,
+      audioUrl: audioUrl || null,
+      synonyms: syns,
+    };
+  }, [card, cefrLevel, audioUrl, lexMatch]);
+
+  const studyInput = useMemo(() => cardFromWord(currentCard), [currentCard]);
 
   const hasGrammar =
-    (card.grammar ?? []).length > 0 || card.grammarNotes.length > 0 || (card.grammarTopics ?? []).length > 0;
+    (currentCard.grammar ?? []).length > 0 || currentCard.grammarNotes.length > 0 || (currentCard.grammarTopics ?? []).length > 0;
   const hasForms =
-    Boolean(card.conjugation) || Boolean(card.declension) || Boolean(card.plural) || card.partOfSpeech === 'adjective';
+    Boolean(currentCard.conjugation) || Boolean(currentCard.declension) || Boolean(currentCard.plural) || currentCard.partOfSpeech === 'adjective';
   const hasRelated =
-    card.synonyms.length > 0 ||
-    card.antonyms.length > 0 ||
-    (card.family ?? []).length > 0 ||
-    card.governance.length > 0 ||
-    card.phrases.length > 0;
+    currentCard.synonyms.length > 0 ||
+    currentCard.antonyms.length > 0 ||
+    (currentCard.family ?? []).length > 0 ||
+    currentCard.governance.length > 0 ||
+    currentCard.phrases.length > 0;
 
   const available: CardTab<TabId>[] = [
     { id: 'all', label: t('word.tabAll') },
     { id: 'dictionary', label: t('word.tabDictionary') },
     ...(hasForms ? [{ id: 'forms' as TabId, label: t('word.tabForms') }] : []),
-    ...(card.examples.length > 0 || dictExamples.length > 0
+    ...(currentCard.examples.length > 0 || dictExamples.length > 0
       ? [{ id: 'examples' as TabId, label: t('word.tabExamples') }]
       : []),
     ...(hasRelated ? [{ id: 'related' as TabId, label: t('word.tabRelated') }] : []),
@@ -90,19 +110,20 @@ export function WordCard({
     }
   };
 
-  const grammarBlock = <GrammarSection card={card} speech={speech} translationLang={lang} />;
+  const grammarBlock = <GrammarSection card={currentCard} speech={speech} translationLang={lang} />;
 
   return (
     <article className="animate-fade-in select-text">
       <WordCardHeader
-        card={card}
+        card={currentCard}
         menu={headerMenu}
         speak={
           <SpeakButton
-            text={card.lemma}
-            language={card.language}
-            id={`card-${card.lemma}`}
+            text={currentCard.lemma}
+            language={currentCard.language}
+            id={`card-${currentCard.lemma}`}
             speech={speech}
+            audioUrl={audioUrl}
             label={t('common.listen')}
           />
         }
@@ -120,7 +141,7 @@ export function WordCard({
       <div className="lg:hidden mt-3">
         <WordCarousel
           ref={carouselRef}
-          card={card}
+          card={currentCard}
           speech={speech}
           dictExamples={dictExamples}
           dictLang={dictLang}
@@ -140,39 +161,39 @@ export function WordCard({
           <div className="space-y-6">
             <div>
               <SectionTitle>{t('word.tabDictionary')}</SectionTitle>
-              <MeaningList meanings={card.meanings} translationLang={lang} onPickTranslation={onPickTranslation} glossary={card.glossary} />
+              <MeaningList meanings={currentCard.meanings} translationLang={lang} onPickTranslation={onPickTranslation} glossary={currentCard.glossary} />
             </div>
-            {card.examples.length > 0 || dictExamples.length > 0 ? (
+            {currentCard.examples.length > 0 || dictExamples.length > 0 ? (
               <ExamplesList
-                card={card}
+                card={currentCard}
                 speech={speech}
                 dictExamples={dictExamples}
                 dictLang={dictLang}
                 translationLang={lang}
               />
             ) : null}
-            {hasForms ? <FormsSection card={card} speech={speech} /> : null}
-            {hasRelated ? <RelatedSection card={card} onPick={pick ?? undefined} /> : null}
+            {hasForms ? <FormsSection card={currentCard} speech={speech} /> : null}
+            {hasRelated ? <RelatedSection card={currentCard} onPick={pick ?? undefined} /> : null}
             {hasGrammar ? grammarBlock : null}
-            <SourcesLine sources={card.dictSources ?? []} />
+            <SourcesLine sources={currentCard.dictSources ?? []} />
           </div>
         ) : null}
 
         {active === 'dictionary' ? (
           <div>
             <MeaningList
-              meanings={card.meanings}
+              meanings={currentCard.meanings}
               translationLang={lang}
               onPickTranslation={onPickTranslation}
-              glossary={card.glossary}
+              glossary={currentCard.glossary}
             />
-            <SourcesLine sources={card.dictSources ?? []} />
+            <SourcesLine sources={currentCard.dictSources ?? []} />
           </div>
         ) : null}
 
         {active === 'examples' ? (
           <ExamplesList
-            card={card}
+            card={currentCard}
             speech={speech}
             dictExamples={dictExamples}
             dictLang={dictLang}
@@ -180,10 +201,10 @@ export function WordCard({
           />
         ) : null}
 
-        {active === 'forms' ? <FormsSection card={card} speech={speech} /> : null}
+        {active === 'forms' ? <FormsSection card={currentCard} speech={speech} /> : null}
 
         {active === 'related' ? (
-          <RelatedSection card={card} onPick={pick ?? undefined} />
+          <RelatedSection card={currentCard} onPick={pick ?? undefined} />
         ) : null}
 
         {active === 'grammar' ? grammarBlock : null}

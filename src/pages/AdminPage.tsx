@@ -21,9 +21,10 @@ import { AdminUsersTab } from '../components/admin/AdminUsersTab';
 import { AdminResourcesTab } from '../components/admin/AdminResourcesTab';
 import { AdminGrammarTab } from '../components/admin/AdminGrammarTab';
 import { AdminPaidTab } from '../components/admin/AdminPaidTab';
+import { AdminErrorsTab } from '../components/admin/AdminErrorsTab';
 import { AdminLog } from '../components/admin/AdminLog';
 
-type Tab = 'overview' | 'keys' | 'paid' | 'resources' | 'grammar' | 'settings' | 'users';
+type Tab = 'overview' | 'keys' | 'paid' | 'resources' | 'grammar' | 'settings' | 'users' | 'errors';
 
 export default function AdminPage() {
   const { t } = useTranslation();
@@ -107,6 +108,7 @@ export default function AdminPage() {
           { value: 'grammar', label: t('admin.tabGrammar') },
           { value: 'settings', label: t('admin.tabSettings') },
           { value: 'users', label: t('admin.tabUsers') },
+          { value: 'errors', label: t('admin.tabErrors') },
         ]}
       />
 
@@ -149,6 +151,8 @@ export default function AdminPage() {
         ) : null}
 
         {tab === 'users' ? <AdminUsersTab onError={setError} /> : null}
+
+        {tab === 'errors' ? <AdminErrorsTab /> : null}
       </div>
 
       {tab === 'settings' || tab === 'users' || tab === 'resources' || tab === 'grammar' ? (

@@ -5,10 +5,12 @@
  */
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
+import type { LanguageCode } from '../../shared/languages';
 import type { StudyCard, StudyCardInput, StudyDay, StudyGrade, StudyList, StudyProgress } from '../../shared/study';
 import { STUDY_GOALS, STUDY_LIST_CARDS_MAX, STUDY_LIST_MAX, STUDY_NEW_PER_DAY_DEFAULT, studyCardId } from '../../shared/study';
 import { STORAGE_KEYS } from '../config';
 import { readStorage, writeStorage } from '../lib/storage';
+import { markSettingsChanged } from '../lib/settingsSync';
 import { mergeStudyState, sanitizeState } from '../lib/studyMerge';
 import type { MergeInput, StudyState } from '../lib/studyMerge';
 import { mergeLists, readLists, writeLists, LIST_EMOJI_MAX, LIST_TITLE_MAX } from '../lib/studyLists';
@@ -33,7 +35,7 @@ interface StudyContextValue {
   due: number;
   /** Сколько новых слов уже введено сегодня. */
   newToday: number;
-  hasCard: (lemma: string) => boolean;
+  hasCard: (lemma: string, lang?: LanguageCode) => boolean;
   addCard: (input: StudyCardInput) => boolean;
   addCards: (inputs: StudyCardInput[]) => number;
   removeCard: (cardId: string) => void;
@@ -97,10 +99,25 @@ export function StudyProvider({ children }: { children: ReactNode }) {
     writeStorage(STORAGE_KEYS.studyDays, next.days);
   }, []);
 
+  useEffect(() => {
+    const reload = () => {
+      commit(sanitizeState({ cards: readStorage(STORAGE_KEYS.studyCards, []), progress: readStorage(STORAGE_KEYS.studyProgress, []), days: readStorage(STORAGE_KEYS.studyDays, []) }));
+      setLists(readLists());
+      setGoalState(readGoal());
+      setNewPerDayState(readNewPerDay());
+    };
+    window.addEventListener('yai:data-imported', reload);
+    window.addEventListener('yai:remote-settings-applied', reload);
+    return () => {
+      window.removeEventListener('yai:data-imported', reload);
+      window.removeEventListener('yai:remote-settings-applied', reload);
+    };
+  }, [commit]);
+
   const { addCard, addCards, removeCard, grade, recordExercise } = useStudyActions({ stateRef, commit });
 
   const hasCard = useCallback<StudyContextValue['hasCard']>(
-    (lemma) => stateRef.current.cards.some((card) => card.id === studyCardId(lemma)),
+    (lemma, lang = 'de') => stateRef.current.cards.some((card) => card.id === studyCardId(lemma, lang)),
     [],
   );
 
@@ -118,12 +135,14 @@ export function StudyProvider({ children }: { children: ReactNode }) {
     const next = (STUDY_GOALS as readonly number[]).includes(value) ? value : STUDY_GOALS[0];
     setGoalState(next);
     writeStorage(STORAGE_KEYS.studyGoal, next);
+    markSettingsChanged();
   }, []);
 
   const setNewPerDay = useCallback<StudyContextValue['setNewPerDay']>((value) => {
     const next = Math.min(50, Math.max(1, Math.round(value)));
     setNewPerDayState(next);
     writeStorage(STORAGE_KEYS.studyNewPerDay, next);
+    markSettingsChanged();
   }, []);
 
   // Слияние локального и серверного состояния; списки слов — отдельная функция (studyLists.ts).
@@ -218,7 +237,7 @@ export function StudyProvider({ children }: { children: ReactNode }) {
     () => state.days.find((item) => item.day === localDayKey()) ?? { ...EMPTY_DAY, day: localDayKey() },
     [state.days],
   );
-  const streak = useMemo(() => computeStreak(state.days), [state.days]);
+  const streak = useMemo(() => computeStreak(state.days, Date.now(), goal), [state.days, goal]);
   const due = useMemo(() => dueCount(state.cards, state.progress), [state.cards, state.progress]);
   const newToday = useMemo(() => introducedToday(state.progress), [state.progress]);
 

@@ -37,3 +37,6 @@ keystore/
 *.keystore
 *.jks
 keystore_base64.txt
+
+# Generated during build
+public/sitemap.xml

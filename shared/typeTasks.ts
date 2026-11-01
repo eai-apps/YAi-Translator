@@ -21,8 +21,12 @@ export type ProviderId =
   | 'microsoft'
   | 'google'
   | 'mymemory'
+  | 'lingva'
+  | 'apertium'
   | 'm2m100'
-  | 'paid';
+  | 'languagetool'
+  | 'paid'
+  | 'dict';
 
 /** Часть речи для карточки слова. */
 export type PartOfSpeech =
@@ -39,7 +43,7 @@ export type PartOfSpeech =
   | 'other';
 
 /** Переводчики, которые пользователь может выбрать вручную. Порядок = приоритет в цепочке. */
-export const CLASSIC_PROVIDERS = ['deepl', 'lara', 'microsoft', 'google', 'mymemory', 'm2m100'] as const;
+export const CLASSIC_PROVIDERS = ['deepl', 'lara', 'microsoft', 'google', 'mymemory', 'lingva', 'apertium', 'm2m100'] as const;
 export type ClassicProviderId = (typeof CLASSIC_PROVIDERS)[number];
 
 export type { SourceLanguage };

@@ -22,7 +22,8 @@
     "no": "Nein",
     "on": "An",
     "off": "Aus",
-    "noResults": "Keine Ergebnisse"
+    "noResults": "Keine Ergebnisse",
+    "offlineDetailed": "Kein Netz — Wörterbuch, Lernen, Sprachführer und Verlauf funktionieren"
   },
   "nav": {
     "translate": "Übersetzen",
@@ -37,7 +38,11 @@
     "resources": "Nützliche Links",
     "guestSignIn": "Gast · Anmelden",
     "apps": "Apps",
-    "more": "Mehr"
+    "more": "Mehr",
+    "phrasebook": "Sprachführer",
+    "letter": "Behördenbrief",
+    "privacy": "Datenschutz",
+    "terms": "AGB"
   },
   "languages": {
     "auto": "Sprache erkennen",
@@ -137,7 +142,11 @@
     "pasteChip": "Einfügen",
     "pasteFromClipboard": "Aus Zwischenablage einfügen",
     "fromHistory": "Aus dem Verlauf",
-    "dictionaryWords": "Wörter aus dem Wörterbuch"
+    "dictionaryWords": "Wörter aus dem Wörterbuch",
+    "photo": "Aus Foto übersetzen",
+    "ocrProgress": "Text wird erkannt...",
+    "offlineHistoryBadge": "Offline (Verlauf)",
+    "offlineDictBadge": "Offline (Wörterbuch)"
   },
   "others": {
     "title": "Wie andere übersetzen",
@@ -174,6 +183,8 @@
     "antonyms": "Antonyme",
     "phrases": "Feste Wendungen",
     "level": "Niveau",
+    "approxLevelTitle": "Ungefähres Sprachniveau",
+    "approxLevelDesc": "ungefähres Niveau nach Häufigkeit",
     "caseNom": "Nominativ",
     "caseAcc": "Akkusativ",
     "caseDat": "Dativ",
@@ -280,8 +291,12 @@
     "paraphrasesTitle": "Anders gesagt",
     "instantBadge": "sofort",
     "preparingDetails": "Ausführliche KI-Analyse wird vorbereitet…",
-    "loadAi": "KI-Wortanalyse",
-    "loadAiHint": "Beispiele, Regeln, Synonyme und Formen – per Knopf, um das Limit zu sparen."
+    "recreate": "Karte neu erstellen",
+    "recreating": "Karte wird aktualisiert…",
+    "recreateSuccess": "Karte aktualisiert",
+    "askAiCard": "KI-Wortanalyse",
+    "assembledFromDicts": "Aus offenen Wörterbüchern zusammengestellt",
+    "falseFriend": "Falscher Freund"
   },
   "explain": {
     "title": "Analyse",
@@ -310,7 +325,11 @@
     "typeWordOrder": "Wortstellung",
     "typeVocabulary": "Wortwahl",
     "typePunctuation": "Zeichensetzung",
-    "typeStyle": "Stil"
+    "typeStyle": "Stil",
+    "sourceAttribution": "Prüfung: LanguageTool (LGPL)",
+    "fixAll": "Alles korrigieren",
+    "foundErrors": "{{count}} Rechtschreib- / Grammatikfehler",
+    "replacementsTitle": "Korrekturvorschläge:"
   },
   "dictionary": {
     "title": "Wörterbuch",
@@ -452,7 +471,25 @@
     "benefitAiLimit": "50 KI-Anfragen pro Tag (statt 5 für Gäste)",
     "benefitHistory": "Übersetzungsverlauf bis zu 1000 Einträge (statt 50)",
     "benefitPaidAi": "Zugriff auf die geteilten kostenpflichtigen KI-Netzwerke der Website",
-    "benefitSync": "Synchronisierung der Favoriten zwischen allen Geräten"
+    "benefitSync": "Synchronisierung der Favoriten zwischen allen Geräten",
+    "syncTitle": "Synchronisierung",
+    "lastSyncTime": "Synchronisiert: {{time}}",
+    "neverSynced": "Noch nicht synchronisiert",
+    "syncJustNow": "gerade eben",
+    "syncNow": "Jetzt synchronisieren",
+    "deleteAccount": "Konto löschen",
+    "deleteTitle": "Konto löschen",
+    "deleteWarning": "Alle Ihre Daten (Übersetzungsverlauf, Lernkarten, API-Schlüssel) werden unwiderruflich aus der Datenbank gelöscht. Diese Aktion kann nicht rückgängig gemacht werden.",
+    "deleteConfirmPassword": "Geben Sie Ihr Passwort zur Bestätigung ein:",
+    "deleteConfirmBtn": "Konto endgültig löschen",
+    "backupTitle": "Datensicherung & Übertragung",
+    "backupHint": "Laden Sie eine vollständige Kopie Ihrer Daten (Verlauf, Lernkarten, Listen und Einstellungen) als JSON herunter oder übertragen Sie sie ohne Server.",
+    "exportBtn": "Meine Daten herunterladen (JSON)",
+    "importBtn": "Aus Datei importieren",
+    "exportSuccess": "Sicherungsdatei erfolgreich heruntergeladen.",
+    "exportError": "Sicherungsdatei konnte nicht erstellt werden.",
+    "importSuccess": "Daten erfolgreich importiert: {{history}} Übersetzungen, {{cards}} Karten.",
+    "importError": "Ungültiges Sicherungsdateiformat."
   },
   "keys": {
     "getFreeKey": "Kostenlosen Schlüssel holen",
@@ -593,7 +630,15 @@
     "licenseOpenThesaurus": "OpenThesaurus — LGPL / CC BY-SA: Synonyme",
     "licenseTatoeba": "Tatoeba — CC BY 2.0 FR: Beispielsätze mit Übersetzung",
     "licensePons": "PONS — per API-Schlüssel, nur zur Suche",
-    "licenseDwds": "DWDS — Wortinformationen (Berlin-Brandenburgische Akademie)"
+    "licenseDwds": "DWDS — Wortinformationen (Berlin-Brandenburgische Akademie)",
+    "licenseStopwordsIso": "stopwords-iso — MIT: Stopwortlisten für alle Sprachen",
+    "licenseWordNet": "WordNet / Open English WordNet — englische Synonymdatenbank, Lizenz CC-BY 4.0 (Princeton University & Global WordNet Association)",
+    "licenseWikimediaCommons": "Wikimedia Commons und Lingua Libre — muttersprachliche Audioaufnahmen, Lizenz CC-BY-SA 4.0",
+    "licenseTesseractJs": "Optische Zeichenerkennung (OCR) — Apache-2.0-Lizenz, Tesseract.js-Bibliothek.",
+    "licenseLanguageTool": "LGPL 2.1+. Rechtschreib- und Grammatikprüfung für Deutsch, Englisch, Russisch und weitere Sprachen",
+    "licenseLingva": "AGPL 3.0. Freier Übersetzungsproxy ohne Tracking und Werbung",
+    "licenseApertium": "GPL 2.0+. Freie regelbasierte maschinelle Übersetzungsplattform",
+    "licenseMyMemory": "Kostenlose Übersetzungs-API des Translated.net Translation Memory"
   },
   "admin": {
     "title": "Admin",
@@ -637,7 +682,20 @@
       "paidTokensTitle": "Kostenpflichtige KI-Tokens",
       "paidTokensToday": "Tokens heute",
       "paidTokensMonth": "Tokens diesen Monat",
-      "warmedCards": "Vorbereitete Karten (Warm-up)"
+      "warmedCards": "Vorbereitete Karten (Warm-up)",
+      "warmProgress": "Kartenspeicher-Fortschritt",
+      "recreateCard": "Karte im Speicher neu erstellen",
+      "recreateDesc": "Alte Karte aus dem Speicher löschen und bei der KI neu anfordern",
+      "runWarm": "Warming starten",
+      "warmingRunning": "Wärme…",
+      "dailyTableTitle": "Tägliche Statistiken",
+      "dailyTableHint": "Verlauf von Übersetzungen, Besuchern, neuen Nutzern, Fehlern und antwortenden Diensten nach Tagen.",
+      "colDate": "Datum",
+      "colTranslations": "Übersetzungen",
+      "colVisitors": "Besucher",
+      "colNewUsers": "Neue Nutzer",
+      "colErrors": "Fehler",
+      "colTranslators": "Antwortende Dienste"
     },
     "keys": {
       "title": "Schlüssel der Seite",
@@ -693,7 +751,15 @@
       "guestLimit": "Limit für Gäste (Anfragen pro Tag)",
       "regLimit": "Limit für Registrierte (Anfragen pro Tag)",
       "aiRequiresLogin": "KI nur nach Anmeldung (für Gäste sperren)",
-      "wordCardAuto": "KI-Wortanalyse sofort laden (aus – nur per Knopf, spart das Limit)"
+      "myMemoryTitle": "MyMemory API E-Mail",
+      "myMemoryHint": "Kontakt-E-Mail angeben, um das kostenlose MyMemory-Tageslimit auf 50.000 Zeichen zu erhöhen",
+      "whatsNewTitle": "«Was gibt's Neues»-Fenster",
+      "whatsNewHint": "Aktualisierungstext, den Benutzer nach der Veröffentlichung im Popup sehen.",
+      "whatsNewEnabled": "Fenster nach Aktualisierung anzeigen",
+      "whatsNewVersion": "Version",
+      "whatsNewRu": "Text auf Russisch",
+      "whatsNewDe": "Text auf Deutsch",
+      "whatsNewEn": "Text auf Englisch"
     },
     "users": {
       "title": "Benutzer",
@@ -848,6 +914,20 @@
       "urlPlaceholder": "https://...",
       "howtoRuPlaceholder": "Anleitung: 1. Kaufen Sie... 2. Aktivieren Sie...",
       "noItems": "Keine Kauflinks"
+    },
+    "tabErrors": "Fehler",
+    "errors": {
+      "title": "Client-Fehlerprotokoll",
+      "subtitle": "Browserfehler der Benutzer und gemeldete Probleme",
+      "clear": "Protokoll löschen",
+      "confirmClear": "Möchten Sie wirklich alle Fehlerprotokolleinträge löschen?",
+      "noErrors": "Keine Fehler aufgezeichnet",
+      "noErrorsDesc": "Alle App-Systeme laufen stabil.",
+      "userReport": "Benutzermeldung",
+      "codeError": "Code-Fehler",
+      "showStack": "Stack anzeigen",
+      "hideStack": "Stack verbergen",
+      "noteLabel": "Benutzerkommentar"
     }
   },
   "dict": {
@@ -1005,7 +1085,18 @@
       "telling-time": "Uhrzeit und Datum",
       "polite-forms": "Höfliche Anrede: Sie und du",
       "academic-language": "Schriftsprache und Wissenschaftssprache"
-    }
+    },
+    "langDe": "🇩🇪 Deutsch",
+    "langEn": "🇬🇧 Englisch",
+    "langSelect": "Grammatiksprache",
+    "quizTitle": "Mini-Test zur Festigung (5 Fragen)",
+    "quizSubtitle": "Überprüfe dein Verständnis des Themas",
+    "quizReset": "Nochmal versuchen",
+    "quizCorrect": "Richtig!",
+    "quizIncorrect": "Falsch. Richtige Antwort: {{answer}}",
+    "tableTitle": "Referenztabelle",
+    "tableFilter": "In Tabelle suchen…",
+    "tableCount": "{{count}} von {{total}} angezeigt"
   },
   "ask": {
     "title": "KI fragen",
@@ -1104,7 +1195,7 @@
     "exportCsv": "CSV exportieren",
     "exportAnki": "Anki exportieren",
     "decksTitle": "Fertige Sets",
-    "decksSubtitle": "Acht Themen für den Start. Artikel und Plural nach Wiktionary geprüft.",
+    "decksSubtitle": "Wortlisten für Deutsch und Englisch. Sprache und Niveau wählen und eine Liste zum Lernen hinzufügen.",
     "deckWordsCount": "Wörter: {{n}}",
     "deckPreview": "Wörter zeigen",
     "deckHide": "Wörter ausblenden",
@@ -1193,7 +1284,64 @@
     "listFromTranslations": "Aus Übersetzungen",
     "showAnswer": "Aufdecken",
     "swipeHint": "Nach links wischen: „Nicht gewusst“, nach rechts: „Einfach“",
-    "onboardingTitle": "So lernen Sie Wörter – 3 Schritte"
+    "onboardingTitle": "So lernen Sie Wörter – 3 Schritte",
+    "deckA2Amt": "Behörde & Amt",
+    "deckA2Arzt": "Arzt & Apotheke",
+    "deckA2Wohnung": "Wohnung & Miete",
+    "deckA2Bank": "Bank & Finanzen",
+    "deckA2Schule": "Schule & Kita",
+    "deckA2Kleidung": "Kleidung & Mode",
+    "deckB1Jobcenter": "Jobcenter & Arbeitssuche",
+    "deckB1Verkehr": "Verkehr & Reisen",
+    "deckB1Wetter": "Wetter & Natur",
+    "deckB1Freizeit": "Freizeit & Hobbys",
+    "deckDeTop500": "Top-500 deutsche Wörter",
+    "deckEnA1Family": "Familie & Menschen (Englisch)",
+    "deckEnA1Food": "Essen & Trinken (Englisch)",
+    "deckEnA1Home": "Zuhause & Alltag (Englisch)",
+    "deckEnA1City": "Stadt & Verkehr (Englisch)",
+    "deckEnA1Work": "Arbeit & Büro (Englisch)",
+    "deckEnA1Time": "Zeit & Kalender (Englisch)",
+    "deckEnA2Health": "Gesundheit & Körper (Englisch)",
+    "deckEnA2Shopping": "Einkaufen (Englisch)",
+    "deckEnA2Travel": "Reisen & Urlaub (Englisch)",
+    "deckEnA2Airport": "Flughafen & Flüge (Englisch)",
+    "deckEnA2Hotel": "Hotel & Unterkunft (Englisch)",
+    "deckEnB1It": "IT & Technologie (Englisch)",
+    "deckEnTop500": "Top-500 englische Wörter",
+    "filterAllLangs": "Alle Sprachen",
+    "filterAllLevels": "Alle",
+    "deckLearn": "Lernen",
+    "inMyDecks": "In meinen Decks",
+    "deckLearnedProgress": "{{learned}} von {{total}} gelernt ({{percent}}%)",
+    "practiceWrite": "Wort schreiben",
+    "practicePairs": "Paare",
+    "practiceFirstLetterHint": "Erster Buchstabe: {{letter}}",
+    "practicePairsHint": "Verbinde das Wort mit seiner Übersetzung",
+    "progressTitle": "Mein Fortschritt",
+    "progressSubtitle": "Lernstatistik, Tagessträhne und schwierige Wörter",
+    "progressTotalCards": "Wörter im Lernen",
+    "progressLearnedCards": "Gelernt",
+    "streakDays": "{{count}} Tage in Folge",
+    "progressTodayGoal": "Heute / Ziel",
+    "progressByLanguage": "Fortschritt nach Sprachen",
+    "words": "Wörter",
+    "progressChart30": "Aktivität der letzten 30 Tage",
+    "progressChartTotal": "Aktionen im letzten Monat: {{count}}",
+    "days": "Tage",
+    "difficultWordsTitle": "Schwierigste Wörter",
+    "noDifficultWords": "Noch keine schwierigen Wörter 🎉 Tolles Gedächtnis!",
+    "lapsesCount": "{{count}} Fehler",
+    "settingsTitle": "Lerneinstellungen",
+    "settingDailyGoal": "Tagesziel",
+    "goalOption": "{{count}} Wörter / Tag",
+    "settingNewPerDay": "Neue Wörter pro Tag",
+    "newWordsOption": "{{count}} neue",
+    "reminderTitle": "Wiederholungserinnerung",
+    "reminderSubtitle": "Tägliche Benachrichtigung in der App",
+    "reminderTime": "Erinnerungszeit",
+    "reminderBody": "Zeit, Wörter zu wiederholen! Die Serie wartet 🔥",
+    "viewFullProgress": "Details"
   },
   "help": {
     "title": "Hilfe",
@@ -1281,11 +1429,126 @@
     "tvHowTo": "So installieren Sie es auf dem Fernseher (Android TV)",
     "rustoreSubtitle": "YAi Translator im RuStore – bald verfügbar. Es ist dieselbe App, Updates kommen automatisch."
   },
-  "settings": {
-    "aiCardMode": "KI-Wortanalyse",
-    "aiCardModeSite": "Wie auf der Website",
-    "aiCardModeAuto": "Sofort",
-    "aiCardModeButton": "Per Knopf",
-    "aiCardModeHint": "„Sofort“ funktioniert mit eigenem KI-Schlüssel (kostenlos oder bezahlt) – er verbraucht nicht das gemeinsame Limit."
+  "phrasebook": {
+    "title": "Sprachführer",
+    "subtitle": "Praktische Redewendungen zu 12 Alltagsthemen mit Übersetzung und Audio",
+    "searchPlaceholder": "Phrase in beliebiger Sprache suchen...",
+    "allTopics": "Alle Themen",
+    "learningLang": "Lernsprache",
+    "translationLang": "Übersetzungssprache",
+    "notFound": "Keine Phrasen gefunden.",
+    "topics": {
+      "greetings": "Begrüßung",
+      "behoerde": "Behörde & Amt",
+      "doctor": "Arzt & Apotheke",
+      "housing": "Wohnung & Miete",
+      "shopping": "Einkaufen",
+      "restaurant": "Restaurant & Café",
+      "transport": "Verkehr & Bahn",
+      "emergency": "Notfall & Hilfe",
+      "work": "Arbeit & Bewerbung",
+      "school": "Schule & Kita",
+      "phone": "Telefon",
+      "bank": "Bank & Post"
+    }
+  },
+  "letter": {
+    "title": "Behördenbrief-Assistent",
+    "subtitle": "Schnelle Analyse von Behördenschreiben: Absender, Frist, Schritte und Antwortvorlage",
+    "headerLink": "Behördenbrief",
+    "inputTitle": "Text oder Foto des Schreibens",
+    "placeholder": "Fügen Sie den Text des Behördenschreibens ein oder machen Sie ein Foto...",
+    "photoBtn": "Foto / Scan",
+    "samplesTitle": "Beispielschreiben",
+    "samples": {
+      "jobcenter": "Einladung Jobcenter",
+      "mahnung": "Mahnung / Zahlung"
+    },
+    "privacyNotice": "Brieftext wird nicht auf dem Server gespeichert",
+    "analyzeBtn": "Brief analysieren",
+    "analyzing": "Brief wird analysiert...",
+    "analyzingSub": "Prüfe Absender, Frist, Anliegen und Antwortentwurf",
+    "disclaimerTitle": "Keine Rechtsberatung",
+    "disclaimerText": "Diese Auswertung wurde von KI erstellt. Bei wichtigen rechtlichen oder finanziellen Fragen wenden Sie sich an Beratungsstellen oder Rechtsbeistand.",
+    "sender": "Absender",
+    "deadline": "Frist",
+    "noDeadline": "Keine Frist / Informationsschreiben",
+    "summaryTitle": "Kernaussage",
+    "stepsTitle": "Erforderliche Schritte",
+    "replyTemplateTitle": "Antwortvorlage auf Deutsch",
+    "emptyPrompt": "Hier erscheint die Analyse des Schreibens",
+    "emptyPromptSub": "Fügen Sie links einen Text ein oder laden Sie ein Foto hoch",
+    "ocrError": "Texterkennung fehlgeschlagen. Bitte ein schärferes Foto hochladen.",
+    "error": "Analyse fehlgeschlagen. Bitte erneut versuchen."
+  },
+  "conversation": {
+    "partnerLabel": "Gesprächspartner",
+    "youLabel": "Sie",
+    "rotateOpposite": "Um 180° drehen",
+    "autoSpeak": "Automatisch vorlesen",
+    "speakPartner": "Partner zuhören",
+    "speakYou": "Ihnen zuhören",
+    "partnerHint": "Tippen Sie oben auf das Mikrofon, damit der Partner spricht",
+    "youHint": "Tippen Sie unten auf das Mikrofon, um in Ihrer Sprache zu sprechen"
+  },
+  "feedback": {
+    "reportButton": "Problem melden",
+    "modalTitle": "Problem melden",
+    "prompt": "Beschreiben Sie, was schiefgelaufen ist oder was in der App fehlt:",
+    "placeholder": "Zum Beispiel: Beim Übersetzen dieses Wortes ist ein Fehler aufgetreten...",
+    "privacyTitle": "Datenschutz",
+    "privacyNote": "Ihre Übersetzungstexte und persönlichen Daten werden nicht übertragen. Es werden nur technische Geräteparameter und die App-Version gesendet.",
+    "submit": "Nachricht senden",
+    "sentTitle": "Nachricht gesendet",
+    "sentSubtitle": "Danke für Ihre Hilfe zur Verbesserung von YAi Translator! Wir werden das Problem prüfen."
+  },
+  "whatsNew": {
+    "title": "Was gibt's Neues in Version {{version}}",
+    "dismiss": "Verstanden"
+  },
+  "privacy": {
+    "title": "Datenschutzerklärung",
+    "subtitle": "Wie YAi Translator Ihre Daten schützt und Ihre Privatsphäre respektiert",
+    "back": "Zurück",
+    "generalTitle": "1. Allgemeine Grundsätze",
+    "generalText": "YAi Translator ist ein unabhängiges, kostenloses (0 €) Open-Source-Projekt. Wir verkaufen keine Nutzerdaten, verwenden keine Werbetracker und geben keine personenbezogenen Daten an Dritte weiter.",
+    "storageTitle": "2. Welche Daten wir speichern",
+    "storageGuest": "Ohne Anmeldung bleiben Verlauf, Favoriten, Lerndaten und Einstellungen auf Ihrem Gerät. Für Übersetzungen und Prüfungen wird Text an den Server gesendet; Ergebnisse können im gemeinsamen Cache gespeichert werden.",
+    "storageUser": "Bei angemeldeten Nutzern speichert Cloudflare D1 Login, Passwort-Hash, Sitzungen, synchronisierten Verlauf, Favoriten, Lerndaten und Einstellungen. Das Passwort wird zur Prüfung über HTTPS übertragen; gespeichert wird der Hash. API-Schlüssel im Konto werden verschlüsselt.",
+    "servicesTitle": "3. Textübertragung zur Übersetzung",
+    "servicesText": "Text wird über HTTPS an aktivierte Dienste übermittelt: DeepL, Lara, Microsoft, MyMemory, Lingva, Apertium, Cloudflare Workers AI, Gemini, Groq, LanguageTool und gewählte KI-Verbindungen. Nur verfügbare, aktivierte Dienste werden genutzt. Übersetzungen und Prüfungen werden in D1 zwischengespeichert; Wörterbuchkarten können dauerhaft für alle Nutzer gespeichert bleiben. Die Funktion Brief erklären schreibt den Brieftext nicht in den Server-Cache der App. Externe Anbieter bestimmen ihre eigenen Verarbeitungsbedingungen. Geben Sie keine vertraulichen Daten im gemeinsamen Übersetzer ein.",
+    "deletionTitle": "4. Löschung von Konto und Daten",
+    "deletionText": "Löschen Sie Ihr Konto unter Profil → Konto löschen mit Passwortbestätigung oder wenden Sie sich an yeas.apps@gmail.com. Konto, Sitzungen, Schlüssel und verknüpfte D1-Daten werden entfernt. Gemeinsamer Cache und Wörterbuchkarten sind keinem Konto zugeordnet. Lokalen Verlauf löschen Sie separat im Browser oder in den App-Einstellungen. Sicherungskopien können bis zum Ablauf der Cloudflare-Aufbewahrung bestehen bleiben.",
+    "contactTitle": "5. Kontakt",
+    "contactText": "Bei allen Fragen zum Datenschutz können Sie uns per E-Mail kontaktieren: yeas.apps@gmail.com."
+  },
+  "terms": {
+    "title": "Nutzungsbedingungen",
+    "subtitle": "Regeln für die Nutzung des Dienstes YAi Translator",
+    "back": "Zurück",
+    "serviceTitle": "1. Beschreibung des Dienstes",
+    "serviceText": "YAi Translator bietet kostenlosen Zugang zu Übersetzungswerkzeugen, elektronischen Wörterbüchern, Lernkarteikarten und Grammatiknachschlagewerken.",
+    "disclaimerTitle": "2. Haftungsausschluss für Recht und Gesundheit",
+    "disclaimerText": "Maschinelle Übersetzungen und Erklärungen offizieller Dokumente (einschließlich Behördenbriefe und medizinischer Begriffe) dienen ausschließlich Informations- und Orientierungszwecken. Sie stellen keine Rechtsberatung oder ärztliche Verordnung dar. Wenden Sie sich bei wichtigen rechtlichen oder gesundheitlichen Fragen stets an qualifizierte Fachkräfte.",
+    "rulesTitle": "3. Nutzungsregeln",
+    "rulesText": "Der Nutzer verpflichtet sich, den Dienst nicht für Spam, automatisierte Angriffe (DDoS), Hacking-Versuche oder die Umgehung von Abfragelimits zu missbrauchen.",
+    "ipTitle": "4. Geistiges Eigentum und Open-Source-Lizenzen",
+    "ipText": "Wörterbucheinträge, Beispielsätze und offene Datensätze werden gemäß ihren ursprünglichen Lizenzen (Creative Commons CC-BY, CC-BY-SA, LGPL, MIT) bereitgestellt. Eine vollständige Liste finden Sie unter «Über die App» → «Datenquellen».",
+    "changesTitle": "5. Änderungen der Bedingungen und Kontakt",
+    "changesText": "Wir behalten uns das Recht vor, diese Bedingungen zu aktualisieren. Bei Fragen wenden Sie sich bitte an: yeas.apps@gmail.com."
+  },
+  "legal": {
+    "title": "Rechtliche Hinweise",
+    "privacy": "Datenschutzerklärung",
+    "terms": "Nutzungsbedingungen",
+    "links": "Rechtliche Hinweise",
+    "desc": "Informationen zur Datenverarbeitung und Nutzungsbedingungen."
+  },
+  "audit": {
+    "warmResult": "Bearbeitet: {{processed}}, neu: {{warmed}}, übersprungen: {{skipped}}, Fehler: {{errors}}.",
+    "recreated": "Karte „{{word}}“ wurde erneuert.",
+    "cardStoreHint": "Gespeicherte Karten sind ohne erneute KI-Anfrage verfügbar.",
+    "cardCount": "{{ready}} / {{total}} Karten",
+    "wordPlaceholder": "Wort, z. B. Haus oder go"
   }
 }

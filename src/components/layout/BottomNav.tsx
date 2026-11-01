@@ -11,7 +11,7 @@ import { MoreScreen } from './MoreScreen';
 import { IconMenu } from './icons';
 
 // Дополнительные маршруты, которые «принадлежат» вкладке «Ещё» (чтобы она была выделена)
-const MORE_ROUTES = ['/grammar', '/ask', '/resources', '/apps', '/about', '/admin'];
+const MORE_ROUTES = ['/phrasebook', '/letter', '/grammar', '/ask', '/resources', '/apps', '/about', '/admin'];
 
 export function BottomNav() {
   const { t } = useTranslation();

@@ -1,0 +1,20 @@
+{
+  "serviceWorker": true,
+  "networkDisabled": true,
+  "cached": {
+    "names": [
+      "lexicon-chunks-1.0.0",
+      "examples-chunks-1.0.0",
+      "offline-cards-1.0.0",
+      "workbox-precache-v2-http://127.0.0.1:4174/"
+    ],
+    "card": true
+  },
+  "checks": [
+    "reload Haus card",
+    "/dictionary",
+    "/learn/cards",
+    "/phrasebook"
+  ],
+  "errors": []
+}

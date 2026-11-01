@@ -106,7 +106,11 @@ export function GrammarTopicList({ items, uiLanguage, activeSlug, onSelect }: Gr
                         <span className="block text-sm font-medium leading-snug">
                           {grammarTitle(topic, uiLanguage)}
                         </span>
-                        {uiLanguage !== 'de' ? (
+                        {topic.lang === 'en' ? (
+                          uiLanguage !== 'en' && topic.titleEn ? (
+                            <span className="mt-0.5 block text-xs text-muted">{topic.titleEn}</span>
+                          ) : null
+                        ) : uiLanguage !== 'de' ? (
                           <span className="mt-0.5 block text-xs text-muted">{topic.titleDe}</span>
                         ) : null}
                       </span>

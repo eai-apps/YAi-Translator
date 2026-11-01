@@ -5,24 +5,38 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAccount } from '../../hooks/useAccount';
+import { useSyncStatus } from '../../hooks/useSyncStatus';
 import { useAccountErrorText } from '../../lib/accountError';
 import { Button } from '../ui/Button';
 import { Card } from '../ui/Card';
 import { SectionTitle } from '../ui/SectionTitle';
 import { Spinner } from '../ui/Spinner';
-import { IconUser } from '../layout/icons';
+import { IconRefresh, IconTrash, IconUser } from '../layout/icons';
 import { AccountForm } from './AccountForm';
 import { ChangePasswordForm } from './ChangePasswordForm';
 import { SessionList } from './SessionList';
+import { DeleteAccountModal } from './DeleteAccountModal';
 
 export function AccountCard() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { status, account, logout, logoutAll } = useAccount();
+  const { lastSyncTime, isSyncing, syncNow } = useSyncStatus();
   const errorText = useAccountErrorText();
   const [busy, setBusy] = useState<'logout' | 'logoutAll' | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [changing, setChanging] = useState(false);
   const [passwordChanged, setPasswordChanged] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+
+  const formatSyncTime = (ms: number | null) => {
+    if (!ms) return '';
+    const diff = Date.now() - ms;
+    if (diff < 60_000) return t('account.syncJustNow');
+    return new Date(ms).toLocaleTimeString(
+      i18n.language === 'ru' ? 'ru-RU' : i18n.language === 'de' ? 'de-DE' : 'en-US',
+      { hour: '2-digit', minute: '2-digit' },
+    );
+  };
 
   const run = async (action: 'logout' | 'logoutAll') => {
     setBusy(action);
@@ -78,6 +92,29 @@ export function AccountCard() {
             </div>
           </div>
 
+          {/* Синхронизация между устройствами (этап 20) */}
+          <div className="mt-4 rounded-xl border border-line bg-soft p-3">
+            <div className="flex items-center justify-between gap-2">
+              <div className="min-w-0">
+                <p className="text-xs font-semibold text-ink">{t('account.syncTitle')}</p>
+                <p className="text-[11px] text-muted">
+                  {lastSyncTime
+                    ? t('account.lastSyncTime', { time: formatSyncTime(lastSyncTime) })
+                    : t('account.neverSynced')}
+                </p>
+              </div>
+              <Button
+                size="sm"
+                variant="secondary"
+                loading={isSyncing}
+                icon={<IconRefresh className={`h-3.5 w-3.5 ${isSyncing ? 'animate-spin' : ''}`} />}
+                onClick={() => void syncNow()}
+              >
+                {t('account.syncNow')}
+              </Button>
+            </div>
+          </div>
+
           <div className="mt-4">
             <SectionTitle>{t('account.devices')}</SectionTitle>
             <SessionList sessions={account.sessions} />
@@ -110,6 +147,15 @@ export function AccountCard() {
             >
               {t('account.changePassword')}
             </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              className="text-danger hover:bg-danger/10"
+              icon={<IconTrash className="h-4 w-4" />}
+              onClick={() => setDeleteModalOpen(true)}
+            >
+              {t('account.deleteAccount')}
+            </Button>
           </div>
 
           {changing ? (
@@ -121,6 +167,11 @@ export function AccountCard() {
               }}
             />
           ) : null}
+
+          <DeleteAccountModal
+            isOpen={deleteModalOpen}
+            onClose={() => setDeleteModalOpen(false)}
+          />
         </>
       ) : null}
     </Card>

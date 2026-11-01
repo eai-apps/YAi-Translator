@@ -2,6 +2,7 @@
 import { useTranslation } from 'react-i18next';
 import { PageHeader } from '../components/ui/PageHeader';
 import { AccountCard } from '../components/profile/AccountCard';
+import { DataBackupCard } from '../components/profile/DataBackupCard';
 import { KeysCard } from '../components/profile/KeysCard';
 import { SiteServicesCard } from '../components/profile/SiteServicesCard';
 import { SettingsCard } from '../components/profile/SettingsCard';
@@ -17,6 +18,7 @@ export default function ProfilePage() {
       <PageHeader title={t('profile.title')} subtitle={t('profile.subtitle')} />
       <div className="grid grid-cols-1 items-start gap-3 lg:grid-cols-2 lg:gap-4">
         <AccountCard />
+        <DataBackupCard />
         <KeysCard />
         <SiteServicesCard />
         <SettingsCard />

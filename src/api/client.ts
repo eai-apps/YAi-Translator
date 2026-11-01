@@ -7,15 +7,17 @@ import { accountMethods } from './methods/account';
 import { coreMethods } from './methods/core';
 import { grammarMethods } from './methods/grammar';
 import { studyMethods } from './methods/study';
+import { letterMethods } from './methods/letter';
 
 export { ApiClientError, setApiUiLanguage } from './request';
 export type { ClientErrorCode } from './request';
 
-/** Все методы API: перевод, карточка, словари, ресурсы, грамматика, «Спросить у AI», учёба, аккаунт, админка. */
+/** Все методы API: перевод, карточка, словари, ресурсы, грамматика, «Спросить у AI», учёба, аккаунт, админка, письма. */
 export const api = {
   ...coreMethods,
   ...grammarMethods,
   ...studyMethods,
+  ...letterMethods,
   ...accountMethods,
   ...adminMethods,
 };

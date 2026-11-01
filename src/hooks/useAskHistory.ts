@@ -59,6 +59,12 @@ export function useAskHistory() {
     writeStorage(STORAGE_KEYS.askHistory, items);
   }, [items]);
 
+  useEffect(() => {
+    const reload = () => setItems(readStorage<AskHistoryItem[]>(STORAGE_KEYS.askHistory, []).filter(isAskItem));
+    window.addEventListener('yai:data-imported', reload);
+    return () => window.removeEventListener('yai:data-imported', reload);
+  }, []);
+
   // Сервер хранит записи вместе с избранным; формат совпадает (id, payload, updatedAt).
   const onMerge = useCallback(
     ({ items: remote, tombstones }: { items: AskHistoryItem[] | null; tombstones: Record<string, number> }) => {

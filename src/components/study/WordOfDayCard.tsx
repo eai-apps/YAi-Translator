@@ -57,6 +57,11 @@ export function WordOfDayCard({ compact = false, className }: WordOfDayCardProps
         <div className="flex flex-wrap items-center gap-1.5 text-xs font-medium text-muted">
           <IconSparkles className="h-4 w-4 text-accent" />
           <span>{t('study.wordOfDay')}</span>
+          {data.level ? (
+            <span className="rounded-full bg-soft px-1.5 py-0.5 text-[10px] font-semibold text-accent">
+              ~{data.level}
+            </span>
+          ) : null}
           <span aria-hidden="true">·</span>
           <span>{t(data.deckTitleKey)}</span>
         </div>
@@ -101,7 +106,7 @@ export function WordOfDayCard({ compact = false, className }: WordOfDayCardProps
 
       {!compact ? (
         <p className="mt-2 text-xs leading-relaxed text-muted">
-          <span lang="de">{word.example.text}</span> — {word.example.translation}
+          {word.example ? <><span lang="de">{word.example.text}</span> — {word.example.translation}</> : null}
         </p>
       ) : null}
 

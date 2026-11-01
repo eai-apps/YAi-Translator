@@ -1,170 +1,379 @@
-/** Набор A2 «Покупки». Артикли и множественное число сверены по de.wiktionary 31.10.2026. */
+/** Набор «a2-shopping» (уровень A2, язык de). Автоматическая сборка. */
 import type { StudyDeck } from '../study';
 
 export const A2_SHOPPING: StudyDeck = {
-  id: 'a2-shopping',
-  level: 'A2',
-  titleKey: 'study.deckA2Shopping',
-  words: [
+  "id": "a2-shopping",
+  "level": "A2",
+  "lang": "de",
+  "titleKey": "study.deckA2Shopping",
+  "words": [
     {
-      lemma: 'Geschäft',
-      article: 'das',
-      plural: 'Geschäfte',
-      partOfSpeech: 'noun',
-      translations: { ru: 'магазин, дело', uk: 'магазин, справа', en: 'shop, business' },
-      example: { text: 'Das Geschäft schließt um acht Uhr.', translation: 'Магазин закрывается в восемь.' },
+      "lemma": "Einkaufen",
+      "article": null,
+      "plural": null,
+      "partOfSpeech": "verb",
+      "translations": {
+        "ru": "делать покупки",
+        "uk": "делать покупки",
+        "en": "Einkaufen"
+      },
+      "example": {
+        "text": "Tom ging zum Einkaufen in die Stadt.",
+        "translation": "Том отправился за покупками в центр города."
+      },
+      "lang": "de"
     },
     {
-      lemma: 'Laden',
-      article: 'der',
-      plural: 'Läden',
-      partOfSpeech: 'noun',
-      translations: { ru: 'магазин, лавка', uk: 'крамниця', en: 'shop, store' },
-      example: { text: 'Der Laden an der Ecke ist neu.', translation: 'Магазин на углу новый.' },
+      "lemma": "Laden",
+      "article": "das",
+      "plural": null,
+      "partOfSpeech": "noun",
+      "translations": {
+        "ru": "магазин",
+        "uk": "магазин",
+        "en": "Laden"
+      },
+      "example": {
+        "text": "Ich hasse diesen Laden.",
+        "translation": "Ненавижу этот магазин."
+      },
+      "lang": "de"
     },
     {
-      lemma: 'Supermarkt',
-      article: 'der',
-      plural: 'Supermärkte',
-      partOfSpeech: 'noun',
-      translations: { ru: 'супермаркет', uk: 'супермаркет', en: 'supermarket' },
-      example: { text: 'Ich gehe jeden Tag in den Supermarkt.', translation: 'Я каждый день хожу в супермаркет.' },
+      "lemma": "Geschäft",
+      "article": "das",
+      "plural": "Geschäfte",
+      "partOfSpeech": "noun",
+      "translations": {
+        "ru": "магазин",
+        "uk": "магазин",
+        "en": "Geschäft"
+      },
+      "example": {
+        "text": "Das ist sein Geschäft.",
+        "translation": "Это его дело."
+      },
+      "lang": "de"
     },
     {
-      lemma: 'Preis',
-      article: 'der',
-      plural: 'Preise',
-      partOfSpeech: 'noun',
-      translations: { ru: 'цена', uk: 'ціна', en: 'price' },
-      example: { text: 'Der Preis ist heute niedriger.', translation: 'Сегодня цена ниже.' },
+      "lemma": "Supermarkt",
+      "article": "der",
+      "plural": "Supermärkte",
+      "partOfSpeech": "noun",
+      "translations": {
+        "ru": "супермаркет",
+        "uk": "супермаркет",
+        "en": "Supermarkt"
+      },
+      "example": {
+        "text": "Was für ein großer Supermarkt!",
+        "translation": "Какой огромный супермаркет!"
+      },
+      "lang": "de"
     },
     {
-      lemma: 'Geld',
-      article: 'das',
-      plural: null,
-      partOfSpeech: 'noun',
-      translations: { ru: 'деньги', uk: 'гроші', en: 'money' },
-      example: { text: 'Ich habe nicht genug Geld dabei.', translation: 'У меня с собой недостаточно денег.' },
+      "lemma": "Bäckerei",
+      "article": "die",
+      "plural": "Bäckereien",
+      "partOfSpeech": "noun",
+      "translations": {
+        "ru": "булочная",
+        "uk": "булочная",
+        "en": "Bäckerei"
+      },
+      "example": {
+        "text": "Wo ist die Bäckerei?",
+        "translation": "Где находится булочная?"
+      },
+      "lang": "de"
     },
     {
-      lemma: 'Kasse',
-      article: 'die',
-      plural: 'Kassen',
-      partOfSpeech: 'noun',
-      translations: { ru: 'касса', uk: 'каса', en: 'checkout, cash desk' },
-      example: { text: 'Bitte zahlen Sie an der Kasse.', translation: 'Пожалуйста, оплатите на кассе.' },
+      "lemma": "Kasse",
+      "article": "die",
+      "plural": "Kassen",
+      "partOfSpeech": "noun",
+      "translations": {
+        "ru": "касса",
+        "uk": "касса",
+        "en": "Kasse"
+      },
+      "example": {
+        "text": "Ich bin knapp bei Kasse.",
+        "translation": "Я на нуле."
+      },
+      "lang": "de"
     },
     {
-      lemma: 'Rechnung',
-      article: 'die',
-      plural: 'Rechnungen',
-      partOfSpeech: 'noun',
-      translations: { ru: 'счёт, фактура', uk: 'рахунок', en: 'bill, invoice' },
-      example: { text: 'Die Rechnung liegt in der Tüte.', translation: 'Счёт лежит в пакете.' },
+      "lemma": "Kunde",
+      "article": "die",
+      "plural": "Kunden",
+      "partOfSpeech": "noun",
+      "translations": {
+        "ru": "клиент",
+        "uk": "клиент",
+        "en": "Kunde"
+      },
+      "example": {
+        "text": "Verbreitet die Kunde!",
+        "translation": "Разнеси весть."
+      },
+      "lang": "de"
     },
     {
-      lemma: 'Kassenzettel',
-      article: 'der',
-      plural: 'Kassenzettel',
-      partOfSpeech: 'noun',
-      translations: { ru: 'чек', uk: 'чек', en: 'receipt' },
-      example: { text: 'Heben Sie den Kassenzettel auf.', translation: 'Сохраните чек.' },
+      "lemma": "Tüte",
+      "article": "die",
+      "plural": "Tüten",
+      "partOfSpeech": "noun",
+      "translations": {
+        "ru": "пакет",
+        "uk": "пакет",
+        "en": "Tüte"
+      },
+      "example": {
+        "text": "Tom hat eine halbe Tüte Chips gegessen.",
+        "translation": "Том съел полпачки картофельных чипсов."
+      },
+      "lang": "de"
     },
     {
-      lemma: 'Tüte',
-      article: 'die',
-      plural: 'Tüten',
-      partOfSpeech: 'noun',
-      translations: { ru: 'пакет, кулёк', uk: 'пакет', en: 'bag' },
-      example: { text: 'Brauchen Sie eine Tüte?', translation: 'Вам нужен пакет?' },
+      "lemma": "Tasche",
+      "article": "die",
+      "plural": "Taschen",
+      "partOfSpeech": "noun",
+      "translations": {
+        "ru": "сумка, карман",
+        "uk": "сумка, карман",
+        "en": "Tasche"
+      },
+      "example": {
+        "text": "Wo ist meine Tasche?",
+        "translation": "Где моя сумка?"
+      },
+      "lang": "de"
     },
     {
-      lemma: 'Flasche',
-      article: 'die',
-      plural: 'Flaschen',
-      partOfSpeech: 'noun',
-      translations: { ru: 'бутылка', uk: 'пляшка', en: 'bottle' },
-      example: { text: 'Eine Flasche Wasser kostet zwei Euro.', translation: 'Бутылка воды стоит два евро.' },
+      "lemma": "Preis",
+      "article": "der",
+      "plural": "Preise",
+      "partOfSpeech": "noun",
+      "translations": {
+        "ru": "цена",
+        "uk": "цена",
+        "en": "Preis"
+      },
+      "example": {
+        "text": "Der Preis stieg.",
+        "translation": "Цена выросла."
+      },
+      "lang": "de"
     },
     {
-      lemma: 'Packung',
-      article: 'die',
-      plural: 'Packungen',
-      partOfSpeech: 'noun',
-      translations: { ru: 'упаковка, пачка', uk: 'упаковка', en: 'pack, packet' },
-      example: { text: 'Ich nehme eine Packung Kaffee.', translation: 'Я возьму упаковку кофе.' },
+      "lemma": "Geld",
+      "article": "das",
+      "plural": "Gelder",
+      "partOfSpeech": "noun",
+      "translations": {
+        "ru": "деньги",
+        "uk": "деньги",
+        "en": "Geld"
+      },
+      "example": {
+        "text": "Er hat Geld.",
+        "translation": "У него есть деньги."
+      },
+      "lang": "de"
     },
     {
-      lemma: 'Regal',
-      article: 'das',
-      plural: 'Regale',
-      partOfSpeech: 'noun',
-      translations: { ru: 'полка, стеллаж', uk: 'полиця', en: 'shelf' },
-      example: { text: 'Das Brot liegt im Regal links.', translation: 'Хлеб лежит на полке слева.' },
+      "lemma": "Bargeld",
+      "article": "das",
+      "plural": null,
+      "partOfSpeech": "noun",
+      "translations": {
+        "ru": "наличные деньги",
+        "uk": "наличные деньги",
+        "en": "Bargeld"
+      },
+      "example": {
+        "text": "Ich habe Bargeld.",
+        "translation": "У меня есть наличные."
+      },
+      "lang": "de"
     },
     {
-      lemma: 'Einkauf',
-      article: 'der',
-      plural: 'Einkäufe',
-      partOfSpeech: 'noun',
-      translations: { ru: 'покупка, покупки', uk: 'покупка', en: 'purchase, shopping' },
-      example: { text: 'Der Einkauf war heute günstig.', translation: 'Покупки сегодня обошлись недорого.' },
+      "lemma": "Karte",
+      "article": "die",
+      "plural": "Karten",
+      "partOfSpeech": "noun",
+      "translations": {
+        "ru": "карта, билет",
+        "uk": "карта, билет",
+        "en": "Karte"
+      },
+      "example": {
+        "text": "Nimm eine Karte!",
+        "translation": "Возьмите карту."
+      },
+      "lang": "de"
     },
     {
-      lemma: 'Rabatt',
-      article: 'der',
-      plural: 'Rabatte',
-      partOfSpeech: 'noun',
-      translations: { ru: 'скидка', uk: 'знижка', en: 'discount' },
-      example: { text: 'Auf diese Jacke gibt es zehn Prozent Rabatt.', translation: 'На эту куртку скидка десять процентов.' },
+      "lemma": "Kreditkarte",
+      "article": "die",
+      "plural": "Kreditkarten",
+      "partOfSpeech": "noun",
+      "translations": {
+        "ru": "кредитная карта",
+        "uk": "кредитная карта",
+        "en": "Kreditkarte"
+      },
+      "example": {
+        "text": "Ich habe eine Kreditkarte.",
+        "translation": "У меня есть кредитная карточка."
+      },
+      "lang": "de"
     },
     {
-      lemma: 'Kreditkarte',
-      article: 'die',
-      plural: 'Kreditkarten',
-      partOfSpeech: 'noun',
-      translations: { ru: 'кредитная карта', uk: 'кредитна картка', en: 'credit card' },
-      example: { text: 'Kann ich mit Kreditkarte zahlen?', translation: 'Можно заплатить кредитной картой?' },
+      "lemma": "Rechnung",
+      "article": "die",
+      "plural": "Rechnungen",
+      "partOfSpeech": "noun",
+      "translations": {
+        "ru": "счёт",
+        "uk": "счёт",
+        "en": "Rechnung"
+      },
+      "example": {
+        "text": "Die Rechnung bitte.",
+        "translation": "Счёт, пожалуйста."
+      },
+      "lang": "de"
     },
     {
-      lemma: 'Portemonnaie',
-      article: 'das',
-      plural: 'Portemonnaies',
-      partOfSpeech: 'noun',
-      translations: { ru: 'кошелёк', uk: 'гаманець', en: 'wallet' },
-      example: { text: 'Mein Portemonnaie ist zu Hause.', translation: 'Мой кошелёк дома.' },
+      "lemma": "kaufen",
+      "article": null,
+      "plural": null,
+      "partOfSpeech": "verb",
+      "translations": {
+        "ru": "покупать",
+        "uk": "покупать",
+        "en": "kaufen"
+      },
+      "example": {
+        "text": "Ich würde es kaufen.",
+        "translation": "Я бы это купил."
+      },
+      "lang": "de"
     },
     {
-      lemma: 'Größe',
-      article: 'die',
-      plural: 'Größen',
-      partOfSpeech: 'noun',
-      translations: { ru: 'размер, величина', uk: 'розмір', en: 'size' },
-      example: { text: 'Welche Größe brauchen Sie?', translation: 'Какой размер вам нужен?' },
+      "lemma": "verkaufen",
+      "article": null,
+      "plural": null,
+      "partOfSpeech": "verb",
+      "translations": {
+        "ru": "продавать",
+        "uk": "продавать",
+        "en": "verkaufen"
+      },
+      "example": {
+        "text": "Was verkaufen Sie?",
+        "translation": "Что вы продаёте?"
+      },
+      "lang": "de"
     },
     {
-      lemma: 'Kleidung',
-      article: 'die',
-      plural: null,
-      partOfSpeech: 'noun',
-      translations: { ru: 'одежда', uk: 'одяг', en: 'clothing' },
-      example: { text: 'Die Kleidung ist im zweiten Stock.', translation: 'Одежда на втором этаже.' },
+      "lemma": "bezahlen",
+      "article": null,
+      "plural": null,
+      "partOfSpeech": "verb",
+      "translations": {
+        "ru": "оплачивать",
+        "uk": "оплачивать",
+        "en": "bezahlen"
+      },
+      "example": {
+        "text": "Wir bezahlen.",
+        "translation": "Мы платим."
+      },
+      "lang": "de"
     },
     {
-      lemma: 'Hemd',
-      article: 'das',
-      plural: 'Hemden',
-      partOfSpeech: 'noun',
-      translations: { ru: 'рубашка', uk: 'сорочка', en: 'shirt' },
-      example: { text: 'Das blaue Hemd gefällt mir.', translation: 'Мне нравится голубая рубашка.' },
+      "lemma": "kosten",
+      "article": null,
+      "plural": null,
+      "partOfSpeech": "verb",
+      "translations": {
+        "ru": "стоить",
+        "uk": "стоить",
+        "en": "kosten"
+      },
+      "example": {
+        "text": "Wie viel kosten die?",
+        "translation": "Сколько они стоят?"
+      },
+      "lang": "de"
     },
     {
-      lemma: 'Hose',
-      article: 'die',
-      plural: 'Hosen',
-      partOfSpeech: 'noun',
-      translations: { ru: 'брюки', uk: 'штани', en: 'trousers' },
-      example: { text: 'Die Hose ist zu lang.', translation: 'Брюки слишком длинные.' },
+      "lemma": "wählen",
+      "article": null,
+      "plural": null,
+      "partOfSpeech": "verb",
+      "translations": {
+        "ru": "выбирать",
+        "uk": "выбирать",
+        "en": "wählen"
+      },
+      "example": {
+        "text": "Wir wollen wählen.",
+        "translation": "Мы хотим голосовать."
+      },
+      "lang": "de"
     },
-  ],
+    {
+      "lemma": "teuer",
+      "article": null,
+      "plural": null,
+      "partOfSpeech": "adjective",
+      "translations": {
+        "ru": "дорогой",
+        "uk": "дорогой",
+        "en": "teuer"
+      },
+      "example": {
+        "text": "Sie sind teuer.",
+        "translation": "Они дорогие."
+      },
+      "lang": "de"
+    },
+    {
+      "lemma": "billig",
+      "article": null,
+      "plural": null,
+      "partOfSpeech": "adjective",
+      "translations": {
+        "ru": "дешёвый",
+        "uk": "дешёвый",
+        "en": "billig"
+      },
+      "example": {
+        "text": "Es ist sehr billig.",
+        "translation": "Это очень дёшево."
+      },
+      "lang": "de"
+    },
+    {
+      "lemma": "günstig",
+      "article": null,
+      "plural": null,
+      "partOfSpeech": "adjective",
+      "translations": {
+        "ru": "выгодный",
+        "uk": "выгодный",
+        "en": "günstig"
+      },
+      "example": {
+        "text": "Es war sehr günstig.",
+        "translation": "Это было очень дёшево."
+      },
+      "lang": "de"
+    }
+  ]
 };

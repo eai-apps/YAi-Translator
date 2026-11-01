@@ -9,9 +9,11 @@ import type {
   PartOfSpeech,
   StudyArticle,
   StudyCardInput,
+  StudyDeck,
   UiLanguage,
   WordCard,
 } from '../../shared/types';
+import type { LanguageCode } from '../../shared/languages';
 import { STUDY_MAX_CARDS, deckTranslation, studyCardId } from '../../shared/study';
 
 /** «der Tisch» → артикль der и слово Tisch. */
@@ -39,7 +41,6 @@ export function cleanTranslations(values: Array<string | null | undefined>): str
 
 /** Карточка из ответа ИИ (WordCard). Только для немецких слов. */
 export function cardFromWord(card: WordCard): StudyCardInput | null {
-  if (card.language !== 'de') return null;
   const translations = cleanTranslations(card.meanings.flatMap((meaning) => meaning.translations));
   if (translations.length === 0) return null;
 
@@ -49,6 +50,7 @@ export function cardFromWord(card: WordCard): StudyCardInput | null {
 
   return {
     lemma: card.lemma.trim(),
+    lang: card.language,
     article: card.article,
     plural: card.plural,
     partOfSpeech: card.partOfSpeech,
@@ -60,7 +62,6 @@ export function cardFromWord(card: WordCard): StudyCardInput | null {
 
 /** Карточка только из словарей (DictCard). Только для немецких слов. */
 export function cardFromDict(entry: DictEntry, targetLang: UiLanguage): StudyCardInput | null {
-  if (entry.sourceLang !== 'de') return null;
 
   // Сначала переводы на язык интерфейса, затем любые другие (Wiktionary даёт английский).
   const own = entry.senses.filter((sense) => sense.translation && sense.translationLang === targetLang);
@@ -76,6 +77,7 @@ export function cardFromDict(entry: DictEntry, targetLang: UiLanguage): StudyCar
 
   return {
     lemma: entry.word.trim(),
+    lang: entry.sourceLang,
     article: entry.gender,
     plural: entry.plural,
     partOfSpeech: (entry.partOfSpeech ?? 'other') as PartOfSpeech,
@@ -86,9 +88,12 @@ export function cardFromDict(entry: DictEntry, targetLang: UiLanguage): StudyCar
 }
 
 /** Карточка из готового набора: перевод берётся на языке интерфейса. */
-export function cardFromDeckWord(word: DeckWord, targetLang: UiLanguage): StudyCardInput {
+export function cardFromDeckWord(word: DeckWord, targetLang: UiLanguage, deck?: StudyDeck): StudyCardInput {
+  const lang = word.lang || deck?.lang || 'de';
   return {
     lemma: word.lemma,
+    lang,
+    deckId: deck?.id || null,
     article: word.article,
     plural: word.plural,
     partOfSpeech: word.partOfSpeech,
@@ -103,7 +108,7 @@ export function cardFromDeckWord(word: DeckWord, targetLang: UiLanguage): StudyC
  * Простая карточка из строки перевода (1–3 слова): без грамматики, только перевод.
  * Нужна кнопке «+ В карточки» рядом со звёздочкой на экране «Перевод».
  */
-export function cardFromTranslation(germanText: string, translatedText: string): StudyCardInput | null {
+export function cardFromTranslation(germanText: string, translatedText: string, lang: LanguageCode = 'de'): StudyCardInput | null {
   const german = germanText.trim();
   const translation = translatedText.trim();
   if (!german || !translation) return null;
@@ -113,7 +118,9 @@ export function cardFromTranslation(germanText: string, translatedText: string):
   if (!lemma) return null;
   return {
     lemma,
-    article,
+    lang,
+    deckId: null,
+    article: lang === 'de' ? article : null,
     plural: null,
     partOfSpeech: 'other',
     translations: cleanTranslations([translation]),
@@ -124,7 +131,7 @@ export function cardFromTranslation(germanText: string, translatedText: string):
 
 /** Готова ли карточка к сохранению: id, переводы и длина слова. */
 export function isValidStudyInput(input: StudyCardInput): boolean {
-  const id = studyCardId(input.lemma);
+  const id = studyCardId(input.lemma, input.lang || 'de');
   return Boolean(id) && input.lemma.length <= 80 && input.translations.length > 0 && input.translations.length <= 3;
 }
 

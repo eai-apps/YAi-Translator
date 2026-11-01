@@ -7,6 +7,7 @@ import { isUiLanguage } from '../../shared/languages';
 import { STORAGE_KEYS } from '../config';
 import { setApiUiLanguage } from '../api/client';
 import { readStorage, writeStorage } from '../lib/storage';
+import { markSettingsChanged, type SyncedSettingsPayload } from '../lib/settingsSync';
 import type { UserKeys } from '../lib/userKeys';
 import { getUserKeys } from '../lib/userKeys';
 
@@ -41,9 +42,22 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
       setUiLanguageState(language);
       writeStorage(STORAGE_KEYS.uiLanguage, language);
       void i18n.changeLanguage(language);
+      markSettingsChanged();
     },
     [i18n],
   );
+
+  useEffect(() => {
+    const onRemote = (event: Event) => {
+      const custom = event as CustomEvent<Partial<SyncedSettingsPayload>>;
+      if (custom.detail?.uiLanguage && isUiLanguage(custom.detail.uiLanguage)) {
+        setUiLanguageState(custom.detail.uiLanguage);
+        void i18n.changeLanguage(custom.detail.uiLanguage);
+      }
+    };
+    window.addEventListener('yai:remote-settings-applied', onRemote);
+    return () => window.removeEventListener('yai:remote-settings-applied', onRemote);
+  }, [i18n]);
 
   const saveKey = useCallback((provider: keyof UserKeys, key: string) => {
     setKeys((previous) => {

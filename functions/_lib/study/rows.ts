@@ -38,9 +38,12 @@ export function toCard(row: CardRow): StudyCard | null {
   try {
     const card = JSON.parse(row.payload) as StudyCard;
     if (!card || typeof card.lemma !== 'string' || !Array.isArray(card.translations)) return null;
+    const lang = card.lang ?? (row.card_id.startsWith('en:') ? 'en' : 'de');
     return {
       ...card,
       id: row.card_id,
+      lang,
+      deckId: card.deckId ?? null,
       article: (card.article ?? null) as StudyArticle | null,
       partOfSpeech: card.partOfSpeech as PartOfSpeech,
       updatedAt: row.updated_at,

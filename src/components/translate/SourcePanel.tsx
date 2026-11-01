@@ -1,29 +1,30 @@
 /**
- * Поле ввода карточки перевода (этап 12):
+ * Поле ввода карточки перевода (этап 18, версия 0.20.0):
  * - Строка языков с равными долями 1fr auto 1fr и кнопкой ⇄ по центру.
+ * - Проверка правописания LanguageTool (волнистая линия, подсказки, «Исправить всё»).
  * - Поле ввода без перекрывающих чипсов: кнопка «Вставить» вынесена вниз рядом с микрофоном.
  * - enterKeyHint="done", скрытие экранной клавиатуры по Enter и действиям.
- * - Неактивные кнопки (озвучка при пустом вводе) скрываются.
  */
 import { useEffect, useRef, useState } from 'react';
 import type { KeyboardEvent } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { LanguageCode, SourceLanguage } from '../../../shared/types';
+import type { Correction, LanguageCode, SourceLanguage, UiLanguage } from '../../../shared/types';
 import { textDirection } from '../../../shared/languages';
 import type { ProviderChoice } from '../../hooks/useTranslator';
 import type { SpeechController } from '../../hooks/useSpeech';
 import { useSuggestions } from '../../hooks/useSuggestions';
 import { useAudioVoice } from '../../hooks/useAudioVoice';
+import { useSpellCheck } from '../../hooks/useSpellCheck';
 import { hideKeyboard } from '../../lib/keyboard';
-import { cn } from '../../lib/cn';
 import { Card } from '../ui/Card';
-import { IconButton } from '../ui/IconButton';
 import { Spinner } from '../ui/Spinner';
-import { IconClose, IconMic, IconVolume } from '../layout/icons';
+import { IconClose } from '../layout/icons';
+import { recognizeTextFromImage } from '../../lib/ocr';
 import { LanguageRow } from './LanguageRow';
-import { ProviderPill } from './ProviderPill';
 import { SuggestionList } from './SuggestionList';
-import { PasteChip } from './PasteChip';
+import { SpellCheckBar } from './SpellCheckBar';
+import { SourceUnderlay } from './SourceUnderlay';
+import { SourceActions } from './SourceActions';
 
 interface SourcePanelProps {
   text: string;
@@ -45,7 +46,7 @@ interface SourcePanelProps {
 }
 
 export function SourcePanel(props: SourcePanelProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { text, onChange, sourceLang, speech } = props;
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [highlighted, setHighlighted] = useState(-1);
@@ -54,6 +55,40 @@ export function SourcePanel(props: SourcePanelProps) {
   const [focused, setFocused] = useState(false);
   const [dismissed, setDismissed] = useState(false);
   const listOpen = focused && !dismissed && suggestions.length > 0;
+
+  const [ocrLoading, setOcrLoading] = useState(false);
+  const [ocrProgress, setOcrProgress] = useState(0);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Проверка правописания LanguageTool
+  const [dismissedSpell, setDismissedSpell] = useState(false);
+  const uiLanguage = (i18n.language?.slice(0, 2) || 'ru') as UiLanguage;
+  const { corrections, correctedText, clearCorrections } = useSpellCheck({
+    text,
+    sourceLang,
+    uiLanguage,
+  });
+
+  const handlePhotoSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setOcrLoading(true);
+    setOcrProgress(0);
+    try {
+      const recognized = await recognizeTextFromImage(file, sourceLang, (p) => {
+        setOcrProgress(Math.round(p.progress * 100));
+      });
+      if (recognized.trim()) {
+        onChange(recognized.trim());
+        setTimeout(() => props.onSubmit(), 200);
+      }
+    } catch (err) {
+      console.error('OCR error:', err);
+    } finally {
+      setOcrLoading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
 
   useEffect(() => {
     const element = textareaRef.current;
@@ -66,6 +101,7 @@ export function SourcePanel(props: SourcePanelProps) {
   useEffect(() => {
     setHighlighted(-1);
     setDismissed(acceptedRef.current === text);
+    setDismissedSpell(false);
   }, [text]);
 
   const insertCharacter = (char: string) => {
@@ -117,7 +153,6 @@ export function SourcePanel(props: SourcePanelProps) {
       void hideKeyboard();
       return;
     }
-    // На телефоне и в приложении Enter всегда = «Перевести» (новая строка — Shift+Enter не нужна на телефоне).
     const touch = typeof window !== 'undefined' && window.matchMedia?.('(pointer: coarse)').matches;
     if (props.enterToTranslate || touch) {
       event.preventDefault();
@@ -126,9 +161,18 @@ export function SourcePanel(props: SourcePanelProps) {
     }
   };
 
+  const handleApplySpellOne = (corr: Correction, replacement: string) => {
+    if (corr.offset !== undefined && corr.length !== undefined && text.slice(corr.offset, corr.offset + corr.length) === corr.original) {
+      onChange(text.slice(0, corr.offset) + replacement + text.slice(corr.offset + corr.length));
+    } else if (corr.original && text.includes(corr.original)) {
+      onChange(text.replace(corr.original, replacement));
+    }
+  };
+
   const speechLanguage: LanguageCode = sourceLang === 'auto' ? 'de' : sourceLang;
   const voiceError = speech.error === 'unsupported' ? t('translate.voiceUnsupported') : speech.error ? t('translate.voiceDenied') : null;
   const hasText = text.trim().length > 0;
+  const visibleCorrections = dismissedSpell ? [] : corrections;
 
   return (
     <Card className="flex flex-col p-3 sm:p-4">
@@ -140,6 +184,9 @@ export function SourcePanel(props: SourcePanelProps) {
 
       <div className="mt-1.5 border-t border-line pt-2">
         <div className="relative">
+          {/* Волнистая подсветка ошибок под текстом */}
+          <SourceUnderlay text={text} corrections={visibleCorrections} />
+
           <label className="flex flex-col">
             <span className="sr-only">{t('translate.placeholder')}</span>
             <textarea
@@ -148,7 +195,6 @@ export function SourcePanel(props: SourcePanelProps) {
               onChange={(event) => onChange(event.target.value)}
               onKeyDown={handleKeyDown}
               onBeforeInput={(event) => {
-                // Клавиатуры Android (Gboard) часто шлют Enter не как keydown, а как ввод переноса строки.
                 const native = event.nativeEvent as InputEvent;
                 const touch = window.matchMedia?.('(pointer: coarse)').matches;
                 if (touch && (native.inputType === 'insertLineBreak' || native.inputType === 'insertParagraph' || native.data === '\n')) {
@@ -162,14 +208,13 @@ export function SourcePanel(props: SourcePanelProps) {
               maxLength={props.maxLength}
               placeholder={t('translate.placeholder')}
               rows={2}
-              spellCheck
+              spellCheck={false}
               enterKeyHint="done"
               dir={sourceLang === 'auto' ? 'auto' : textDirection(sourceLang)}
-              className="min-h-[64px] max-h-[420px] w-full resize-none overflow-y-auto bg-transparent py-2 pl-1 pr-10 text-lg leading-relaxed text-ink outline-none placeholder:text-muted sm:min-h-[80px] sm:text-xl"
+              className="relative z-10 min-h-[64px] max-h-[420px] w-full resize-none overflow-y-auto bg-transparent py-2 pl-1 pr-10 text-lg leading-relaxed text-ink outline-none placeholder:text-muted sm:min-h-[80px] sm:text-xl"
             />
           </label>
 
-          {/* Крестик «очистить» справа в поле (только если есть текст) */}
           {hasText ? (
             <button
               type="button"
@@ -177,14 +222,29 @@ export function SourcePanel(props: SourcePanelProps) {
               title={t('translate.clearInput')}
               onClick={() => {
                 onChange('');
+                clearCorrections();
                 textareaRef.current?.focus();
               }}
-              className="absolute right-1 top-1 flex h-8 w-8 items-center justify-center rounded-full text-muted transition-colors hover:bg-soft hover:text-ink active:scale-95"
+              className="absolute right-1 top-1 z-20 flex h-8 w-8 items-center justify-center rounded-full text-muted transition-colors hover:bg-soft hover:text-ink active:scale-95"
             >
               <IconClose className="h-[18px] w-[18px]" />
             </button>
           ) : null}
         </div>
+
+        {/* Панель найденных ошибок LanguageTool */}
+        {!dismissedSpell && corrections.length > 0 ? (
+          <SpellCheckBar
+            corrections={corrections}
+            correctedText={correctedText}
+            onApplyAll={(next) => {
+              onChange(next);
+              clearCorrections();
+            }}
+            onApplyOne={handleApplySpellOne}
+            onDismiss={() => setDismissedSpell(true)}
+          />
+        ) : null}
 
         {listOpen ? (
           <SuggestionList
@@ -195,6 +255,12 @@ export function SourcePanel(props: SourcePanelProps) {
           />
         ) : null}
 
+        {ocrLoading ? (
+          <p className="flex items-center gap-1.5 px-1 pb-1 text-xs font-medium text-accent" role="status">
+            <Spinner className="h-3 w-3" />
+            {t('translate.ocrProgress')} {ocrProgress}%
+          </p>
+        ) : null}
         {voice.recording ? (
           <p className="flex items-center gap-1.5 px-1 pb-1 text-xs font-medium text-danger" role="status">
             <span className="inline-block h-2 w-2 animate-pulse rounded-full bg-danger" />
@@ -217,59 +283,34 @@ export function SourcePanel(props: SourcePanelProps) {
         ) : null}
       </div>
 
-      <div className="mt-1 flex flex-wrap items-center gap-1.5 border-t border-line pt-2">
-        {/* Озвучка ввода: скрыта, если поле пустое (пункт 8) */}
-        {hasText ? (
-          <IconButton
-            label={t('translate.speakSource')}
-            icon={<IconVolume className="h-[18px] w-[18px]" />}
-            onClick={() => speech.speak(text, speechLanguage, 'source')}
-            active={speech.speakingId === 'source'}
-          />
-        ) : null}
+      {/* Скрытый input для фото */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={handlePhotoSelect}
+      />
 
-        <ProviderPill
-          value={props.providerChoice}
-          onChange={props.onProviderChange}
-          aiLoading={props.aiLoading}
-          onAskAi={props.onAskAi}
-          hasText={hasText}
-        />
-
-        <div className="ml-auto flex items-center gap-1.5">
-          {/* Кнопка «Вставить» рядом с микрофоном при пустом поле (пункт 7) */}
-          {!hasText ? <PasteChip onPaste={onChange} /> : null}
-
-          <button
-            type="button"
-            aria-label={voice.recording || speech.listening ? t('common.stop') : t('translate.voice')}
-            title={voice.recording || speech.listening ? t('common.stop') : t('translate.voice')}
-            onClick={handleVoice}
-            className={cn(
-              'flex h-9 items-center justify-center gap-1.5 rounded-xl border border-line px-2.5 text-xs font-medium transition-colors',
-              (voice.recording || speech.listening)
-                ? 'border-danger bg-danger text-white'
-                : 'text-muted hover:bg-soft hover:text-ink',
-            )}
-          >
-            {voice.transcribing ? (
-              <Spinner className="h-4 w-4" />
-            ) : voice.recording ? (
-              <>
-                <span className="h-2 w-2 animate-pulse rounded-full bg-white" />
-                <span className="tabular-nums font-mono">{voice.seconds}s</span>
-              </>
-            ) : (
-              <IconMic className="h-[18px] w-[18px]" />
-            )}
-          </button>
-        </div>
-
-        <span className="w-full text-right text-[11px] tabular-nums text-muted">
-          {props.enterToTranslate ? `${t('translate.enterHint')} · ` : ''}
-          {t('translate.chars', { used: text.length, max: props.maxLength })}
-        </span>
-      </div>
+      <SourceActions
+        text={text}
+        speech={speech}
+        speechLanguage={speechLanguage}
+        providerChoice={props.providerChoice}
+        onProviderChange={props.onProviderChange}
+        aiLoading={props.aiLoading}
+        onAskAi={props.onAskAi}
+        onChange={onChange}
+        ocrLoading={ocrLoading}
+        ocrProgress={ocrProgress}
+        onPhotoClick={() => fileInputRef.current?.click()}
+        voiceRecording={voice.recording}
+        voiceSeconds={voice.seconds}
+        voiceTranscribing={voice.transcribing}
+        onVoiceClick={handleVoice}
+        enterToTranslate={props.enterToTranslate}
+        maxLength={props.maxLength}
+      />
     </Card>
   );
 }

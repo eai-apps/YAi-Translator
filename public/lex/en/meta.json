@@ -1,0 +1,24 @@
+{
+  "version": "1.0.0",
+  "lang": "en",
+  "date": "2026-11-01",
+  "entries": 174247,
+  "lemmas": 88884,
+  "sources": [
+    {
+      "name": "Wiktionary / Kaikki.org",
+      "url": "https://kaikki.org/dictionary/en/",
+      "license": "CC BY-SA 4.0"
+    },
+    {
+      "name": "FrequencyWords",
+      "url": "https://github.com/hermitdave/FrequencyWords",
+      "license": "MIT"
+    },
+    {
+      "name": "Wikimedia Commons / Lingua Libre",
+      "url": "https://commons.wikimedia.org/",
+      "license": "CC BY-SA 4.0"
+    }
+  ]
+}

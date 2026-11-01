@@ -2,8 +2,8 @@ name: Warm Word Cards
 
 on:
   schedule:
-    # Раз в сутки ночью (03:00 UTC)
-    - cron: '0 3 * * *'
+    # Запуск каждые 2 часа ночью (01:00, 03:00, 05:00 UTC)
+    - cron: '0 1,3,5 * * *'
   workflow_dispatch:
     inputs:
       batchSize:

@@ -75,6 +75,14 @@ export function WordCardHeader({ card, menu, speak }: WordCardHeaderProps) {
           <span className="rounded-full bg-soft px-2 py-0.5 text-[11px] font-medium text-muted">
             {t(partOfSpeechKey(card.partOfSpeech))}
           </span>
+          {card.cefrLevel ? (
+            <span
+              title={t('word.approxLevelDesc')}
+              className="rounded-full bg-soft px-2 py-0.5 text-[11px] font-semibold text-accent cursor-help"
+            >
+              ~{card.cefrLevel}
+            </span>
+          ) : null}
         </div>
         {forms ? (
           <p className="mt-1 break-words text-sm italic leading-relaxed text-muted">{forms}</p>

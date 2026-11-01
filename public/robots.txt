@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://yai-translator.pages.dev/sitemap.xml

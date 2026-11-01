@@ -15,6 +15,8 @@ import { laraTranslator } from './lara';
 import { m2m100Translator } from './m2m100';
 import { microsoftTranslator } from './microsoft';
 import { myMemoryTranslator } from './mymemory';
+import { lingvaTranslator } from './lingva';
+import { apertiumTranslator } from './apertium';
 import type { ClassicInput, ClassicResult, ClassicTranslator } from './types';
 
 const TRANSLATORS: Record<string, ClassicTranslator> = {
@@ -23,6 +25,8 @@ const TRANSLATORS: Record<string, ClassicTranslator> = {
   microsoft: microsoftTranslator,
   google: googleTranslator,
   mymemory: myMemoryTranslator,
+  lingva: lingvaTranslator,
+  apertium: apertiumTranslator,
   m2m100: m2m100Translator,
 };
 

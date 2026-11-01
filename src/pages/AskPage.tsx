@@ -16,7 +16,7 @@ import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { PageHeader } from '../components/ui/PageHeader';
 import { Spinner } from '../components/ui/Spinner';
-import { IconArrowLeft, IconSparkles } from '../components/layout/icons';
+import { IconArrowLeft, IconFileText, IconSparkles } from '../components/layout/icons';
 
 export default function AskPage() {
   const { t } = useTranslation();
@@ -60,11 +60,18 @@ export default function AskPage() {
         title={t('ask.title')}
         subtitle={t('ask.subtitle')}
         action={
-          <Link to="/grammar">
-            <Button size="sm" variant="ghost" icon={<IconArrowLeft className="h-4 w-4" />}>
-              {t('grammar.title')}
-            </Button>
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link to="/letter">
+              <Button size="sm" variant="ghost" icon={<IconFileText className="h-4 w-4" />}>
+                {t('letter.headerLink')}
+              </Button>
+            </Link>
+            <Link to="/grammar">
+              <Button size="sm" variant="ghost" icon={<IconArrowLeft className="h-4 w-4" />}>
+                {t('grammar.title')}
+              </Button>
+            </Link>
+          </div>
         }
       />
 

@@ -10,3 +10,4 @@ export type { CheckCore } from './check';
 export { validateGrammar } from './grammar';
 export { validateAsk } from './ask';
 export type { AskCore } from './ask';
+export { validateLetter } from './letter';

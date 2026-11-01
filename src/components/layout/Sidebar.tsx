@@ -3,17 +3,19 @@
  * Этап 8Б: на невысоких экранах меню прокручивается, переключатели темы и языка стоят в одну
  * компактную строку, «О приложении» и версия всегда видны внизу.
  */
+import { useState } from 'react';
 import { NavLink, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { APP_VERSION } from '../../config';
 import { useAccount } from '../../hooks/useAccount';
 import { cn } from '../../lib/cn';
-import { IconCompass, IconInfo, IconSparkles, IconPhone } from './icons';
+import { IconCompass, IconInfo, IconSparkles, IconPhone, IconAlert } from './icons';
 import { useSidebarItems } from './navItems';
 import type { NavItem } from './navItems';
 import { Logo } from './Logo';
 import { ThemeSwitch } from './ThemeSwitch';
 import { LanguageSwitch } from './LanguageSwitch';
+import { ReportIssueModal } from './ReportIssueModal';
 
 function NavRow({ to, label, icon: Icon }: NavItem) {
   return (
@@ -37,6 +39,7 @@ export function Sidebar() {
   const { t } = useTranslation();
   const items = useSidebarItems();
   const { account } = useAccount();
+  const [reportOpen, setReportOpen] = useState(false);
 
   return (
     <aside
@@ -111,11 +114,29 @@ export function Sidebar() {
               <span className="truncate">{t('nav.admin')}</span>
             </Link>
           ) : null}
+          <button
+            type="button"
+            onClick={() => setReportOpen(true)}
+            className="flex w-full items-center gap-2.5 rounded-lg px-2 py-1.5 text-xs font-medium text-muted transition-colors hover:bg-soft hover:text-ink text-left"
+          >
+            <IconAlert className="h-4 w-4 shrink-0 text-warning" />
+            <span className="truncate">{t('feedback.reportButton')}</span>
+          </button>
         </div>
-        <p className="px-1 text-[11px] text-muted">
-          {t('common.appName')} · {t('common.version')} {APP_VERSION}
-        </p>
+        <div className="flex flex-wrap items-center gap-1.5 px-1 text-[11px] text-muted">
+          <span>{t('common.appName')} · v{APP_VERSION}</span>
+          <span>·</span>
+          <Link to="/privacy" className="hover:text-ink hover:underline">
+            {t('legal.privacy')}
+          </Link>
+          <span>·</span>
+          <Link to="/terms" className="hover:text-ink hover:underline">
+            {t('legal.terms')}
+          </Link>
+        </div>
       </div>
+
+      <ReportIssueModal open={reportOpen} onClose={() => setReportOpen(false)} />
     </aside>
   );
 }

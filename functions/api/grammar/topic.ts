@@ -11,6 +11,7 @@ import { resolveUserKeys } from '../../_lib/auth/keys';
 import { readTopic, requireSlug } from '../../_lib/grammar/store';
 import { loadTopicBody, topicResponse } from '../../_lib/grammar/generate';
 import { ApiError } from '../../_lib/http';
+import { ENGLISH_GRAMMAR_TOPICS, getEnglishTopicBody, isEnglishGrammarSlug } from '../../../shared/grammarEnglish';
 
 export const onRequestGet: PagesFunction<Env> = async (context) => {
   const uiLang = getUiLanguage(context.request);
@@ -18,6 +19,30 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     const url = new URL(context.request.url);
     const slug = requireSlug(url.searchParams.get('slug'));
     const answerLang = requireUiLanguage(url.searchParams.get('ui') ?? uiLang);
+
+    // Английские темы справочника (этап 18): готовые тексты, таблицы и тесты без вызова ИИ
+    if (isEnglishGrammarSlug(slug)) {
+      const seed = ENGLISH_GRAMMAR_TOPICS.find((item) => item.slug === slug);
+      const body = getEnglishTopicBody(slug, answerLang);
+      if (seed && body) {
+        const response: GrammarTopicResponse = {
+          slug: seed.slug,
+          lang: 'en',
+          level: seed.level,
+          category: seed.category,
+          titleRu: seed.titleRu,
+          titleDe: seed.titleDe,
+          titleEn: seed.titleEn,
+          filled: true,
+          updatedAt: Date.now(),
+          body,
+          source: 'admin',
+          offlineReason: null,
+          links: body.links || [],
+        };
+        return jsonResponse(response);
+      }
+    }
 
     const env = context.env;
     const row = await readTopic(env, slug);

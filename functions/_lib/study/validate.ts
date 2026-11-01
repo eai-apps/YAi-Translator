@@ -62,8 +62,12 @@ function parseCard(raw: unknown): StudyCard {
 
   const id = text(card.id, 140);
   const lemma = text(card.lemma, 80);
-  // id строится на клиенте как «de:слово» — принимаем только такой формат.
-  if (id !== `de:${lemma.toLowerCase()}`) throw new ApiError('VALIDATION', 400);
+  const lang = (typeof card.lang === 'string' && /^[a-z]{2,5}$/.test(card.lang)) ? card.lang : 'de';
+  // id строится на клиенте как «<lang>:слово» (или обратная совместимость с «de:слово»).
+  const expectedId = `${lang}:${lemma.toLowerCase()}`;
+  if (id.toLowerCase() !== expectedId && id.toLowerCase() !== `de:${lemma.toLowerCase()}`) {
+    throw new ApiError('VALIDATION', 400);
+  }
   if (!ARTICLES.includes(card.article === undefined ? null : card.article)) {
     throw new ApiError('VALIDATION', 400);
   }
@@ -83,7 +87,8 @@ function parseCard(raw: unknown): StudyCard {
   return {
     id,
     lemma,
-    lang: 'de',
+    lang,
+    deckId: optionalText(card.deckId, 100),
     article: (card.article ?? null) as StudyArticle | null,
     plural: optionalText(card.plural, 80),
     partOfSpeech: card.partOfSpeech as PartOfSpeech,

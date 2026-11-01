@@ -24,6 +24,7 @@ export function useSpeech() {
   const [listening, setListening] = useState(false);
   const [error, setError] = useState<SpeechError>(null);
   const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const supported = useMemo(
     () => ({
@@ -38,6 +39,10 @@ export function useSpeech() {
   // Останавливаем озвучку при уходе со страницы.
   useEffect(() => {
     return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
       if (isAndroid) {
         TextToSpeech.stop().catch(() => undefined);
       } else if (supported.synthesis && typeof window !== 'undefined' && 'speechSynthesis' in window) {
@@ -48,6 +53,10 @@ export function useSpeech() {
   }, [isAndroid, supported.synthesis]);
 
   const stopSpeaking = useCallback(() => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current = null;
+    }
     if (isAndroid) {
       TextToSpeech.stop().catch(() => undefined);
     } else if (supported.synthesis && typeof window !== 'undefined' && 'speechSynthesis' in window) {
@@ -56,24 +65,13 @@ export function useSpeech() {
     setSpeakingId(null);
   }, [isAndroid, supported.synthesis]);
 
-  const speak = useCallback(
-    (text: string, language: LanguageCode | 'auto', id = 'default') => {
+  const playTts = useCallback(
+    (clean: string, language: LanguageCode | 'auto') => {
       if (!supported.synthesis) {
         setError('unsupported');
+        setSpeakingId(null);
         return;
       }
-      const clean = text.trim();
-      if (!clean) return;
-
-      // Повторное нажатие на ту же кнопку останавливает озвучку.
-      if (speakingId === id) {
-        stopSpeaking();
-        return;
-      }
-
-      setError(null);
-      setSpeakingId(id);
-
       if (isAndroid) {
         TextToSpeech.stop()
           .catch(() => undefined)
@@ -106,7 +104,56 @@ export function useSpeech() {
         window.speechSynthesis.speak(utterance);
       }
     },
-    [isAndroid, speakingId, stopSpeaking, supported.synthesis],
+    [isAndroid, supported.synthesis],
+  );
+
+  const speak = useCallback(
+    (text: string, language: LanguageCode | 'auto', id = 'default', audioUrl?: string) => {
+      const clean = text.trim();
+      if (!clean) return;
+
+      // Повторное нажатие на ту же кнопку останавливает озвучку.
+      if (speakingId === id) {
+        stopSpeaking();
+        return;
+      }
+
+      stopSpeaking();
+      setError(null);
+      setSpeakingId(id);
+
+      // Если передана запись человеческого голоса (Wikimedia Commons / Lingua Libre)
+      if (audioUrl && typeof window !== 'undefined' && typeof Audio !== 'undefined') {
+        try {
+          if (audioRef.current) {
+            audioRef.current.pause();
+            audioRef.current = null;
+          }
+          const audio = new Audio(audioUrl);
+          audioRef.current = audio;
+          audio.onended = () => {
+            setSpeakingId(null);
+            audioRef.current = null;
+          };
+          const fallback = () => {
+            if (audioRef.current !== audio) return;
+            audioRef.current = null;
+            audio.onerror = null;
+            playTts(clean, language);
+          };
+          audio.onerror = fallback;
+          audio.play().catch(fallback);
+          return;
+        } catch {
+          audioRef.current = null;
+          playTts(clean, language);
+          return;
+        }
+      }
+
+      playTts(clean, language);
+    },
+    [playTts, speakingId, stopSpeaking],
   );
 
   const stopListening = useCallback(() => {

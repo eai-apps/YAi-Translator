@@ -53,19 +53,20 @@ export function useStudyActions({ stateRef, commit }: Options) {
 
       for (const input of inputs) {
         if (!isValidStudyInput(input)) continue;
-        const id = studyCardId(input.lemma);
+        const lang = input.lang || 'de';
+        const id = studyCardId(input.lemma, lang);
         const existing = cards.get(id);
 
         if (existing) {
           // Снимок обновляем, но addedAt и прогресс сохраняем.
           if (!sameSnapshot(existing, input)) {
-            cards.set(id, { ...existing, ...input, id, lang: 'de', updatedAt: now });
+            cards.set(id, { ...existing, ...input, id, lang, updatedAt: now });
             changed = true;
           }
           continue;
         }
         if (cards.size >= STUDY_MAX_CARDS) break;
-        cards.set(id, { ...input, id, lang: 'de', addedAt: now, updatedAt: now });
+        cards.set(id, { ...input, id, lang, addedAt: now, updatedAt: now });
         added += 1;
         changed = true;
       }

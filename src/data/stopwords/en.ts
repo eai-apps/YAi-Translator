@@ -1,0 +1,27 @@
+/**
+ * Английские стоп-слова (stopwords-iso, MIT).
+ */
+export const STOPWORDS_EN = new Set([
+  'a', 'about', 'above', 'after', 'again', 'against', 'all', 'am', 'an', 'and',
+  'any', 'are', 'aren', "aren't", 'as', 'at', 'be', 'because', 'been', 'before',
+  'being', 'below', 'between', 'both', 'but', 'by', 'can', 'cannot', 'could',
+  'couldn', "couldn't", 'd', 'did', 'didn', "didn't", 'do', 'does', 'doesn',
+  "doesn't", 'doing', 'don', "don't", 'down', 'during', 'each', 'few', 'for',
+  'from', 'further', 'had', 'hadn', "hadn't", 'has', 'hasn', "hasn't", 'have',
+  'haven', "haven't", 'having', 'he', "he'd", "he'll", "he's", 'her', 'here',
+  "here's", 'hers', 'herself', 'him', 'himself', 'his', 'how', "how's", 'i',
+  "i'd", "i'll", "i'm", "i've", 'if', 'in', 'into', 'is', 'isn', "isn't", 'it',
+  "it's", 'its', 'itself', 'let', "let's", 'll', 'm', 'me', 'more', 'most',
+  'mustn', "mustn't", 'my', 'myself', 'no', 'nor', 'not', 'o', 'of', 'off', 'on',
+  'once', 'only', 'or', 'other', 'ought', 'our', 'ours', 'ourselves', 'out',
+  'over', 'own', 're', 's', 'same', 'shan', "shan't", 'she', "she'd", "she'll",
+  "she's", 'should', 'shouldn', "shouldn't", 'so', 'some', 'such', 't', 'than',
+  'that', "that'll", "that's", 'the', 'their', 'theirs', 'them', 'themselves',
+  'then', 'there', "there's", 'these', 'they', "they'd", "they'll", "they're",
+  "they've", 'this', 'those', 'through', 'to', 'too', 'under', 'until', 'up',
+  've', 'very', 'was', 'wasn', "wasn't", 'we', "we'd", "we'll", "we're",
+  "we've", 'were', 'weren', "weren't", 'what', "what's", 'when', "when's",
+  'where', "where's", 'which', 'while', 'who', "who's", 'whom', 'why', "why's",
+  'will', 'with', 'won', "won't", 'would', 'wouldn', "wouldn't", 'y', 'you',
+  "you'd", "you'll", "you're", "you've", 'your', 'yours', 'yourself', 'yourselves',
+]);

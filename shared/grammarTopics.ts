@@ -60,3 +60,5 @@ export const GERMAN_GRAMMAR_SLUGS: string[] = GERMAN_GRAMMAR_TOPICS.map((topic) 
 export function isGermanGrammarSlug(value: unknown): value is string {
   return typeof value === 'string' && GERMAN_GRAMMAR_SLUGS.includes(value);
 }
+
+export { ENGLISH_GRAMMAR_TOPICS, ENGLISH_GRAMMAR_SLUGS, isEnglishGrammarSlug } from './grammarEnglishTopics';

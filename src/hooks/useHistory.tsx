@@ -9,7 +9,7 @@ import type { LanguageCode, SourceLanguage } from '../../shared/types';
 import { HISTORY_LIMIT, HISTORY_STORAGE_LIMIT, STORAGE_KEYS, SYNC_MARKS } from '../config';
 import { readStorage, writeStorage } from '../lib/storage';
 import { readTranslateSettings } from '../lib/translateSettings';
-import type { Tombstones } from '../lib/syncTombstones';
+import { readTombstones, writeTombstones, type Tombstones } from '../lib/syncTombstones';
 import { useAccount } from './useAccount';
 import { useHistorySync } from './useHistorySync';
 
@@ -22,6 +22,7 @@ export interface HistoryItem {
   kind: 'word' | 'text';
   article: 'der' | 'die' | 'das' | null;
   createdAt: number;
+  updatedAt?: number;
   favorite: boolean;
 }
 
@@ -83,6 +84,12 @@ export function HistoryProvider({ children }: { children: ReactNode }) {
     writeStorage(STORAGE_KEYS.history, items);
   }, [items]);
 
+  useEffect(() => {
+    const reload = () => setItems(readStorage<HistoryItem[]>(STORAGE_KEYS.history, []).filter(isHistoryItem));
+    window.addEventListener('yai:data-imported', reload);
+    return () => window.removeEventListener('yai:data-imported', reload);
+  }, []);
+
   /** Сливаем записи с сервера и удаления; побеждает более новая запись. */
   const onMerge = useCallback(
     ({ items: remote, tombstones }: { items: HistoryItem[] | null; tombstones: Tombstones }) => {
@@ -127,16 +134,22 @@ export function HistoryProvider({ children }: { children: ReactNode }) {
 
   const toggleFavorite = useCallback((id: string) => {
     setItems((previous) =>
-      previous.map((item) => (item.id === id ? { ...item, favorite: !item.favorite } : item)),
+      previous.map((item) => (item.id === id ? { ...item, favorite: !item.favorite, updatedAt: Date.now() } : item)),
     );
   }, []);
 
   const removeItem = useCallback((id: string) => {
+    writeTombstones({ ...readTombstones(), [id]: Date.now() });
     setItems((previous) => previous.filter((item) => item.id !== id));
   }, []);
 
   const clearHistory = useCallback(() => {
-    setItems((previous) => previous.filter((item) => item.favorite));
+    setItems((previous) => {
+      const tombstones = readTombstones();
+      for (const item of previous) if (!item.favorite) tombstones[item.id] = Date.now();
+      writeTombstones(tombstones);
+      return previous.filter((item) => item.favorite);
+    });
   }, []);
 
   const favorites = useMemo(() => items.filter((item) => item.favorite), [items]);

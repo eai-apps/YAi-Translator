@@ -2,6 +2,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 import { STORAGE_KEYS } from '../config';
+import { markSettingsChanged, type SyncedSettingsPayload } from '../lib/settingsSync';
 import { useLocalStorage } from './useLocalStorage';
 
 export type ThemeMode = 'light' | 'dark' | 'system';
@@ -35,7 +36,21 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     if (meta) meta.setAttribute('content', resolvedTheme === 'dark' ? '#0e1117' : '#3b6ef6');
   }, [resolvedTheme]);
 
-  const changeTheme = useCallback((next: ThemeMode) => setTheme(next), [setTheme]);
+  const changeTheme = useCallback((next: ThemeMode) => {
+    setTheme(next);
+    markSettingsChanged();
+  }, [setTheme]);
+
+  useEffect(() => {
+    const onRemote = (event: Event) => {
+      const custom = event as CustomEvent<Partial<SyncedSettingsPayload>>;
+      if (custom.detail?.theme) {
+        setTheme(custom.detail.theme as ThemeMode);
+      }
+    };
+    window.addEventListener('yai:remote-settings-applied', onRemote);
+    return () => window.removeEventListener('yai:remote-settings-applied', onRemote);
+  }, [setTheme]);
 
   const value = useMemo(
     () => ({ theme, resolvedTheme, setTheme: changeTheme }),

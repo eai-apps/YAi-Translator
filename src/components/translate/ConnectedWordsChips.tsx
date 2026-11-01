@@ -37,6 +37,8 @@ export function ConnectedWordsChips({ items, onSelectWord }: ConnectedWordsChips
       >
         {items.map((item) => {
           const article = item.article;
+          const isDeArticle = article && (article === 'der' || article === 'die' || article === 'das');
+          const itemLang = item.lang || item.match.lang || 'de';
           return (
             <div
               key={`${item.raw}-${item.match.lemma}`}
@@ -55,9 +57,13 @@ export function ConnectedWordsChips({ items, onSelectWord }: ConnectedWordsChips
               )}
             >
               <div className="flex items-baseline gap-1.5 text-sm font-medium">
-                {article ? (
+                {isDeArticle ? (
                   <span className={cn('text-xs font-bold uppercase tracking-wide', ARTICLE_COLORS[article])}>
                     {article}
+                  </span>
+                ) : article ? (
+                  <span className="text-[11px] font-semibold uppercase text-muted">
+                    ({article})
                   </span>
                 ) : null}
                 <span className="text-ink font-semibold group-hover:text-accent">
@@ -73,7 +79,8 @@ export function ConnectedWordsChips({ items, onSelectWord }: ConnectedWordsChips
               <div onClick={(e) => e.stopPropagation()}>
                 <AddToStudyQuickButton
                   lemma={item.match.lemma}
-                  article={article}
+                  lang={itemLang}
+                  article={isDeArticle ? article : null}
                   translations={item.translation ? [item.translation] : undefined}
                   variant="chip"
                 />

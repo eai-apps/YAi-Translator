@@ -1,0 +1,357 @@
+/**
+ * Темы английской грамматики: артикли, модальные глаголы, условные предложения, пассив, предлоги (этап 18, версия 0.20.0).
+ */
+import type { GrammarBody } from './grammar';
+
+export const ENGLISH_OTHER_BODIES: Record<string, Record<'ru' | 'de' | 'en', GrammarBody>> = {
+  'en-articles': {
+    ru: {
+      summary: 'В английском языке артикли a/an (неопределённый), the (определённый) и нулевой артикль определяют степень известности предмета собеседникам.',
+      whenToUse: [
+        'a / an: перед исчисляемыми существительными в ед. числе, упомянутыми впервые или одним из многих (I have a dog. He is an engineer).',
+        'the: когда предмет уникален, уже упоминался или понятен из контекста (The Sun, the door, the book you gave me).',
+        'Нулевой артикль (без артикля): перед неисчисляемыми существительными и во множественном числе при обобщении (I love music. Cats hate water), перед большинством стран, городов и именами.',
+      ],
+      formation: [
+        { rule: 'a перед согласными звуками, an перед гласными звуками', example: 'a car, a university (звук [j]); an apple, an hour (немое h)', translation: 'машина, университет; яблоко, час' },
+        { rule: 'the произносится [ðə] перед согласными, [ðiː] перед гласными звуками', example: 'the boy, the orange', translation: 'мальчик, апельсин' },
+      ],
+      examples: [
+        { level: 'A1', text: 'I bought a book yesterday. The book is very interesting.', translation: 'Вчера я купил книгу. Эта книга очень интересная.' },
+        { level: 'A2', text: 'She plays the piano, but she also loves football.', translation: 'Она играет на фортепиано, но также любит футбол (спорт — без артикля).' },
+      ],
+      exceptions: [
+        'Страны со словами Kingdom, States, Republic берут the: The UK, The USA, The Czech Republic.',
+        'Перед музыкальными инструментами с play используется the (play the guitar), перед видами спорта — без артикля (play tennis).',
+      ],
+      commonMistakes: [
+        { wrong: 'He is engineer.', right: 'He is an engineer.', why: 'Перед названиями профессий в единственном числе обязательно нужен артикль a/an.' },
+        { wrong: 'I want a information.', right: 'I want some information / information.', why: 'Слово information неисчисляемое, с ним нельзя использовать a.' },
+      ],
+      related: ['en-irregular-verbs'],
+      links: [{ title: 'Cambridge: Articles', url: 'https://dictionary.cambridge.org/grammar/british-grammar/articles-a-an-and-the' }],
+      quiz: [
+        { question: 'She has been working as _____ doctor for five years.', options: ['a', 'an', 'the', '—'], answerIndex: 0, explanation: 'Перед профессией на согласный звук используется a: a doctor.' },
+        { question: 'We stayed at _____ hotel near the airport. _____ hotel was noisy.', options: ['the / A', 'a / The', 'a / A', 'the / The'], answerIndex: 1, explanation: 'Первое упоминание — a hotel, повторное — The hotel.' },
+        { question: 'It took him _____ hour to get home.', options: ['a', 'an', 'the', '—'], answerIndex: 1, explanation: 'Слово hour начинается с гласного звука [aʊə], поэтому an hour.' },
+        { question: 'Have you ever visited _____ United Kingdom?', options: ['a', 'an', 'the', '—'], answerIndex: 2, explanation: 'Перед названиями со словом Kingdom используется the.' },
+        { question: 'My sister plays _____ violin beautifully.', options: ['a', 'an', 'the', '—'], answerIndex: 2, explanation: 'С музыкальными инструментами при глаголе play используется the: play the violin.' },
+      ],
+    },
+    de: {
+      summary: 'Englische Artikel: a/an (unbestimmt), the (bestimmt) und der Nullartikel.',
+      whenToUse: ['a/an: Einzahl, unbestimmt (a car, an hour).', 'the: Bestimmtes oder Einzigartiges (the sun, the president).', 'Nullartikel: Plural bei Verallgemeinerung, Sportarten, Städte.'],
+      formation: [{ rule: 'a vor Konsonantenlauten, an vor Vokallauten', example: 'a book, an apple, a university, an honest man', translation: 'ein Buch, ein Apfel, eine Universität, ein ehrlicher Mann' }],
+      examples: [{ level: 'A1', text: 'I live in a big city. The city is lively.', translation: 'Ich lebe in einer Großstadt. Die Stadt ist lebhaft.' }],
+      exceptions: ['Berufe verlangen a/an: He is a teacher. Instrumente mit the: play the guitar.'],
+      commonMistakes: [{ wrong: 'She is architect.', right: 'She is an architect.', why: 'Berufe im Singular verlangen a/an.' }],
+      related: ['en-nouns'],
+      links: [{ title: 'Cambridge: Articles', url: 'https://dictionary.cambridge.org/grammar/british-grammar/articles-a-an-and-the' }],
+      quiz: [
+        { question: 'He is _____ honest person.', options: ['a', 'an', 'the', '—'], answerIndex: 1, explanation: 'Stummes h: An honest person.' },
+        { question: 'I play _____ tennis on Sundays.', options: ['a', 'the', 'an', '—'], answerIndex: 3, explanation: 'Sportarten stehen ohne Artikel.' },
+        { question: 'Look at _____ moon!', options: ['a', 'the', 'an', '—'], answerIndex: 1, explanation: 'Einzigartige Objekte: the moon.' },
+        { question: 'She wants to buy _____ umbrella.', options: ['a', 'an', 'the', '—'], answerIndex: 1, explanation: 'Vokallaut: an umbrella.' },
+        { question: 'They live in _____ USA.', options: ['a', 'an', 'the', '—'], answerIndex: 2, explanation: 'The USA.' },
+      ],
+    },
+    en: {
+      summary: 'Articles (a, an, the, and zero article) signal whether a noun refers to a specific or non-specific entity.',
+      whenToUse: ['a/an: Singular countable nouns, non-specific or mentioned for the first time.', 'the: Specific, unique, or previously mentioned nouns.', 'Zero article: General plurals, uncountable nouns, sports, most countries.'],
+      formation: [{ rule: 'a before consonant sounds, an before vowel sounds', example: 'a European country ([j] sound), an hour (silent h)', translation: 'a European country, an hour' }],
+      examples: [{ level: 'A1', text: 'He is an astronaut and she is a pilot.', translation: 'He is an astronaut and she is a pilot.' }],
+      exceptions: ['The Netherlands, The Philippines, The UK, The United States.'],
+      commonMistakes: [{ wrong: 'I play the basketball.', right: 'I play basketball.', why: 'Sports take no article.' }],
+      related: ['en-nouns'],
+      links: [{ title: 'Cambridge: Articles', url: 'https://dictionary.cambridge.org/grammar/british-grammar/articles-a-an-and-the' }],
+      quiz: [
+        { question: 'She wants to become _____ engineer.', options: ['a', 'an', 'the', '—'], answerIndex: 1, explanation: 'Engineer starts with a vowel sound: an engineer.' },
+        { question: 'Did you see _____ Eiffel Tower in Paris?', options: ['a', 'an', 'the', '—'], answerIndex: 2, explanation: 'Famous unique landmarks take the.' },
+        { question: 'He plays _____ guitar every evening.', options: ['a', 'an', 'the', '—'], answerIndex: 2, explanation: 'Musical instruments take the with play.' },
+        { question: 'We need _____ advice on this matter.', options: ['a', 'an', 'the', '—'], answerIndex: 3, explanation: 'Advice is uncountable: no article or some.' },
+        { question: 'It was _____ European initiative.', options: ['a', 'an', 'the', '—'], answerIndex: 0, explanation: 'European begins with the consonant sound [j]: a European.' },
+      ],
+    },
+  },
+
+  'en-modal-verbs': {
+    ru: {
+      summary: 'Модальные глаголы (can, could, may, might, must, should) выражают способность, разрешение, вероятность, обязанность или совет.',
+      whenToUse: [
+        'can / could: физическая или умственная способность, вежливая просьба (I can swim. Could you help me?).',
+        'may / might: вероятность или формальное разрешение (It might rain. May I enter?).',
+        'must / have to: строгая необходимость или обязанность (You must wear a helmet).',
+        'should: совет или рекомендация (You should see a doctor).',
+      ],
+      formation: [
+        { rule: 'Модальный глагол + V1 (без частицы to и без окончания -s в 3-м лице)', example: 'She can speak German. He must go.', translation: 'Она умеет говорить по-немецки. Он должен идти.' },
+        { rule: 'Отрицание: modal + not (cannot / can\'t, shouldn\'t, mustn\'t)', example: 'You mustn\'t touch that!', translation: 'Нельзя трогать это! (строгий запрет)' },
+      ],
+      examples: [
+        { level: 'A2', text: 'You should drink more water every day.', translation: 'Тебе следует пить больше воды каждый день.' },
+        { level: 'B1', text: 'You mustn\'t park your car here; it is strictly forbidden.', translation: 'Здесь нельзя парковать машину; это строго запрещено.' },
+      ],
+      exceptions: ['Глагол have to изменяется по лицам и временам (he has to, he had to, he will have to), так как является полумодальным.'],
+      commonMistakes: [
+        { wrong: 'She cans speak Spanish.', right: 'She can speak Spanish.', why: 'Модальные глаголы никогда не получают окончание -s.' },
+        { wrong: 'I must to leave now.', right: 'I must leave now.', why: 'После must частица to не употребляется.' },
+      ],
+      related: ['en-conditionals'],
+      links: [{ title: 'Cambridge: Modal verbs', url: 'https://dictionary.cambridge.org/grammar/british-grammar/modals-and-modality' }],
+      quiz: [
+        { question: 'You _____ smoke in the hospital. It is prohibited.', options: ['mustn\'t', 'shouldn\'t', 'don\'t have to', 'can'], answerIndex: 0, explanation: 'Строгий запрет: mustn\'t.' },
+        { question: 'She _____ swim very well when she was six.', options: ['can', 'could', 'may', 'should'], answerIndex: 1, explanation: 'Способность в прошлом: could.' },
+        { question: 'It\'s cold outside; you _____ wear a warm scarf.', options: ['should', 'may', 'might', 'must to'], answerIndex: 0, explanation: 'Дружеский совет: should.' },
+        { question: 'Take an umbrella, it _____ rain later.', options: ['might', 'must', 'can to', 'should to'], answerIndex: 0, explanation: 'Вероятность события: might.' },
+        { question: 'Tomorrow is Sunday, so I _____ wake up early.', options: ['mustn\'t', 'don\'t have to', 'can\'t', 'shouldn\'t'], answerIndex: 1, explanation: 'Отсутствие необходимости: don\'t have to.' },
+      ],
+    },
+    de: {
+      summary: 'Modalverben (can, could, may, might, must, should) drücken Fähigkeit, Erlaubnis, Pflicht oder Ratschläge aus.',
+      whenToUse: ['can/could: Können, Fähigkeit, Bitte.', 'must: Pflicht; mustn\'t: Verbot.', 'should: Ratschlag.', 'may/might: Möglichkeit.'],
+      formation: [{ rule: 'Modalverb + Infinitiv OHNE to und OHNE «s»', example: 'She can drive. He should rest.', translation: 'Sie kann fahren. Er sollte sich ausruhen.' }],
+      examples: [{ level: 'A2', text: 'Could you please repeat that?', translation: 'Könnten Sie das bitte wiederholen?' }],
+      exceptions: ['have to wird gebeugt: He has to go.'],
+      commonMistakes: [{ wrong: 'He musts go.', right: 'He must go.', why: 'Kein -s bei Modalverben.' }],
+      related: ['en-conditionals'],
+      links: [{ title: 'Cambridge: Modals', url: 'https://dictionary.cambridge.org/grammar/british-grammar/modals-and-modality' }],
+      quiz: [
+        { question: 'You look exhausted. You _____ sleep.', options: ['should', 'can to', 'must to', 'ought'], answerIndex: 0, explanation: 'Ratschlag: should.' },
+        { question: '_____ I borrow your pen for a moment?', options: ['May', 'Must', 'Should', 'Need'], answerIndex: 0, explanation: 'Höfliche Erlaubnisfrage: May.' },
+        { question: 'We _____ be late for the meeting.', options: ['mustn\'t', 'don\'t need', 'not have to', 'can not to'], answerIndex: 0, explanation: 'Verbot/Nicht-Dürfen: mustn\'t.' },
+        { question: 'He _____ speak four languages.', options: ['can', 'cans', 'is can', 'can to'], answerIndex: 0, explanation: 'Kein -s bei can.' },
+        { question: 'Yesterday she _____ work late.', options: ['must', 'had to', 'should', 'might to'], answerIndex: 1, explanation: 'Vergangenheit von must ist had to.' },
+      ],
+    },
+    en: {
+      summary: 'Modal verbs (can, could, may, might, must, should) express ability, permission, obligation, possibility, and advice.',
+      whenToUse: ['can/could: ability, requests.', 'must/have to: necessity, rules.', 'should: advice.', 'may/might: probability.'],
+      formation: [{ rule: 'Subject + modal + bare infinitive (no to, no -s)', example: 'He can play chess. You must leave.', translation: 'He can play chess. You must leave.' }],
+      examples: [{ level: 'A2', text: 'You should try this delicious dessert.', translation: 'You should try this delicious dessert.' }],
+      exceptions: ['have to behaves like a normal verb with do/does/did.'],
+      commonMistakes: [{ wrong: 'You must to sign here.', right: 'You must sign here.', why: 'Modal verbs take the bare infinitive.' }],
+      related: ['en-conditionals'],
+      links: [{ title: 'Cambridge: Modals', url: 'https://dictionary.cambridge.org/grammar/british-grammar/modals-and-modality' }],
+      quiz: [
+        { question: 'You _____ wear a seatbelt while driving.', options: ['must', 'might', 'may', 'could'], answerIndex: 0, explanation: 'Legal requirement: must.' },
+        { question: '_____ you open the window, please?', options: ['Could', 'Must', 'Should', 'May to'], answerIndex: 0, explanation: 'Polite request: Could.' },
+        { question: 'She _____ be at home, but I am not certain.', options: ['might', 'must', 'can to', 'should to'], answerIndex: 0, explanation: 'Uncertain possibility: might.' },
+        { question: 'You _____ pay today; it is completely free.', options: ['don\'t have to', 'mustn\'t', 'can\'t', 'shouldn\'t'], answerIndex: 0, explanation: 'Lack of obligation: don\'t have to.' },
+        { question: 'He _____ type without looking at the keyboard.', options: ['can', 'cans', 'can to', 'is can'], answerIndex: 0, explanation: 'Ability: can without -s.' },
+      ],
+    },
+  },
+
+  'en-conditionals': {
+    ru: {
+      summary: 'Условные предложения (Conditionals 0, 1, 2, 3) выражают условия и их следствия: от реальных фактов до нереальных гипотез в прошлом.',
+      whenToUse: [
+        'Zero Conditional: законы природы и абсолютные истины (If you heat ice, it melts).',
+        'First Conditional: реальное будущее условие (If it rains tomorrow, we will stay at home).',
+        'Second Conditional: маловероятное или воображаемое настоящее/будущее (If I won a million, I would travel).',
+        'Third Conditional: сожаление о прошлом, которое нельзя изменить (If I had studied harder, I would have passed the exam).',
+      ],
+      formation: [
+        { rule: 'Zero: If + Present Simple, ... Present Simple', example: 'If you touch fire, you get burned.', translation: 'Если тронешь огонь, обожжёшься.' },
+        { rule: '1st: If + Present Simple, ... will + V1', example: 'If you hurry, you will catch the train.', translation: 'Если поторопишься, успеешь на поезд.' },
+        { rule: '2nd: If + Past Simple, ... would + V1', example: 'If I were you, I would take that offer.', translation: 'На твоём месте я бы принял предложение.' },
+        { rule: '3rd: If + had + V3, ... would have + V3', example: 'If she had left earlier, she wouldn\'t have missed the flight.', translation: 'Если бы она вышла раньше, она бы не опоздала на рейс.' },
+      ],
+      examples: [
+        { level: 'B1', text: 'If I had more free time, I would learn Spanish.', translation: 'Если бы у меня было больше времени, я бы учил испанский.' },
+        { level: 'B2', text: 'If we had known about the traffic jam, we would have chosen a different route.', translation: 'Если бы мы знали о пробке, мы бы выбрали другой маршрут.' },
+      ],
+      exceptions: ['В Second Conditional с глаголом to be для всех лиц традиционно используется were: If I were you, If he were here.'],
+      commonMistakes: [
+        { wrong: 'If it will rain, I will stay home.', right: 'If it rains, I will stay home.', why: 'В условной части (после If) будущее время will никогда не используется!' },
+      ],
+      related: ['en-modal-verbs', 'en-past-perfect'],
+      links: [{ title: 'Cambridge: Conditionals', url: 'https://dictionary.cambridge.org/grammar/british-grammar/conditionals-if' }],
+      quiz: [
+        { question: 'If she _____ harder, she will pass the examination.', options: ['studies', 'will study', 'studied', 'study'], answerIndex: 0, explanation: 'В 1st Conditional после if ставится Present Simple: studies.' },
+        { question: 'If I had a yacht, I _____ sail around the world.', options: ['will', 'would', 'would have', 'shall'], answerIndex: 1, explanation: 'Воображаемое условие в настоящем (2nd Conditional): would sail.' },
+        { question: 'If you _____ ice, it melts into water.', options: ['heat', 'will heat', 'heated', 'heats'], answerIndex: 0, explanation: 'Zero Conditional (закон природы): heat.' },
+        { question: 'If we _____ the tickets yesterday, we would have saved money.', options: ['bought', 'had bought', 'have bought', 'would buy'], answerIndex: 1, explanation: '3rd Conditional (прошлое): had bought.' },
+        { question: 'If I _____ you, I would consult a specialist.', options: ['was', 'were', 'am', 'would be'], answerIndex: 1, explanation: 'В сослагательном наклонении 2nd Conditional: were.' },
+      ],
+    },
+    de: {
+      summary: 'Konditionalsätze (If-Clauses 0, 1, 2, 3) drücken Bedingungen und Folgen aus.',
+      whenToUse: ['Typ 0: Naturgesetze.', 'Typ 1: Reale Zukunft.', 'Typ 2: Hypothetische Gegenwart.', 'Typ 3: Unmögliche Vergangenheit.'],
+      formation: [
+        { rule: 'Typ 1: If + Present, will + Infinitiv', example: 'If it rains, we will stay home.', translation: 'Wenn es regnet, bleiben wir zu Hause.' },
+        { rule: 'Typ 2: If + Past Simple, would + Infinitiv', example: 'If I were rich, I would buy a house.', translation: 'Wäre ich reich, würde ich ein Haus kaufen.' },
+      ],
+      examples: [{ level: 'B1', text: 'If you invite them, they will come.', translation: 'Wenn du sie einlädst, werden sie kommen.' }],
+      exceptions: ['Kein will oder would direkt im if-Teil!'],
+      commonMistakes: [{ wrong: 'If I will have time, I will call.', right: 'If I have time, I will call.', why: 'If + will ist im Englischen falsch.' }],
+      related: ['en-modal-verbs'],
+      links: [{ title: 'Cambridge: Conditionals', url: 'https://dictionary.cambridge.org/grammar/british-grammar/conditionals-if' }],
+      quiz: [
+        { question: 'If it snows, the roads _____ slippery.', options: ['will be', 'are would', 'would have been', 'were'], answerIndex: 0, explanation: '1st Conditional: will be.' },
+        { question: 'If I _____ a million dollars, I would travel.', options: ['win', 'won', 'had won', 'will win'], answerIndex: 1, explanation: '2nd Conditional: won.' },
+        { question: 'If she had invited me, I _____ attended.', options: ['would', 'would have', 'will have', 'had'], answerIndex: 1, explanation: '3rd Conditional: would have.' },
+        { question: 'If you touch that wire, you _____ an electric shock.', options: ['get', 'would get', 'got', 'had got'], answerIndex: 0, explanation: 'Fakt: get.' },
+        { question: 'If I _____ you, I would take a break.', options: ['am', 'were', 'was to', 'be'], answerIndex: 1, explanation: 'If I were you.' },
+      ],
+    },
+    en: {
+      summary: 'Conditionals express cause-and-effect relationships from universal truths to hypothetical past regrets.',
+      whenToUse: ['Zero: general scientific facts.', 'First: real and likely future possibility.', 'Second: imaginary or unlikely present/future.', 'Third: impossible past regret.'],
+      formation: [
+        { rule: 'Zero: If + present, present', example: 'If water freezes, it expands.', translation: 'If water freezes, it expands.' },
+        { rule: 'First: If + present, will + base', example: 'If you study, you will succeed.', translation: 'If you study, you will succeed.' },
+        { rule: 'Second: If + past, would + base', example: 'If I had wings, I would fly.', translation: 'If I had wings, I would fly.' },
+        { rule: 'Third: If + had + V3, would have + V3', example: 'If I had known, I would have helped.', translation: 'If I had known, I would have helped.' },
+      ],
+      examples: [{ level: 'B1', text: 'If she practiced more, she would play much better.', translation: 'If she practiced more, she would play much better.' }],
+      exceptions: ['Never use will or would inside the condition clause (after if).'],
+      commonMistakes: [{ wrong: 'If I will see him, I will tell him.', right: 'If I see him, I will tell him.', why: 'Present simple is required in the if-clause.' }],
+      related: ['en-modal-verbs'],
+      links: [{ title: 'Cambridge: Conditionals', url: 'https://dictionary.cambridge.org/grammar/british-grammar/conditionals-if' }],
+      quiz: [
+        { question: 'If we leave now, we _____ catch the early train.', options: ['will', 'would', 'would have', 'had'], answerIndex: 0, explanation: 'First conditional result clause: will.' },
+        { question: 'If I were you, I _____ accept that scholarship.', options: ['will', 'would', 'would have', 'shall'], answerIndex: 1, explanation: 'Second conditional advice: would.' },
+        { question: 'If they had started earlier, they _____ on time.', options: ['would arrive', 'would have arrived', 'will arrive', 'arrived'], answerIndex: 1, explanation: 'Third conditional: would have arrived.' },
+        { question: 'Plants die if you _____ them water.', options: ['don\'t give', 'won\'t give', 'didn\'t give', 'haven\'t given'], answerIndex: 0, explanation: 'Zero conditional factual truth: don\'t give.' },
+        { question: 'What would you do if you _____ your phone in another country?', options: ['lose', 'lost', 'had lost', 'will lose'], answerIndex: 1, explanation: 'Second conditional hypothesis: lost.' },
+      ],
+    },
+  },
+
+  'en-passive-voice': {
+    ru: {
+      summary: 'Пассивный залог (Passive Voice) переносит внимание с исполнителя на само действие или его объект.',
+      whenToUse: [
+        'Исполнитель действия неизвестен или не важен (The bank was robbed last night).',
+        'Важен сам результат или факт совершения (The bridge was built in 1932).',
+        'В официальном, научном или новостном стиле (The experiments were conducted successfully).',
+      ],
+      formation: [
+        { rule: 'to be (в нужном времени) + V3 (Past Participle)', example: 'Present: is done; Past: was done; Future: will be done; Perfect: has been done', translation: 'делается; было сделано; будет сделано; уже сделано' },
+        { rule: 'Исполнитель указывается с предлогом by', example: 'Romeo and Juliet was written by Shakespeare.', translation: '«Ромео и Джульетта» была написана Шекспиром.' },
+      ],
+      examples: [
+        { level: 'B1', text: 'Millions of emails are sent every second around the world.', translation: 'Миллионы электронных писем отправляются каждую секунду по всему миру.' },
+        { level: 'B1', text: 'The stolen painting has finally been recovered by the police.', translation: 'Украденная картина наконец была найдена полицией.' },
+      ],
+      exceptions: ['Непереходные глаголы (глаголы без прямого дополнения: happen, arrive, die, sleep) не имеют формы пассивного залога.'],
+      commonMistakes: [
+        { wrong: 'The accident was happened yesterday.', right: 'The accident happened yesterday.', why: 'Глагол happen непереходный и не образует пассивную форму.' },
+      ],
+      related: ['en-past-simple', 'en-irregular-verbs'],
+      links: [{ title: 'Cambridge: Passive', url: 'https://dictionary.cambridge.org/grammar/british-grammar/passive-voice' }],
+      quiz: [
+        { question: 'The Mona Lisa _____ by Leonardo da Vinci.', options: ['painted', 'was painted', 'has painted', 'is painting'], answerIndex: 1, explanation: 'Завершённое действие в прошлом с исполнителем by: was painted.' },
+        { question: 'English _____ all around the globe.', options: ['is spoken', 'speaks', 'was spoken', 'is speaking'], answerIndex: 0, explanation: 'Постоянный факт в настоящем: is spoken.' },
+        { question: 'A new highway _____ next year.', options: ['will build', 'will be built', 'is built', 'was built'], answerIndex: 1, explanation: 'Пассивный залог в будущем времени: will be built.' },
+        { question: 'The report _____ already _____ submitted.', options: ['has / been', 'is / been', 'was / being', 'will / be'], answerIndex: 0, explanation: 'Present Perfect Passive: has been submitted.' },
+        { question: 'Cars _____ in this garage since 1980.', options: ['have been repaired', 'were repaired', 'are repaired', 'had repaired'], answerIndex: 0, explanation: 'Действие с предлогом since (до настоящего): have been repaired.' },
+      ],
+    },
+    de: {
+      summary: 'Passive Voice rückt die Handlung oder das betroffene Objekt in den Vordergrund.',
+      whenToUse: ['Der Handelnde ist unwichtig oder unbekannt.', 'Nachrichten- und Wissenschaftssprache.'],
+      formation: [{ rule: 'Form von to be + 3. Verbform (Past Participle)', example: 'The car was washed.', translation: 'Das Auto wurde gewaschen.' }],
+      examples: [{ level: 'B1', text: 'The new rules were announced yesterday.', translation: 'Die neuen Regeln wurden gestern angekündigt.' }],
+      exceptions: ['Intransitive Verben (happen, arrive) bilden kein Passiv.'],
+      commonMistakes: [{ wrong: 'It was arrived on time.', right: 'It arrived on time.', why: 'Arrive bildet kein Passiv.' }],
+      related: ['en-past-simple'],
+      links: [{ title: 'Cambridge: Passive Voice', url: 'https://dictionary.cambridge.org/grammar/british-grammar/passive-voice' }],
+      quiz: [
+        { question: 'The letters _____ delivered every morning.', options: ['are', 'is', 'were', 'have'], answerIndex: 0, explanation: 'Plural: are delivered.' },
+        { question: 'The stadium was _____ in 2005.', options: ['build', 'built', 'building', 'builds'], answerIndex: 1, explanation: '3. Form von build ist built.' },
+        { question: 'His phone was _____ on the train.', options: ['steal', 'stole', 'stolen', 'stealing'], answerIndex: 2, explanation: 'Partizip: stolen.' },
+        { question: 'The mystery has not been _____ yet.', options: ['solve', 'solved', 'solving', 'solves'], answerIndex: 1, explanation: 'Has been solved.' },
+        { question: 'The project will be _____ next week.', options: ['finish', 'finished', 'finishing', 'finishes'], answerIndex: 1, explanation: 'Will be finished.' },
+      ],
+    },
+    en: {
+      summary: 'Passive Voice shifts emphasis from the subject doing the action to the recipient or the action itself.',
+      whenToUse: ['The agent is unknown, obvious, or unimportant.', 'Academic, legal, and news reporting style.'],
+      formation: [{ rule: 'appropriate tense of to be + past participle (V3)', example: 'The room is cleaned daily.', translation: 'The room is cleaned daily.' }],
+      examples: [{ level: 'B1', text: 'The novel was adapted into an award-winning movie.', translation: 'The novel was adapted into an award-winning movie.' }],
+      exceptions: ['Intransitive verbs cannot be put into passive (happen, occur, arrive, sleep).'],
+      commonMistakes: [{ wrong: 'An accident was occurred.', right: 'An accident occurred.', why: 'Occur is intransitive.' }],
+      related: ['en-past-simple'],
+      links: [{ title: 'Cambridge: Passive Voice', url: 'https://dictionary.cambridge.org/grammar/british-grammar/passive-voice' }],
+      quiz: [
+        { question: 'The castle _____ in the fourteenth century.', options: ['built', 'was built', 'is built', 'has built'], answerIndex: 1, explanation: 'Historic past passive: was built.' },
+        { question: 'Spanish _____ in many South American countries.', options: ['speaks', 'is spoken', 'was spoken', 'is speaking'], answerIndex: 1, explanation: 'General fact passive: is spoken.' },
+        { question: 'The package _____ delivered tomorrow morning.', options: ['will be', 'is', 'was', 'has been'], answerIndex: 0, explanation: 'Future passive: will be delivered.' },
+        { question: 'The missing keys have finally been _____ .', options: ['find', 'found', 'finding', 'finds'], answerIndex: 1, explanation: 'Present perfect passive participle: found.' },
+        { question: 'This poem was composed _____ an anonymous writer.', options: ['by', 'with', 'from', 'at'], answerIndex: 0, explanation: 'Agent is introduced by by.' },
+      ],
+    },
+  },
+
+  'en-prepositions': {
+    ru: {
+      summary: 'Предлоги времени и места in, on, at подчиняются чётким правилам: at — точная точка/время, on — день/поверхность, in — период/пространство внутри.',
+      whenToUse: [
+        'ВРЕМЯ: at для точного времени (at 5:00, at noon, at night); on для дней и дат (on Monday, on May 9th); in для месяцев, времён года, лет, веков (in July, in summer, in 2024).',
+        'МЕСТО: at для конкретной точки или учреждения (at the bus stop, at the station, at school); on для поверхности или линии (on the table, on the wall, on the 2nd floor); in для объёма или замкнутого пространства (in the room, in London, in a box).',
+      ],
+      formation: [
+        { rule: 'at + точное время / точка: at 3 PM, at night, at the door', example: 'Meet me at the station at 6 o\'clock.', translation: 'Встреть меня на вокзале в 6 часов.' },
+        { rule: 'on + день недели / дата / поверхность: on Friday, on the table', example: 'We have a meeting on Tuesday.', translation: 'У нас встреча во вторник.' },
+        { rule: 'in + месяц / год / страна / город: in July, in 2026, in Germany', example: 'She was born in October.', translation: 'Она родилась в октябре.' },
+      ],
+      examples: [
+        { level: 'A1', text: 'I wake up at seven, and we have English lessons on Mondays.', translation: 'Я просыпаюсь в семь, и у нас уроки английского по понедельникам.' },
+        { level: 'A2', text: 'There is a beautiful painting on the wall in the living room.', translation: 'На стене в гостиной висит красивая картина.' },
+      ],
+      exceptions: [
+        'at night (ночью), но in the morning / in the afternoon / in the evening (утром/днём/вечером).',
+        'Перед словами next, last, this, every предлоги времени НЕ ставятся: see you next Monday (без on!).',
+      ],
+      commonMistakes: [
+        { wrong: 'I will see you on next Friday.', right: 'I will see you next Friday.', why: 'Перед словом next предлог on не ставится.' },
+        { wrong: 'She was born in 15th of May.', right: 'She was born on the 15th of May.', why: 'С конкретными календарными датами используется предлог on, а не in.' },
+      ],
+      related: ['en-articles'],
+      links: [{ title: 'Cambridge: Prepositions of time and place', url: 'https://dictionary.cambridge.org/grammar/british-grammar/at-on-and-in-time' }],
+      quiz: [
+        { question: 'Our flight departs _____ 6:30 AM.', options: ['at', 'in', 'on', 'by'], answerIndex: 0, explanation: 'Точное время: at 6:30 AM.' },
+        { question: 'My birthday is _____ September 14th.', options: ['in', 'on', 'at', 'for'], answerIndex: 1, explanation: 'Конкретная календарная дата: on September 14th.' },
+        { question: 'He lived _____ Berlin _____ the 1990s.', options: ['in / in', 'at / on', 'on / in', 'at / in'], answerIndex: 0, explanation: 'Город и десятилетие оба требуют in: in Berlin in the 1990s.' },
+        { question: 'There were many books lying _____ the desk.', options: ['on', 'in', 'at', 'to'], answerIndex: 0, explanation: 'На поверхности стола: on the desk.' },
+        { question: 'I will call you _____ next Friday.', options: ['on', 'in', 'at', '— (no preposition)'], answerIndex: 3, explanation: 'Перед словом next предлог опускается.' },
+      ],
+    },
+    de: {
+      summary: 'Präpositionen für Zeit und Ort (at, on, in) folgen einer klaren Abstufung von präzise bis umfassend.',
+      whenToUse: ['at: Genaue Uhrzeit / Punkt (at 5:00, at the door).', 'on: Tage, Daten, Flächen (on Monday, on the table).', 'in: Monate, Jahre, geschlossene Räume (in July, in Berlin).'],
+      formation: [{ rule: 'at Uhrzeit / on Wochentag / in Monat & Jahr', example: 'at 7:00, on Friday, in 2026', translation: 'um 7:00, am Freitag, im Jahr 2026' }],
+      examples: [{ level: 'A1', text: 'We meet at the cafe on Sunday.', translation: 'Wir treffen uns am Sonntag im Cafe.' }],
+      exceptions: ['at night, aber in the morning/evening; kein on vor next/last.'],
+      commonMistakes: [{ wrong: 'in Monday', right: 'on Monday', why: 'Tage verlangen on.' }],
+      related: ['en-articles'],
+      links: [{ title: 'Cambridge: Prepositions', url: 'https://dictionary.cambridge.org/grammar/british-grammar/at-on-and-in-time' }],
+      quiz: [
+        { question: 'The train arrives _____ 10:15.', options: ['at', 'on', 'in', 'by'], answerIndex: 0, explanation: 'Uhrzeit: at 10:15.' },
+        { question: 'She was born _____ May.', options: ['in', 'on', 'at', 'to'], answerIndex: 0, explanation: 'Monat verlangt in.' },
+        { question: 'We have a test _____ Wednesday.', options: ['on', 'in', 'at', 'from'], answerIndex: 0, explanation: 'Wochentag: on Wednesday.' },
+        { question: 'The picture is hanging _____ the wall.', options: ['on', 'in', 'at', 'over'], answerIndex: 0, explanation: 'Wandfläche: on the wall.' },
+        { question: 'I like reading _____ night.', options: ['at', 'in', 'on', 'to'], answerIndex: 0, explanation: 'Fester Ausdruck: at night.' },
+      ],
+    },
+    en: {
+      summary: 'Prepositions of time and place (at, on, in) scale from specific points to broad ranges.',
+      whenToUse: ['at: Precise times and points (at 8:00, at the bus stop).', 'on: Days, dates, and surfaces (on Tuesday, on the table).', 'in: Enclosed spaces, months, years, and long periods (in the room, in 2025).'],
+      formation: [{ rule: 'at + clock time / on + calendar day / in + month or year', example: 'at noon, on July 4th, in winter', translation: 'at noon, on July 4th, in winter' }],
+      examples: [{ level: 'A1', text: 'The conference starts at 9:00 AM on Monday in Berlin.', translation: 'The conference starts at 9:00 AM on Monday in Berlin.' }],
+      exceptions: ['at night vs. in the morning; no preposition before next, last, this, every.'],
+      commonMistakes: [{ wrong: 'See you on next Tuesday.', right: 'See you next Tuesday.', why: 'Do not use a preposition before next.' }],
+      related: ['en-articles'],
+      links: [{ title: 'Cambridge: Prepositions', url: 'https://dictionary.cambridge.org/grammar/british-grammar/at-on-and-in-time' }],
+      quiz: [
+        { question: 'The store closes _____ midnight.', options: ['at', 'in', 'on', 'by'], answerIndex: 0, explanation: 'Exact point of time: at midnight.' },
+        { question: 'We always travel somewhere warm _____ summer.', options: ['in', 'on', 'at', 'with'], answerIndex: 0, explanation: 'Seasons take in: in summer.' },
+        { question: 'The keys are _____ the kitchen counter.', options: ['on', 'in', 'at', 'into'], answerIndex: 0, explanation: 'Surface contact: on the counter.' },
+        { question: 'She graduated _____ 2022.', options: ['in', 'on', 'at', 'from'], answerIndex: 0, explanation: 'Years take in: in 2022.' },
+        { question: 'I saw her _____ Monday morning.', options: ['on', 'in', 'at', 'during'], answerIndex: 0, explanation: 'Days take on: on Monday morning.' },
+      ],
+    },
+  },
+};

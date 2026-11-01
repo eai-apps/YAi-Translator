@@ -179,16 +179,31 @@ export default function TranslatePage() {
 
   const moreVariants = extractMoreVariants(translator.word.data, shown);
 
-  // Связывание немецких слов со словарём (этап 13)
-  const germanTextForConnected =
-    targetLang === 'de'
-      ? shown?.translatedText ?? ''
-      : resolvedSource === 'de'
-      ? text
-      : '';
+  // Связывание слов перевода со словарём для любого языка (этапы 13, 14).
+  // Показываем слова того языка, который не родной для пользователя.
+  const userLang = uiLanguage || 'ru';
+  let connectedText = '';
+  let connectedLang: LanguageCode = 'en';
+  let connectedTargetLang: LanguageCode = 'ru';
+
+  if (targetLang !== userLang) {
+    connectedText = shown?.translatedText ?? '';
+    connectedLang = targetLang;
+    connectedTargetLang = (resolvedSource !== targetLang ? resolvedSource : userLang) as LanguageCode;
+  } else if (resolvedSource !== userLang) {
+    connectedText = text;
+    connectedLang = resolvedSource as LanguageCode;
+    connectedTargetLang = targetLang;
+  } else {
+    connectedText = shown?.translatedText ?? text;
+    connectedLang = targetLang;
+    connectedTargetLang = userLang as LanguageCode;
+  }
 
   const { items: connectedWords, matchedWordsMap } = useConnectedWords(
-    germanTextForConnected,
+    connectedText,
+    connectedLang,
+    connectedTargetLang,
     Boolean(shown && !translator.loading && !translator.error),
   );
 
@@ -316,8 +331,7 @@ export default function TranslatePage() {
           word={translator.word}
           dict={translator.dict}
           queryWord={translator.text}
-          translatedText={translator.result?.translatedText}
-          aiOnButton={isWordQuery(translator.text.trim())}
+          translatedText={shown?.translatedText}
           sourceLang={wordLanguage}
           speech={speech}
           onRetry={translator.retryWord}

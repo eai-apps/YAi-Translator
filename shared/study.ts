@@ -3,6 +3,7 @@
  * и слово дня. Общие типы для сайта и Functions — подключаются через shared/types.ts.
  */
 import type { PartOfSpeech } from './typeTasks';
+import type { LanguageCode } from './languages';
 
 /** Артикль с цветом: der — синий, die — красный, das — зелёный. */
 export type StudyArticle = 'der' | 'die' | 'das';
@@ -10,15 +11,17 @@ export type StudyArticle = 'der' | 'die' | 'das';
 /** Оценка после показа карточки. */
 export type StudyGrade = 'again' | 'hard' | 'good' | 'easy';
 
-/** Виды упражнений. */
-export type PracticeType = 'article' | 'plural' | 'translation' | 'listening' | 'sentence';
+/** Виды упражнений (этап 6, часть 16: тренировки для любого языка). */
+export type PracticeType = 'translation' | 'write' | 'listening' | 'article' | 'sentence' | 'pairs' | 'plural';
 
 export const PRACTICE_TYPES: PracticeType[] = [
-  'article',
-  'plural',
   'translation',
+  'write',
   'listening',
+  'article',
   'sentence',
+  'pairs',
+  'plural',
 ];
 
 export function isPracticeType(value: unknown): value is PracticeType {
@@ -36,6 +39,8 @@ export interface StudyExample {
 /** Снимок слова без служебных полей: из него собирается карточка. */
 export interface StudyCardInput {
   lemma: string;
+  lang?: LanguageCode;
+  deckId?: string | null;
   article: StudyArticle | null;
   plural: string | null;
   partOfSpeech: PartOfSpeech;
@@ -49,7 +54,7 @@ export interface StudyCardInput {
 /** Карточка слова — снимок на момент добавления, без запросов к ИИ. */
 export interface StudyCard extends StudyCardInput {
   id: string;
-  lang: 'de';
+  lang: LanguageCode;
   addedAt: number;
   updatedAt: number;
 }
@@ -135,11 +140,12 @@ export interface StudyPingRequest {
 
 /* ------------------------------- Готовые наборы ---------------------------- */
 
-/** Перевод слова для готовых наборов: русский, украинский, английский и язык интерфейса. */
+/** Перевод слова для готовых наборов: русский, украинский, английский и немецкий. */
 export interface DeckTranslations {
   ru: string;
   uk: string;
   en: string;
+  de?: string;
 }
 
 /** Слово из готового набора: переводы сразу на языках набора. */
@@ -149,12 +155,14 @@ export interface DeckWord {
   plural: string | null;
   partOfSpeech: PartOfSpeech;
   translations: DeckTranslations;
-  example: StudyExample;
+  example: StudyExample | null;
+  lang?: LanguageCode;
 }
 
 export interface StudyDeck {
   id: string;
-  level: 'A1' | 'A2';
+  level: 'A1' | 'A2' | 'B1';
+  lang?: LanguageCode;
   /** Ключ названия в файлах локализации. */
   titleKey: string;
   words: DeckWord[];
@@ -167,6 +175,7 @@ export interface WordOfDayResponse {
   deckId: string;
   deckTitleKey: string;
   word: DeckWord;
+  level?: 'A1' | 'A2' | 'B1';
 }
 
 /* -------------------------------- Настройки -------------------------------- */
@@ -177,14 +186,14 @@ export const STUDY_MAX_CARDS = 3000;
 export const STUDY_SESSION_MAX = 20;
 /** Новых карточек в день по умолчанию (настройка). */
 export const STUDY_NEW_PER_DAY_DEFAULT = 10;
-/** Варианты цели дня в карточках. */
-export const STUDY_GOALS = [10, 20, 30] as const;
+/** Варианты цели дня в карточках (этап 16: 5, 10, 20 слов). */
+export const STUDY_GOALS = [5, 10, 20] as const;
 /** День засчитан, если повторено столько карточек или сделано одно упражнение. */
 export const STUDY_STREAK_REVIEWS = 10;
 
 /** Постоянный id карточки: одно слово — одна карточка на всех устройствах. */
-export function studyCardId(lemma: string): string {
-  return `de:${lemma.trim().toLowerCase()}`;
+export function studyCardId(lemma: string, lang: LanguageCode = 'de'): string {
+  return `${lang}:${lemma.trim().toLowerCase()}`;
 }
 
 /** Название дня по UTC: 2026-10-31. */
@@ -204,7 +213,13 @@ export function hashCode(text: string): number {
 
 /** Перевод слова из набора на языке интерфейса; для остальных языков — русский. */
 export function deckTranslation(word: DeckWord, language: string): string {
-  if (language === 'de' || language === 'en') return word.translations.en;
-  if (language === 'uk') return word.translations.uk;
+  const isEn = word.lang === 'en' || Boolean(word.translations.de && !word.article);
+  if (language === 'de') {
+    return isEn ? (word.translations.de || word.translations.en || word.translations.ru) : (word.translations.en || word.translations.ru);
+  }
+  if (language === 'en') {
+    return isEn ? (word.translations.ru || word.translations.uk) : (word.translations.en || word.translations.ru);
+  }
+  if (language === 'uk') return word.translations.uk || word.translations.ru;
   return word.translations.ru;
 }

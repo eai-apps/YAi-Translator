@@ -6,6 +6,7 @@ import { providerLabel } from '../../lib/errors';
 import { Card } from '../ui/Card';
 import { SectionTitle } from '../ui/SectionTitle';
 import { AdminChart } from './AdminChart';
+import { AdminWarmCardsSection } from './AdminWarmCardsSection';
 
 function Stat({ label, value }: { label: string; value: string | number }) {
   return (
@@ -120,10 +121,74 @@ export function AdminOverviewTab({ data }: { data: AdminOverview }) {
         </Card>
       </div>
 
+      <AdminWarmCardsSection warmedCards={data.warmedCards} />
+
       <Card className="p-4">
         <SectionTitle>{t('admin.overview.chartTitle')}</SectionTitle>
         <div className="mt-2 text-ink">
           <AdminChart data={data.daily} />
+        </div>
+      </Card>
+
+      {/* Посуточная статистика (этап 20): переводы, пользователи, ошибки, переводчики */}
+      <Card className="p-4">
+        <SectionTitle>{t('admin.overview.dailyTableTitle')}</SectionTitle>
+        <p className="mt-1 text-xs text-muted">{t('admin.overview.dailyTableHint')}</p>
+        <div className="mt-3 overflow-x-auto">
+          <table className="w-full text-left text-xs">
+            <thead>
+              <tr className="border-b border-line text-muted">
+                <th className="pb-2 font-medium">{t('admin.overview.colDate')}</th>
+                <th className="pb-2 font-medium">{t('admin.overview.colTranslations')}</th>
+                <th className="pb-2 font-medium">{t('admin.overview.colVisitors')}</th>
+                <th className="pb-2 font-medium">{t('admin.overview.colNewUsers')}</th>
+                <th className="pb-2 font-medium">{t('admin.overview.colErrors')}</th>
+                <th className="pb-2 font-medium">{t('admin.overview.colTranslators')}</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-line">
+              {[...data.daily].reverse().slice(0, 14).map((row) => {
+                const serviceEntries = Object.entries(row.translators || {});
+                return (
+                  <tr key={row.day} className="hover:bg-soft">
+                    <td className="py-2 font-medium tabular-nums">{row.day}</td>
+                    <td className="py-2 tabular-nums">{row.translations}</td>
+                    <td className="py-2 tabular-nums text-muted">{row.visitors}</td>
+                    <td className="py-2 tabular-nums text-muted">
+                      {row.newUsers > 0 ? (
+                        <span className="font-semibold text-accent">+{row.newUsers}</span>
+                      ) : (
+                        '0'
+                      )}
+                    </td>
+                    <td className="py-2 tabular-nums">
+                      {row.errors > 0 ? (
+                        <span className="font-semibold text-danger">⚠️ {row.errors}</span>
+                      ) : (
+                        <span className="text-muted">0</span>
+                      )}
+                    </td>
+                    <td className="py-2">
+                      {serviceEntries.length === 0 ? (
+                        <span className="text-muted">—</span>
+                      ) : (
+                        <div className="flex flex-wrap gap-1">
+                          {serviceEntries.map(([srv, count]) => (
+                            <span
+                              key={srv}
+                              className="rounded bg-soft px-1.5 py-0.5 text-[10px] text-muted"
+                            >
+                              {providerLabel(srv)}: {count}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
       </Card>
     </div>

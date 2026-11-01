@@ -7,7 +7,7 @@ export { LANGUAGES, LANGUAGE_CODES, getLanguage, isLanguageCode, isUiLanguage } 
 
 import { CLASSIC_PROVIDERS } from '../../shared/types';
 
-export const APP_VERSION = '0.15.0';
+export const APP_VERSION = '1.0.0';
 
 export const LIMITS = {
   /** Максимальная длина текста для перевода и разбора. */

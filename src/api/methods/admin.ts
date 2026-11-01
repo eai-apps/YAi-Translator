@@ -15,6 +15,8 @@ import type {
   SiteKeyTestResponse,
   BuyLinkItem,
   PaidConnectionItem,
+  WordCard,
+  AdminErrorsResponse,
 } from '../../../shared/types';
 import { request } from '../request';
 
@@ -50,10 +52,12 @@ export const adminMethods = {
     banner?: AdminSettings['banner'];
     disabledProviders?: string[];
     feedbackEmail?: string;
+    myMemoryEmail?: string;
     guestAiLimit?: number;
     registeredAiLimit?: number;
     aiRequiresLogin?: boolean;
     wordCardAuto?: boolean;
+    whatsNew?: AdminSettings['whatsNew'];
   }): Promise<AdminSettings> {
     return request<AdminSettings>('/api/admin/settings', { method: 'PUT', body: payload });
   },
@@ -115,5 +119,33 @@ export const adminMethods = {
 
   adminBuyLinkAction(payload: Record<string, unknown>): Promise<{ ok: boolean }> {
     return request('/api/admin/buy-links', { method: 'POST', body: payload });
+  },
+
+  adminWarmBatch(batchSize: number = 40): Promise<{
+    ok: boolean;
+    cursor: number;
+    total: number;
+    processed: number;
+    warmed: number;
+    skipped: number;
+    errors: number;
+  }> {
+    return request('/api/admin/warm', { method: 'POST', body: { batchSize } });
+  },
+
+  adminRecreateCard(payload: {
+    word: string;
+    lang: string;
+    explainLang: string;
+  }): Promise<{ ok: boolean; card: WordCard }> {
+    return request('/api/admin/recreate-card', { method: 'POST', body: payload });
+  },
+
+  adminErrors(signal?: AbortSignal): Promise<AdminErrorsResponse> {
+    return request<AdminErrorsResponse>('/api/admin/errors', { method: 'GET' }, signal);
+  },
+
+  adminClearErrors(): Promise<{ ok: boolean }> {
+    return request<{ ok: boolean }>('/api/admin/errors', { method: 'DELETE' });
   },
 };

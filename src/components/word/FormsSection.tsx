@@ -22,7 +22,7 @@ export function FormsSection({ card, speech }: FormsSectionProps) {
   const { t } = useTranslation();
   const hasVerb = Boolean(card.conjugation);
   const hasNoun = Boolean(card.declension) || Boolean(card.plural);
-  const hasAdjective = card.partOfSpeech === 'adjective';
+  const hasAdjective = card.language === 'de' && card.partOfSpeech === 'adjective';
 
   if (!hasVerb && !hasAdjective && !hasNoun) {
     return <p className="text-sm text-muted">{t('word.noForms')}</p>;

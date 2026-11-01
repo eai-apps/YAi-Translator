@@ -114,7 +114,11 @@ export function useStudySync({ signedIn, cards, progress, days, lists, onMerge }
         if (!more) break;
       }
 
-      if (serverTime) writeStorage(STORAGE_KEYS.studySyncSince, serverTime);
+      if (serverTime) {
+        writeStorage(STORAGE_KEYS.studySyncSince, serverTime);
+        writeStorage(STORAGE_KEYS.lastSyncTime, Date.now());
+        window.dispatchEvent(new CustomEvent('yai:sync-success', { detail: { time: Date.now() } }));
+      }
     } catch {
       // Сеть пропала — следующая минута повторит обмен сама.
     } finally {
@@ -129,6 +133,13 @@ export function useStudySync({ signedIn, cards, progress, days, lists, onMerge }
     writeMarks(marks.current);
     writeStorage(STORAGE_KEYS.studySyncSince, 0);
   }, [signedIn]);
+
+  useEffect(() => {
+    if (!signedIn) return;
+    const onSyncNow = () => void sync();
+    window.addEventListener('yai:sync-now', onSyncNow);
+    return () => window.removeEventListener('yai:sync-now', onSyncNow);
+  }, [signedIn, sync]);
 
   // Небольшая задержка: во время сессии оценки идут подряд, один запрос лучше пяти.
   useEffect(() => {

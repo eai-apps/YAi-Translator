@@ -11,7 +11,7 @@ import { cn } from '../../lib/cn';
 import { Card } from '../ui/Card';
 import { SectionTitle } from '../ui/SectionTitle';
 
-const ORDER = ['gemini', 'groq', 'workersai', 'deepl', 'lara', 'microsoft', 'google', 'm2m100', 'mymemory'];
+const ORDER = ['gemini', 'groq', 'workersai', 'deepl', 'lara', 'microsoft', 'google', 'mymemory', 'lingva', 'apertium', 'm2m100'];
 
 export function ProviderSwitches({ onError }: { onError: (message: string | null) => void }) {
   const { t } = useTranslation();
@@ -61,7 +61,7 @@ export function ProviderSwitches({ onError }: { onError: (message: string | null
                 role="switch"
                 aria-checked={enabled}
                 aria-label={providerLabel(id)}
-                disabled={busy === id}
+                disabled={busy !== null}
                 onClick={() => void toggle(id)}
                 className={cn(
                   'relative h-6 w-11 shrink-0 rounded-full transition-colors disabled:opacity-50',
