@@ -54,3 +54,7 @@
 Механизм чтения статики сервером: [Cloudflare Pages ASSETS API](https://developers.cloudflare.com/pages/functions/api-reference/).
 
 Что проверить на настоящем устройстве: `tasks/PHONE_CHECK.md`.
+
+## Подтверждение публикации — 2026-11-01 20:18 (Europe/Berlin)
+
+Код: `c3c9855`, тег `v1.0.0`. Cloudflare Pages и production health подтверждают 1.0.0. [Android Actions](https://github.com/eai-apps/YAi-Translator/actions/runs/41340627211) прошёл, подписанный APK 31 002 739 байт опубликован в [Release v1.0.0](https://github.com/eai-apps/YAi-Translator/releases/tag/v1.0.0). Живые HTTP-проверки перевода Haus, статической карточки/SEO, английской грамматики и проверки орфографии успешны. Сайт: 7390 файлов; public 86.01 MiB; OTA 24.63 MiB / 3388 файлов; ZIP дополнительно проверен стандартным Python zipfile. Исходники синхронизированы на G: с резервной копией. Физическое устройство ещё не проверено.

@@ -49,6 +49,7 @@
 | `G:\evvant\Projects\Projects\HANDOFF\YAi-Translator` | этот файл-вход | чтение; запись — только если появился новый аккаунт/сервис/ключ/бэкап |
 | `G:\evvant\Projects\Projects\TempCode\YAi-Translator` | временная папка: сюда помощник кладёт код по заданию, Claude проверяет и переносит | чтение и запись |
 | `G:\evvant\Projects\Projects\YAi-Translator\keystore\` | **ключ подписи Android-приложения** (`*.jks` + пароли). В git НЕ попадает (`.gitignore`). Потеря = нельзя обновлять приложение | только владелец; не читать, не копировать, не коммитить |
+| `C:\Users\evgen\Documents\Codex\2026-11-01\slynet-radio\work\source-before-review` | временная резервная копия заменённых исходников перед проверкой Codex 01.11.2026; без keystore и секретов | чтение |
 
 Git на компьютере владельца **не установлен** — Antigravity и DeepSeek не коммитят; на GitHub выкладывает Claude (или Codex).
 
@@ -216,6 +217,16 @@ Git на компьютере владельца **не установлен** �
 ---
 
 ## Журнал работ (новые записи — сверху)
+
+### 2026-11-01 20:18 — Codex — публикация и live-проверка результатов аудита 14–21 / 15Б
+- Проверенный код отправлен в `main`: **`c3c98554da14c7d2c1a57e6dbd7ec4d8ca3cb795`**. Тег **`v1.0.0`** указывает на этот же код; автор `eai-apps <yeas.apps@gmail.com>`. Следующий коммит обновляет только документы и карту резервной копии.
+- **Cloudflare Pages: success** для этого коммита. Проверка production: `/api/health` → `ok: true, version: 1.0.0`; `/app/bundle.json` → версия 1.0.0, minVersionCode 5. Обычный запрос перевода Haus → «Дом», provider deepl; English Present Simple → заполненная тема; статическая карточка Haus → das и 4 падежа; SEO Haus → 200/canonical; LanguageTool → 200, одно исправление. Никакие лимиты/ключи в админке не менялись, аккаунт владельца не использовался.
+- **GitHub Actions Build Android APK: success**, включая 67 тестов, сборку/синхронизацию Capacitor и **Build signed Release APK**. Запуск: https://github.com/eai-apps/YAi-Translator/actions/runs/41340627211 . Релиз: https://github.com/eai-apps/YAi-Translator/releases/tag/v1.0.0 . `YAi-Translator.apk` — **31 002 739 байт**, версия 1.0.0 / code 5. Установку поверх прежнего APK и работу на телефоне подтверждает владелец.
+- Обычная локальная сборка: 7390 файлов сайта, public 86.01 MiB, OTA 3388 файлов / 24.63 MiB. Содержимое всех записей ZIP сверено с dist; `python -m zipfile -t` — Done testing. SHA-256 локального OTA: `2463ec959f001e91c5ba987080eb48c8b00e0577b89edfea9c8427d321205f77` (это локальный ZIP, не хеш APK и не обещание идентичности Linux-сборке Cloudflare).
+- Рабочая папка `G:\evvant\Projects\Projects\YAi-Translator` обновлена: 1233 файла перенесены, 2825 совпали. Перед заменой 1212 файлов сохранены в `C:\Users\evgen\Documents\Codex\2026-11-01\slynet-radio\work\source-before-review`. Одновременных правок другого помощника не обнаружено. Keystore, .dev.vars/.env, node_modules, dist, .wrangler не читались/не переносились; логотипы сохранены. Восстановлены также старые расхождения G: с проверенным main (router/usage/режим ИИ), чтобы следующий помощник не вернул регрессии.
+- **Карта доступов дополнена только новым временным бэкапом** — здесь и в файле-входе `G:\evvant\Projects\Projects\HANDOFF\YAi-Translator\HANDOFF.md`. Текущая работа, полный аудит и ограничения: `tasks/AUDIT_14_21.md`; список файлов: `tasks/AUDIT_FILES.txt`; владельцу: `tasks/PHONE_CHECK.md`.
+
+
 
 ### 2026-11-01 20:07 — Codex — проверка Antigravity: части 14–21, включая 15Б, версия 1.0.0 / Android code 5
 - Прочитал файл-вход на G:, HANDOFF на GitHub и локальный журнал, AGENTS, ROADMAP и REPORT. Найдены все 9 записей Antigravity, в том числе 15Б от 13:30 в середине журнала; она оставлена на прежнем месте. Основа GitHub: `1ab444d`. Подключён `tenyls`, право push проверено; автор коммитов `eai-apps`.
