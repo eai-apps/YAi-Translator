@@ -136,7 +136,8 @@
     "shareImage": "As image",
     "pasteChip": "Paste",
     "pasteFromClipboard": "Paste from clipboard",
-    "fromHistory": "From history"
+    "fromHistory": "From history",
+    "dictionaryWords": "Dictionary words"
   },
   "others": {
     "title": "How others translate it",
@@ -336,7 +337,11 @@
     "chatPromptMnemonic": "How to remember",
     "chatQueryMnemonic": "Give me a mnemonic or memory trick to easily remember “{{word}}”",
     "chatPromptMistakes": "Common mistakes",
-    "chatQueryMistakes": "What common mistakes do learners make with the word “{{word}}”?"
+    "chatQueryMistakes": "What common mistakes do learners make with the word “{{word}}”?",
+    "searchPlaceholderUnified": "Search word (German or Russian)",
+    "recentLookups": "Recently viewed",
+    "alphabetAndTopics": "Alphabet and topics",
+    "browseByLetter": "Words starting with {{letter}}"
   },
   "profile": {
     "title": "Profile",
@@ -1162,7 +1167,30 @@
     "listEmptyText": "Add words with “To cards ▾” → “To a list…”.",
     "listAddFromTranslate": "Go to the translator",
     "listReview": "Study this list ({{count}})",
-    "listRemoveWord": "Remove from list"
+    "listRemoveWord": "Remove from list",
+    "addToStudy": "+ To study",
+    "todayDue": "Review today: {{count}} words",
+    "startReview": "Start",
+    "allDoneForToday": "All done for today 🎉",
+    "learnNewWords": "Learn new words",
+    "myWordsTitle": "My words",
+    "myWordsProgress": "Total: {{total}} · Learned: {{learned}}",
+    "tileMyDecks": "My decks",
+    "tileMyDecksHint": "Words you saved from translations",
+    "tileReadySets": "Ready-made sets",
+    "tileReadySetsHint": "Topic lists: Authorities, doctor, work, A1–B1",
+    "tileTraining": "Training",
+    "tileTrainingHint": "Multiple choice, write word, listening",
+    "onboardingStep1": "Translate a word",
+    "onboardingStep1Desc": "Enter a word or phrase in the translator",
+    "onboardingStep2": "Tap “+ To study”",
+    "onboardingStep2Desc": "Word is saved to your personal deck",
+    "onboardingStep3": "Review for 5 minutes every day",
+    "onboardingStep3Desc": "Spaced repetition helps remember permanently",
+    "listFromTranslations": "From translations",
+    "showAnswer": "Show",
+    "swipeHint": "Swipe left: “Forgot”, right: “Easy”",
+    "onboardingTitle": "How to learn words — 3 steps"
   },
   "help": {
     "title": "Help",

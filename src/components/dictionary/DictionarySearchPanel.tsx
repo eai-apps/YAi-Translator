@@ -1,26 +1,35 @@
 /**
- * Вкладка «Слово» в словаре: поле поиска (слово на любом языке), выбор языка слова и языка перевода,
- * карточка ИИ и, если ИИ недоступен, карточка из словарей.
- * Этап 8Б: подсказка «Введите слово на любом языке…», «Определить» по умолчанию.
+ * Вкладка «Слово» в словаре (этап 13):
+ * 1. Поле поиска «Найти слово (немецкий или русский)», поиск мгновенный без кнопки.
+ * 2. Пока ничего не введено — «Слово дня», «Вы недавно смотрели», алфавит и темы базы.
+ * 3. Результат — та же карточка слова, что и в переводе.
+ * 4. В каждой строке результата — «+ В учёбу».
  */
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { LanguageCode, SourceLanguage, UiLanguage, WordResponse } from '../../../shared/types';
-import { groupedLanguages } from '../../../shared/languages';
+import { STUDY_DECKS } from '../../../shared/decks';
 import type { DictState } from '../../hooks/useDictLookup';
 import type { TranslatorError } from '../../lib/errors';
 import { errorMessageKey, providerLabel } from '../../lib/errors';
 import type { SpeechController } from '../../hooks/useSpeech';
+import { ARTICLE_COLORS } from '../../config';
+import { cn } from '../../lib/cn';
 import { Button } from '../ui/Button';
 import { Card } from '../ui/Card';
-import { EmptyState } from '../ui/EmptyState';
-import { IconAlert, IconBook, IconSearch, IconSwap } from '../layout/icons';
-import { DictPanel } from '../word/DictPanel';
+import { IconAlert, IconBook, IconClock, IconSearch } from '../layout/icons';
 import { WordCard } from '../word/WordCard';
 import { InstantWordCard } from '../word/InstantWordCard';
 import { useLexicon } from '../../hooks/useLexicon';
+import { useHistory } from '../../hooks/useHistory';
 import { PickContext } from '../word/pick';
-import { WordChatPanel } from './WordChatPanel';
+import { WordOfDayCard } from '../study/WordOfDayCard';
+import { AddToStudyQuickButton } from '../study/AddToStudyQuickButton';
+import {
+  COMMON_DE_RU,
+  getGermanTranslation,
+  searchGermanByRussian,
+} from '../../data/commonTranslationsDeRu';
 
 interface DictionarySearchPanelProps {
   query: string;
@@ -34,15 +43,13 @@ interface DictionarySearchPanelProps {
   onOpenLimit: () => void;
   uiLang: UiLanguage;
   onPickWord?: (word: string) => void;
-  /** Язык слова и язык перевода (этап 8Б). */
   sourceLang: SourceLanguage;
   targetLang: LanguageCode;
   onSourceChange: (value: SourceLanguage) => void;
   onTargetChange: (value: LanguageCode) => void;
 }
 
-const SELECT_CLASS =
-  'h-8 cursor-pointer appearance-none rounded-lg bg-transparent px-1.5 text-xs font-semibold uppercase tracking-wide text-muted transition-colors hover:bg-soft hover:text-ink focus:bg-soft';
+const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 
 export function DictionarySearchPanel({
   query,
@@ -54,121 +61,176 @@ export function DictionarySearchPanel({
   error,
   speech,
   onOpenLimit,
-  uiLang,
   onPickWord,
-  sourceLang,
   targetLang,
-  onSourceChange,
-  onTargetChange,
 }: DictionarySearchPanelProps) {
   const { t } = useTranslation();
-  const groups = useMemo(() => groupedLanguages(), []);
-  const isGerman = sourceLang === 'de' || (sourceLang === 'auto' && /^[a-zäöüß\s]+$/i.test(query.trim()));
-  const { match: lexMatch } = useLexicon(query.trim(), isGerman && !card);
+  const { items: historyItems } = useHistory();
+
+  const [selectedLetter, setSelectedLetter] = useState<string | null>(null);
+  const [selectedTopicId, setSelectedTopicId] = useState<string | null>(null);
+
+  const cleanQuery = query.trim();
+  const isCyrillic = /[а-яёА-ЯЁ]/i.test(cleanQuery);
+  const isGerman = !isCyrillic && cleanQuery.length >= 2;
+
+  // 1. Мгновенный поиск по базе lex (для немецкого ввода)
+  const { match: lexMatch } = useLexicon(cleanQuery, isGerman && !card);
+
+  // 2. Обратный поиск немецких слов по русскому запросу
+  const russianMatches = useMemo(() => {
+    if (!isCyrillic || cleanQuery.length < 2) return [];
+    return searchGermanByRussian(cleanQuery, 10);
+  }, [cleanQuery, isCyrillic]);
+
+  // 3. Автоматический запуск подробного поиска (debounce 400ms)
+  useEffect(() => {
+    if (!cleanQuery || cleanQuery.length < 2) return;
+    const timer = setTimeout(() => {
+      onSearch();
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [cleanQuery, onSearch]);
+
+  // Недавно просмотренные слова (из истории)
+  const recentWords = useMemo(() => {
+    const list = historyItems.slice(0, 5);
+    return list.map((item) => ({
+      text: item.text,
+      translation: item.translation,
+      from: item.sourceLang,
+      to: item.targetLang,
+    }));
+  }, [historyItems]);
+
+  // Слова по выбранной букве алфавита
+  const letterWords = useMemo(() => {
+    if (!selectedLetter) return [];
+    const results: Array<{ lemma: string; translation: string }> = [];
+    for (const [lemma, tr] of Object.entries(COMMON_DE_RU)) {
+      if (lemma.toUpperCase().startsWith(selectedLetter)) {
+        results.push({ lemma, translation: tr });
+        if (results.length >= 20) break;
+      }
+    }
+    return results;
+  }, [selectedLetter]);
+
+  // Слова по выбранной теме
+  const topicWords = useMemo(() => {
+    if (!selectedTopicId) return [];
+    const deck = STUDY_DECKS.find((d) => d.id === selectedTopicId);
+    if (!deck) return [];
+    return deck.words.map((w) => ({
+      lemma: w.lemma,
+      article: w.article,
+      translation: w.translations?.ru || getGermanTranslation(w.lemma) || '',
+    }));
+  }, [selectedTopicId]);
+
+  const handlePick = (word: string) => {
+    onQueryChange(word);
+    onPickWord?.(word);
+  };
 
   return (
     <PickContext.Provider value={onPickWord ?? null}>
-    <section className="mt-4">
-      <Card className="p-3">
-        <form
-          onSubmit={(event) => {
-            event.preventDefault();
-            onSearch();
-          }}
-          className="flex gap-2"
-        >
-          <div className="relative min-w-0 flex-1">
-            <IconSearch className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
-            <input
-              value={query}
-              onChange={(event) => onQueryChange(event.target.value)}
-              placeholder={t('dictionary.searchPlaceholder')}
-              aria-label={t('dictionary.searchPlaceholder')}
-              maxLength={60}
-              className="h-11 w-full rounded-xl border border-line bg-card pl-9 pr-3 text-sm outline-none focus:border-accent"
-            />
-          </div>
-          <Button type="submit" variant="primary" loading={loading} disabled={!query.trim()}>
-            {t('dictionary.search')}
-          </Button>
-        </form>
-
-        {/* Компактный выбор языков, как на экране перевода: слово на любом языке. */}
-        <div className="mt-2 flex items-center gap-1 border-t border-line pt-2">
-          <label className="min-w-0">
-            <span className="sr-only">{t('translate.sourceLanguage')}</span>
-            <select
-              value={sourceLang}
-              onChange={(event) => onSourceChange(event.target.value as SourceLanguage)}
-              className={SELECT_CLASS}
-            >
-              <option value="auto">{t('dictionary.detect')}</option>
-              {(['pinned', 'other'] as const).map((group) => (
-                <optgroup key={group} label={t(`languages.${group}`)}>
-                  {groups[group].map((language) => (
-                    <option key={language.code} value={language.code}>
-                      {t(`languages.${language.code}`)}
-                    </option>
-                  ))}
-                </optgroup>
-              ))}
-            </select>
-          </label>
-          {/* Стрелка показывает направление: язык слова → язык перевода. */}
-          <button
-            type="button"
-            aria-label={t('dictionary.swap')}
-            title={t('dictionary.swap')}
-            onClick={() => {
-              // «Определить» менять не на что: тогда берём немецкий как самый частый.
-              const from: LanguageCode = sourceLang === 'auto' ? 'de' : sourceLang;
-              onSourceChange(targetLang);
-              onTargetChange(from);
+      <section className="mt-4 space-y-4">
+        {/* Поле поиска: мгновенный поиск без обязательного нажатия кнопки */}
+        <Card className="p-3">
+          <form
+            onSubmit={(event) => {
+              event.preventDefault();
+              onSearch();
             }}
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-muted transition-colors hover:bg-soft hover:text-accent"
+            className="flex gap-2"
           >
-            <IconSwap className="h-4 w-4" />
-          </button>
-          <label className="min-w-0">
-            <span className="sr-only">{t('translate.targetLanguage')}</span>
-            <select
-              value={targetLang}
-              onChange={(event) => onTargetChange(event.target.value as LanguageCode)}
-              className={SELECT_CLASS}
-            >
-              {(['pinned', 'other'] as const).map((group) => (
-                <optgroup key={group} label={t(`languages.${group}`)}>
-                  {groups[group].map((language) => (
-                    <option key={language.code} value={language.code}>
-                      {t(`languages.${language.code}`)}
-                    </option>
-                  ))}
-                </optgroup>
-              ))}
-            </select>
-          </label>
-        </div>
-      </Card>
-
-      {error ? (
-        <Card className="mt-3 p-4">
-          <div className="flex items-start gap-2 text-danger">
-            <IconAlert className="mt-0.5 h-5 w-5 shrink-0" />
-            <div>
-              <p className="text-sm leading-relaxed">{t(errorMessageKey(error.code))}</p>
-              {error.code === 'LIMIT_REACHED' ? (
-                <Button size="sm" variant="primary" className="mt-2" onClick={onOpenLimit}>
-                  {t('limit.title')}
-                </Button>
-              ) : null}
+            <div className="relative min-w-0 flex-1">
+              <IconSearch className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
+              <input
+                value={query}
+                onChange={(event) => {
+                  onQueryChange(event.target.value);
+                  setSelectedLetter(null);
+                  setSelectedTopicId(null);
+                }}
+                placeholder={t('dictionary.searchPlaceholderUnified', {
+                  defaultValue: 'Найти слово (немецкий или русский)',
+                })}
+                aria-label={t('dictionary.searchPlaceholderUnified', {
+                  defaultValue: 'Найти слово (немецкий или русский)',
+                })}
+                maxLength={60}
+                className="h-11 w-full rounded-xl border border-line bg-card pl-9 pr-3 text-sm outline-none transition-colors focus:border-accent"
+              />
             </div>
-          </div>
+            {query.trim() ? (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  onQueryChange('');
+                  setSelectedLetter(null);
+                  setSelectedTopicId(null);
+                }}
+              >
+                ✕
+              </Button>
+            ) : null}
+          </form>
         </Card>
-      ) : null}
 
-      {card ? (
-        <>
-          <Card className="mt-3 p-4 sm:p-5">
+        {/* Результаты поиска по русскому запросу (список найденных немецких слов с «+ В учёбу») */}
+        {isCyrillic && russianMatches.length > 0 && !card ? (
+          <Card className="p-4">
+            <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted">
+              {t('dictionary.tabSearch')} ({russianMatches.length})
+            </h3>
+            <div className="divide-y divide-line">
+              {russianMatches.map((item) => (
+                <div
+                  key={item.lemma}
+                  className="flex items-center justify-between py-2.5 transition-colors hover:bg-soft rounded-lg px-2 cursor-pointer"
+                  onClick={() => handlePick(item.lemma)}
+                >
+                  <div className="flex items-baseline gap-2">
+                    <span className="font-semibold text-ink">{item.lemma}</span>
+                    <span className="text-xs text-muted">· {item.translation}</span>
+                  </div>
+                  <div onClick={(e) => e.stopPropagation()}>
+                    <AddToStudyQuickButton
+                      lemma={item.lemma}
+                      translations={[item.translation]}
+                      variant="compact"
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Card>
+        ) : null}
+
+        {/* Ошибка */}
+        {error ? (
+          <Card className="p-4">
+            <div className="flex items-start gap-2 text-danger">
+              <IconAlert className="mt-0.5 h-5 w-5 shrink-0" />
+              <div>
+                <p className="text-sm leading-relaxed">{t(errorMessageKey(error.code))}</p>
+                {error.code === 'LIMIT_REACHED' ? (
+                  <Button size="sm" variant="primary" className="mt-2" onClick={onOpenLimit}>
+                    {t('limit.title')}
+                  </Button>
+                ) : null}
+              </div>
+            </div>
+          </Card>
+        ) : null}
+
+        {/* 3. Результат: единая карточка слова (та же, что на экране перевода) */}
+        {card ? (
+          <Card className="p-4 sm:p-5">
             <WordCard
               card={card.card}
               speech={speech}
@@ -181,41 +243,198 @@ export function DictionarySearchPanel({
               {card.cached ? ` · ${t('translate.fromCache')}` : ''}
             </p>
           </Card>
-          <WordChatPanel
-            word={card.card.lemma || query}
-            wordSummary={card.card.meanings.map((m) => m.translations.join(', ')).join('; ')}
-            uiLang={uiLang}
-            onPickWord={onPickWord}
-          />
-        </>
-      ) : null}
+        ) : null}
 
-      {/* Мгновенная карточка из базы лексикона (пока ИИ думает или если ИИ недоступен) */}
-      {!card && lexMatch ? (
-        <Card className="mt-3 p-4 sm:p-5">
-          <InstantWordCard
-            match={lexMatch}
-            speech={speech}
-            isPreparingAi={loading}
-            dictEntry={dict.data?.entry ?? null}
-            onPickTranslation={(val) => onPickWord?.(val)}
-          />
-        </Card>
-      ) : null}
+        {/* Мгновенная карточка из базы лексикона (пока сервер готовит или офлайн) */}
+        {!card && lexMatch ? (
+          <Card className="p-4 sm:p-5">
+            <InstantWordCard
+              match={lexMatch}
+              speech={speech}
+              isPreparingAi={loading}
+              dictEntry={dict.data?.entry ?? null}
+              onPickTranslation={(val) => handlePick(val)}
+            />
+          </Card>
+        ) : null}
 
-      {/* ИИ не ответил и слова нет в лексиконе — карточка из настоящих словарей */}
-      {!card && !lexMatch && (dict.loading || dict.data) ? <DictPanel dict={dict} speech={speech} /> : null}
+        {/* 2. Пока ничего не введено — «Слово дня», «Вы недавно смотрели», алфавит и темы базы */}
+        {!cleanQuery ? (
+          <div className="space-y-4">
+            {/* Слово дня */}
+            <WordOfDayCard />
 
-      {!card && !error && !loading && !dict.data && !lexMatch ? (
-        <Card className="mt-3">
-          <EmptyState
-            icon={<IconBook className="h-6 w-6" />}
-            title={t('dictionary.title')}
-            text={t('dictionary.searchPlaceholder')}
-          />
-        </Card>
-      ) : null}
-    </section>
+            {/* Вы недавно смотрели */}
+            {recentWords.length > 0 ? (
+              <Card className="p-4">
+                <div className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-muted">
+                  <IconClock className="h-4 w-4" />
+                  <span>{t('dictionary.recentLookups', { defaultValue: 'Вы недавно смотрели' })}</span>
+                </div>
+                <div className="divide-y divide-line">
+                  {recentWords.map((item, idx) => (
+                    <div
+                      key={`recent-${idx}-${item.text}`}
+                      className="flex items-center justify-between py-2 text-sm cursor-pointer hover:bg-soft px-1 rounded-lg"
+                      onClick={() => handlePick(item.text)}
+                    >
+                      <div className="flex items-baseline gap-2 min-w-0">
+                        <span className="font-semibold text-ink truncate">{item.text}</span>
+                        {item.translation ? (
+                          <span className="text-xs text-muted truncate">→ {item.translation}</span>
+                        ) : null}
+                      </div>
+                      {!/\s/.test(item.text.trim()) && (
+                      <div className="shrink-0" onClick={(e) => e.stopPropagation()}>
+                        <AddToStudyQuickButton
+                          lemma={item.text}
+                          translations={item.translation ? [item.translation] : undefined}
+                          variant="compact"
+                        />
+                      </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </Card>
+            ) : null}
+
+            {/* Алфавит и темы базы */}
+            <Card className="p-4">
+              <div className="mb-3 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-muted">
+                <IconBook className="h-4 w-4" />
+                <span>{t('dictionary.alphabetAndTopics', { defaultValue: 'Алфавит и темы' })}</span>
+              </div>
+
+              {/* Буквы алфавита */}
+              <div className="flex flex-wrap gap-1 mb-4">
+                {ALPHABET.map((letter) => {
+                  const active = selectedLetter === letter;
+                  return (
+                    <button
+                      key={letter}
+                      type="button"
+                      onClick={() => {
+                        setSelectedLetter(active ? null : letter);
+                        setSelectedTopicId(null);
+                      }}
+                      className={cn(
+                        'h-7 w-7 rounded-lg text-xs font-semibold transition-colors',
+                        active
+                          ? 'bg-accent text-accentInk'
+                          : 'bg-soft text-ink hover:bg-line',
+                      )}
+                    >
+                      {letter}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Темы из базы */}
+              <div className="flex flex-wrap gap-1.5">
+                {STUDY_DECKS.map((deck) => {
+                  const active = selectedTopicId === deck.id;
+                  return (
+                    <button
+                      key={deck.id}
+                      type="button"
+                      onClick={() => {
+                        setSelectedTopicId(active ? null : deck.id);
+                        setSelectedLetter(null);
+                      }}
+                      className={cn(
+                        'rounded-xl px-2.5 py-1 text-xs font-medium transition-colors',
+                        active
+                          ? 'bg-accent text-accentInk'
+                          : 'bg-soft text-ink hover:bg-line',
+                      )}
+                    >
+                      {t(deck.titleKey)}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Результаты просмотра буквы */}
+              {selectedLetter && letterWords.length > 0 ? (
+                <div className="mt-4 border-t border-line pt-3">
+                  <h4 className="mb-2 text-xs font-semibold text-muted">
+                    {t('dictionary.browseByLetter', {
+                      letter: selectedLetter,
+                      defaultValue: `Слова на букву ${selectedLetter}`,
+                    })}
+                  </h4>
+                  <div className="divide-y divide-line max-h-64 overflow-y-auto">
+                    {letterWords.map((item) => (
+                      <div
+                        key={item.lemma}
+                        className="flex items-center justify-between py-2 text-sm cursor-pointer hover:bg-soft px-1 rounded-lg"
+                        onClick={() => handlePick(item.lemma)}
+                      >
+                        <div className="flex items-baseline gap-2">
+                          <span className="font-semibold text-ink">{item.lemma}</span>
+                          <span className="text-xs text-muted">· {item.translation}</span>
+                        </div>
+                        <div onClick={(e) => e.stopPropagation()}>
+                          <AddToStudyQuickButton
+                            lemma={item.lemma}
+                            translations={[item.translation]}
+                            variant="compact"
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
+
+              {/* Результаты просмотра темы */}
+              {selectedTopicId && topicWords.length > 0 ? (
+                <div className="mt-4 border-t border-line pt-3">
+                  <h4 className="mb-2 text-xs font-semibold text-muted">
+                    {topicWords.length} слов
+                  </h4>
+                  <div className="divide-y divide-line max-h-64 overflow-y-auto">
+                    {topicWords.map((item) => (
+                      <div
+                        key={item.lemma}
+                        className="flex items-center justify-between py-2 text-sm cursor-pointer hover:bg-soft px-1 rounded-lg"
+                        onClick={() => handlePick(item.lemma)}
+                      >
+                        <div className="flex items-baseline gap-2">
+                          {item.article ? (
+                            <span
+                              className={cn(
+                                'text-xs font-bold uppercase tracking-wide',
+                                ARTICLE_COLORS[item.article],
+                              )}
+                            >
+                              {item.article}
+                            </span>
+                          ) : null}
+                          <span className="font-semibold text-ink">{item.lemma}</span>
+                          {item.translation ? (
+                            <span className="text-xs text-muted">· {item.translation}</span>
+                          ) : null}
+                        </div>
+                        <div onClick={(e) => e.stopPropagation()}>
+                          <AddToStudyQuickButton
+                            lemma={item.lemma}
+                            article={item.article}
+                            translations={item.translation ? [item.translation] : undefined}
+                            variant="compact"
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
+            </Card>
+          </div>
+        ) : null}
+      </section>
     </PickContext.Provider>
   );
 }

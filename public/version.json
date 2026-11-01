@@ -1,9 +1,9 @@
 {
   "versionCode": 4,
-  "versionName": "0.14.1",
+  "versionName": "0.15.0",
   "apkUrl": "https://github.com/eai-apps/YAi-Translator/releases/latest/download/YAi-Translator.apk",
-  "notes_ru": "Исправлено: перевод в приложении снова работает («Нет связи с сервером»), нижнее меню больше не уходит под кнопки Android, Enter = «Перевести».",
-  "notes_de": "Behoben: Übersetzen in der App funktioniert wieder („Keine Verbindung zum Server“), das untere Menü liegt nicht mehr unter den Android-Tasten, Enter = „Übersetzen“.",
-  "notes_en": "Fixed: translation works in the app again (\"No connection to server\"), the bottom menu no longer sits under the Android buttons, Enter = Translate.",
+  "notes_ru": "Этап 13: каждое слово перевода связано со словарём public/lex/de (чипы и подчёркивание), понятные разделы «Учёба» и «Словарь», кнопка «+ В учёбу».",
+  "notes_de": "Stufe 13: Jedes Übersetzungswort ist mit dem Lexikon verknüpft, verständliche Bereiche „Lernen“ und „Wörterbuch“, „+ Zum Lernen“-Button.",
+  "notes_en": "Stage 13: Every translated word connected to the lexicon, clear “Study” and “Dictionary” sections, “+ To study” button.",
   "required": false
 }

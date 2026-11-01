@@ -26,6 +26,9 @@ import { IconAlert, IconStar, IconTranslate } from '../layout/icons';
 import { AddToStudyMenu } from '../study/AddToStudyMenu';
 import { AlternativesList } from './AlternativesList';
 import { CardMenu } from './CardMenu';
+import type { ConnectedWordItem } from '../../hooks/useConnectedWords';
+import { ConnectedWordsChips } from './ConnectedWordsChips';
+import { InteractiveGermanText } from './InteractiveGermanText';
 
 interface ResultPanelProps {
   result: TranslateResponse | null;
@@ -55,6 +58,9 @@ interface ResultPanelProps {
   historyCounter?: string | null;
   slideDirection?: 'left' | 'right' | null;
   onShareImage?: () => void;
+  connectedWords?: ConnectedWordItem[];
+  matchedWordsMap?: Map<string, ConnectedWordItem>;
+  onSelectConnectedWord?: (item: ConnectedWordItem) => void;
 }
 
 export function ResultPanel(props: ResultPanelProps) {
@@ -206,7 +212,16 @@ export function ResultPanel(props: ResultPanelProps) {
                   targetDir === 'rtl' ? 'text-right' : ''
                 }`}
               >
-                {result.translatedText}
+                {targetLang === 'de' && props.matchedWordsMap && props.onSelectConnectedWord ? (
+                  <InteractiveGermanText
+                    text={result.translatedText}
+                    matchedWordsMap={props.matchedWordsMap}
+                    onWordClick={props.onSelectConnectedWord}
+                    dir={targetDir}
+                  />
+                ) : (
+                  result.translatedText
+                )}
               </p>
               <AlternativesList alternatives={result.alternatives} targetLang={targetLang} speech={speech} />
               {props.moreVariants && props.moreVariants.length > 0 ? (
@@ -265,6 +280,13 @@ export function ResultPanel(props: ResultPanelProps) {
           </div>
         ) : null}
       </Card>
+
+      {props.connectedWords && props.connectedWords.length > 0 && props.onSelectConnectedWord ? (
+        <ConnectedWordsChips
+          items={props.connectedWords}
+          onSelectWord={props.onSelectConnectedWord}
+        />
+      ) : null}
 
       {props.others}
     </div>

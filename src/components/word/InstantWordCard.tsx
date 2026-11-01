@@ -13,6 +13,7 @@ import { partOfSpeechKey } from '../../lib/labels';
 import { Spinner } from '../ui/Spinner';
 import { Badge } from '../ui/Badge';
 import { SpeakButton } from '../ui/SpeakButton';
+import { AddToStudyQuickButton } from '../study/AddToStudyQuickButton';
 import { DictExamples } from './DictExamples';
 import { Chips } from './Chips';
 
@@ -80,14 +81,21 @@ export function InstantWordCard({
             <p className="mt-1 break-words text-sm italic leading-relaxed text-muted">{forms}</p>
           ) : null}
         </div>
-        {speech ? (
-          <SpeakButton
-            text={match.lemma}
-            language="de"
-            id={`instant-${match.lemma}`}
-            speech={speech}
+        <div className="flex flex-wrap items-center gap-1.5 shrink-0">
+          <AddToStudyQuickButton
+            lemma={match.lemma}
+            article={article}
+            translations={translations.map((s) => s.translation).filter((s): s is string => Boolean(s))}
           />
-        ) : null}
+          {speech ? (
+            <SpeakButton
+              text={match.lemma}
+              language="de"
+              id={`instant-${match.lemma}`}
+              speech={speech}
+            />
+          ) : null}
+        </div>
       </header>
 
       {isPreparingAi ? (

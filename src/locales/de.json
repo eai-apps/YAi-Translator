@@ -136,7 +136,8 @@
     "shareImage": "Als Bild",
     "pasteChip": "Einfügen",
     "pasteFromClipboard": "Aus Zwischenablage einfügen",
-    "fromHistory": "Aus dem Verlauf"
+    "fromHistory": "Aus dem Verlauf",
+    "dictionaryWords": "Wörter aus dem Wörterbuch"
   },
   "others": {
     "title": "Wie andere übersetzen",
@@ -336,7 +337,11 @@
     "chatPromptMnemonic": "Merkhilfe",
     "chatQueryMnemonic": "Gib mir eine Eselsbrücke oder Mnemotechnik, um mir „{{word}}“ leicht zu merken",
     "chatPromptMistakes": "Typische Fehler",
-    "chatQueryMistakes": "Welche typischen Fehler machen Lernende beim Wort „{{word}}“?"
+    "chatQueryMistakes": "Welche typischen Fehler machen Lernende beim Wort „{{word}}“?",
+    "searchPlaceholderUnified": "Wort suchen (Deutsch oder Russisch)",
+    "recentLookups": "Kürzlich angesehen",
+    "alphabetAndTopics": "Alphabet und Themen",
+    "browseByLetter": "Wörter mit {{letter}}"
   },
   "profile": {
     "title": "Profil",
@@ -1162,7 +1167,30 @@
     "listEmptyText": "Fügen Sie Wörter über „In die Karten ▾“ → „In eine Liste …“ hinzu.",
     "listAddFromTranslate": "Zum Übersetzer",
     "listReview": "Diese Liste lernen ({{count}})",
-    "listRemoveWord": "Aus der Liste entfernen"
+    "listRemoveWord": "Aus der Liste entfernen",
+    "addToStudy": "+ Zum Lernen",
+    "todayDue": "Heute wiederholen: {{count}} Wörter",
+    "startReview": "Starten",
+    "allDoneForToday": "Für heute alles erledigt 🎉",
+    "learnNewWords": "Neue Wörter lernen",
+    "myWordsTitle": "Meine Wörter",
+    "myWordsProgress": "Gesamt: {{total}} · Gelernt: {{learned}}",
+    "tileMyDecks": "Meine Decks",
+    "tileMyDecksHint": "Wörter, die Sie aus Übersetzungen gespeichert haben",
+    "tileReadySets": "Fertige Sets",
+    "tileReadySetsHint": "Themenlisten: Behörde, Arzt, Arbeit, A1–B1",
+    "tileTraining": "Training",
+    "tileTrainingHint": "Antwort wählen, Wort schreiben, nach Gehör",
+    "onboardingStep1": "Übersetzen Sie ein Wort",
+    "onboardingStep1Desc": "Geben Sie ein Wort oder einen Satz im Übersetzer ein",
+    "onboardingStep2": "Tippen Sie auf „+ Zum Lernen“",
+    "onboardingStep2Desc": "Das Wort wird in Ihrem persönlichen Deck gespeichert",
+    "onboardingStep3": "Wiederholen Sie täglich 5 Minuten",
+    "onboardingStep3Desc": "Spaced Repetition hilft, Wörter dauerhaft zu behalten",
+    "listFromTranslations": "Aus Übersetzungen",
+    "showAnswer": "Aufdecken",
+    "swipeHint": "Nach links wischen: „Nicht gewusst“, nach rechts: „Einfach“",
+    "onboardingTitle": "So lernen Sie Wörter – 3 Schritte"
   },
   "help": {
     "title": "Hilfe",

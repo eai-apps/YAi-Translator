@@ -1,7 +1,10 @@
 /**
- * Сессия повторения (этап 6): до 20 карточек, сначала просроченные, потом новые.
- * Лицо — немецкое слово с артиклем, оборот — перевод, множественное число и пример.
- * «Не помню» возвращает карточку в конец сессии (один раз за сессию).
+ * Сессия повторения карточек (этап 6, этап 13).
+ * Понятный интерфейс:
+ * - Крупно слово с артиклем.
+ * - Кнопка «Показать».
+ * - 3 крупные кнопки снизу: «Не помню / Трудно / Легко» (удобно большим пальцем).
+ * - Свайп влево = «Не помню», свайп вправо = «Легко».
  */
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
@@ -13,21 +16,15 @@ import type { SessionEntry } from '../../lib/srs';
 import { useSpeech } from '../../hooks/useSpeech';
 import { useStudy } from '../../hooks/useStudy';
 import { useStudyPing } from '../../hooks/useStudyPing';
+import { useSwipe } from '../../hooks/useSwipe';
 import { PageHeader } from '../../components/ui/PageHeader';
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
 import { Segmented } from '../../components/ui/Segmented';
 import { ReviewCard } from '../../components/study/ReviewCard';
-import { IconBookmark, IconCheck, IconClose, IconStar } from '../../components/layout/icons';
+import { IconCheck, IconClose, IconStar } from '../../components/layout/icons';
 
 type Direction = 'de-ru' | 'ru-de';
-
-const GRADES: Array<{ grade: StudyGrade; key: string; className: string }> = [
-  { grade: 'again', key: 'reviewAgain', className: 'border-danger/40 text-danger hover:bg-soft' },
-  { grade: 'hard', key: 'reviewHard', className: 'border-line text-ink hover:bg-soft' },
-  { grade: 'good', key: 'reviewGood', className: 'border-accent bg-accentSoft text-accent hover:brightness-105' },
-  { grade: 'easy', key: 'reviewEasy', className: 'border-success/40 text-success hover:bg-soft' },
-];
 
 export default function ReviewPage() {
   const { t } = useTranslation();
@@ -54,8 +51,6 @@ export default function ReviewPage() {
   const current = queue[0] ?? null;
   const total = done + queue.length;
   const finished = queue.length === 0;
-  // Сессия начата, если уже была хотя бы одна оценка: так пустой старт
-  // показывается как «на сегодня всё», а не как «сессия закончена».
   const started = done > 0;
 
   // Итог сессии отправляем один раз, а не на каждую карточку.
@@ -72,7 +67,7 @@ export default function ReviewPage() {
 
     setQueue((previous) => {
       const rest = previous.slice(1);
-      // «Не помню» — карточка снова в конце сессии, но не бесконечно.
+      // «Не помню» — карточка снова в конце сессии, но не более одного раза
       if (value === 'again' && !repeated.current.has(current.card.id)) {
         repeated.current.add(current.card.id);
         const refreshed = getProgress(current.card.id) ?? current.progress;
@@ -89,6 +84,17 @@ export default function ReviewPage() {
     setQueue(pickSession(sessionCards, progress, { newPerDay }));
   };
 
+  // Жест свайпа по карточке: влево = «Не помню», вправо = «Легко»
+  const cardContainerRef = useRef<HTMLDivElement>(null);
+  const { dragOffset, isDragging } = useSwipe(cardContainerRef, {
+    onSwipeLeft: () => {
+      if (current) answer('again');
+    },
+    onSwipeRight: () => {
+      if (current) answer('easy');
+    },
+  });
+
   const card = current?.card ?? null;
 
   if (!card) {
@@ -98,18 +104,18 @@ export default function ReviewPage() {
         <Card className="mx-auto max-w-md p-6 text-center">
           {started ? (
             <>
-              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-accentSoft text-accent">
-                <IconCheck className="h-6 w-6" />
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-accentSoft text-accent">
+                <IconCheck className="h-7 w-7" />
               </div>
-              <h2 className="mt-3 text-lg font-semibold">{t('study.reviewDoneTitle')}</h2>
+              <h2 className="mt-4 text-xl font-bold">{t('study.reviewDoneTitle')}</h2>
               <p className="mt-1 text-sm text-muted">{t('study.reviewDoneText', { n: done })}</p>
-              <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:justify-center">
-                <Button variant="primary" onClick={restart}>
+              <div className="mt-6 flex flex-col gap-2.5 sm:flex-row sm:justify-center">
+                <Button variant="primary" size="md" onClick={restart}>
                   {t('study.reviewAgainSession')}
                 </Button>
                 <Link
                   to="/learn"
-                  className="inline-flex h-11 items-center justify-center rounded-xl border border-line bg-card px-4 text-sm font-medium text-ink hover:bg-soft"
+                  className="inline-flex h-11 items-center justify-center rounded-xl border border-line bg-card px-5 text-sm font-semibold text-ink hover:bg-soft"
                 >
                   {t('study.reviewToStudy')}
                 </Link>
@@ -117,11 +123,11 @@ export default function ReviewPage() {
             </>
           ) : (
             <>
-              <p className="font-medium">{t('study.reviewEmpty')}</p>
+              <p className="text-lg font-bold">{t('study.allDoneForToday')}</p>
               <p className="mt-1 text-sm text-muted">{t('study.reviewEmptyText')}</p>
               <Link
                 to="/learn/decks"
-                className="mt-4 inline-flex h-11 items-center justify-center rounded-xl bg-accent px-4 text-sm font-medium text-accentInk"
+                className="mt-5 inline-flex h-11 items-center justify-center rounded-xl bg-accent px-5 text-sm font-semibold text-accentInk shadow-sm"
               >
                 {t('study.tileDecks')}
               </Link>
@@ -138,7 +144,7 @@ export default function ReviewPage() {
     <>
       <PageHeader title={t('study.reviewTitle')} subtitle={t('study.subtitle')} />
 
-      <div className="mx-auto max-w-xl space-y-3">
+      <div className="mx-auto max-w-xl space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <Segmented
             ariaLabel={t('study.reviewDirection')}
@@ -149,42 +155,88 @@ export default function ReviewPage() {
               { value: 'ru-de', label: t('study.reviewRuDe') },
             ]}
           />
-          <span className="text-xs tabular-nums text-muted">
+          <span className="text-xs font-semibold tabular-nums text-muted">
             {t('study.reviewProgress', { done: done + 1, total: Math.max(total, 1) })}
           </span>
         </div>
 
-        <ReviewCard
-          card={card}
-          germanSide={germanSide}
-          flipped={flipped}
-          onFlip={() => setFlipped((value) => !value)}
-          speech={speech}
-        />
+        {/* Контейнер карточки со свайпом */}
+        <div
+          ref={cardContainerRef}
+          className="relative transition-transform"
+          style={
+            isDragging
+              ? {
+                  transform: `translateX(${dragOffset}px) rotate(${dragOffset * 0.04}deg)`,
+                  transition: 'none',
+                }
+              : undefined
+          }
+        >
+          <ReviewCard
+            card={card}
+            germanSide={germanSide}
+            flipped={flipped}
+            onFlip={() => setFlipped((value) => !value)}
+            speech={speech}
+          />
+        </div>
 
+        {/* Кнопка «Показать» или 3 крупные кнопки ответа */}
         {flipped ? (
-          <div className="grid grid-cols-2 gap-2">
-            {GRADES.map((item) => (
+          <div className="space-y-2">
+            <div className="grid grid-cols-3 gap-2 sm:gap-3">
+              {/* 1. Не помню */}
               <button
-                key={item.grade}
                 type="button"
-                onClick={() => answer(item.grade)}
+                onClick={() => answer('again')}
                 className={cn(
-                  'inline-flex h-12 items-center justify-center gap-1.5 rounded-xl border bg-card text-sm font-medium transition-colors',
-                  item.className,
+                  'flex h-14 flex-col items-center justify-center gap-1 rounded-2xl border font-bold text-sm transition-all shadow-sm',
+                  'border-red-500/30 bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-950/30 dark:text-red-400 active:scale-95',
                 )}
               >
-                {item.grade === 'again' ? <IconClose className="h-4 w-4" /> : null}
-                {item.grade === 'hard' ? <IconBookmark className="h-4 w-4" /> : null}
-                {item.grade === 'good' ? <IconCheck className="h-4 w-4" /> : null}
-                {item.grade === 'easy' ? <IconStar className="h-4 w-4" /> : null}
-                {t(`study.${item.key}`)}
+                <IconClose className="h-4 w-4" />
+                <span>{t('study.reviewAgain')}</span>
               </button>
-            ))}
+
+              {/* 2. Трудно */}
+              <button
+                type="button"
+                onClick={() => answer('hard')}
+                className={cn(
+                  'flex h-14 flex-col items-center justify-center gap-1 rounded-2xl border font-bold text-sm transition-all shadow-sm',
+                  'border-line bg-card text-ink hover:bg-soft active:scale-95',
+                )}
+              >
+                <span className="text-xs">⚡</span>
+                <span>{t('study.reviewHard')}</span>
+              </button>
+
+              {/* 3. Легко */}
+              <button
+                type="button"
+                onClick={() => answer('easy')}
+                className={cn(
+                  'flex h-14 flex-col items-center justify-center gap-1 rounded-2xl border font-bold text-sm transition-all shadow-sm',
+                  'border-emerald-500/30 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 dark:bg-emerald-950/30 dark:text-emerald-400 active:scale-95',
+                )}
+              >
+                <IconStar className="h-4 w-4" />
+                <span>{t('study.reviewEasy')}</span>
+              </button>
+            </div>
+            <p className="text-center text-[11px] text-muted">
+              {t('study.swipeHint')}
+            </p>
           </div>
         ) : (
-          <Button variant="primary" size="md" className="w-full" onClick={() => setFlipped(true)}>
-            {t('study.reviewShowAnswer')}
+          <Button
+            variant="primary"
+            size="md"
+            className="w-full h-14 text-base font-semibold shadow-md rounded-2xl"
+            onClick={() => setFlipped(true)}
+          >
+            {t('study.showAnswer')}
           </Button>
         )}
       </div>

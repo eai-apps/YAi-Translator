@@ -14,6 +14,36 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '0.15.0',
+    date: '2026-11-01',
+    items: {
+      ru: [
+        'Каждое слово перевода связано со словарём: под панелью перевода отображаются чипы слов из базы public/lex/de с цветным артиклем и переводом.',
+        'Слова в тексте перевода выделены пунктирным подчёркиванием: нажатие мгновенно открывает карточку слова.',
+        'Кнопка «+ В учёбу»: добавление слова в персональную колоду «Из переводов» в один клик.',
+        'Понятный раздел «Учёба»: крупный статус повторения на сегодня, кнопка «Начать», статистика «Мои слова» и пошаговый старт для новичков.',
+        'Удобные карточки повторения: крупное слово с артиклем, 3 большие кнопки снизу («Не помню / Трудно / Легко»), свайп влево/вправо.',
+        'Понятный «Словарь»: мгновенный поиск без кнопки (немецкий или русский), Слово дня, история просмотров, алфавит и тематические наборы.',
+      ],
+      de: [
+        'Jedes Übersetzungswort ist mit dem Lexikon verknüpft: Wort-Chips unter der Übersetzung mit farbigem Artikel und Übersetzung.',
+        'Wörter im Übersetzungstext sind punktiert unterstrichen: Antippen öffnet sofort die Wortkarte.',
+        '„+ Zum Lernen“-Button: Wort mit einem Klick zum persönlichen Deck „Aus Übersetzungen“ hinzufügen.',
+        'Verständlicher Bereich „Lernen“: Großer Wiederholungsstatus für heute, „Starten“-Button, Fortschritt und Schritt-für-Schritt-Einführung.',
+        'Bequeme Wiederholungskarten: Großes Wort mit Artikel, 3 große Daumentasten („Nicht gewusst / Schwer / Einfach“), Wischgesten.',
+        'Verständliches „Wörterbuch“: Sofortsuche ohne Button (Deutsch oder Russisch), Wort des Tages, Verlauf, Alphabet und Themen.',
+      ],
+      en: [
+        'Every translated word is connected to the lexicon: word chips under translation with colored articles and translations.',
+        'Words in translated text are dotted-underlined: tapping instantly opens the word card.',
+        '"+ To study" button: add any word to the personal "From translations" deck with a single tap.',
+        'Clear "Study" section: large today review status, "Start" button, "My words" progress bar, and 3-step onboarding.',
+        'Thumb-friendly review flashcards: large word with article, 3 big bottom buttons (Forgot / Hard / Easy), swipe left/right.',
+        'Clear "Dictionary": instant search without submit button (German or Russian), Word of the Day, recent lookups, alphabet and topics.',
+      ],
+    },
+  },
+  {
     version: '0.14.1',
     date: '2026-11-01',
     items: {

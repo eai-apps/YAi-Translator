@@ -38,6 +38,8 @@ import { cardFromTranslation } from '../lib/studyCard';
 import { shareTranslationImage } from '../lib/renderShareImage';
 import { extractMoreVariants } from '../components/translate/variants';
 import { hideKeyboard } from '../lib/keyboard';
+import { useConnectedWords, type ConnectedWordItem } from '../hooks/useConnectedWords';
+import { WordDetailModal } from '../components/word/WordDetailModal';
 
 export default function TranslatePage() {
   const { t } = useTranslation();
@@ -154,6 +156,21 @@ export default function TranslatePage() {
 
   const moreVariants = extractMoreVariants(translator.word.data, shown);
 
+  // Связывание немецких слов со словарём (этап 13)
+  const germanTextForConnected =
+    targetLang === 'de'
+      ? shown?.translatedText ?? ''
+      : resolvedSource === 'de'
+      ? text
+      : '';
+
+  const { items: connectedWords, matchedWordsMap } = useConnectedWords(
+    germanTextForConnected,
+    Boolean(shown && !translator.loading && !translator.error),
+  );
+
+  const [selectedConnectedWord, setSelectedConnectedWord] = useState<ConnectedWordItem | null>(null);
+
   const tools = {
     onExplain: runExplain,
     onCheck: runCheck,
@@ -251,6 +268,9 @@ export default function TranslatePage() {
             historyCounter={historyBrowse.counterText}
             slideDirection={historyBrowse.slideDirection}
             onShareImage={handleShareImage}
+            connectedWords={connectedWords}
+            matchedWordsMap={matchedWordsMap}
+            onSelectConnectedWord={(item) => setSelectedConnectedWord(item)}
           />
           </div>
 
@@ -330,6 +350,14 @@ export default function TranslatePage() {
         onClose={quiz.closeQuiz}
         items={quiz.wordItems}
         onComplete={markTodayActivity}
+      />
+
+      <WordDetailModal
+        open={Boolean(selectedConnectedWord)}
+        onClose={() => setSelectedConnectedWord(null)}
+        match={selectedConnectedWord?.match ?? null}
+        translation={selectedConnectedWord?.translation}
+        speech={speech}
       />
 
       <LimitDialog open={limitOpen} onClose={() => setLimitOpen(false)} onSaved={translator.retry} />

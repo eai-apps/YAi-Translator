@@ -136,7 +136,8 @@
     "shareImage": "Картинкой",
     "pasteChip": "Вставить",
     "pasteFromClipboard": "Вставить из буфера обмена",
-    "fromHistory": "Из истории"
+    "fromHistory": "Из истории",
+    "dictionaryWords": "Слова из словаря"
   },
   "others": {
     "title": "Как переводят другие",
@@ -336,7 +337,11 @@
     "chatPromptMnemonic": "Как запомнить",
     "chatQueryMnemonic": "Подскажи яркую ассоциацию или мнемонику, как легко запомнить «{{word}}»",
     "chatPromptMistakes": "Типичные ошибки",
-    "chatQueryMistakes": "Какие типичные ошибки делают ученики со словом «{{word}}»?"
+    "chatQueryMistakes": "Какие типичные ошибки делают ученики со словом «{{word}}»?",
+    "searchPlaceholderUnified": "Найти слово (немецкий или русский)",
+    "recentLookups": "Вы недавно смотрели",
+    "alphabetAndTopics": "Алфавит и темы",
+    "browseByLetter": "Слова на букву {{letter}}"
   },
   "profile": {
     "title": "Профиль",
@@ -1162,7 +1167,30 @@
     "listEmptyText": "Добавьте слова из перевода кнопкой «В карточки ▾» → «В список…».",
     "listAddFromTranslate": "К переводчику",
     "listReview": "Учить этот список ({{count}})",
-    "listRemoveWord": "Убрать из списка"
+    "listRemoveWord": "Убрать из списка",
+    "addToStudy": "+ В учёбу",
+    "todayDue": "Сегодня повторить: {{count}} слов",
+    "startReview": "Начать",
+    "allDoneForToday": "На сегодня всё 🎉",
+    "learnNewWords": "Учить новые слова",
+    "myWordsTitle": "Мои слова",
+    "myWordsProgress": "Всего: {{total}} · Выучено: {{learned}}",
+    "tileMyDecks": "Мои колоды",
+    "tileMyDecksHint": "Слова, которые вы сохранили из переводов",
+    "tileReadySets": "Готовые наборы",
+    "tileReadySetsHint": "Тематические списки: Behörde, врач, работа, A1–B1",
+    "tileTraining": "Тренировка",
+    "tileTrainingHint": "Выбор ответа, написать слово, на слух",
+    "onboardingStep1": "Переведите слово",
+    "onboardingStep1Desc": "Введите слово или фразу в переводчике",
+    "onboardingStep2": "Нажмите «+ В учёбу»",
+    "onboardingStep2Desc": "Слово сохранится в вашу персональную колоду «Из переводов»",
+    "onboardingStep3": "Повторяйте каждый день 5 минут",
+    "onboardingStep3Desc": "Интервальное повторение поможет запомнить навсегда",
+    "listFromTranslations": "Из переводов",
+    "showAnswer": "Показать",
+    "swipeHint": "Свайп влево — «Не помню», вправо — «Легко»",
+    "onboardingTitle": "Как учить слова — 3 шага"
   },
   "help": {
     "title": "Справка",
