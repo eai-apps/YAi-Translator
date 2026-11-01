@@ -10,6 +10,7 @@
  */
 import type { ProviderId } from '../../shared/types';
 import type { Env } from './env';
+import type { LimitGuard } from './usage';
 import { ApiError } from './http';
 import { readDisabledProviders } from './settings';
 import { markExhausted, markInvalid, markUsed, usableKeys } from './keystate';
@@ -170,6 +171,7 @@ export async function runJsonTask<T>(options: RunJsonOptions<T>): Promise<{ data
         } else if (attempt.pooledKeyId && attempt.id === 'paid' && usedTokens > 0) {
           void recordPaidTokens(options.env, usedTokens);
         }
+        if (attempt.shared && attempt.id !== 'paid') await (options.beforeShared as LimitGuard | undefined)?.commit?.();
         return { data, provider: attempt.id, ...(attempt.paidModel ? { model: attempt.paidModel } : {}) };
       }
       console.warn(`Провайдер ${attempt.id} вернул JSON без нужных полей`);
@@ -189,5 +191,6 @@ export async function runJsonTask<T>(options: RunJsonOptions<T>): Promise<{ data
     }
   }
 
-  throw new ApiError('LIMIT_REACHED', 429);
+  // Лимит здесь не кончился (его проверка выше бросила бы LIMIT_REACHED) — просто ни одна нейросеть не ответила.
+  throw new ApiError('NO_PROVIDERS', 503);
 }

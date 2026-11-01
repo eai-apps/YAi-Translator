@@ -24,6 +24,10 @@ import { useDictLookup } from './useDictLookup';
 import { useCardLanguage, useLanguageSwitching } from './useLanguageSwitching';
 import { useLocalStorage } from './useLocalStorage';
 
+
+/** Через сколько после перевода заказывать карточку слова у ИИ (экономит дневной лимит). */
+const WORD_CARD_DELAY_MS = 900;
+
 export type { TranslatorError };
 
 /** ИИ, который можно выбрать в списке, — только с личным ключом пользователя. */
@@ -170,6 +174,9 @@ export function useTranslator(onLimitReached: () => void) {
     ) => {
       setWord({ loading: true, data: null, error: null });
       try {
+        // Пауза: пока человек печатает («Ка» → «Кака» → «Какашка»), карточки ИИ на промежуточные куски не заказываем.
+        await new Promise((resolve) => window.setTimeout(resolve, WORD_CARD_DELAY_MS));
+        if (signal.aborted || requestId !== requestRef.current) return;
         const data = await api.word({ word: value, sourceLang: source, targetLang: target, ...(aiModel ? { aiModel } : {}) }, signal);
         if (requestId !== requestRef.current) return;
         setWord({ loading: false, data, error: null });

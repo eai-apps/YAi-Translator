@@ -2,6 +2,7 @@
  * Карточка слова только из словарей (когда ИИ недоступен: лимит, нет ключей, ошибка).
  * Значения, род, формы, синонимы и настоящие примеры — с пометкой «Без ИИ — данные словарей».
  */
+import { useAccount } from '../../hooks/useAccount';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import type { DictEntry, LanguageCode } from '../../../shared/types';
@@ -30,6 +31,8 @@ interface DictCardProps {
 }
 
 export function DictCard({ entry, speech, withAi, onPick }: DictCardProps) {
+  // Вошедшим не предлагаем «зарегистрироваться» — у них ИИ уже есть.
+  const signedIn = useAccount().status === 'signedIn';
   const { t } = useTranslation();
   const { uiLanguage } = useSettings();
   // Значения на исходном языке и их переводы, если источник их даёт (PONS).
@@ -156,7 +159,7 @@ export function DictCard({ entry, speech, withAi, onPick }: DictCardProps) {
 
       <SourcesLine sources={entry.sources} />
 
-      {!withAi ? (
+      {!withAi && !signedIn ? (
         <div className="mt-4 border-t border-line pt-3 text-xs text-muted">
           <span>{t('dict.guestAiHintPrefix')}{' '}</span>
           <Link to="/profile" className="font-medium text-accent hover:underline">
