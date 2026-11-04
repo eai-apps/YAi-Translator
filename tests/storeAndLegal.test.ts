@@ -7,16 +7,16 @@ import { APP_VERSION as SERVER_APP_VERSION } from '../functions/_lib/config';
 describe('Part 21: Store readiness, versions and legal checks', () => {
   const root = process.cwd();
 
-  it('APP_VERSION is 1.0.0 across all configuration files', () => {
+  // Версия сайта (1.0.1+) может обгонять версию APK: сайт обновляется сам, APK — только при изменении нативной части.
+  // Проверяем согласованность внутри каждой группы, а не одну жёсткую цифру (исправление Claude, 1.0.1).
+  it('site, server and package versions match; APK versions match each other', () => {
     const pkg = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
     const versionJson = JSON.parse(fs.readFileSync(path.join(root, 'public/version.json'), 'utf8'));
     const gradle = fs.readFileSync(path.join(root, 'android/app/build.gradle'), 'utf8');
 
-    expect(APP_VERSION).toBe('1.0.0');
-    expect(SERVER_APP_VERSION).toBe('1.0.0');
-    expect(pkg.version).toBe('1.0.0');
-    expect(versionJson.versionName).toBe('1.0.0');
-    expect(gradle).toContain('versionName "1.0.0"');
+    expect(SERVER_APP_VERSION).toBe(APP_VERSION);
+    expect(pkg.version).toBe(APP_VERSION);
+    expect(gradle).toContain(`versionName "${versionJson.versionName}"`);
   });
 
   it('ANDROID_VERSION_CODE is 5 across mobile configs', () => {

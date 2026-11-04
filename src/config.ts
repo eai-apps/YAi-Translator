@@ -11,7 +11,7 @@ export const API_BASE = (
 ).replace(/\/+$/, '');
 
 /** Версия показывается в профиле; совпадает с package.json. */
-export const APP_VERSION = '1.0.0';
+export const APP_VERSION = '1.0.1';
 
 /** Код версии приложения Android (увеличивается при каждом обновлении APK). */
 export const ANDROID_VERSION_CODE = 5;

@@ -38,8 +38,8 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     const rawBatch = rawBody.batchSize;
     const batchSize =
       typeof rawBatch === 'number' && rawBatch > 0
-        ? Math.min(Math.floor(rawBatch), 20)
-        : 20;
+        ? Math.min(Math.floor(rawBatch), 25)
+        : 25;
 
     const cursor = (await readSetting<number>(env, SETTINGS_KEYS.warmCardsCursor)) ?? 0;
     const safeCursor = cursor >= TOTAL_WARM_TASKS ? 0 : cursor;
@@ -113,11 +113,16 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       } catch (err) {
         console.warn(`[warm] Ошибка прогрева слова "${task.lemma}":`, err instanceof Error ? err.message : err);
         errors++;
-        break;
+        // Одна неудача не останавливает очередь (раньше break — за ночь прогревалось 7–8 слов);
+        // три подряд — значит, бесплатные ИИ сейчас недоступны: останавливаемся и повторим это слово позже.
+        if (errors >= 3) {
+          processed--;
+          break;
+        }
       }
     }
 
-    const nextCursor = (safeCursor + processed - errors) % TOTAL_WARM_TASKS;
+    const nextCursor = (safeCursor + processed) % TOTAL_WARM_TASKS;
     await writeSetting(env, SETTINGS_KEYS.warmCardsCursor, nextCursor);
 
     return jsonResponse({

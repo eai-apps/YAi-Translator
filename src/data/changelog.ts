@@ -14,6 +14,15 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '1.0.1',
+    date: '2026-11-04',
+    items: {
+      ru: ['Карточка слова больше не ждёт по 20–50 секунд, если одна из бесплатных нейросетей не отвечает: сайт сразу берёт другую.', 'Готовые карточки популярных слов теперь появляются заметно быстрее: сначала немецкий → русский.'],
+      de: ['Die Wortkarte wartet nicht mehr 20–50 Sekunden, wenn eine kostenlose KI nicht antwortet: die Website nimmt sofort eine andere.', 'Fertige Karten für häufige Wörter entstehen deutlich schneller, zuerst Deutsch → Russisch.'],
+      en: ['The word card no longer waits 20–50 seconds when one free AI does not answer: the site switches to another one right away.', 'Ready-made cards for frequent words are prepared much faster, German → Russian first.'],
+    },
+  },
+  {
     version: '1.0.0',
     date: '2026-11-01',
     items: {

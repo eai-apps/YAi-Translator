@@ -133,6 +133,22 @@ async function buildAttempts(env: Env, userKeys: UserKeys, isRegistered = false,
   return attempts;
 }
 
+/**
+ * Нейросеть, которая только что не ответила (тайм-аут, обрыв), 2 минуты идёт в конец очереди общих ключей —
+ * в пределах одного «процесса» сервера (1.0.1, Claude). Так пользователь не ждёт по 20 с на каждый её ключ.
+ */
+const SLOW_COOLDOWN_MS = 120_000;
+const slowUntil = new Map<ProviderId, number>();
+
+function isSlow(id: ProviderId): boolean {
+  return (slowUntil.get(id) ?? 0) > Date.now();
+}
+
+/** Ошибка без HTTP-статуса — тайм-аут или сеть: сервис недоступен целиком, а не конкретный ключ. */
+function isOutage(error: unknown): boolean {
+  return statusOf(error) === null || statusOf(error)! >= 500;
+}
+
 export async function runJsonTask<T>(options: RunJsonOptions<T>): Promise<{ data: T; provider: ProviderId; model?: string }> {
   const disabled = await readDisabledProviders(options.env);
   const attempts = (await buildAttempts(options.env, options.userKeys, options.isRegistered, options.sharedPaidPick)).filter(
@@ -141,9 +157,14 @@ export async function runJsonTask<T>(options: RunJsonOptions<T>): Promise<{ data
       !disabled.has(attempt.id) &&
       (!options.personalOnly || !attempt.shared),
   );
+  // Общие ключи «медленных» сейчас нейросетей — в конец (личные ключи и порядок остальных не трогаем).
+  attempts.sort((a, b) => Number(a.shared && isSlow(a.id)) - Number(b.shared && isSlow(b.id)));
+  const downNow = new Set<ProviderId>();
 
   for (const attempt of attempts) {
     const provider = PROVIDERS[attempt.id];
+    // Нейросеть уже не ответила в этом запросе по тайм-ауту — остальные её ключи не ждём.
+    if (attempt.shared && downNow.has(attempt.id)) continue;
     if (!provider || !provider.tasks.includes(options.prompt.task)) continue;
 
     // Ключи пользователя не сработали — дальше идут общие ключи, считаем лимит.
@@ -178,6 +199,11 @@ export async function runJsonTask<T>(options: RunJsonOptions<T>): Promise<{ data
     } catch (error) {
       const message = describeError(error);
       console.warn(`Провайдер ${attempt.id} не справился: ${message}`);
+      if (options.signal?.aborted) throw error;
+      if (attempt.id !== 'paid' && isOutage(error)) {
+        downNow.add(attempt.id);
+        slowUntil.set(attempt.id, Date.now() + SLOW_COOLDOWN_MS);
+      }
       if (attempt.pooledKeyId) {
         const status = statusOf(error);
         if (attempt.id === 'paid') {

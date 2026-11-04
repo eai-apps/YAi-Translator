@@ -33,7 +33,7 @@ export const SETTINGS_KEYS = {
   /** Модель нейросети по умолчанию для всего сайта («connId|model»). */
   paidDefaultModel: 'paid_default_model',
   /** Номер строки прогрева карточек популярных слов (этап 11). */
-  warmCardsCursor: 'warm_cards_cursor',
+  warmCardsCursor: 'warm_cards_cursor_v2',
   /** Тексты «Что нового» (этап 20). */
   whatsNew: 'whats_new',
   wordCardAuto: 'word_card_auto',

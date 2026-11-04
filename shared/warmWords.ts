@@ -24,29 +24,29 @@ export const TOTAL_WARM_TASKS =
   WARM_DE_WORDS.length * WARM_EXPLAIN_LANGS.de.length +
   WARM_EN_WORDS.length * WARM_EXPLAIN_LANGS.en.length;
 
+/**
+ * Порядок прогрева (1.0.1, Claude): сначала ВСЕ немецкие слова с объяснением на русском (главная пара сайта),
+ * потом английские → русский, затем остальные языки объяснения. Раньше шли «слово × 3 языка», и до русского
+ * объяснения частых слов очередь доходила очень медленно.
+ */
+const WARM_PHASES: Array<{ lang: 'de' | 'en'; explainLang: 'ru' | 'de' | 'en' | 'uk' }> = [
+  { lang: 'de', explainLang: 'ru' },
+  { lang: 'en', explainLang: 'ru' },
+  { lang: 'de', explainLang: 'en' },
+  { lang: 'en', explainLang: 'de' },
+  { lang: 'de', explainLang: 'uk' },
+  { lang: 'en', explainLang: 'uk' },
+];
+
 /** Получение задачи прогрева по линейному курсору */
 export function getWarmTaskAt(index: number): WarmWordEntry {
-  const deTotal = WARM_DE_WORDS.length * WARM_EXPLAIN_LANGS.de.length;
-  const safeIndex = ((index % TOTAL_WARM_TASKS) + TOTAL_WARM_TASKS) % TOTAL_WARM_TASKS;
-
-  if (safeIndex < deTotal) {
-    const wordIdx = Math.floor(safeIndex / WARM_EXPLAIN_LANGS.de.length);
-    const langIdx = safeIndex % WARM_EXPLAIN_LANGS.de.length;
-    return {
-      lemma: WARM_DE_WORDS[wordIdx],
-      lang: 'de',
-      explainLang: WARM_EXPLAIN_LANGS.de[langIdx],
-    };
+  let rest = ((index % TOTAL_WARM_TASKS) + TOTAL_WARM_TASKS) % TOTAL_WARM_TASKS;
+  for (const phase of WARM_PHASES) {
+    const words = phase.lang === 'de' ? WARM_DE_WORDS : WARM_EN_WORDS;
+    if (rest < words.length) return { lemma: words[rest], lang: phase.lang, explainLang: phase.explainLang };
+    rest -= words.length;
   }
-
-  const enIndex = safeIndex - deTotal;
-  const wordIdx = Math.floor(enIndex / WARM_EXPLAIN_LANGS.en.length);
-  const langIdx = enIndex % WARM_EXPLAIN_LANGS.en.length;
-  return {
-    lemma: WARM_EN_WORDS[wordIdx],
-    lang: 'en',
-    explainLang: WARM_EXPLAIN_LANGS.en[langIdx],
-  };
+  return { lemma: WARM_DE_WORDS[0], lang: 'de', explainLang: 'ru' };
 }
 
 /** Совместимость с кодом этапа 11 */

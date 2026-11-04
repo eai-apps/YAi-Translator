@@ -59,12 +59,17 @@ export const geminiProvider: AiProvider = {
     if (!input.apiKey) throw new Error('Gemini API key is missing');
     let lastError: unknown = null;
 
-    // Если модель недоступна в регионе или удалена, пробуем следующую.
+    // Если модель недоступна в регионе или удалена (ответ 4xx), пробуем следующую.
+    // Тайм-аут или обрыв связи — это недоступен весь Gemini: другие модели не пробуем, иначе одна карточка
+    // ждала 3 × 22 с на каждый ключ (замер 04.11.2026: «gehen» — 49 с; исправление Claude, 1.0.1).
     for (const model of GEMINI.models) {
       try {
         return await callModel(model, input, input.apiKey);
       } catch (error) {
         lastError = error;
+        const message = error instanceof Error ? error.message : String(error);
+        if (input.signal?.aborted || !/^Gemini \d{3}/.test(message)) break;
+        if (/^Gemini (429|5\d\d)/.test(message)) break;
       }
     }
     throw lastError instanceof Error ? lastError : new Error('Gemini request failed');
